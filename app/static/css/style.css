@@ -177,3 +177,59 @@ body {
     font-size: 14px;
     padding: 20px;
 }
+/* Hero verification badge */
+.hero-verification {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+.verified-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.08);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+/* Sidebar block spacing & divider */
+.sidebar-block + .sidebar-block {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* Reviews */
+.sidebar-reviews {
+    font-size: 14px;
+}
+
+.review-stars {
+    font-size: 16px;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+}
+
+.review-quote {
+    margin: 0 0 4px 0;
+    font-style: italic;
+}
+
+.review-source {
+    margin: 0 0 6px 0;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 12px;
+}
+
+.review-link {
+    font-size: 13px;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.review-link:hover {
+    text-decoration: underline;
+}

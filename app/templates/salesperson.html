@@ -5,7 +5,7 @@
 {% block content %}
 
 <div class="top-bar">
-    <span>CarsInStock demo profile · Powered by Eddie's platform</span>
+    <span>CarsInStock demo profile · Powered by Eddie’s platform</span>
     <span>Secure · Mobile friendly · Lead ready</span>
 </div>
 
@@ -14,9 +14,18 @@
         <div class="avatar">
             {{ salesperson.name[0:1] }}{{ salesperson.name.split(' ')[-1][0:1] }}
         </div>
+
         <div class="hero-main">
             <h1>{{ salesperson.name }}</h1>
-            <p>{{ salesperson.dealership }} · {{ salesperson.city }}, {{ salesperson.state }}</p>
+
+            <div class="hero-verification">
+                <span class="verified-badge">✔ Verified CarsInStock Seller</span>
+            </div>
+
+            <p class="hero-location">
+                {{ salesperson.dealership }} · {{ salesperson.city }}, {{ salesperson.state }}
+            </p>
+
             <div class="hero-tagline">
                 ▶ Top rated · {{ salesperson.tagline }}
             </div>
@@ -47,7 +56,7 @@
                 class="lead-input"
                 type="text"
                 name="lead_info"
-                placeholder="Enter your name & email to get {{ salesperson.name.split(' ')[0] }}'s best deals first…"
+                placeholder="Enter your name & email to get {{ salesperson.name.split(' ')[0] }}’s best deals first…"
                 required
             />
             <button class="lead-btn" type="submit">Join VIP Deal List</button>
@@ -90,6 +99,7 @@
     <!-- RIGHT COLUMN — SIDEBAR -->
     <aside class="sidebar-col">
 
+        <!-- About block -->
         <div class="sidebar-block">
             <div class="sidebar-title">About {{ salesperson.name.split(' ')[0] }}</div>
             <div class="sidebar-text">
@@ -97,17 +107,20 @@
             </div>
         </div>
 
-        <div class="sidebar-block">
-            <div class="sidebar-title">Performance</div>
-            <div class="stats-row">
-                <div class="stat-pill">
-                    <span class="stat-label">2025 deliveries</span>
-                    <span class="stat-value">{{ salesperson.total_deliveries }}</span>
-                </div>
-            </div>
-            <span class="badge-pill">Verified CarsInStock Pro</span>
+        <!-- Reviews block -->
+        <div class="sidebar-block sidebar-reviews">
+            <div class="sidebar-title">What people say</div>
+            <div class="review-stars">★★★★★</div>
+            <p class="review-quote">
+                "Hands down the easiest car deal I’ve ever done."
+            </p>
+            <p class="review-source">
+                – Google review
+            </p>
+            <a href="#" class="review-link">See more Google reviews →</a>
         </div>
 
+        <!-- Contact block -->
         <div class="sidebar-block">
             <div class="sidebar-title">Contact & Hours</div>
             <div class="sidebar-text">
@@ -142,7 +155,7 @@
         if (daysLeft > 1) {
             headerEl.textContent = `My Best Picks In Stock — These Links Expire in ${daysLeft} Days!`;
         } else if (daysLeft === 1) {
-            headerEl.textContent = "My Best Picks In Stock — These Links Expire in 1 Day!";
+            headerEl.textContent = `My Best Picks In Stock — These Links Expire in 1 Day!`;
         } else {
             headerEl.textContent = "My Best Picks In Stock — These Links Expire Today!";
         }
