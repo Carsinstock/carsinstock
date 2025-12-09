@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}CarsInStock – Demo Directory{% endblock %}
+
+{% block content %}
+<h1 style="padding: 20px 22px 4px; margin: 0;">
+    CarsInStock demo – salesperson directory
+</h1>
+<p style="padding: 0 22px 18px; margin: 0; font-size: 14px; color: #4b5563;">
+    Tap a card below to open that salesperson's Carvana-style mini-site.
+</p>
+
+<div style="
+    padding: 0 22px 24px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 14px;
+">
+    {% for sp in salespeople %}
+    <a href="{{ url_for('main.salesperson_page', slug=sp.slug) }}" style="text-decoration: none;">
+        <div style="
+            border-radius: 14px;
+            border: 1px solid #e5e7eb;
+            padding: 12px 14px;
+            background: #ffffff;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+        ">
+            <div style="font-weight: 600; margin-bottom: 4px;">
+                {{ sp.name }}
+            </div>
+            <div style="font-size: 12px; color: #6b7280;">
+                {{ sp.dealership }} • {{ sp.city }}
+            </div>
+            <div style="margin-top: 8px; font-size: 12px; color: #0ea5e9;">
+                View mini-site →
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% endblock %}

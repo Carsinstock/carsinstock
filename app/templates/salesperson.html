@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}{{ salesperson.name }} – CarsInStock{% endblock %}
+
+{% block content %}
+
+<div class="top-bar">
+    <span>CarsInStock demo profile · Powered by Eddie's platform</span>
+    <span>Secure · Mobile friendly · Lead ready</span>
+</div>
+
+<header class="hero">
+    <div class="hero-left">
+        <div class="avatar">
+            {{ salesperson.name[0:1] }}{{ salesperson.name.split(' ')[-1][0:1] }}
+        </div>
+        <div class="hero-main">
+            <h1>{{ salesperson.name }}</h1>
+            <p>{{ salesperson.dealership }} · {{ salesperson.city }}, {{ salesperson.state }}</p>
+            <div class="hero-tagline">
+                ▶ Top rated · {{ salesperson.tagline }}
+            </div>
+        </div>
+    </div>
+
+    <div class="hero-right">
+        <div class="hero-card">
+            <div class="hero-card-title">Talk to {{ salesperson.name.split(' ')[0] }}</div>
+
+            <div class="hero-card-main">
+                <span>Real person, real options.</span><br>
+                <small>{{ salesperson.hours or "Mon–Sat 9am–7pm" }}</small>
+            </div>
+
+            <div class="hero-buttons">
+                <button class="btn-primary">📞 Call {{ salesperson.phone }}</button>
+                <button class="btn-outline">✉️ Text / Message</button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="search-row">
+    <div class="lead-box">
+        <form method="POST" action="/lead">
+            <input
+                class="lead-input"
+                type="text"
+                name="lead_info"
+                placeholder="Enter your name & email to get {{ salesperson.name.split(' ')[0] }}'s best deals first…"
+                required
+            />
+            <button class="lead-btn" type="submit">Join VIP Deal List</button>
+        </form>
+
+        <a href="#inventory-section" class="view-all-link">View my posted cars →</a>
+    </div>
+</div>
+
+<div class="main-row">
+
+    <!-- LEFT COLUMN — INVENTORY -->
+    <section id="inventory-section" class="inventory-col">
+        <div class="section-header">
+            <h2 id="countdown-title">My Best Picks In Stock — Loading...</h2>
+            <span>{{ inventory|length }} vehicles</span>
+        </div>
+
+        <div class="inventory-grid">
+            {% for car in inventory %}
+            <article class="car-card">
+                <div class="car-image"></div>
+                <div class="car-body">
+                    <div class="car-title">
+                        {{ car.year }} {{ car.make }} {{ car.model }}
+                    </div>
+                    <div class="car-meta">
+                        {{ car.miles }} miles · {{ car.trim }}
+                    </div>
+                    <div class="car-footer">
+                        <div class="car-price">{{ car.price }}</div>
+                        <div class="car-cta">View details →</div>
+                    </div>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- RIGHT COLUMN — SIDEBAR -->
+    <aside class="sidebar-col">
+
+        <div class="sidebar-block">
+            <div class="sidebar-title">About {{ salesperson.name.split(' ')[0] }}</div>
+            <div class="sidebar-text">
+                {{ salesperson.bio }}
+            </div>
+        </div>
+
+        <div class="sidebar-block">
+            <div class="sidebar-title">Performance</div>
+            <div class="stats-row">
+                <div class="stat-pill">
+                    <span class="stat-label">2025 deliveries</span>
+                    <span class="stat-value">{{ salesperson.total_deliveries }}</span>
+                </div>
+            </div>
+            <span class="badge-pill">Verified CarsInStock Pro</span>
+        </div>
+
+        <div class="sidebar-block">
+            <div class="sidebar-title">Contact & Hours</div>
+            <div class="sidebar-text">
+                Phone: {{ salesperson.phone }}<br>
+                Email: {{ salesperson.email }}<br>
+                Hours: {{ salesperson.hours or "Mon–Sat 9am–7pm" }}<br>
+                Market: {{ salesperson.city }}, {{ salesperson.state }}
+            </div>
+        </div>
+
+    </aside>
+
+</div>
+
+<!-- COUNTDOWN TIMER -->
+<script>
+    const totalDays = 3;
+
+    let startDate = localStorage.getItem("cis_start_date");
+    if (!startDate) {
+        startDate = new Date().getTime();
+        localStorage.setItem("cis_start_date", startDate);
+    }
+
+    const now = new Date().getTime();
+    const daysPassed = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
+    let daysLeft = totalDays - daysPassed;
+    if (daysLeft < 0) daysLeft = 0;
+
+    const headerEl = document.querySelector("#countdown-title");
+    if (headerEl) {
+        if (daysLeft > 1) {
+            headerEl.textContent = `My Best Picks In Stock — These Links Expire in ${daysLeft} Days!`;
+        } else if (daysLeft === 1) {
+            headerEl.textContent = "My Best Picks In Stock — These Links Expire in 1 Day!";
+        } else {
+            headerEl.textContent = "My Best Picks In Stock — These Links Expire Today!";
+        }
+    }
+</script>
+
+{% endblock %}

@@ -1,0 +1,179 @@
+/* Base resets */
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: #f5f6fa;
+    color: #222;
+}
+
+/* Page shell */
+.page-shell {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.page {
+    width: 100%;
+    max-width: 1200px;
+    padding: 20px;
+}
+
+/* Header / Hero section */
+.hero {
+    display: flex;
+    justify-content: space-between;
+    background: linear-gradient(135deg, #1d7fe2, #4ab3ff);
+    padding: 40px;
+    border-radius: 14px;
+    color: white;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.hero-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.avatar {
+    width: 85px;
+    height: 85px;
+    border-radius: 50%;
+    background: #000;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.hero-main h1 {
+    margin: 0;
+    font-size: 32px;
+}
+
+.hero-main p {
+    margin: 4px 0;
+}
+
+.hero-tagline {
+    margin-top: 8px;
+    font-size: 14px;
+    background: rgba(255,255,255,0.2);
+    padding: 5px 10px;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+/* Right side contact card */
+.hero-right {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 16px;
+    border-radius: 10px;
+    width: 240px;
+    color: #fff;
+}
+
+.hero-right button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.btn-primary {
+    background: #2ecc71;
+}
+
+.btn-outline {
+    border: 2px solid white;
+    background: transparent;
+    color: white;
+}
+
+/* Search bar row */
+.search-row {
+    margin-top: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.search-input input {
+    width: 260px;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+.filter-chip {
+    padding: 6px 14px;
+    background: white;
+    border-radius: 20px;
+    border: 1px solid #ccc;
+    margin-left: 6px;
+}
+
+/* Inventory section */
+.section-header {
+    margin-top: 25px;
+}
+
+.inventory-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.car-card {
+    background: white;
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
+}
+
+.car-title {
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.car-meta {
+    color: #666;
+    font-size: 14px;
+}
+
+.car-price {
+    margin-top: 10px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* Sidebar (About, Contact, etc.) */
+.sidebar-block {
+    background: white;
+    padding: 16px;
+    border-radius: 12px;
+    margin-top: 20px;
+}
+
+.sidebar-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* Footer */
+.cis-footer {
+    margin-top: 50px;
+    text-align: center;
+    color: #888;
+    font-size: 14px;
+    padding: 20px;
+}
