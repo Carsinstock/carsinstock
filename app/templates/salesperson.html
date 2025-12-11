@@ -48,13 +48,10 @@
 <!-- INVENTORY BLOCK -->
 <section class="inventory-section">
   <h2>My Best Picks In Stock — These Links Expire in 3 Days!</h2>
-
-  <p class="inventory-count">
-    {{ inventory|length }} vehicle{% if inventory|length != 1 %}s{% endif %}
-  </p>
+  <p class="inventory-count">{{ vehicles|length }} vehicles</p>
 
   <div class="inventory-grid">
-    {% for vehicle in inventory %}
+    {% for vehicle in vehicles %}
     <article class="vehicle-card">
       <h3>{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}</h3>
 
@@ -74,9 +71,8 @@
       </p>
       {% endif %}
 
-      <a href="#" class="view-details">
-        View details / Ask about this car →
-      </a>
+      <!-- Placeholder link for now; we’ll wire this up later -->
+      <a href="#" class="view-details">View details →</a>
     </article>
     {% endfor %}
   </div>
@@ -84,7 +80,7 @@
 
 <!-- ABOUT BLOCK -->
 <section class="about-section">
-  <h3>About {{ salesperson.name.split(' ')[0] }}</h3>
+  <h3>About {{ salesperson.name }}</h3>
   <p>{{ salesperson.bio }}</p>
 </section>
 
@@ -92,9 +88,7 @@
 <section class="reviews-section">
   <h3>What people say</h3>
   <p class="stars">★★★★★</p>
-  <p class="review-highlight">
-    "Hands down the easiest car deal I’ve ever done."
-  </p>
+  <p class="review-highlight">"Hands down the easiest car deal I’ve ever done."</p>
   <p class="review-source">– Google review</p>
   <a href="#" class="review-link">See more Google reviews →</a>
 </section>
