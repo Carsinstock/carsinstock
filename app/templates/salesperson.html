@@ -1,98 +1,62 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!-- HEADER BLOCK -->
-<section class="seller-header">
-    <div class="seller-avatar">
-        <span>{{ salesperson.name[0] }}</span>
-    </div>
 
-    <div class="seller-info">
-        <h1>{{ salesperson.name }}</h1>
-        <p class="badge">✓ Verified CarsInStock Seller</p>
-        <p>{{ salesperson.dealership }} · {{ salesperson.city }}, {{ salesperson.state }}</p>
-        <p class="tagline">{{ salesperson.tagline }}</p>
-
-        <p class="contact-links">
-            <a href="tel:{{ salesperson.phone }}" class="contact-button">Call {{ salesperson.phone }}</a>
-            <a href="sms:{{ salesperson.phone }}" class="contact-button text-btn">Text</a>
-        </p>
-    </div>
-</section>
-
-<hr>
-
-<!-- TOP HERO / PROFILE SECTION -->
-<header class="hero">
+<!-- TOP HERO / PROFILE HEADER -->
+<div class="hero">
   <div class="hero-left">
     <div class="avatar">
-      {{ salesperson.name[0:1] }}{{ salesperson.name.split(' ')[-1][0:1] }}
+      {{ salesperson.name[0] }}{{ salesperson.name.split(' ')[-1][0:1] }}
     </div>
 
     <div class="hero-main">
       <h1>{{ salesperson.name }}</h1>
 
-      <div class="hero-verified">
-        ✓ Verified Cars In Stock Seller
+      <div class="hero-verification">
+        <span class="verified-badge">✓ Verified CarsInStock Seller</span>
       </div>
 
       <p class="hero-location">
         {{ salesperson.dealership }} · {{ salesperson.city }}, {{ salesperson.state }}
       </p>
 
-      <p class="hero-tagline">
+      <div class="hero-tagline">
         {{ salesperson.tagline }}
-      </p>
+      </div>
     </div>
   </div>
 
   <div class="hero-right">
     <div class="hero-card">
-      <p class="hero-card-title">Talk to {{ salesperson.name }}</p>
-      <p class="hero-card-sub">
-        Real person, real options.<br>
-        Mon–Sat 9am–7pm
-      </p>
-
-      <a href="tel:{{ salesperson.phone }}" class="btn btn-primary">
-        📞 Call {{ salesperson.phone }}
-      </a>
-      <a href="sms:{{ salesperson.phone }}" class="btn btn-secondary">
-        💬 Text / Message
-      </a>
+      <div class="hero-card-title">Talk to {{ salesperson.name }}</div>
+      <div class="hero-card-main">
+        <span>Real person, real options.</span><br>
+        <small>Mon–Sat 9am–7pm</small>
+      </div>
+      <div class="hero-card-buttons">
+        <a href="tel:{{ salesperson.phone }}" class="btn btn-primary">
+          Call {{ salesperson.phone }}
+        </a>
+        <a href="sms:{{ salesperson.phone }}" class="btn btn-secondary">
+          Text / Message
+        </a>
+      </div>
     </div>
   </div>
-</header>
+</div>
 
-<!-- LEAD / EMAIL SIGNUP ROW -->
-<section class="lead-section">
-  <form method="POST" action="/lead" class="lead-form">
-    <input
-      class="lead-input"
-      type="text"
-      name="lead_info"
-      placeholder="Enter your name & email to get {{ salesperson.name.split(' ')[0] }}’s best deals first…"
-      required
-    />
-    <button class="lead-btn" type="submit">Join VIP Deal List</button>
-  </form>
+<!-- INVENTORY BLOCK -->
+<section class="inventory-section">
+  <h2>My Best Picks In Stock — These Links Expire in 3 Days!</h2>
 
-  <a href="#inventory-section" class="view-all-link">View my posted cars →</a>
-</section>
-
-<!-- INVENTORY SECTION -->
-<section id="inventory-section" class="inventory-section">
-  <div class="inventory-header">
-    <h2>My Best Picks In Stock — These Links Expire in 3 Days!</h2>
-    <p class="inventory-count">{{ inventory|length }} vehicles</p>
-  </div>
+  <p class="inventory-count">
+    {{ inventory|length }} vehicle{% if inventory|length != 1 %}s{% endif %}
+  </p>
 
   <div class="inventory-grid">
     {% for vehicle in inventory %}
     <article class="vehicle-card">
-      <h3 class="vehicle-title">
-        {{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}
-      </h3>
+      <h3>{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}</h3>
 
       {% if vehicle.trim %}
       <p class="vehicle-trim">{{ vehicle.trim }}</p>
@@ -100,21 +64,17 @@
 
       {% if vehicle.miles is not none %}
       <p class="vehicle-miles">
-        {{ "{:,}".format(vehicle.miles) }} miles
+        {{ "{:,}".format(vehicle.miles | int) }} miles
       </p>
       {% endif %}
 
       {% if vehicle.price is not none %}
       <p class="vehicle-price">
-        ${{ "{:,.0f}".format(vehicle.price) }}
+        ${{ "{:,.0f}".format(vehicle.price | float) }}
       </p>
       {% endif %}
 
-      <!-- “View details” = working email link for now -->
-      <a
-        class="view-details"
-        href="mailto:{{ salesperson.email }}?subject=I’m interested in the {{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}&body=Hi {{ salesperson.name.split(' ')[0] }},%0D%0A%0D%0AI’m asking about the {{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }} you have listed on Cars In Stock.%0D%0A%0D%0AThanks!"
-      >
+      <a href="#" class="view-details">
         View details / Ask about this car →
       </a>
     </article>
