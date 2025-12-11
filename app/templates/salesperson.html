@@ -1,7 +1,28 @@
 {% extends "base.html" %}
 
 {% block content %}
+<!-- HEADER BLOCK -->
+<section class="seller-header">
+    <div class="seller-avatar">
+        <span>{{ salesperson.name[0] }}</span>
+    </div>
 
+    <div class="seller-info">
+        <h1>{{ salesperson.name }}</h1>
+        <p class="badge">✓ Verified CarsInStock Seller</p>
+        <p>{{ salesperson.dealership }} · {{ salesperson.city }}, {{ salesperson.state }}</p>
+        <p class="tagline">{{ salesperson.tagline }}</p>
+
+        <p class="contact-links">
+            <a href="tel:{{ salesperson.phone }}" class="contact-button">Call {{ salesperson.phone }}</a>
+            <a href="sms:{{ salesperson.phone }}" class="contact-button text-btn">Text</a>
+        </p>
+    </div>
+</section>
+
+<hr>
+
+<!-- TOP HERO / PROFILE SECTION -->
 <header class="hero">
   <div class="hero-left">
     <div class="avatar">
@@ -12,7 +33,7 @@
       <h1>{{ salesperson.name }}</h1>
 
       <div class="hero-verified">
-        ✓ Verified CarsInStock Seller
+        ✓ Verified Cars In Stock Seller
       </div>
 
       <p class="hero-location">
@@ -34,23 +55,44 @@
       </p>
 
       <a href="tel:{{ salesperson.phone }}" class="btn btn-primary">
-        Call {{ salesperson.phone }}
+        📞 Call {{ salesperson.phone }}
       </a>
       <a href="sms:{{ salesperson.phone }}" class="btn btn-secondary">
-        Text / Message
+        💬 Text / Message
       </a>
     </div>
   </div>
 </header>
 
-<section class="inventory-section">
-  <h2>My Best Picks In Stock — These Links Expire in 3 Days!</h2>
-  <p class="inventory-count">{{ inventory|length }} vehicles</p>
+<!-- LEAD / EMAIL SIGNUP ROW -->
+<section class="lead-section">
+  <form method="POST" action="/lead" class="lead-form">
+    <input
+      class="lead-input"
+      type="text"
+      name="lead_info"
+      placeholder="Enter your name & email to get {{ salesperson.name.split(' ')[0] }}’s best deals first…"
+      required
+    />
+    <button class="lead-btn" type="submit">Join VIP Deal List</button>
+  </form>
+
+  <a href="#inventory-section" class="view-all-link">View my posted cars →</a>
+</section>
+
+<!-- INVENTORY SECTION -->
+<section id="inventory-section" class="inventory-section">
+  <div class="inventory-header">
+    <h2>My Best Picks In Stock — These Links Expire in 3 Days!</h2>
+    <p class="inventory-count">{{ inventory|length }} vehicles</p>
+  </div>
 
   <div class="inventory-grid">
     {% for vehicle in inventory %}
     <article class="vehicle-card">
-      <h3>{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}</h3>
+      <h3 class="vehicle-title">
+        {{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}
+      </h3>
 
       {% if vehicle.trim %}
       <p class="vehicle-trim">{{ vehicle.trim }}</p>
@@ -68,29 +110,40 @@
       </p>
       {% endif %}
 
-      <a href="#" class="view-details">View details →</a>
+      <!-- “View details” = working email link for now -->
+      <a
+        class="view-details"
+        href="mailto:{{ salesperson.email }}?subject=I’m interested in the {{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}&body=Hi {{ salesperson.name.split(' ')[0] }},%0D%0A%0D%0AI’m asking about the {{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }} you have listed on Cars In Stock.%0D%0A%0D%0AThanks!"
+      >
+        View details / Ask about this car →
+      </a>
     </article>
     {% endfor %}
   </div>
 </section>
 
+<!-- ABOUT BLOCK -->
 <section class="about-section">
-  <h3>About {{ salesperson.name }}</h3>
+  <h3>About {{ salesperson.name.split(' ')[0] }}</h3>
   <p>{{ salesperson.bio }}</p>
 </section>
 
+<!-- REVIEWS BLOCK -->
 <section class="reviews-section">
   <h3>What people say</h3>
   <p class="stars">★★★★★</p>
-  <p class="review-highlight">"Hands down the easiest car deal I’ve ever done."</p>
+  <p class="review-highlight">
+    "Hands down the easiest car deal I’ve ever done."
+  </p>
   <p class="review-source">– Google review</p>
   <a href="#" class="review-link">See more Google reviews →</a>
 </section>
 
+<!-- CONTACT BLOCK -->
 <section class="contact-section">
   <h3>Contact &amp; Hours</h3>
-  <p>Phone: {{ salesperson.phone }}</p>
-  <p>Email: {{ salesperson.email }}</p>
+  <p>Phone: <a href="tel:{{ salesperson.phone }}">{{ salesperson.phone }}</a></p>
+  <p>Email: <a href="mailto:{{ salesperson.email }}">{{ salesperson.email }}</a></p>
   <p>Hours: Mon–Sat 9am–7pm</p>
   <p>Market: {{ salesperson.city }}, {{ salesperson.state }}</p>
 </section>
