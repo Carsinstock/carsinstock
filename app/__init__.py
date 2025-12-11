@@ -1,20 +1,22 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from config import Config
 
-# create the db object at the package level
 db = SQLAlchemy()
-
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object(Config)
+    app.config.from_object('config.Config')
 
-    # attach db to this app
+    # REGISTER SQLALCHEMY WITH THE FLASK APP
     db.init_app(app)
 
-    # import and register blueprints AFTER app + db are set up
-    from .routes import main
+    # IMPORT MODELS SO TABLE CREATION WORKS
+    with app.app_context():
+        from app import models
+        db.create_all()
+
+    # REGISTER ROUTES
+    from app.routes import main
     app.register_blueprint(main)
 
     return app

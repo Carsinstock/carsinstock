@@ -2,16 +2,15 @@ from app import create_app, db
 from app.models import Salesperson, Vehicle
 
 
-def seed_data():
-    # --- Create app context ---
+def reset_and_seed():
     app = create_app()
+
     with app.app_context():
-        # Start fresh
+        # Drop and recreate all tables
         db.drop_all()
         db.create_all()
 
-        # --- Demo salespeople ---
-
+        # --- Eddie ---
         eddie = Salesperson(
             slug="eddie",
             name="Eddie Castillo",
@@ -21,106 +20,49 @@ def seed_data():
             phone="732-555-1234",
             email="eddie@example.com",
             tagline="TOP RATED STRAIGHT ANSWERS, NO GAMES.",
-            bio="I help people in Ocean & Monmouth County find the right car with straightforward numbers and no surprises.",
-            google_rating=5.0,
-            google_review_count=124,
-            review_highlight="Hands down the easiest car deal I’ve ever done.",
+            bio=(
+                "I help people in Ocean & Monmouth County find the right car "
+                "with straightforward numbers and no surprises."
+            ),
         )
 
-        kim = Salesperson(
-            slug="kim",
-            name="Kim Chan",
-            dealership="Pine Belt Toyota",
-            city="Lakewood",
-            state="NJ",
-            phone="732-555-5678",
-            email="kim@example.com",
-            tagline="Top rated Toyota specialist.",
-            bio="I help busy families find reliable Toyotas that fit their payment and their lifestyle.",
-            google_rating=4.9,
-            google_review_count=89,
-            review_highlight="Kim made everything simple and stress-free.",
-        )
-
-        db.session.add_all([eddie, kim])
-        db.session.commit()
-
-        # --- Demo inventory for Eddie ---
-
-        eddie_crv = Vehicle(
-            salesperson_id=eddie.id,
+        # --- Vehicles (attach them directly to Eddie) ---
+        v1 = Vehicle(
+            salesperson=eddie,
             year=2021,
             make="Honda",
-            model="CR-V EX",
-            trim="AWD · One owner",
+            model="CR-V",
+            trim="EX",
             miles=28430,
-            price="$24,995",
-            body_style="SUV",
-            drivetrain="AWD",
-            transmission="Automatic",
+            price=24995,
         )
 
-        eddie_equinox = Vehicle(
-            salesperson_id=eddie.id,
+        v2 = Vehicle(
+            salesperson=eddie,
             year=2020,
             make="Chevrolet",
-            model="Equinox LT",
-            trim="FWD · Remote start",
+            model="Equinox",
+            trim="LT",
             miles=34100,
-            price="$19,995",
-            body_style="SUV",
-            drivetrain="FWD",
-            transmission="Automatic",
+            price=19995,
         )
 
-        eddie_camry = Vehicle(
-            salesperson_id=eddie.id,
+        v3 = Vehicle(
+            salesperson=eddie,
             year=2019,
             make="Toyota",
-            model="Camry SE",
-            trim="Sport · Backup camera",
+            model="Camry",
+            trim="SE",
             miles=41250,
-            price="$18,495",
-            body_style="Sedan",
-            drivetrain="FWD",
-            transmission="Automatic",
+            price=18495,
         )
 
-        # --- Demo inventory for Kim ---
-
-        kim_rav4 = Vehicle(
-            salesperson_id=kim.id,
-            year=2022,
-            make="Toyota",
-            model="RAV4 XLE",
-            trim="AWD · Moonroof",
-            miles=28800,
-            price="$27,995",
-            body_style="SUV",
-            drivetrain="AWD",
-            transmission="Automatic",
-        )
-
-        kim_corolla = Vehicle(
-            salesperson_id=kim.id,
-            year=2021,
-            make="Toyota",
-            model="Corolla LE",
-            trim="Great on gas",
-            miles=22150,
-            price="$18,250",
-            body_style="Sedan",
-            drivetrain="FWD",
-            transmission="Automatic",
-        )
-
-        db.session.add_all(
-            [eddie_crv, eddie_equinox, eddie_camry, kim_rav4, kim_corolla]
-        )
+        # Save everything
+        db.session.add_all([eddie, v1, v2, v3])
         db.session.commit()
 
-        print("✅ Database created and demo salespeople + vehicles added.")
+        print("Database reset. Eddie + 3 vehicles added.")
 
 
 if __name__ == "__main__":
-    seed_data()
+    reset_and_seed()

@@ -1,165 +1,98 @@
 {% extends "base.html" %}
 
-{% block title %}{{ salesperson.name }} – CarsInStock{% endblock %}
-
 {% block content %}
 
-<div class="top-bar">
-    <span>CarsInStock demo profile · Powered by Eddie’s platform</span>
-    <span>Secure · Mobile friendly · Lead ready</span>
-</div>
-
 <header class="hero">
-    <div class="hero-left">
-        <div class="avatar">
-            {{ salesperson.name[0:1] }}{{ salesperson.name.split(' ')[-1][0:1] }}
-        </div>
-
-        <div class="hero-main">
-            <h1>{{ salesperson.name }}</h1>
-
-            <div class="hero-verification">
-                <span class="verified-badge">✔ Verified CarsInStock Seller</span>
-            </div>
-
-            <p class="hero-location">
-                {{ salesperson.dealership }} · {{ salesperson.city }}, {{ salesperson.state }}
-            </p>
-
-            <div class="hero-tagline">
-                ▶ Top rated · {{ salesperson.tagline }}
-            </div>
-        </div>
+  <div class="hero-left">
+    <div class="avatar">
+      {{ salesperson.name[0:1] }}{{ salesperson.name.split(' ')[-1][0:1] }}
     </div>
 
-    <div class="hero-right">
-        <div class="hero-card">
-            <div class="hero-card-title">Talk to {{ salesperson.name.split(' ')[0] }}</div>
+    <div class="hero-main">
+      <h1>{{ salesperson.name }}</h1>
 
-            <div class="hero-card-main">
-                <span>Real person, real options.</span><br>
-                <small>{{ salesperson.hours or "Mon–Sat 9am–7pm" }}</small>
-            </div>
+      <div class="hero-verified">
+        ✓ Verified CarsInStock Seller
+      </div>
 
-            <div class="hero-buttons">
-                <button class="btn-primary">📞 Call {{ salesperson.phone }}</button>
-                <button class="btn-outline">✉️ Text / Message</button>
-            </div>
-        </div>
+      <p class="hero-location">
+        {{ salesperson.dealership }} · {{ salesperson.city }}, {{ salesperson.state }}
+      </p>
+
+      <p class="hero-tagline">
+        {{ salesperson.tagline }}
+      </p>
     </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="hero-card">
+      <p class="hero-card-title">Talk to {{ salesperson.name }}</p>
+      <p class="hero-card-sub">
+        Real person, real options.<br>
+        Mon–Sat 9am–7pm
+      </p>
+
+      <a href="tel:{{ salesperson.phone }}" class="btn btn-primary">
+        Call {{ salesperson.phone }}
+      </a>
+      <a href="sms:{{ salesperson.phone }}" class="btn btn-secondary">
+        Text / Message
+      </a>
+    </div>
+  </div>
 </header>
 
-<div class="search-row">
-    <div class="lead-box">
-        <form method="POST" action="/lead">
-            <input
-                class="lead-input"
-                type="text"
-                name="lead_info"
-                placeholder="Enter your name & email to get {{ salesperson.name.split(' ')[0] }}’s best deals first…"
-                required
-            />
-            <button class="lead-btn" type="submit">Join VIP Deal List</button>
-        </form>
+<section class="inventory-section">
+  <h2>My Best Picks In Stock — These Links Expire in 3 Days!</h2>
+  <p class="inventory-count">{{ inventory|length }} vehicles</p>
 
-        <a href="#inventory-section" class="view-all-link">View my posted cars →</a>
-    </div>
-</div>
+  <div class="inventory-grid">
+    {% for vehicle in inventory %}
+    <article class="vehicle-card">
+      <h3>{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}</h3>
 
-<div class="main-row">
+      {% if vehicle.trim %}
+      <p class="vehicle-trim">{{ vehicle.trim }}</p>
+      {% endif %}
 
-    <!-- LEFT COLUMN — INVENTORY -->
-    <section id="inventory-section" class="inventory-col">
-        <div class="section-header">
-            <h2 id="countdown-title">My Best Picks In Stock — Loading...</h2>
-            <span>{{ inventory|length }} vehicles</span>
-        </div>
+      {% if vehicle.miles is not none %}
+      <p class="vehicle-miles">
+        {{ "{:,}".format(vehicle.miles) }} miles
+      </p>
+      {% endif %}
 
-        <div class="inventory-grid">
-            {% for car in inventory %}
-            <article class="car-card">
-                <div class="car-image"></div>
-                <div class="car-body">
-                    <div class="car-title">
-                        {{ car.year }} {{ car.make }} {{ car.model }}
-                    </div>
-                    <div class="car-meta">
-                        {{ car.miles }} miles · {{ car.trim }}
-                    </div>
-                    <div class="car-footer">
-                        <div class="car-price">{{ car.price }}</div>
-                        <div class="car-cta">View details →</div>
-                    </div>
-                </div>
-            </article>
-            {% endfor %}
-        </div>
-    </section>
+      {% if vehicle.price is not none %}
+      <p class="vehicle-price">
+        ${{ "{:,.0f}".format(vehicle.price) }}
+      </p>
+      {% endif %}
 
-    <!-- RIGHT COLUMN — SIDEBAR -->
-    <aside class="sidebar-col">
+      <a href="#" class="view-details">View details →</a>
+    </article>
+    {% endfor %}
+  </div>
+</section>
 
-        <!-- About block -->
-        <div class="sidebar-block">
-            <div class="sidebar-title">About {{ salesperson.name.split(' ')[0] }}</div>
-            <div class="sidebar-text">
-                {{ salesperson.bio }}
-            </div>
-        </div>
+<section class="about-section">
+  <h3>About {{ salesperson.name }}</h3>
+  <p>{{ salesperson.bio }}</p>
+</section>
 
-        <!-- Reviews block -->
-        <div class="sidebar-block sidebar-reviews">
-            <div class="sidebar-title">What people say</div>
-            <div class="review-stars">★★★★★</div>
-            <p class="review-quote">
-                "Hands down the easiest car deal I’ve ever done."
-            </p>
-            <p class="review-source">
-                – Google review
-            </p>
-            <a href="#" class="review-link">See more Google reviews →</a>
-        </div>
+<section class="reviews-section">
+  <h3>What people say</h3>
+  <p class="stars">★★★★★</p>
+  <p class="review-highlight">"Hands down the easiest car deal I’ve ever done."</p>
+  <p class="review-source">– Google review</p>
+  <a href="#" class="review-link">See more Google reviews →</a>
+</section>
 
-        <!-- Contact block -->
-        <div class="sidebar-block">
-            <div class="sidebar-title">Contact & Hours</div>
-            <div class="sidebar-text">
-                Phone: {{ salesperson.phone }}<br>
-                Email: {{ salesperson.email }}<br>
-                Hours: {{ salesperson.hours or "Mon–Sat 9am–7pm" }}<br>
-                Market: {{ salesperson.city }}, {{ salesperson.state }}
-            </div>
-        </div>
-
-    </aside>
-
-</div>
-
-<!-- COUNTDOWN TIMER -->
-<script>
-    const totalDays = 3;
-
-    let startDate = localStorage.getItem("cis_start_date");
-    if (!startDate) {
-        startDate = new Date().getTime();
-        localStorage.setItem("cis_start_date", startDate);
-    }
-
-    const now = new Date().getTime();
-    const daysPassed = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
-    let daysLeft = totalDays - daysPassed;
-    if (daysLeft < 0) daysLeft = 0;
-
-    const headerEl = document.querySelector("#countdown-title");
-    if (headerEl) {
-        if (daysLeft > 1) {
-            headerEl.textContent = `My Best Picks In Stock — These Links Expire in ${daysLeft} Days!`;
-        } else if (daysLeft === 1) {
-            headerEl.textContent = `My Best Picks In Stock — These Links Expire in 1 Day!`;
-        } else {
-            headerEl.textContent = "My Best Picks In Stock — These Links Expire Today!";
-        }
-    }
-</script>
+<section class="contact-section">
+  <h3>Contact &amp; Hours</h3>
+  <p>Phone: {{ salesperson.phone }}</p>
+  <p>Email: {{ salesperson.email }}</p>
+  <p>Hours: Mon–Sat 9am–7pm</p>
+  <p>Market: {{ salesperson.city }}, {{ salesperson.state }}</p>
+</section>
 
 {% endblock %}
