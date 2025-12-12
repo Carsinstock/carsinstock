@@ -2,107 +2,67 @@
 
 {% block content %}
 
-<!-- TOP HERO / PROFILE HEADER -->
-<div class="hero">
-  <div class="hero-left">
-    <div class="avatar">
-      {{ salesperson.name[0] }}{{ salesperson.name.split(' ')[-1][0:1] }}
-    </div>
+<!-- VEHICLE DETAIL PAGE -->
 
-    <div class="hero-main">
-      <h1>{{ salesperson.name }}</h1>
+<section class="vehicle-detail">
 
-      <div class="hero-verification">
-        <span class="verified-badge">✓ Verified CarsInStock Seller</span>
-      </div>
+  <!-- Breadcrumb / Back -->
+  <p class="breadcrumb">
+    <a href="/s/{{ salesperson.slug }}">← Back to {{ salesperson.name }}’s inventory</a>
+  </p>
 
-      <p class="hero-location">
-        {{ salesperson.dealership }} · {{ salesperson.city }}, {{ salesperson.state }}
-      </p>
-
-      <div class="hero-tagline">
-        {{ salesperson.tagline }}
-      </div>
-    </div>
-  </div>
-
-  <div class="hero-right">
-    <div class="hero-card">
-      <div class="hero-card-title">Talk to {{ salesperson.name }}</div>
-      <div class="hero-card-main">
-        <span>Real person, real options.</span><br>
-        <small>Mon–Sat 9am–7pm</small>
-      </div>
-      <div class="hero-card-buttons">
-        <a href="tel:{{ salesperson.phone }}" class="btn btn-primary">
-          Call {{ salesperson.phone }}
-        </a>
-        <a href="sms:{{ salesperson.phone }}" class="btn btn-secondary">
-          Text / Message
-        </a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- INVENTORY BLOCK -->
-<section class="inventory-section">
-  <h2>My Best Picks In Stock — These Links Expire in 3 Days!</h2>
-  <p class="inventory-count">{{ vehicles|length }} vehicles</p>
-
-  <div class="inventory-grid">
-    {% for vehicle in vehicles %}
-    <article class="vehicle-card">
-      <h3>{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}</h3>
-
+  <!-- Vehicle Header -->
+  <header class="vehicle-header">
+    <h1>
+      {{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}
       {% if vehicle.trim %}
-      <p class="vehicle-trim">{{ vehicle.trim }}</p>
+        {{ vehicle.trim }}
       {% endif %}
+    </h1>
 
-      {% if vehicle.miles is not none %}
-      <p class="vehicle-miles">
-        {{ "{:,}".format(vehicle.miles | int) }} miles
-      </p>
-      {% endif %}
-
-      {% if vehicle.price is not none %}
+    {% if vehicle.price %}
       <p class="vehicle-price">
         ${{ "{:,.0f}".format(vehicle.price | float) }}
       </p>
-      {% endif %}
+    {% endif %}
+  </header>
 
-      <!-- Placeholder link for now; we’ll wire this up later -->
-      <a href="/s/{{ salesperson.slug }}/vehicle/{{ vehicle.id }}" class="view-details">
-  View details / Ask about this car →
-</a>
+  <!-- Vehicle Stats -->
+  <section class="vehicle-stats">
+    {% if vehicle.miles %}
+      <div class="stat">
+        <strong>Miles</strong><br>
+        {{ "{:,}".format(vehicle.miles) }}
+      </div>
+    {% endif %}
 
-    </article>
-    {% endfor %}
-  </div>
-</section>
+    <div class="stat">
+      <strong>Seller</strong><br>
+      {{ salesperson.name }}
+    </div>
 
-<!-- ABOUT BLOCK -->
-<section class="about-section">
-  <h3>About {{ salesperson.name }}</h3>
-  <p>{{ salesperson.bio }}</p>
-</section>
+    <div class="stat">
+      <strong>Location</strong><br>
+      {{ salesperson.city }}, {{ salesperson.state }}
+    </div>
+  </section>
 
-<!-- REVIEWS BLOCK -->
-<section class="reviews-section">
-  <h3>What people say</h3>
-  <p class="stars">★★★★★</p>
-  <p class="review-highlight">"Hands down the easiest car deal I’ve ever done."</p>
-  <p class="review-source">– Google review</p>
-  <a href="#" class="review-link">See more Google reviews →</a>
-</section>
+  <!-- Contact Card -->
+  <section class="vehicle-contact">
+    <h3>Interested in this car?</h3>
+    <p>Talk directly to {{ salesperson.name }}.</p>
 
-<!-- CONTACT BLOCK -->
-<section class="contact-section">
-  <h3>Contact &amp; Hours</h3>
-  <p>Phone: <a href="tel:{{ salesperson.phone }}">{{ salesperson.phone }}</a></p>
-  <p>Email: <a href="mailto:{{ salesperson.email }}">{{ salesperson.email }}</a></p>
-  <p>Hours: Mon–Sat 9am–7pm</p>
-  <p>Market: {{ salesperson.city }}, {{ salesperson.state }}</p>
+    <div class="contact-buttons">
+      <a href="tel:{{ salesperson.phone }}" class="btn btn-primary">
+        Call {{ salesperson.phone }}
+      </a>
+
+      <a href="sms:{{ salesperson.phone }}" class="btn btn-secondary">
+        Text / Message
+      </a>
+    </div>
+  </section>
+
 </section>
 
 {% endblock %}
