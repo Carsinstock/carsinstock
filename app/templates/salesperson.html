@@ -72,7 +72,10 @@
       {% endif %}
 
       <!-- Placeholder link for now; we’ll wire this up later -->
-      <a href="#" class="view-details">View details →</a>
+      <a href="/s/{{ salesperson.slug }}/vehicle/{{ vehicle.id }}" class="view-details">
+  View details / Ask about this car →
+</a>
+
     </article>
     {% endfor %}
   </div>
