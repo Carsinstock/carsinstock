@@ -1,578 +1,178 @@
+/* ====== Base Reset ====== */
+* { box-sizing: border-box; }
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #f4f5f7;
-  color: #111827;
+  font-family: Arial, Helvetica, sans-serif;
+  line-height: 1.4;
+  background: #f6f7f9;
+  color: #111;
 }
+a { color: inherit; text-decoration: none; }
 
-.page {
-  max-width: 960px;
+/* ====== Layout Helpers ====== */
+.container {
+  width: min(1100px, 92%);
   margin: 0 auto;
-  padding: 24px 16px 40px;
 }
 
-/* HERO */
-
-.hero {
-  background: linear-gradient(90deg, #1d4ed8, #0ea5e9);
+/* ====== Header / Footer ====== */
+.site-header {
+  background: #111;
   color: #fff;
-  padding: 24px;
-  border-radius: 16px;
-  margin-bottom: 32px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.header-inner {
   display: flex;
-  gap: 24px;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
 }
-
-.hero-left {
-  display: flex;
-  gap: 16px;
-  align-items: center;
-}
-
-.avatar {
-  width: 64px;
-  height: 64px;
-  border-radius: 999px;
-  background: #0f172a;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 24px;
-}
-
-.hero-main h1 {
-  margin: 0 0 4px;
-  font-size: 24px;
-}
-
-.hero-verified {
-  display: inline-block;
-  margin-bottom: 6px;
-  font-size: 12px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: rgba(15, 23, 42, 0.25);
-}
-
-.hero-location {
-  margin: 0;
-  font-size: 14px;
-  opacity: 0.9;
-}
-
-.hero-tagline {
-  margin-top: 6px;
-  margin-bottom: 0;
-  font-size: 14px;
-}
-
-.hero-right {
-  min-width: 220px;
-}
-
-.hero-card {
-  background: rgba(15, 23, 42, 0.15);
-  border-radius: 12px;
-  padding: 12px 16px;
-  font-size: 14px;
-}
-
-.hero-card-title {
-  margin: 0 0 4px;
-  font-weight: 600;
-}
-
-.hero-card-sub {
-  margin: 0 0 12px;
-  font-size: 13px;
-}
-
-.btn {
-  display: inline-block;
-  text-decoration: none;
-  padding: 8px 12px;
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 600;
-  margin-right: 8px;
-}
-
-.btn-primary {
-  background: #22c55e;
-  color: #022c22;
-}
-
-.btn-secondary {
-  background: #e5e7eb;
-  color: #111827;
-}
-
-/* INVENTORY */
-
-.inventory-section h2 {
-  margin-top: 0;
-}
-
-.inventory-count {
-  margin-top: 4px;
-  color: #6b7280;
-  font-size: 14px;
-}
-
-.inventory-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 16px;
-  margin-top: 16px;
-}
-
-.vehicle-card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 14px 16px;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
-}
-
-.vehicle-card h3 {
-  margin: 0 0 4px;
-  font-size: 16px;
-}
-
-.vehicle-trim,
-.vehicle-miles,
-.vehicle-price {
-  margin: 0;
-  font-size: 14px;
-}
-
-.vehicle-miles {
-  color: #6b7280;
-}
-
-.vehicle-price {
-  margin-top: 4px;
-  font-weight: 700;
-}
-
-.view-details {
-  display: inline-block;
-  margin-top: 8px;
-  font-size: 13px;
-  color: #2563eb;
-  text-decoration: none;
-}
-
-/* LOWER SECTIONS */
-
-.about-section,
-.reviews-section,
-.contact-section {
-  margin-top: 24px;
-  background: #fff;
-  border-radius: 12px;
-  padding: 16px 18px;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
-}
-
-.about-section h3,
-.reviews-section h3,
-.contact-section h3 {
-  margin-top: 0;
-}
-
-.stars {
-  margin: 0 0 4px;
-}
-
-.review-highlight {
-  margin: 0 0 4px;
-  font-style: italic;
-}
-
-.review-source {
-  margin: 0 0 8px;
-  font-size: 13px;
-  color: #6b7280;
-}
-
-.review-link {
-  font-size: 13px;
-  color: #2563eb;
-  text-decoration: none;
-}
-
-/* RESPONSIVE */
-
-@media (max-width: 640px) {
-  .hero {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .hero-right {
-    width: 100%;
-  }
-
-  .hero-card {
-    width: 100%;
-  }
-}
-/* =========================================================
-   CarsInStock - Premium Seller + Vehicle Layout Pack (v1)
-   Paste at bottom of app/static/css/style.css
-   ========================================================= */
-
-/* --- Base polish --- */
-:root{
-  --bg: #f6f8fb;
-  --card: #ffffff;
-  --text: #0f172a;
-  --muted: #475569;
-  --line: #e2e8f0;
-  --brand: #2563eb;
-  --brand2:#1d4ed8;
-  --ok: #16a34a;
-  --shadow: 0 10px 30px rgba(2, 6, 23, .08);
-  --shadow2: 0 8px 20px rgba(2, 6, 23, .10);
-  --radius: 16px;
-  --radius2: 12px;
-}
-
-html, body{
-  background: var(--bg);
-  color: var(--text);
-}
-
-main, .container{
-  width: min(1100px, calc(100% - 32px));
-  margin: 0 auto;
-}
-
-a{ color: var(--brand); }
-a:hover{ color: var(--brand2); }
-
-/* =========================================================
-   SELLER PAGE (salesperson.html)
-   ========================================================= */
-
-/* Top hero section */
-.hero{
-  display: grid;
-  grid-template-columns: 1.3fr .9fr;
-  gap: 18px;
-  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 45%, #38bdf8 100%);
-  border-radius: var(--radius);
-  padding: 22px;
-  box-shadow: var(--shadow);
-  color: #fff;
-  margin: 18px 0 18px;
-}
-
-.hero-left{
-  display: grid;
-  grid-template-columns: 64px 1fr;
-  gap: 14px;
-  align-items: start;
-}
-
-.avatar{
-  width: 64px;
-  height: 64px;
-  border-radius: 999px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+.brand {
   font-weight: 800;
-  letter-spacing: .5px;
-  background: rgba(255,255,255,.18);
-  border: 1px solid rgba(255,255,255,.25);
-  backdrop-filter: blur(6px);
+  letter-spacing: 0.3px;
   font-size: 18px;
 }
+.nav a {
+  opacity: 0.9;
+  margin-left: 14px;
+}
+.nav a:hover { opacity: 1; }
 
-.hero-main h1{
-  margin: 2px 0 6px;
-  font-size: 28px;
-  line-height: 1.1;
+.main-content {
+  padding: 22px 0 38px;
 }
 
-.hero-location{
-  margin: 0;
-  color: rgba(255,255,255,.9);
-  font-weight: 600;
+.site-footer {
+  padding: 18px 0;
+  border-top: 1px solid #e5e7eb;
+  background: #fff;
+}
+.footer-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-.hero-tagline{
-  margin-top: 8px;
+/* ====== Typography ====== */
+h1, h2, h3 { margin: 0 0 10px; }
+p { margin: 0 0 12px; color: #333; }
+
+/* ====== Buttons ====== */
+.btn {
   display: inline-block;
-  background: rgba(15, 23, 42, .25);
-  border: 1px solid rgba(255,255,255,.18);
-  padding: 8px 10px;
-  border-radius: 999px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #111;
+  color: #fff;
   font-weight: 700;
-  color: rgba(255,255,255,.95);
+  border: 1px solid #111;
+}
+.btn:hover { opacity: 0.92; }
+
+.btn-outline {
+  background: transparent;
+  color: #111;
+  border: 1px solid #111;
+}
+.btn-outline:hover { background: #111; color: #fff; }
+
+/* ====== Card ====== */
+.card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
 }
 
-.hero-verification{
-  margin-top: 8px;
+/* ====== Seller Header Block ====== */
+.seller-hero {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 18px;
 }
-
-.verified-badge{
-  display:inline-flex;
-  align-items:center;
-  gap: 8px;
+.seller-hero .row {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+.seller-hero .meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.seller-hero .meta .name {
+  font-size: 22px;
   font-weight: 800;
-  background: rgba(255,255,255,.16);
-  border: 1px solid rgba(255,255,255,.22);
-  padding: 7px 10px;
-  border-radius: 999px;
 }
-
-.hero-right{
-  display:flex;
-  justify-content:flex-end;
-  align-items:stretch;
-}
-
-.hero-card{
-  width: 100%;
-  background: rgba(255,255,255,.15);
-  border: 1px solid rgba(255,255,255,.22);
-  border-radius: var(--radius);
-  padding: 14px;
-  backdrop-filter: blur(8px);
-  box-shadow: var(--shadow2);
-}
-
-.hero-card-title{
-  font-weight: 900;
+.seller-hero .meta .sub {
+  color: #555;
   font-size: 14px;
-  opacity: .95;
-  margin-bottom: 10px;
 }
-
-.hero-card-main{
-  opacity: .95;
-  font-weight: 650;
-  line-height: 1.3;
-  margin-bottom: 12px;
-}
-
-.hero-card-buttons{
-  display:flex;
+.seller-hero .actions {
+  display: flex;
   gap: 10px;
   flex-wrap: wrap;
 }
 
-.btn{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  padding: 10px 12px;
-  border-radius: 999px;
-  font-weight: 900;
-  text-decoration:none;
-  border: 1px solid rgba(255,255,255,.22);
-  transition: transform .08s ease, opacity .15s ease;
+/* ====== Inventory Grid ====== */
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
 }
 
-.btn:hover{ transform: translateY(-1px); opacity: .95; }
+.inventory-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: transform 0.08s ease-in-out;
+}
+.inventory-card:hover { transform: translateY(-2px); }
 
-.btn-primary{
-  background: rgba(15,23,42,.35);
-  color: #fff;
+.inventory-card .photo {
+  width: 100%;
+  height: 170px;
+  background: #ddd;
+  overflow: hidden;
+}
+.inventory-card .photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-.btn-secondary{
-  background: rgba(255,255,255,.18);
-  color: #fff;
-}
-
-/* Inventory section */
-.inventory-section{
-  margin: 16px 0 18px;
-}
-
-.inventory-section h2{
-  margin: 8px 0 8px;
-  font-size: 20px;
-}
-
-.inventory-count{
-  color: var(--muted);
-  margin-bottom: 14px;
-  font-weight: 600;
-}
-
-.inventory-grid{
-  display:grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-}
-
-.inventory-card{
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius2);
+.inventory-card .body {
   padding: 14px;
-  box-shadow: 0 6px 18px rgba(2,6,23,.06);
-  transition: transform .10s ease, box-shadow .15s ease;
 }
-
-.inventory-card:hover{
-  transform: translateY(-2px);
-  box-shadow: 0 14px 30px rgba(2,6,23,.10);
-}
-
-.vehicle-title{
-  font-weight: 900;
+.inventory-card .title {
   font-size: 16px;
+  font-weight: 800;
   margin-bottom: 6px;
 }
-
-.vehicle-meta{
-  color: var(--muted);
-  font-weight: 650;
-  margin: 3px 0;
+.inventory-card .line {
+  color: #444;
+  font-size: 13px;
+  margin-bottom: 8px;
 }
-
-.vehicle-price{
-  margin-top: 10px;
+.inventory-card .price {
   font-size: 18px;
-  font-weight: 950;
-  color: #0b1220;
-}
-
-.view-details{
-  display:inline-flex;
-  margin-top: 12px;
   font-weight: 900;
-  text-decoration:none;
-  color: var(--brand);
+  margin: 10px 0;
+}
+.inventory-card .cta {
+  display: flex;
+  gap: 10px;
 }
 
-.view-details:hover{
-  text-decoration: underline;
-}
-
-/* About / Reviews / Contact blocks */
-.about-section, .reviews-section, .contact-section{
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius2);
-  padding: 16px;
-  margin: 14px 0;
-  box-shadow: 0 6px 18px rgba(2,6,23,.05);
-}
-
-.about-section h3, .reviews-section h3, .contact-section h3{
-  margin: 0 0 10px;
-  font-size: 16px;
-}
-
-.stars{
-  letter-spacing: 2px;
-  font-weight: 900;
-}
-
-.review-highlight{
-  margin: 8px 0;
-  font-style: italic;
-  color: #0b1220;
-  font-weight: 650;
-}
-
-.review-source{
-  color: var(--muted);
-  font-weight: 650;
-}
-
-.review-link{
-  font-weight: 900;
-  text-decoration: none;
-}
-
-.review-link:hover{
-  text-decoration: underline;
-}
-
-/* =========================================================
-   VEHICLE DETAIL PAGE (vehicle_detail.html)
-   ========================================================= */
-
-.vehicle-detail{
-  margin: 18px 0;
-}
-
-.breadcrumb{
-  margin: 0 0 10px;
-  font-weight: 800;
-}
-
-.breadcrumb a{
-  text-decoration: none;
-  font-weight: 900;
-}
-
-.breadcrumb a:hover{
-  text-decoration: underline;
-}
-
-.vehicle-header{
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  padding: 18px;
-  box-shadow: var(--shadow);
-}
-
-.vehicle-header h1{
-  margin: 0 0 10px;
-  font-size: 26px;
-}
-
-.vehicle-price{
-  font-size: 22px;
-  font-weight: 950;
-}
-
-.vehicle-stats{
-  display:flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-top: 12px;
-}
-
-.stat{
-  background: #f1f5f9;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 10px 12px;
-  font-weight: 900;
-  color: #0b1220;
-}
-
-/* Responsive */
-@media (max-width: 980px){
-  .hero{
-    grid-template-columns: 1fr;
-  }
-  .hero-right{
-    justify-content: flex-start;
-  }
-  .inventory-grid{
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 640px){
-  .inventory-grid{
-    grid-template-columns: 1fr;
-  }
-  .hero-main h1{
-    font-size: 24px;
-  }
+/* ====== Mobile tweaks ====== */
+@media (max-width: 480px) {
+  .seller-hero { padding: 14px; }
+  .inventory-card .photo { height: 155px; }
 }
