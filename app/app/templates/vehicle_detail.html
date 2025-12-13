@@ -1,39 +1,60 @@
 {% extends "base.html" %}
 
+{% block title %}
+{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }} | Cars In Stock
+{% endblock %}
+
 {% block content %}
-<section class="vehicle-detail">
-  <div class="vehicle-detail-header">
-    <a class="back-link" href="/s/{{ salesperson.slug }}">← Back to {{ salesperson.name }}</a>
-    <h1>{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}</h1>
-    {% if vehicle.trim %}
-      <p class="vehicle-trim">{{ vehicle.trim }}</p>
-    {% endif %}
-  </div>
 
-  <div class="vehicle-detail-grid">
-    <div class="vehicle-detail-card">
-      <h3>Key Info</h3>
-      <ul>
-        {% if vehicle.miles is not none %}
-          <li><strong>Miles:</strong> {{ "{:,}".format(vehicle.miles) }}</li>
-        {% endif %}
-        {% if vehicle.price is not none %}
-          <li><strong>Price:</strong> ${{ "{:,.0f}".format(vehicle.price) }}</li>
-        {% endif %}
-      </ul>
-    </div>
+<div class="page">
 
-    <div class="vehicle-detail-card">
-      <h3>Ask about this car</h3>
-      <p>Want the out-the-door numbers or to confirm availability?</p>
-      <div class="btn-row">
-        <a class="btn btn-primary" href="tel:{{ salesperson.phone }}">Call {{ salesperson.phone }}</a>
-        <a class="btn btn-secondary" href="sms:{{ salesperson.phone }}">Text / Message</a>
+  <!-- Vehicle Header -->
+  <div class="seller-hero">
+    <div class="row">
+      <div class="meta">
+        <div class="name">
+          {{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}
+        </div>
+        <div class="sub">
+          Listed by {{ salesperson.name }}
+        </div>
       </div>
-      <p class="small-note">
-        Ask for: <strong>{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}</strong>
-      </p>
+
+      <div class="actions">
+        {% if salesperson.phone %}
+          <a class="btn" href="tel:{{ salesperson.phone }}">Call</a>
+          <a class="btn btn-outline" href="sms:{{ salesperson.phone }}">Text</a>
+        {% endif %}
+        <a class="btn btn-outline"
+           href="{{ url_for('main.salesperson_page', slug=salesperson.slug) }}">
+          Back to Inventory
+        </a>
+      </div>
     </div>
   </div>
-</section>
+
+  <!-- Vehicle Card -->
+  <div class="card">
+
+    {% if vehicle.image_url %}
+      <div class="photo" style="margin-bottom: 16px;">
+        <img src="{{ vehicle.image_url }}" alt="Vehicle photo">
+      </div>
+    {% endif %}
+
+    <h2>
+      {{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}
+    </h2>
+
+    <p><strong>Price:</strong> ${{ "{:,}".format(vehicle.price) }}</p>
+    <p><strong>Mileage:</strong> {{ vehicle.mileage }} miles</p>
+
+    {% if vehicle.description %}
+      <p>{{ vehicle.description }}</p>
+    {% endif %}
+
+  </div>
+
+</div>
+
 {% endblock %}
