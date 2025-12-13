@@ -1,16 +1,33 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>CarsInStock</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}Cars In Stock{% endblock %}</title>
 
-  <!-- Main stylesheet -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <!-- Blueprint-safe CSS loading -->
+  <link rel="stylesheet" href="{{ url_for('main.static', filename='css/style.css') }}">
 </head>
 <body>
-  <div class="page">
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="{{ url_for('main.index') }}">CarsInStock</a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container main-content">
     {% block content %}{% endblock %}
-  </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <small>&copy; 2025 CarsInStock.com</small>
+    </div>
+  </footer>
+
 </body>
 </html>
