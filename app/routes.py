@@ -2,7 +2,13 @@ from flask import Blueprint, render_template, abort
 from .models import Salesperson, Vehicle
 
 # Blueprint for main site pages
-main = Blueprint("main", __name__)
+# IMPORTANT: Lock template/static folders to /app/templates and /app/static
+main = Blueprint(
+    "main",
+    __name__,
+    template_folder="templates",
+    static_folder="static"
+)
 
 
 # ==============================
@@ -22,9 +28,11 @@ def salesperson_page(slug):
     salesperson = Salesperson.query.filter_by(slug=slug).first_or_404()
 
     # Get this salesperson's inventory (newest first)
-    inventory = Vehicle.query.filter_by(
-        salesperson_id=salesperson.id
-    ).order_by(Vehicle.id.desc()).all()
+    inventory = (
+        Vehicle.query.filter_by(salesperson_id=salesperson.id)
+        .order_by(Vehicle.id.desc())
+        .all()
+    )
 
     return render_template(
         "salesperson.html",
@@ -40,6 +48,7 @@ def salesperson_page(slug):
 def vehicle_detail(slug, vehicle_id):
     salesperson = Salesperson.query.filter_by(slug=slug).first_or_404()
 
+    # Vehicle must belong to this seller (enforced in the query)
     vehicle = Vehicle.query.filter_by(
         id=vehicle_id,
         salesperson_id=salesperson.id
