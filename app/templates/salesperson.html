@@ -2,67 +2,155 @@
 
 {% block content %}
 
-<!-- VEHICLE DETAIL PAGE -->
+<div class="page">
 
-<section class="vehicle-detail">
-
-  <!-- Breadcrumb / Back -->
-  <p class="breadcrumb">
-    <a href="/s/{{ salesperson.slug }}">← Back to {{ salesperson.name }}’s inventory</a>
-  </p>
-
-  <!-- Vehicle Header -->
-  <header class="vehicle-header">
-    <h1>
-      {{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}
-      {% if vehicle.trim %}
-        {{ vehicle.trim }}
-      {% endif %}
-    </h1>
-
-    {% if vehicle.price %}
-      <p class="vehicle-price">
-        ${{ "{:,.0f}".format(vehicle.price | float) }}
-      </p>
-    {% endif %}
-  </header>
-
-  <!-- Vehicle Stats -->
-  <section class="vehicle-stats">
-    {% if vehicle.miles %}
-      <div class="stat">
-        <strong>Miles</strong><br>
-        {{ "{:,}".format(vehicle.miles) }}
+  <!-- ========================= -->
+  <!-- HERO / SELLER HEADER -->
+  <!-- ========================= -->
+  <section class="hero">
+    <div class="hero-left">
+      <div class="avatar">
+        {{ salesperson.name[0] }}{{ salesperson.name.split(' ')[-1][0:1] }}
       </div>
+
+      <div class="hero-main">
+        <h1>{{ salesperson.name }}</h1>
+
+        <div class="hero-verification">
+          <span class="verified-badge">✔ Verified CarsInStock Seller</span>
+        </div>
+
+        <p class="hero-location">
+          {{ salesperson.dealership }} · {{ salesperson.city }}, {{ salesperson.state }}
+        </p>
+
+        {% if salesperson.tagline %}
+        <div class="hero-tagline">
+          {{ salesperson.tagline }}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="hero-right">
+      <div class="hero-card">
+        <div class="hero-card-title">
+          Talk to {{ salesperson.name }}
+        </div>
+
+        <div class="hero-card-main">
+          <span>Real person. Real options.</span><br>
+          <small>Mon–Sat 9am–7pm</small>
+        </div>
+
+        <div class="hero-card-buttons">
+          <a href="tel:{{ salesperson.phone }}" class="btn btn-primary">
+            Call {{ salesperson.phone }}
+          </a>
+          <a href="sms:{{ salesperson.phone }}" class="btn btn-secondary">
+            Text / Message
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================= -->
+  <!-- INVENTORY SECTION -->
+  <!-- ========================= -->
+  <section class="inventory-section">
+    <h2>{{ salesperson.name }}’s Inventory</h2>
+
+    {% if inventory %}
+    <div class="inventory-grid">
+      {% for vehicle in inventory %}
+      <article class="inventory-card">
+
+        <h3>
+          {{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}
+          {% if vehicle.trim %} {{ vehicle.trim }}{% endif %}
+        </h3>
+
+        {% if vehicle.price %}
+        <p class="price">
+          ${{ "{:,.0f}".format(vehicle.price | float) }}
+        </p>
+        {% endif %}
+
+        {% if vehicle.miles %}
+        <p class="miles">
+          {{ "{:,.0f}".format(vehicle.miles) }} miles
+        </p>
+        {% endif %}
+
+        <a
+          href="/s/{{ salesperson.slug }}/vehicle/{{ vehicle.id }}"
+          class="view-details"
+        >
+          View details / Ask about this car →
+        </a>
+
+      </article>
+      {% endfor %}
+    </div>
+    {% else %}
+      <p>No vehicles currently listed.</p>
     {% endif %}
-
-    <div class="stat">
-      <strong>Seller</strong><br>
-      {{ salesperson.name }}
-    </div>
-
-    <div class="stat">
-      <strong>Location</strong><br>
-      {{ salesperson.city }}, {{ salesperson.state }}
-    </div>
   </section>
 
-  <!-- Contact Card -->
-  <section class="vehicle-contact">
-    <h3>Interested in this car?</h3>
-    <p>Talk directly to {{ salesperson.name }}.</p>
-
-    <div class="contact-buttons">
-      <a href="tel:{{ salesperson.phone }}" class="btn btn-primary">
-        Call {{ salesperson.phone }}
-      </a>
-
-      <a href="sms:{{ salesperson.phone }}" class="btn btn-secondary">
-        Text / Message
-      </a>
-    </div>
+  <!-- ========================= -->
+  <!-- ABOUT SECTION -->
+  <!-- ========================= -->
+  <section class="about-section">
+    <h3>About {{ salesperson.name }}</h3>
+    <p>
+      {{ salesperson.bio or "Reach out today to get personalized help with your next vehicle." }}
+    </p>
   </section>
 
-</section>
+  <!-- ========================= -->
+  <!-- REVIEWS SECTION -->
+  <!-- ========================= -->
+  <section class="reviews-section">
+    <h3>What people say</h3>
+
+    <p class="stars">★★★★★</p>
+
+    <p class="review-highlight">
+      “Hands down the easiest car deal I’ve ever done.”
+    </p>
+
+    <p class="review-source">— Google Review</p>
+
+    <a href="#" class="review-link">
+      See more Google reviews →
+    </a>
+  </section>
+
+  <!-- ========================= -->
+  <!-- CONTACT SECTION -->
+  <!-- ========================= -->
+  <section class="contact-section">
+    <h3>Contact & Hours</h3>
+
+    <p>
+      Phone:
+      <a href="tel:{{ salesperson.phone }}">
+        {{ salesperson.phone }}
+      </a>
+    </p>
+
+    <p>
+      Email:
+      <a href="mailto:{{ salesperson.email }}">
+        {{ salesperson.email }}
+      </a>
+    </p>
+
+    <p>Hours: Mon–Sat 9am–7pm</p>
+    <p>Market: {{ salesperson.city }}, {{ salesperson.state }}</p>
+  </section>
+
+</div>
 
 {% endblock %}
