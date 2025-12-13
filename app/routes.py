@@ -6,20 +6,26 @@ main = Blueprint("main", __name__)
 
 
 # ==============================
+# Home / root page
+# ==============================
+@main.route("/")
+def index():
+    return render_template("index.html")
+
+
+# ==============================
 # Seller profile page
 # ==============================
 @main.route("/s/<slug>")
 def salesperson_page(slug):
     # Look up the salesperson by slug (e.g. "eddie")
-    salesperson = Salesperson.query.filter_by(slug=slug).first()
+    salesperson = Salesperson.query.filter_by(slug=slug).first_or_404()
 
-    if not salesperson:
-        abort(404)
+    # Get this salesperson's inventory (newest first)
+    inventory = Vehicle.query.filter_by(
+        salesperson_id=salesperson.id
+    ).order_by(Vehicle.id.desc()).all()
 
-    # Get this salesperson's inventory
-    inventory = salesperson.vehicles
-
-    # Render the seller profile page
     return render_template(
         "salesperson.html",
         salesperson=salesperson,
@@ -33,22 +39,14 @@ def salesperson_page(slug):
 @main.route("/s/<slug>/vehicle/<int:vehicle_id>")
 def vehicle_detail(slug, vehicle_id):
     salesperson = Salesperson.query.filter_by(slug=slug).first_or_404()
-    vehicle = Vehicle.query.get_or_404(vehicle_id)
 
-    # Safety check: vehicle must belong to this seller
-    if vehicle.salesperson_id != salesperson.id:
-        abort(404)
+    vehicle = Vehicle.query.filter_by(
+        id=vehicle_id,
+        salesperson_id=salesperson.id
+    ).first_or_404()
 
     return render_template(
         "vehicle_detail.html",
         salesperson=salesperson,
         vehicle=vehicle
     )
-
-
-# ==============================
-# Home / root page
-# ==============================
-@main.route("/")
-def index():
-    return "CarsInStock home page"
