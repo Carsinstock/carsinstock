@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}
+{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }} | Cars In Stock
+{% endblock %}
+
+{% block content %}
+
+<div class="page">
+
+  <!-- Vehicle Header -->
+  <div class="seller-hero">
+    <div class="row">
+
+      <div class="meta">
+        <div class="name">
+          {{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}
+        </div>
+        <div class="sub">
+          Listed by {{ salesperson.name }}
+        </div>
+      </div>
+
+      <div class="actions">
+        {% if salesperson.phone %}
+          <a class="btn" href="tel:{{ salesperson.phone }}">Call</a>
+          <a class="btn btn-outline" href="sms:{{ salesperson.phone }}">Text</a>
+        {% endif %}
+
+        <a class="btn btn-outline"
+           href="{{ url_for('main.salesperson_page', slug=salesperson.slug) }}">
+          Back to Inventory
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Vehicle Details -->
+  <div class="card">
+
+    {% if vehicle.image_url %}
+      <img src="{{ vehicle.image_url }}"
+           alt="{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}"
+           style="max-width:100%; border-radius:12px; margin-bottom:16px;">
+    {% endif %}
+
+    {% if vehicle.price %}
+      <p><strong>Price:</strong> ${{ "{:,}".format(vehicle.price) }}</p>
+    {% endif %}
+
+    {% if vehicle.mileage %}
+      <p><strong>Mileage:</strong> {{ "{:,}".format(vehicle.mileage) }} miles</p>
+    {% endif %}
+
+    {% if vehicle.description %}
+      <p>{{ vehicle.description }}</p>
+    {% endif %}
+
+  </div>
+
+</div>
+
+{% endblock %}
