@@ -1,155 +1,73 @@
 {% extends "base.html" %}
 
+{% block title %}
+{{ salesperson.name }} | Cars In Stock
+{% endblock %}
+
 {% block content %}
 
 <div class="page">
 
-  <!-- ========================= -->
-  <!-- HERO / SELLER HEADER -->
-  <!-- ========================= -->
-  <section class="hero">
-    <div class="hero-left">
-      <div class="avatar">
-        {{ salesperson.name[0] }}{{ salesperson.name.split(' ')[-1][0:1] }}
+  <!-- Seller Header -->
+  <div class="seller-hero">
+    <div class="row">
+      <div class="meta">
+        <div class="name">{{ salesperson.name }}</div>
+        <div class="sub">
+          {{ inventory|length }} vehicles available
+        </div>
       </div>
 
-      <div class="hero-main">
-        <h1>{{ salesperson.name }}</h1>
-
-        <div class="hero-verification">
-          <span class="verified-badge">✔ Verified CarsInStock Seller</span>
-        </div>
-
-        <p class="hero-location">
-          {{ salesperson.dealership }} · {{ salesperson.city }}, {{ salesperson.state }}
-        </p>
-
-        {% if salesperson.tagline %}
-        <div class="hero-tagline">
-          {{ salesperson.tagline }}
-        </div>
+      <div class="actions">
+        {% if salesperson.phone %}
+          <a class="btn" href="tel:{{ salesperson.phone }}">Call</a>
+          <a class="btn btn-outline" href="sms:{{ salesperson.phone }}">Text</a>
         {% endif %}
       </div>
     </div>
+  </div>
 
-    <div class="hero-right">
-      <div class="hero-card">
-        <div class="hero-card-title">
-          Talk to {{ salesperson.name }}
-        </div>
-
-        <div class="hero-card-main">
-          <span>Real person. Real options.</span><br>
-          <small>Mon–Sat 9am–7pm</small>
-        </div>
-
-        <div class="hero-card-buttons">
-          <a href="tel:{{ salesperson.phone }}" class="btn btn-primary">
-            Call {{ salesperson.phone }}
-          </a>
-          <a href="sms:{{ salesperson.phone }}" class="btn btn-secondary">
-            Text / Message
-          </a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========================= -->
-  <!-- INVENTORY SECTION -->
-  <!-- ========================= -->
-  <section class="inventory-section">
-    <h2>{{ salesperson.name }}’s Inventory</h2>
-
-    {% if inventory %}
+  <!-- Inventory -->
+  {% if inventory %}
     <div class="inventory-grid">
       {% for vehicle in inventory %}
-      <article class="inventory-card">
+        <div class="inventory-card card">
 
-        <h3>
-          {{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}
-          {% if vehicle.trim %} {{ vehicle.trim }}{% endif %}
-        </h3>
+          <div class="photo">
+            {% if vehicle.image_url %}
+              <img src="{{ vehicle.image_url }}" alt="Vehicle photo">
+            {% endif %}
+          </div>
 
-        {% if vehicle.price %}
-        <p class="price">
-          ${{ "{:,.0f}".format(vehicle.price | float) }}
-        </p>
-        {% endif %}
+          <div class="body">
+            <div class="title">
+              {{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}
+            </div>
 
-        {% if vehicle.miles %}
-        <p class="miles">
-          {{ "{:,.0f}".format(vehicle.miles) }} miles
-        </p>
-        {% endif %}
+            <div class="line">
+              {{ vehicle.mileage }} miles
+            </div>
 
-        <a
-          href="/s/{{ salesperson.slug }}/vehicle/{{ vehicle.id }}"
-          class="view-details"
-        >
-          View details / Ask about this car →
-        </a>
+            <div class="price">
+              ${{ "{:,}".format(vehicle.price) }}
+            </div>
 
-      </article>
+            <div class="cta">
+              <a
+                class="btn"
+                href="{{ url_for('main.vehicle_detail', slug=salesperson.slug, vehicle_id=vehicle.id) }}"
+              >
+                View Details
+              </a>
+            </div>
+          </div>
+
+        </div>
       {% endfor %}
     </div>
-    {% else %}
-      <p>No vehicles currently listed.</p>
-    {% endif %}
-  </section>
-
-  <!-- ========================= -->
-  <!-- ABOUT SECTION -->
-  <!-- ========================= -->
-  <section class="about-section">
-    <h3>About {{ salesperson.name }}</h3>
-    <p>
-      {{ salesperson.bio or "Reach out today to get personalized help with your next vehicle." }}
-    </p>
-  </section>
-
-  <!-- ========================= -->
-  <!-- REVIEWS SECTION -->
-  <!-- ========================= -->
-  <section class="reviews-section">
-    <h3>What people say</h3>
-
-    <p class="stars">★★★★★</p>
-
-    <p class="review-highlight">
-      “Hands down the easiest car deal I’ve ever done.”
-    </p>
-
-    <p class="review-source">— Google Review</p>
-
-    <a href="#" class="review-link">
-      See more Google reviews →
-    </a>
-  </section>
-
-  <!-- ========================= -->
-  <!-- CONTACT SECTION -->
-  <!-- ========================= -->
-  <section class="contact-section">
-    <h3>Contact & Hours</h3>
-
-    <p>
-      Phone:
-      <a href="tel:{{ salesperson.phone }}">
-        {{ salesperson.phone }}
-      </a>
-    </p>
-
-    <p>
-      Email:
-      <a href="mailto:{{ salesperson.email }}">
-        {{ salesperson.email }}
-      </a>
-    </p>
-
-    <p>Hours: Mon–Sat 9am–7pm</p>
-    <p>Market: {{ salesperson.city }}, {{ salesperson.state }}</p>
-  </section>
+  {% else %}
+    <p>No vehicles currently listed.</p>
+  {% endif %}
 
 </div>
 
