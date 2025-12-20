@@ -7,15 +7,10 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object('config.Config')
 
-    # REGISTER SQLALCHEMY WITH THE FLASK APP
+    # init extensions
     db.init_app(app)
 
-    # IMPORT MODELS SO TABLE CREATION WORKS
-    with app.app_context():
-        from app import models
-        db.create_all()
-
-    # REGISTER ROUTES
+    # register routes
     from app.routes import main
     app.register_blueprint(main)
 
