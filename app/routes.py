@@ -1,5 +1,6 @@
-from flask import Blueprint, render_template, abort
-from app.models import Salesperson, Vehicle
+from flask import Blueprint, render_template
+from flask_login import login_required
+
 
 main = Blueprint(
     "main",

@@ -1,33 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>{% block title %}Cars In Stock{% endblock %}</title>
-
-  <!-- Blueprint-safe CSS loading -->
-  <link rel="stylesheet" href="{{ url_for('main.static', filename='css/style.css') }}">
+    <meta charset="UTF-8">
+    <title>CarsInStock</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background: #f5f6f8;
+        }
+        header {
+            background: #111;
+            color: white;
+            padding: 15px 20px;
+        }
+        nav a {
+            color: white;
+            margin-right: 15px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .container {
+            padding: 30px;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+        }
+    </style>
 </head>
 <body>
 
-  <!-- Header -->
-  <header class="site-header">
-    <div class="container header-inner">
-      <a class="brand" href="{{ url_for('main.index') }}">CarsInStock</a>
-    </div>
-  </header>
+<header>
+    <nav>
+        <a href="/">CarsInStock</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/logout">Logout</a>
+    </nav>
+</header>
 
-  <!-- Main Content -->
-  <main class="container main-content">
+<div class="container">
     {% block content %}{% endblock %}
-  </main>
+</div>
 
-  <!-- Footer -->
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <small>&copy; 2025 CarsInStock.com</small>
-    </div>
-  </footer>
+<footer>
+    © 2025 CarsInStock
+</footer>
 
 </body>
 </html>

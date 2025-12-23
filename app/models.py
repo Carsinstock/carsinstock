@@ -1,26 +1,8 @@
 from app import db
+from flask_login import UserMixin
 
-class Salesperson(db.Model):
+class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
-    slug = db.Column(db.String(50), unique=True, nullable=False)
-    name = db.Column(db.String(100), nullable=False)
-    dealership = db.Column(db.String(100), nullable=False)
-    city = db.Column(db.String(100), nullable=False)
-    state = db.Column(db.String(10), nullable=False)
-    phone = db.Column(db.String(20), nullable=False)
-    email = db.Column(db.String(100), nullable=False)
-    tagline = db.Column(db.String(255))
-    bio = db.Column(db.Text)
-
-    vehicles = db.relationship("Vehicle", backref="salesperson", lazy=True)
-
-
-class Vehicle(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    salesperson_id = db.Column(db.Integer, db.ForeignKey("salesperson.id"), nullable=False)
-    year = db.Column(db.Integer, nullable=False)
-    make = db.Column(db.String(50), nullable=False)
-    model = db.Column(db.String(50), nullable=False)
-    trim = db.Column(db.String(50))
-    miles = db.Column(db.Integer)
-    price = db.Column(db.Float)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(200), nullable=False)
+    role = db.Column(db.String(20), default='dealer')  # dealer | salesperson
