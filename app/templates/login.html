@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login | CarsInStock</title>
+
+    <script>
+        function togglePassword() {
+            const pw = document.getElementById("password");
+            pw.type = pw.type === "password" ? "text" : "password";
+        }
+    </script>
+</head>
+<body>
+
+<h2>Login</h2>
+
+<form method="POST" action="{{ url_for('main.login') }}">
+    <label>Email</label><br>
+    <input type="email" name="email" required><br><br>
+
+    <label>Password</label><br>
+    <input type="password" id="password" name="password" required><br><br>
+
+    <input type="checkbox" onclick="togglePassword()"> Show Password<br><br>
+
+    <button type="submit">Login</button>
+</form>
+
+<br>
+
+<a href="#">Forgot User ID?</a> |
+<a href="#">Forgot Password?</a>
+
+</body>
+</html>
