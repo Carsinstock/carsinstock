@@ -1,12 +1,19 @@
 from flask import Flask
+from app.extensions import db, login_manager
+from app.models import User
 
 def create_app():
     app = Flask(__name__)
 
-    # Basic config
-    app.config["SECRET_KEY"] = "change-this-later"
+    app.config.from_object("app.config.Config")
 
-    # Register blueprints (ONCE)
+    db.init_app(app)
+    login_manager.init_app(app)
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
+
     from app.routes import main
     app.register_blueprint(main)
 

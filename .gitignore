@@ -209,3 +209,4 @@ carsinstock.db
 # Virtual environment
 venv/
 .env
+carsinstock.db
