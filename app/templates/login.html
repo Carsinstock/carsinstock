@@ -1,36 +1,71 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Login | CarsInStock</title>
+{% extends "base.html" %}
+{% block content %}
 
-    <script>
-        function togglePassword() {
-            const pw = document.getElementById("password");
-            pw.type = pw.type === "password" ? "text" : "password";
-        }
-    </script>
-</head>
-<body>
+<div style="max-width: 420px; margin: 80px auto; text-align: center;">
 
-<h2>Login</h2>
+  <h2 style="margin-bottom: 10px;">Welcome Back</h2>
+  <p style="color: #555; margin-bottom: 30px>
+    Sign in to continue managing your inventory.
+  </p>
 
-<form method="POST" action="{{ url_for('main.login') }}">
-    <label>Email</label><br>
-    <input type="email" name="email" required><br><br>
+  <form method="POST">
 
-    <label>Password</label><br>
-    <input type="password" id="password" name="password" required><br><br>
+    <div style="margin-bottom: 15px; text-align: left;">
+      <label>Email</label>
+      <input
+        type="email"
+        name="email"
+        required
+        style="width: 100%; padding: 10px; margin-top: 5px;"
+      >
+    </div>
 
-    <input type="checkbox" onclick="togglePassword()"> Show Password<br><br>
+    <div style="margin-bottom: 10px; text-align: left;">
+      <label>Password</label>
+      <input
+        type="password"
+        name="password"
+        id="password"
+        required
+        style="width: 100%; padding: 10px; margin-top: 5px;"
+      >
+    </div>
 
-    <button type="submit">Login</button>
-</form>
+    <div style="text-align: left; margin-bottom: 20px;">
+      <input type="checkbox" id="showPassword" onclick="togglePassword()">
+      <label for="showPassword"> Show password</label>
+    </div>
 
-<br>
+    <button
+      type="submit"
+      style="
+        width: 100%;
+        padding: 12px;
+        background-color: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 16px;
+        cursor: pointer;
+      "
+    >
+      Login
+    </button>
 
-<a href="#">Forgot User ID?</a> |
-<a href="#">Forgot Password?</a>
+  </form>
 
-</body>
-</html>
+  <div style="margin-top: 20px;">
+    <a href="/register">Create an account</a> |
+    <a href="#">Forgot password?</a>
+  </div>
+
+</div>
+
+<script>
+function togglePassword() {
+  const pwd = document.getElementById("password");
+  pwd.type = pwd.type === "password" ? "text" : "password";
+}
+</script>
+
+{% endblock %}
