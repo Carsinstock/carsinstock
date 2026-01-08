@@ -209,5 +209,7 @@ carsinstock.db
 # Virtual environment
 venv/
 .env
-carsinstock.db
-carsinstock.db
+
+# Local database files
+*.db
+
