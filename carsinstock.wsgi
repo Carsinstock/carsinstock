@@ -1,9 +1,9 @@
 import sys
-import os
+import logging
 
-project_dir = "/home/eddie/carsinstock"
-if project_dir not in sys.path:
-    sys.path.insert(0, project_dir)
+logging.basicConfig(stream=sys.stderr)
+
+sys.path.insert(0, "/home/eddie/carsinstock")
 
 from app import create_app
 application = create_app()
