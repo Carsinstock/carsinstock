@@ -5,25 +5,29 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from app.models import User
 from app import db
 
+# Blueprint
 main = Blueprint("main", __name__)
-
-# -------------------------
-# Home
-# -------------------------
+# --------------------
+# Index (Homepage)
+# --------------------
 @main.route("/")
 def index():
     return render_template("index.html")
 
-# -------------------------
-# Health check (for curl)
-# -------------------------
+# --------------------
+# Home
+# --------------------
+
+# --------------------
+# Health check (for curl / uptime)
+# --------------------
 @main.route("/health")
 def health():
     return "OK", 200
 
-# -------------------------
+# --------------------
 # Login
-# -------------------------
+# --------------------
 @main.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -46,9 +50,9 @@ def login():
 
     return render_template("login.html")
 
-# -------------------------
+# --------------------
 # Register
-# -------------------------
+# --------------------
 @main.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -61,8 +65,8 @@ def register():
 
         existing = User.query.filter_by(email=email).first()
         if existing:
-            flash("User already exists. Please log in.", "warning")
-            return redirect(url_for("main.login"))
+            flash("Email already registered", "danger")
+            return redirect(url_for("main.register"))
 
         user = User(
             email=email,
@@ -71,25 +75,7 @@ def register():
         db.session.add(user)
         db.session.commit()
 
-        flash("Account created. Please log in.", "success")
-        return redirect(url_for("main.login"))
+        login_user(user)
+        return redirect(url_for("main.dashboard"))
 
     return render_template("register.html")
-
-# -------------------------
-# Dashboard (protected)
-# -------------------------
-@main.route("/dashboard")
-@login_required
-def dashboard():
-    return render_template("dashboard.html")
-
-# -------------------------
-# Logout
-# -------------------------
-@main.route("/logout")
-@login_required
-def logout():
-    logout_user()
-    flash("Logged out.", "success")
-    return redirect(url_for("main.login"))
