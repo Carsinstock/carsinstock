@@ -2,60 +2,38 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CarsInStock</title>
-<link rel="stylesheet" href="{{ url_for('static', filename='auth.css') }}">
+    <title>{% block title %}CarsInStock{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- Minimal, safe styling -->
     <style>
         body {
-            font-family: Arial, sans-serif;
             margin: 0;
-            background: #f5f6f8;
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: #f7f7f7;
+            color: #222;
         }
         header {
             background: #111;
             color: white;
-            padding: 15px 20px;
-        }
-        nav a {
-            color: white;
-            margin-right: 15px;
-            text-decoration: none;
+            padding: 16px 24px;
+            font-size: 20px;
             font-weight: bold;
         }
-        .container {
-            padding: 30px;
-        }
-        footer {
-            text-align: center;
-            padding: 20px;
-            color: #777;
+        main {
+            padding: 40px 24px;
         }
     </style>
 </head>
 <body>
 
 <header>
-<nav>
-  <a href="{{ url_for('main.index') }}">CarsInStock</a>
-
-  {% if current_user.is_authenticated %}
-    <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
-    <a href="{{ url_for('main.logout') }}">Logout</a>
-  {% else %}
-    <a href="{{ url_for('main.login') }}">Login</a>
-    <a href="{{ url_for('main.register') }}">Sign up</a>
-  {% endif %}
-</nav>
-
+    CarsInStock
 </header>
 
-<div class="container">
+<main>
     {% block content %}{% endblock %}
-</div>
-
-<footer>
-Copyright © 2026 Cars In Stock. All rights reserved 
-</footer>
+</main>
 
 </body>
 </html>
