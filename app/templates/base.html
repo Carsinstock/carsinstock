@@ -1,39 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>{% block title %}CarsInStock{% endblock %}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>{% block title %}CarsInStock{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Minimal, safe styling -->
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            background-color: #f7f7f7;
-            color: #222;
-        }
-        header {
-            background: #111;
-            color: white;
-            padding: 16px 24px;
-            font-size: 20px;
-            font-weight: bold;
-        }
-        main {
-            padding: 40px 24px;
-        }
-    </style>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-<header>
-    CarsInStock
+<header class="site-header">
+  <div class="nav-container">
+    <div class="logo">
+      <a href="/">CarsInStock</a>
+    </div>
+
+    <nav class="nav-links">
+      <a href="/search">Search Cars</a>
+      <a href="/login">Login</a>
+      <a href="/register" class="btn-outline">Register</a>
+    </nav>
+  </div>
 </header>
 
-<main>
-    {% block content %}{% endblock %}
+<main class="site-main">
+  {% block content %}{% endblock %}
 </main>
+
+<footer class="site-footer">
+  © 2026 CarsInStock. Real Cars. Real Salespeople.
+</footer>
 
 </body>
 </html>
