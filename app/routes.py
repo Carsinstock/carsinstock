@@ -6,12 +6,29 @@ main = Blueprint("main", __name__)
 def home():
     return render_template("home.html")
 
-@main.route("/health")
-def health():
-    return "OK", 200
-@main.route("/inventory")
-def inventory():
-    return render_template("inventory.html")
+@main.route("/search")
+def search():
+    return render_template("search.html")
+
+@main.route("/login")
+def login():
+    return render_template("login.html")
+
+@main.route("/register")
+def register():
+    return render_template("register.html")
+
+@main.route("/salespeople")
+def salespeople():
+    return render_template("salespeople.html")
+
+@main.route("/customers")
+def customers():
+    return render_template("customers.html")
+
+@main.route("/disclosure")
+def disclosure():
+    return render_template("disclosure.html")
 
 
 
