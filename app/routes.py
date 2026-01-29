@@ -8,6 +8,7 @@ def home():
 
 @main.route("/search")
 def search():
+    # SAFE placeholder — NO DB, NO logic
     return render_template("search.html")
 
 @main.route("/login")
