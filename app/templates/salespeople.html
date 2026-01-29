@@ -1,7 +1,104 @@
+cat << 'EOF' > /home/eddie/carsinstock/app/templates/salespeople.html
 {% extends "base.html" %}
 {% block content %}
-<section style="padding:60px;text-align:center;">
-  <h1>Salespeople</h1>
-  <p>More coming soon.</p>
-</section>
+
+<style>
+.page-wrap {
+  max-width: 900px;
+  margin: 60px auto;
+  padding: 0 24px;
+}
+
+.page-wrap h1 {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+.page-wrap h2 {
+  margin-top: 40px;
+}
+
+.page-wrap p,
+.page-wrap li {
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.page-wrap ul {
+  margin-left: 20px;
+}
+
+.cta-bottom {
+  margin-top: 50px;
+}
+</style>
+
+<div class="page-wrap">
+
+<h1>This Is For You.</h1>
+<p>If you’re a real salesperson who wants control, ownership, and results — not more noise.</p>
+
+<h2>You Don’t Need More Leads.<br>You Need Control.</h2>
+<ul>
+  <li>BDC appointments that may or may not show</li>
+  <li>The same dealership ads as everyone else</li>
+  <li>Stale listings that hurt your credibility</li>
+  <li>Competing with coworkers on the same cars</li>
+  <li>Effort that doesn’t match results</li>
+</ul>
+
+<p><strong>That’s not a talent problem. It’s a broken system.</strong></p>
+
+<h2>Your Name. Your Inventory. Your Dealership.</h2>
+<p>CarsInStock turns you into your own digital dealership.</p>
+
+<h3>Your Personal Page</h3>
+<p>You get a permanent link:<br>
+<strong>carsinstock.com/your-name</strong></p>
+
+<h3>Real Inventory Only</h3>
+<p>You choose what you post. Every car expires after 7 days.<br>
+No stale listings. No ghost cars.</p>
+
+<h3>Direct Buyer Contact</h3>
+<p>No BDC. No middleman. Buyers contact <strong>you</strong> directly.</p>
+
+<h2>When Someone Clicks Your Link</h2>
+<ul>
+  <li>They don’t feel like a lead</li>
+  <li>They see a real person</li>
+  <li>They see real cars you actually have</li>
+  <li>They contact you directly</li>
+</ul>
+
+<p><strong>You’re not an order-taker. You’re the owner.</strong></p>
+
+<h2>How It Works</h2>
+<ul>
+  <li><strong>Post Your Cars</strong> — Pick 5–10 vehicles. Each post lasts 7 days.</li>
+  <li><strong>Share One Link</strong> — Text it. Email it. Put it in your bio.</li>
+  <li><strong>Buyers Come to You</strong> — Direct conversations. No filters.</li>
+  <li><strong>You Close & Repeat</strong> — The flywheel spins.</li>
+</ul>
+
+<h2>This Is Not For Everyone</h2>
+<p>CarsInStock is for salespeople who:</p>
+<ul>
+  <li>Market themselves</li>
+  <li>Care about reputation</li>
+  <li>Want ownership</li>
+  <li>Are building a career</li>
+</ul>
+
+<p><strong>This is for builders — not waiters.</strong></p>
+
+<div class="cta-bottom">
+  <a href="/register" class="btn btn-primary">
+    Register
+  </a>
+</div>
+
+</div>
+
 {% endblock %}
+EOF
