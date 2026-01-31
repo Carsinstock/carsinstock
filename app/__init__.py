@@ -1,10 +1,18 @@
 from flask import Flask
-from .routes import main
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from config import Config
+
+db = SQLAlchemy()
+migrate = Migrate()
 
 def create_app():
     app = Flask(__name__)
-    app.secret_key = "change-me"
+    app.config.from_object("config.Config")
 
-    app.register_blueprint(main)
+    db.init_app(app)
+    migrate.init_app(app, db)
+
+    from app import models
 
     return app
