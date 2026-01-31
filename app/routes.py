@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template
+from flask import Blueprint
 from flask_login import login_required
 
 main_bp = Blueprint("main", __name__)
