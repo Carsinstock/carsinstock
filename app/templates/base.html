@@ -1,16 +1,49 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>CarsInStock</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- Main stylesheet -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <meta charset="UTF-8">
+    <title>CarsInStock</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f6f8;
+        }
+        header {
+            background: #0b1d36;
+            padding: 15px 30px;
+            color: white;
+        }
+        header nav a {
+            color: white;
+            margin-right: 20px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .container {
+            max-width: 1100px;
+            margin: 60px auto;
+            padding: 0 20px;
+        }
+    </style>
 </head>
 <body>
-  <div class="page">
+
+<header>
+    <nav>
+        <a href="/">CarsInStock</a>
+        <a href="/search">Search Cars</a>
+        <a href="/salespeople">Salespeople</a>
+        <a href="/customers">Customers</a>
+        <a href="/login">Login</a>
+        <a href="/register">Register</a>
+    </nav>
+</header>
+
+<div class="container">
     {% block content %}{% endblock %}
-  </div>
+</div>
+
 </body>
 </html>
