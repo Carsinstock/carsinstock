@@ -5,10 +5,14 @@ db = SQLAlchemy()
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object("config")
 
+    # Load config first
+    app.config.from_pyfile("/home/eddie/carsinstock/config.py")
+
+    # Init DB
     db.init_app(app)
 
+    # Register routes blueprint
     from app.routes import main
     app.register_blueprint(main)
 
