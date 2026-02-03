@@ -17,4 +17,3 @@ def customers():
 @main.route("/search-cars")
 def search_cars():
     return render_template("search_cars.html")
-

@@ -6,13 +6,13 @@ db = SQLAlchemy()
 def create_app():
     app = Flask(__name__)
 
-    # Load config first
-    app.config.from_pyfile("/home/eddie/carsinstock/config.py")
+    # Load config
+    app.config.from_object("config")
 
-    # Init DB
+    # Init extensions
     db.init_app(app)
 
-    # Register routes blueprint
+    # Register blueprints
     from app.routes import main
     app.register_blueprint(main)
 
