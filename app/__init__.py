@@ -17,5 +17,7 @@ def create_app():
     # Register blueprints
     from app.routes import main
     app.register_blueprint(main)
-
+# Register salesperson blueprint
+    from app.salesperson import salesperson
+    app.register_blueprint(salesperson)
     return app
