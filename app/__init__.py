@@ -5,6 +5,8 @@ db = SQLAlchemy()
 
 def create_app():
     app = Flask(__name__)
+    from app.auth import auth
+    app.register_blueprint(auth)
 
     # Load config
     app.config.from_object("config")
