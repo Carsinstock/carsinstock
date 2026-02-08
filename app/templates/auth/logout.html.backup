@@ -1,0 +1,5 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Logout</h1>
+<p>Placeholder page (Phase 2 Step 1). No logic yet.</p>
+{% endblock %}

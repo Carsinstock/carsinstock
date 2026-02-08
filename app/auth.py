@@ -9,6 +9,9 @@ auth = Blueprint("auth", __name__)
 
 @auth.route("/register", methods=["GET", "POST"])
 def register():
+    if session.get("user_id"):
+        return redirect("/")
+
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
@@ -53,6 +56,9 @@ def register():
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():
+    if session.get("user_id"):
+        return redirect("/")
+
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
