@@ -75,8 +75,8 @@
             <ul class="nav-links">
                 <li><a href="/search-cars">Search Cars</a></li>
                 <li><a href="/salespeople">Salespeople</a></li>
-                <li><a href="/login">Login</a></li>
-                <li><a href="/register">Register</a></li>
+                {% if session.get("user_id") %}<li><a href="/logout" style="color:#1a1a1a;">Logout</a></li>{% else %}<li><a href="/login">Login</a></li>{% endif %}
+                {% if not session.get("user_id") %}<li><a href="/register">Register</a></li>{% endif %}
             </ul>
         </nav>
     </header>
