@@ -1,5 +1,3 @@
 from flask import Blueprint
 
-salesperson = Blueprint('salesperson', __name__)
-
-from app.salesperson import routes
+salesperson_bp = Blueprint('salesperson', __name__)

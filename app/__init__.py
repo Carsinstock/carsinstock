@@ -12,13 +12,22 @@ def create_app():
     from app.models import db
     db.init_app(app)
 
-    # Only import User for now - other models need schema fixes
     from app.models.user import User
+    from app.models.salesperson import Salesperson
+    from app.models.dealer import Dealer
+    from app.models.vehicle import Vehicle
+    from app.models.lead import Lead
+    from app.models.attribution import Attribution
 
     from app.routes import main
     app.register_blueprint(main)
 
     from app.auth import auth
     app.register_blueprint(auth)
+
+    from app.salesperson import salesperson_bp
+    from app.salesperson.routes import register_routes
+    register_routes(salesperson_bp)
+    app.register_blueprint(salesperson_bp)
 
     return app

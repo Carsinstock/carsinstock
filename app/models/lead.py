@@ -5,7 +5,7 @@ class Lead(db.Model):
     __tablename__ = 'leads'
     
     lead_id = db.Column(db.Integer, primary_key=True)
-    vehicle_id = db.Column(db.Integer, db.ForeignKey('vehicles.vehicle_id'))
+    vehicle_id = db.Column(db.Integer, db.ForeignKey('vehicles.id'))
     salesperson_id = db.Column(db.Integer, db.ForeignKey('salespeople.salesperson_id'), nullable=False)
     customer_name = db.Column(db.String(255), nullable=False)
     customer_email = db.Column(db.String(255), nullable=False)

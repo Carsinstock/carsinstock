@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="profile-page">
+    <div class="profile-header">
+        <div class="profile-avatar">{{ sp.display_name[0] if sp.display_name else '?' }}</div>
+        <h1>{{ sp.display_name }}</h1>
+        {% if sp.bio %}
+        <p class="profile-bio">{{ sp.bio }}</p>
+        {% endif %}
+        {% if sp.phone %}
+        <p class="profile-contact"><strong>Phone:</strong> {{ sp.phone }}</p>
+        {% endif %}
+        {% if sp.email %}
+        <p class="profile-contact"><strong>Email:</strong> {{ sp.email }}</p>
+        {% endif %}
+    </div>
+    <div class="profile-inventory">
+        <h2>My Inventory</h2>
+        <p class="coming-soon">Vehicles coming soon — this salesperson hasn't listed any cars yet.</p>
+    </div>
+</div>
+<style>
+    .profile-page { max-width: 800px; margin: 40px auto; padding: 0 20px; }
+    .profile-header { background: #fff; border-radius: 12px; padding: 40px; text-align: center; box-shadow: 0 2px 16px rgba(45,29,54,0.10); margin-bottom: 30px; }
+    .profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: #2d1d36; color: white; font-size: 36px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; }
+    .profile-header h1 { color: #2d1d36; font-size: 32px; margin-bottom: 12px; }
+    .profile-bio { color: #555; font-size: 16px; line-height: 1.6; margin-bottom: 16px; max-width: 600px; margin-left: auto; margin-right: auto; }
+    .profile-contact { color: #666; font-size: 14px; margin-bottom: 6px; }
+    .profile-inventory { background: #fff; border-radius: 12px; padding: 40px; box-shadow: 0 2px 16px rgba(45,29,54,0.10); }
+    .profile-inventory h2 { color: #2d1d36; font-size: 24px; margin-bottom: 16px; }
+    .coming-soon { color: #999; font-style: italic; text-align: center; padding: 40px 0; }
+</style>
+{% endblock %}

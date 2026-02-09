@@ -5,8 +5,8 @@ class Salesperson(db.Model):
     __tablename__ = 'salespeople'
     
     salesperson_id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), unique=True, nullable=False)
-    dealer_id = db.Column(db.Integer, db.ForeignKey('dealers.dealer_id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
+    dealer_id = db.Column(db.Integer, db.ForeignKey('dealers.dealer_id'), nullable=True)
     display_name = db.Column(db.String(255), nullable=False)
     phone = db.Column(db.String(50))
     email = db.Column(db.String(255), nullable=False)
