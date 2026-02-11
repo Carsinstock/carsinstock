@@ -1,16 +1,16 @@
 import sys
 import os
+import site
 
-# Activate virtualenv
-activate_this = "/home/eddie/carsinstock/venv/bin/activate_this.py"
-if os.path.exists(activate_this):
-    exec(open(activate_this).read(), dict(__file__=activate_this))
+# Add venv site-packages
+site.addsitedir('/home/eddie/carsinstock/venv/lib/python3.10/site-packages')
 
-sys.path.insert(0, "/home/eddie/carsinstock")
-site_packages = "/home/eddie/carsinstock/venv/lib/python3.10/site-packages"
-if site_packages not in sys.path:
-    sys.path.insert(0, site_packages)
+# Add project to path
+sys.path.insert(0, '/home/eddie/carsinstock')
+
+# Load environment variables
+from dotenv import load_dotenv
+load_dotenv('/home/eddie/carsinstock/.env')
 
 from app import create_app
-
 application = create_app()

@@ -4,6 +4,7 @@ from datetime import datetime
 from . import auth
 from app.models import db
 from app.models.user import User
+from app.utils.email import send_welcome_email
 
 
 @auth.route("/register", methods=["GET", "POST"])
@@ -35,6 +36,7 @@ def register():
         try:
             db.session.add(new_user)
             db.session.commit()
+            send_welcome_email(email)
             flash("Account created successfully! Please log in.", "success")
             return redirect(url_for("auth.login"))
         except Exception as e:
