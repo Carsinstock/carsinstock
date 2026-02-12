@@ -15,6 +15,14 @@
         {% endif %}
     </div>
 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+
     <div class="profile-inventory">
         <h2>My Inventory</h2>
         {% if vehicles %}
@@ -38,6 +46,7 @@
                     {% if v.transmission %}
                     <p class="vehicle-detail">{{ v.transmission }}</p>
                     {% endif %}
+                    <button class="interested-btn" onclick="showLeadForm({{ v.id }}, '{{ v.year }} {{ v.make }} {{ v.model }}')">I'm Interested</button>
                 </div>
             </div>
             {% endfor %}
@@ -47,6 +56,49 @@
         {% endif %}
     </div>
 </div>
+
+<!-- Lead Form Modal -->
+<div id="leadModal" class="lead-modal" style="display:none;">
+    <div class="lead-modal-content">
+        <span class="lead-close" onclick="closeLeadForm()">&times;</span>
+        <h2>I'm Interested!</h2>
+        <p id="leadVehicleName" class="lead-vehicle-name"></p>
+        <form method="POST" action="/lead/submit">
+            <input type="hidden" id="leadVehicleId" name="vehicle_id">
+            <div class="lead-field">
+                <label>Your Name *</label>
+                <input type="text" name="customer_name" placeholder="John Smith" required>
+            </div>
+            <div class="lead-field">
+                <label>Your Email *</label>
+                <input type="email" name="customer_email" placeholder="john@email.com" required>
+            </div>
+            <div class="lead-field">
+                <label>Your Phone</label>
+                <input type="tel" name="customer_phone" placeholder="(555) 123-4567">
+            </div>
+            <div class="lead-field">
+                <label>Message</label>
+                <textarea name="message" placeholder="I'd like to schedule a test drive..." rows="3"></textarea>
+            </div>
+            <button type="submit" class="lead-submit-btn">Send to Salesperson</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function showLeadForm(vehicleId, vehicleName) {
+    document.getElementById('leadVehicleId').value = vehicleId;
+    document.getElementById('leadVehicleName').textContent = vehicleName;
+    document.getElementById('leadModal').style.display = 'flex';
+}
+function closeLeadForm() {
+    document.getElementById('leadModal').style.display = 'none';
+}
+document.getElementById('leadModal').addEventListener('click', function(e) {
+    if (e.target === this) closeLeadForm();
+});
+</script>
 
 <style>
 .profile-page { max-width: 800px; margin: 40px auto; padding: 0 20px; }
@@ -61,11 +113,31 @@
 .vehicle-card { border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; background: #fff; transition: box-shadow 0.2s; }
 .vehicle-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
 .vehicle-img { width: 100%; height: 200px; object-fit: cover; }
-.vehicle-img-placeholder { width: 100%; height: 200px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #999; font-size: 16px; }
+.vehicle-img-placeholder { width: 100%; height: 200px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #999; }
 .vehicle-info { padding: 16px; }
 .vehicle-info h3 { color: #2d1d36; font-size: 18px; margin-bottom: 8px; }
 .vehicle-price { color: #1a73e8; font-size: 22px; font-weight: 700; margin-bottom: 8px; }
 .vehicle-detail { color: #666; font-size: 14px; margin-bottom: 4px; }
+.interested-btn { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 12px; transition: background 0.2s; }
+.interested-btn:hover { background: #1557b0; }
+
+/* Modal */
+.lead-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.lead-modal-content { background: #fff; border-radius: 16px; padding: 32px; max-width: 440px; width: 90%; position: relative; }
+.lead-close { position: absolute; top: 12px; right: 16px; font-size: 28px; cursor: pointer; color: #999; }
+.lead-close:hover { color: #333; }
+.lead-modal-content h2 { color: #2d1d36; font-size: 24px; margin-bottom: 4px; }
+.lead-vehicle-name { color: #1a73e8; font-size: 16px; font-weight: 600; margin-bottom: 20px; }
+.lead-field { margin-bottom: 14px; }
+.lead-field label { display: block; font-size: 14px; font-weight: 600; color: #333; margin-bottom: 4px; }
+.lead-field input, .lead-field textarea { width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px; }
+.lead-field input:focus, .lead-field textarea:focus { border-color: #1a73e8; outline: none; }
+.lead-submit-btn { width: 100%; padding: 14px; background: #2d1d36; color: white; border: none; border-radius: 10px; font-size: 17px; font-weight: 700; cursor: pointer; margin-top: 8px; }
+.lead-submit-btn:hover { background: #3d2d46; }
+
+.alert { padding: 14px 20px; border-radius: 10px; margin-bottom: 20px; font-size: 15px; }
+.alert-success { background: #f0fff4; color: #38a169; border: 1px solid #c6f6d5; }
+.alert-error { background: #fff5f5; color: #e53e3e; border: 1px solid #fed7d7; }
 .coming-soon { color: #999; font-style: italic; text-align: center; padding: 40px 0; }
 </style>
 {% endblock %}
