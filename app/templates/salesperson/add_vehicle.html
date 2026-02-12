@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="auth-container">
-    <h1>Add a Vehicle</h1>
-    <p class="auth-subtitle">Add a car to your storefront — buyers will see this on your page.</p>
+<div class="snap-container">
+    <h1>📸 Snap, Price, Post</h1>
+    <p class="snap-subtitle">Add a car in 30 seconds. Snap a photo, set the price, done.</p>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
@@ -12,69 +12,219 @@
     {% endif %}
     {% endwith %}
 
-    <form method="POST" action="/vehicles/add" enctype="multipart/form-data">
-        <div class="form-group">
-            <label for="year">Year *</label>
-            <input type="text" id="year" name="year" placeholder="e.g. 2021" required>
+    <form method="POST" action="/vehicles/add" enctype="multipart/form-data" id="vehicleForm">
+
+        <!-- STEP 1: PHOTO -->
+        <div class="snap-step">
+            <div class="step-number">1</div>
+            <label class="photo-upload" id="photoLabel">
+                <input type="file" id="photo" name="photo" accept="image/*" capture="environment" required>
+                <div class="photo-preview" id="photoPreview">
+                    <span class="camera-icon">📷</span>
+                    <span>Tap to take photo or choose from gallery</span>
+                </div>
+                <img id="previewImg" style="display:none; width:100%; border-radius:12px;">
+            </label>
         </div>
-        <div class="form-group">
-            <label for="make">Make *</label>
-            <input type="text" id="make" name="make" placeholder="e.g. Toyota" required>
+
+        <!-- STEP 2: PRICE -->
+        <div class="snap-step">
+            <div class="step-number">2</div>
+            <label for="price" class="step-label">What's the price?</label>
+            <div class="price-input-wrap">
+                <span class="dollar-sign">$</span>
+                <input type="text" id="price" name="price" placeholder="29,995" class="price-input" required
+                    inputmode="numeric">
+            </div>
         </div>
-        <div class="form-group">
-            <label for="model">Model *</label>
-            <input type="text" id="model" name="model" placeholder="e.g. Camry" required>
+
+        <!-- STEP 3: VIN (optional but magic) -->
+        <div class="snap-step">
+            <div class="step-number">3</div>
+            <label for="vin" class="step-label">Got the VIN? <small>(optional — auto-fills everything)</small></label>
+            <div class="vin-input-wrap">
+                <input type="text" id="vin" name="vin" placeholder="Paste or type 17-char VIN" maxlength="17"
+                    class="vin-input" style="text-transform:uppercase;">
+                <button type="button" id="vinLookup" class="vin-btn" onclick="decodeVIN()">🔍 Decode</button>
+            </div>
+            <div id="vinResult" class="vin-result" style="display:none;"></div>
         </div>
-        <div class="form-group">
-            <label for="trim">Trim</label>
-            <input type="text" id="trim" name="trim" placeholder="e.g. SE, XLE, Sport">
+
+        <!-- AUTO-FILLED FIELDS (hidden until VIN decoded or manually opened) -->
+        <div id="detailsSection" class="details-section" style="display:none;">
+            <p class="details-toggle" onclick="toggleDetails()" id="detailsToggleText">▼ Vehicle details filled from VIN</p>
+            <div id="detailsFields">
+                <div class="detail-row">
+                    <input type="text" id="year" name="year" placeholder="Year">
+                    <input type="text" id="make" name="make" placeholder="Make">
+                </div>
+                <div class="detail-row">
+                    <input type="text" id="model" name="model" placeholder="Model">
+                    <input type="text" id="trim" name="trim" placeholder="Trim">
+                </div>
+                <div class="detail-row">
+                    <input type="text" id="mileage" name="mileage" placeholder="Mileage" inputmode="numeric">
+                    <input type="text" id="exterior_color" name="exterior_color" placeholder="Exterior Color">
+                </div>
+                <div class="detail-row">
+                    <input type="text" id="interior_color" name="interior_color" placeholder="Interior Color">
+                    <input type="text" id="transmission" name="transmission" placeholder="Transmission">
+                </div>
+                <div class="detail-row">
+                    <input type="text" id="fuel_type" name="fuel_type" placeholder="Fuel Type">
+                </div>
+            </div>
         </div>
-        <div class="form-group">
-            <label for="vin">VIN *</label>
-            <input type="text" id="vin" name="vin" placeholder="17-character VIN" maxlength="17" required>
-        </div>
-        <div class="form-group">
-            <label for="mileage">Mileage *</label>
-            <input type="text" id="mileage" name="mileage" placeholder="e.g. 45000" required>
-        </div>
-        <div class="form-group">
-            <label for="price">Price *</label>
-            <input type="text" id="price" name="price" placeholder="e.g. 24995" required>
-        </div>
-        <div class="form-group">
-            <label for="exterior_color">Exterior Color</label>
-            <input type="text" id="exterior_color" name="exterior_color" placeholder="e.g. Midnight Black">
-        </div>
-        <div class="form-group">
-            <label for="interior_color">Interior Color</label>
-            <input type="text" id="interior_color" name="interior_color" placeholder="e.g. Ash Gray">
-        </div>
-        <div class="form-group">
-            <label for="transmission">Transmission</label>
-            <select id="transmission" name="transmission">
-                <option value="">Select...</option>
-                <option value="Automatic">Automatic</option>
-                <option value="Manual">Manual</option>
-                <option value="CVT">CVT</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="fuel_type">Fuel Type</label>
-            <select id="fuel_type" name="fuel_type">
-                <option value="">Select...</option>
-                <option value="Gasoline">Gasoline</option>
-                <option value="Diesel">Diesel</option>
-                <option value="Hybrid">Hybrid</option>
-                <option value="Electric">Electric</option>
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="photo">Vehicle Photo *</label>
-            <input type="file" id="photo" name="photo" accept="image/*" required>
-            <small style="color:#888;font-size:12px;">JPG or PNG, max 5MB</small>
-        </div>
-        <button type="submit" class="btn btn-primary" style="width:100%;padding:12px;margin-top:10px;">Add Vehicle</button>
+
+        <!-- OR manually add details -->
+        <p class="manual-link" id="manualLink">
+            <a href="javascript:void(0)" onclick="showDetails()">+ Add details manually (year, make, model...)</a>
+        </p>
+
+        <!-- POST IT -->
+        <button type="submit" class="post-btn">🚀 Post to My Storefront</button>
     </form>
-    <p style="text-align:center;margin-top:15px;"><a href="/{{ sp.profile_url_slug }}">← Back to my storefront</a></p>
+    <p style="text-align:center;margin-top:15px;"><a href="/{{ sp.profile_url_slug }}" class="back-link">← Back to my storefront</a></p>
 </div>
+
+<script>
+// Photo preview
+document.getElementById('photo').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            document.getElementById('previewImg').src = ev.target.result;
+            document.getElementById('previewImg').style.display = 'block';
+            document.getElementById('photoPreview').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+// VIN Decode
+function decodeVIN() {
+    const vin = document.getElementById('vin').value.trim().toUpperCase();
+    if (vin.length !== 17) {
+        document.getElementById('vinResult').innerHTML = '<span style="color:#e53e3e;">VIN must be 17 characters</span>';
+        document.getElementById('vinResult').style.display = 'block';
+        return;
+    }
+
+    document.getElementById('vinLookup').textContent = '⏳ Decoding...';
+    document.getElementById('vinLookup').disabled = true;
+
+    fetch('/api/vin-decode/' + vin)
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('vinResult').innerHTML = '<span style="color:#e53e3e;">' + data.error + '</span>';
+            } else {
+                // Auto-fill the fields
+                if (data.year) document.getElementById('year').value = data.year;
+                if (data.make) document.getElementById('make').value = data.make;
+                if (data.model) document.getElementById('model').value = data.model;
+                if (data.trim) document.getElementById('trim').value = data.trim;
+                if (data.transmission) document.getElementById('transmission').value = data.transmission;
+                if (data.fuel_type) document.getElementById('fuel_type').value = data.fuel_type;
+
+                // Show success
+                let info = (data.year || '') + ' ' + (data.make || '') + ' ' + (data.model || '');
+                if (data.trim) info += ' ' + data.trim;
+                document.getElementById('vinResult').innerHTML = '<span style="color:#38a169;">✅ ' + info + '</span>';
+
+                // Show and expand details section
+                document.getElementById('detailsSection').style.display = 'block';
+                document.getElementById('detailsFields').style.display = 'grid';
+                document.getElementById('manualLink').style.display = 'none';
+            }
+            document.getElementById('vinResult').style.display = 'block';
+            document.getElementById('vinLookup').textContent = '🔍 Decode';
+            document.getElementById('vinLookup').disabled = false;
+        })
+        .catch(err => {
+            document.getElementById('vinResult').innerHTML = '<span style="color:#e53e3e;">Network error</span>';
+            document.getElementById('vinResult').style.display = 'block';
+            document.getElementById('vinLookup').textContent = '🔍 Decode';
+            document.getElementById('vinLookup').disabled = false;
+        });
+}
+
+// Auto-decode when VIN reaches 17 chars
+document.getElementById('vin').addEventListener('input', function() {
+    if (this.value.length === 17) {
+        decodeVIN();
+    }
+});
+
+function showDetails() {
+    document.getElementById('detailsSection').style.display = 'block';
+    document.getElementById('detailsFields').style.display = 'grid';
+    document.getElementById('manualLink').style.display = 'none';
+    document.getElementById('detailsToggleText').textContent = '▼ Vehicle details';
+}
+
+function toggleDetails() {
+    const fields = document.getElementById('detailsFields');
+    const text = document.getElementById('detailsToggleText');
+    if (fields.style.display === 'none') {
+        fields.style.display = 'grid';
+        text.textContent = '▼ Vehicle details';
+    } else {
+        fields.style.display = 'none';
+        text.textContent = '▶ Vehicle details (tap to expand)';
+    }
+}
+</script>
+
+<style>
+.snap-container { max-width: 500px; margin: 30px auto; padding: 0 20px; }
+.snap-container h1 { text-align: center; font-size: 28px; color: #2d1d36; margin-bottom: 4px; }
+.snap-subtitle { text-align: center; color: #888; font-size: 15px; margin-bottom: 30px; }
+
+.snap-step { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); position: relative; }
+.step-number { position: absolute; top: -10px; left: -10px; background: #2d1d36; color: #fff; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; }
+.step-label { font-size: 17px; font-weight: 600; color: #2d1d36; display: block; margin-bottom: 10px; }
+.step-label small { font-weight: 400; color: #999; }
+
+/* Photo upload */
+.photo-upload { cursor: pointer; display: block; }
+.photo-upload input[type="file"] { display: none; }
+.photo-preview { border: 3px dashed #ccc; border-radius: 12px; padding: 40px 20px; text-align: center; color: #999; font-size: 16px; transition: border-color 0.2s; }
+.photo-preview:hover { border-color: #2d1d36; }
+.camera-icon { font-size: 48px; display: block; margin-bottom: 10px; }
+
+/* Price input */
+.price-input-wrap { display: flex; align-items: center; gap: 8px; }
+.dollar-sign { font-size: 32px; font-weight: 700; color: #2d1d36; }
+.price-input { font-size: 32px; font-weight: 700; border: none; border-bottom: 3px solid #2d1d36; outline: none; width: 100%; padding: 8px 0; color: #2d1d36; background: transparent; }
+
+/* VIN input */
+.vin-input-wrap { display: flex; gap: 8px; }
+.vin-input { flex: 1; padding: 12px; font-size: 16px; border: 2px solid #ddd; border-radius: 8px; font-family: monospace; letter-spacing: 1px; }
+.vin-btn { background: #2d1d36; color: #fff; border: none; padding: 12px 16px; border-radius: 8px; font-size: 14px; cursor: pointer; white-space: nowrap; }
+.vin-btn:hover { background: #3d2d46; }
+.vin-btn:disabled { opacity: 0.6; }
+.vin-result { margin-top: 10px; font-size: 15px; font-weight: 600; }
+
+/* Details section */
+.details-section { background: #f9f9f9; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+.details-toggle { font-size: 14px; color: #666; cursor: pointer; margin-bottom: 12px; }
+.detail-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.detail-row input { padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+
+.manual-link { text-align: center; margin: 16px 0; }
+.manual-link a { color: #666; font-size: 14px; text-decoration: none; }
+.manual-link a:hover { color: #2d1d36; }
+
+/* Post button */
+.post-btn { width: 100%; padding: 16px; font-size: 20px; font-weight: 700; background: #2d1d36; color: #fff; border: none; border-radius: 12px; cursor: pointer; margin-top: 8px; transition: background 0.2s; }
+.post-btn:hover { background: #3d2d46; }
+
+.back-link { color: #999; text-decoration: none; font-size: 14px; }
+
+.alert { padding: 12px; border-radius: 8px; margin-bottom: 16px; }
+.alert-success { background: #f0fff4; color: #38a169; border: 1px solid #c6f6d5; }
+.alert-error { background: #fff5f5; color: #e53e3e; border: 1px solid #fed7d7; }
+</style>
 {% endblock %}

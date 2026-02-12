@@ -188,3 +188,15 @@ def register_routes(bp):
                 print(f"Vehicle add error: {e}")
 
         return render_template("salesperson/add_vehicle.html", sp=sp)
+
+    @bp.route("/api/vin-decode/<vin>")
+    @login_required
+    def vin_decode(vin):
+        from flask import jsonify
+        from app.utils.vin_decoder import decode_vin
+        if len(vin) != 17:
+            return jsonify({"error": "VIN must be 17 characters"}), 400
+        result = decode_vin(vin.upper())
+        if result:
+            return jsonify(result)
+        return jsonify({"error": "Could not decode VIN"}), 404
