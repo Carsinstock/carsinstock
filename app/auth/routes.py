@@ -58,10 +58,15 @@ def login():
         if user and check_password_hash(user.password_hash, password):
             session["user_id"] = user.id
             session["email"] = user.email
+            # Store slug for nav link
+            from app.models.salesperson import Salesperson
+            sp = Salesperson.query.filter_by(user_id=user.id).first()
+            if sp and sp.profile_url_slug:
+                session["slug"] = sp.profile_url_slug
             user.last_login_at = datetime.utcnow()
             db.session.commit()
             flash("Welcome back!", "success")
-            return redirect(url_for('auth.login'))
+            return redirect("/" + session.get("slug", ""))
         else:
             flash("Invalid email or password.", "error")
             return render_template("auth/login.html", email=email)
