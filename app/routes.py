@@ -25,4 +25,9 @@ def public_profile(slug):
     sp = Salesperson.query.filter_by(profile_url_slug=slug).first()
     if not sp:
         return render_template('index.html')
-    return render_template('salesperson/public_profile.html', sp=sp)
+    from app.models.vehicle import Vehicle
+    from datetime import datetime
+    vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status='active').all()
+    # Filter out expired
+    vehicles = [v for v in vehicles if not v.expires_at or v.expires_at > datetime.utcnow()]
+    return render_template('salesperson/public_profile.html', sp=sp, vehicles=vehicles)

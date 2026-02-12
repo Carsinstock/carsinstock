@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="auth-container">
+    <h1>Add a Vehicle</h1>
+    <p class="auth-subtitle">Add a car to your storefront — buyers will see this on your page.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="/vehicles/add" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="year">Year *</label>
+            <input type="text" id="year" name="year" placeholder="e.g. 2021" required>
+        </div>
+        <div class="form-group">
+            <label for="make">Make *</label>
+            <input type="text" id="make" name="make" placeholder="e.g. Toyota" required>
+        </div>
+        <div class="form-group">
+            <label for="model">Model *</label>
+            <input type="text" id="model" name="model" placeholder="e.g. Camry" required>
+        </div>
+        <div class="form-group">
+            <label for="trim">Trim</label>
+            <input type="text" id="trim" name="trim" placeholder="e.g. SE, XLE, Sport">
+        </div>
+        <div class="form-group">
+            <label for="vin">VIN *</label>
+            <input type="text" id="vin" name="vin" placeholder="17-character VIN" maxlength="17" required>
+        </div>
+        <div class="form-group">
+            <label for="mileage">Mileage *</label>
+            <input type="text" id="mileage" name="mileage" placeholder="e.g. 45000" required>
+        </div>
+        <div class="form-group">
+            <label for="price">Price *</label>
+            <input type="text" id="price" name="price" placeholder="e.g. 24995" required>
+        </div>
+        <div class="form-group">
+            <label for="exterior_color">Exterior Color</label>
+            <input type="text" id="exterior_color" name="exterior_color" placeholder="e.g. Midnight Black">
+        </div>
+        <div class="form-group">
+            <label for="interior_color">Interior Color</label>
+            <input type="text" id="interior_color" name="interior_color" placeholder="e.g. Ash Gray">
+        </div>
+        <div class="form-group">
+            <label for="transmission">Transmission</label>
+            <select id="transmission" name="transmission">
+                <option value="">Select...</option>
+                <option value="Automatic">Automatic</option>
+                <option value="Manual">Manual</option>
+                <option value="CVT">CVT</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="fuel_type">Fuel Type</label>
+            <select id="fuel_type" name="fuel_type">
+                <option value="">Select...</option>
+                <option value="Gasoline">Gasoline</option>
+                <option value="Diesel">Diesel</option>
+                <option value="Hybrid">Hybrid</option>
+                <option value="Electric">Electric</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="photo">Vehicle Photo *</label>
+            <input type="file" id="photo" name="photo" accept="image/*" required>
+            <small style="color:#888;font-size:12px;">JPG or PNG, max 5MB</small>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;padding:12px;margin-top:10px;">Add Vehicle</button>
+    </form>
+    <p style="text-align:center;margin-top:15px;"><a href="/{{ sp.profile_url_slug }}">← Back to my storefront</a></p>
+</div>
+{% endblock %}
