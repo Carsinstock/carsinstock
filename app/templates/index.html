@@ -10,9 +10,11 @@
         
         /* Header */
         header { background: white; border-bottom: 1px solid #e0e0e0; padding: 1rem 0; position: sticky; top: 0; z-index: 100; }
-        nav { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+        nav { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; display: flex; justify-content: space-between; align-items: center; position: relative; }
         .logo { font-size: 1.5rem; font-weight: 700; color: #0066ff; text-decoration: none; }
         .nav-links { display: flex; gap: 2rem; list-style: none; }
+        .hamburger { display: none; background: none; border: none; cursor: pointer; padding: 8px; }
+        .hamburger span { display: block; width: 24px; height: 3px; background: #2d1d36; margin: 5px 0; border-radius: 2px; }
         .nav-links a { text-decoration: none; color: #1a1a1a; font-weight: 500; transition: color 0.2s; }
         .nav-links a:hover { color: #0066ff; }
         
@@ -63,7 +65,10 @@
         @media (max-width: 768px) {
             .hero h1 { font-size: 2rem; }
             .hero p { font-size: 1rem; }
-            .nav-links { display: none; }
+            .hamburger { display: block; }
+            .nav-links { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 12px 20px; z-index: 99; }
+            .nav-links.open { display: flex; }
+            .nav-links li { padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
             .cars-grid { grid-template-columns: 1fr; }
         }
     </style>
@@ -72,6 +77,9 @@
     <header>
         <nav>
             <a href="/" class="logo">CarsInStock</a>
+            <button class="hamburger" onclick="this.classList.toggle('active');document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </button>
             <ul class="nav-links">
                 <li><a href="/search-cars">Search Cars</a></li>
                 <li><a href="/salespeople">Salespeople</a></li>
