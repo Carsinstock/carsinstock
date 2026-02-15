@@ -47,6 +47,7 @@
                     class="vin-input" style="text-transform:uppercase;">
                 <button type="button" id="vinLookup" class="vin-btn" onclick="decodeVIN()">🔍 Decode</button>
             </div>
+            <button type="button" class="scan-btn" onclick="startVINScan()">📷 Scan VIN Barcode</button>
             <div id="vinResult" class="vin-result" style="display:none;"></div>
         </div>
 
@@ -200,10 +201,17 @@ function toggleDetails() {
 .price-input { font-size: 32px; font-weight: 700; border: none; border-bottom: 3px solid #2d1d36; outline: none; width: 100%; padding: 8px 0; color: #2d1d36; background: transparent; }
 
 /* VIN input */
-.vin-input-wrap { display: flex; gap: 8px; }
+.vin-input-wrap { display: flex; gap: 6px; flex-wrap: nowrap; }
+.vin-input-wrap .vin-input { flex: 1; min-width: 0; font-size: 13px; }
+.vin-btn { padding: 10px 12px; font-size: 13px; white-space: nowrap; }
+.scan-btn { width: 100%; padding: 12px; font-size: 15px; margin-top: 10px; display: block; text-align: center; }
 .vin-input { flex: 1; padding: 12px; font-size: 16px; border: 2px solid #ddd; border-radius: 8px; font-family: monospace; letter-spacing: 1px; }
 .vin-btn { background: #2d1d36; color: #fff; border: none; padding: 12px 16px; border-radius: 8px; font-size: 14px; cursor: pointer; white-space: nowrap; }
 .vin-btn:hover { background: #3d2d46; }
+
+.scan-btn { background: #4CAF50; color: white; border: none; border-radius: 8px; padding: 10px 16px; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.scan-btn:hover { background: #45a049; }
+
 .vin-btn:disabled { opacity: 0.6; }
 .vin-result { margin-top: 10px; font-size: 15px; font-weight: 600; }
 
@@ -227,4 +235,90 @@ function toggleDetails() {
 .alert-success { background: #f0fff4; color: #38a169; border: 1px solid #c6f6d5; }
 .alert-error { background: #fff5f5; color: #e53e3e; border: 1px solid #fed7d7; }
 </style>
+
+<!-- VIN SCANNER MODAL -->
+<div id="scanModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.9); z-index:9999; flex-direction:column; align-items:center; justify-content:center;">
+    <div style="text-align:center; color:white; padding:20px;">
+        <h2 style="margin-bottom:8px;">Scan VIN Barcode</h2>
+        <p style="opacity:0.7; font-size:14px; margin-bottom:16px;">Position the VIN barcode in the camera view</p>
+    </div>
+    <video id="scanVideo" style="width:90%; max-width:500px; border-radius:12px; border:3px solid #4CAF50;" autoplay playsinline></video>
+    <canvas id="scanCanvas" style="display:none;"></canvas>
+    <div id="scanStatus" style="color:white; margin-top:16px; font-size:15px;">Starting camera...</div>
+    <button onclick="stopVINScan()" style="margin-top:20px; padding:14px 40px; font-size:16px; background:white; border:none; border-radius:30px; font-weight:600; cursor:pointer;">Close Scanner</button>
+</div>
+
+<script>
+let scanStream = null;
+let codeReader = null;
+
+function startVINScan() {
+    const modal = document.getElementById("scanModal");
+    const video = document.getElementById("scanVideo");
+    const status = document.getElementById("scanStatus");
+    modal.style.display = "flex";
+    status.textContent = "Loading scanner...";
+
+    if (!window.ZXing) {
+        const s = document.createElement("script");
+        s.src = "https://unpkg.com/@zxing/library@latest";
+        s.onload = function() { initScanner(video, status); };
+        s.onerror = function() { status.textContent = "Failed to load scanner. Type VIN manually."; };
+        document.head.appendChild(s);
+    } else {
+        initScanner(video, status);
+    }
+}
+
+function initScanner(video, status) {
+    codeReader = new ZXing.BrowserMultiFormatReader();
+    var hints = new Map();
+    hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
+    hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
+        ZXing.BarcodeFormat.CODE_39,
+        ZXing.BarcodeFormat.CODE_128,
+        ZXing.BarcodeFormat.DATA_MATRIX,
+        ZXing.BarcodeFormat.QR_CODE,
+        ZXing.BarcodeFormat.ITF
+    ]);
+    codeReader = new ZXing.BrowserMultiFormatReader(hints);
+    status.textContent = "Starting camera...";
+    var constraints = {
+        video: {
+            facingMode: "environment",
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+            focusMode: { ideal: "continuous" }
+        }
+    };
+    navigator.mediaDevices.getUserMedia(constraints).then(function(stream) {
+        video.srcObject = stream;
+        video.setAttribute("playsinline", true);
+        video.play();
+        codeReader.decodeFromVideoDevice(null, "scanVideo", function(result, err) {
+            if (result) {
+                var val = result.getText().replace(/[^A-HJ-NPR-Z0-9]/gi, "");
+                if (val.length === 17) {
+                    document.getElementById("vin").value = val.toUpperCase();
+                    status.textContent = "VIN Found: " + val.toUpperCase();
+                    stopVINScan();
+                    decodeVIN();
+                } else if (val.length > 10) {
+                    status.textContent = "Reading: " + val + " (" + val.length + " chars, need 17)";
+                }
+            }
+        }).catch(function(err) {
+            status.textContent = "Scanner error: " + err.message;
+        });
+        status.textContent = "Point camera at VIN barcode. Hold steady...";
+    }).catch(function(err) {
+        status.textContent = "Camera error: " + err.message;
+    });
+}
+function stopVINScan() {
+    if (codeReader) { codeReader.reset(); codeReader = null; }
+    document.getElementById("scanModal").style.display = "none";
+}
+</script>
+
 {% endblock %}
