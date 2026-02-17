@@ -47,7 +47,7 @@
                     class="vin-input" style="text-transform:uppercase;">
                 <button type="button" id="vinLookup" class="vin-btn" onclick="decodeVIN()">🔍 Decode</button>
             </div>
-            <button type="button" class="scan-btn" onclick="startVINScan()">📷 Scan VIN Barcode</button>
+            <button type="button" class="scan-btn" onclick="startVINScan()">📷 Scan VIN (Beta)</button>
             <div id="vinResult" class="vin-result" style="display:none;"></div>
         </div>
 
@@ -239,13 +239,14 @@ function toggleDetails() {
 <!-- VIN SCANNER MODAL -->
 <div id="scanModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.9); z-index:9999; flex-direction:column; align-items:center; justify-content:center;">
     <div style="text-align:center; color:white; padding:20px;">
-        <h2 style="margin-bottom:8px;">Scan VIN Barcode</h2>
+        <h2 style="margin-bottom:8px;">Scan VIN (Beta)</h2>
         <p style="opacity:0.7; font-size:14px; margin-bottom:16px;">Position the VIN barcode in the camera view</p>
     </div>
-    <video id="scanVideo" style="width:90%; max-width:500px; border-radius:12px; border:3px solid #4CAF50;" autoplay playsinline></video>
+    <video id="scanVideo" style="width:90%; max-width:500px; max-height:40vh; border-radius:12px; border:3px solid #4CAF50; object-fit:cover;" autoplay playsinline></video>
     <canvas id="scanCanvas" style="display:none;"></canvas>
     <div id="scanStatus" style="color:white; margin-top:16px; font-size:15px;">Starting camera...</div>
-    <button onclick="stopVINScan()" style="margin-top:20px; padding:14px 40px; font-size:16px; background:white; border:none; border-radius:30px; font-weight:600; cursor:pointer;">Close Scanner</button>
+    <button id="captureBtn" onclick="captureAndRead()" style="display:none; margin-top:10px; padding:14px 40px; font-size:18px; background:#4CAF50; color:white; border:none; border-radius:30px; font-weight:600; cursor:pointer;">📸 Capture &amp; Read VIN</button>
+            <button onclick="stopVINScan()" style="margin-top:20px; padding:14px 40px; font-size:16px; background:white; border:none; border-radius:30px; font-weight:600; cursor:pointer;">Close Scanner</button>
 </div>
 
 <script>
@@ -271,17 +272,6 @@ function startVINScan() {
 }
 
 function initScanner(video, status) {
-    codeReader = new ZXing.BrowserMultiFormatReader();
-    var hints = new Map();
-    hints.set(ZXing.DecodeHintType.TRY_HARDER, true);
-    hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS, [
-        ZXing.BarcodeFormat.CODE_39,
-        ZXing.BarcodeFormat.CODE_128,
-        ZXing.BarcodeFormat.DATA_MATRIX,
-        ZXing.BarcodeFormat.QR_CODE,
-        ZXing.BarcodeFormat.ITF
-    ]);
-    codeReader = new ZXing.BrowserMultiFormatReader(hints);
     status.textContent = "Starting camera...";
     var constraints = {
         video: {
@@ -295,29 +285,65 @@ function initScanner(video, status) {
         video.srcObject = stream;
         video.setAttribute("playsinline", true);
         video.play();
-        codeReader.decodeFromVideoDevice(null, "scanVideo", function(result, err) {
-            if (result) {
-                var val = result.getText().replace(/[^A-HJ-NPR-Z0-9]/gi, "");
-                if (val.length === 17) {
-                    document.getElementById("vin").value = val.toUpperCase();
-                    status.textContent = "VIN Found: " + val.toUpperCase();
-                    stopVINScan();
-                    decodeVIN();
-                } else if (val.length > 10) {
-                    status.textContent = "Reading: " + val + " (" + val.length + " chars, need 17)";
-                }
-            }
-        }).catch(function(err) {
-            status.textContent = "Scanner error: " + err.message;
-        });
-        status.textContent = "Point camera at VIN barcode. Hold steady...";
+        status.textContent = "Hold camera over VIN. Tap Capture to read.";
+        var captureBtn = document.getElementById("captureBtn");
+        if (captureBtn) captureBtn.style.display = "block";
     }).catch(function(err) {
         status.textContent = "Camera error: " + err.message;
     });
 }
+
+function captureAndRead() {
+    var video = document.getElementById("scanVideo");
+    var canvas = document.getElementById("scanCanvas");
+    var status = document.getElementById("scanStatus");
+    status.textContent = "Reading VIN...";
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    var ctx = canvas.getContext("2d");
+    ctx.drawImage(video, 0, 0);
+    if (!window.Tesseract) {
+        status.textContent = "Loading OCR engine (first time may take a moment)...";
+        var s = document.createElement("script");
+        s.src = "https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js";
+        s.onload = function() { runOCR(canvas, status); };
+        s.onerror = function() { status.textContent = "Failed to load OCR. Type VIN manually."; };
+        document.head.appendChild(s);
+    } else {
+        runOCR(canvas, status);
+    }
+}
+
+function runOCR(canvas, status) {
+    Tesseract.recognize(canvas, "eng", {
+        tessedit_char_whitelist: "ABCDEFGHJKLMNPRSTUVWXYZ0123456789"
+    }).then(function(result) {
+        var text = result.data.text.replace(/[^A-HJ-NPR-Z0-9]/gi, "").toUpperCase();
+        var vinMatch = text.match(/[A-HJ-NPR-Z0-9]{17}/);
+        if (vinMatch) {
+            document.getElementById("vin").value = vinMatch[0];
+            status.textContent = "VIN Found: " + vinMatch[0];
+            stopVINScan();
+            decodeVIN();
+        } else if (text.length > 10) {
+            status.textContent = "Read: " + text.substring(0,20) + "... No 17-char VIN. Try again.";
+        } else {
+            status.textContent = "Could not read VIN. Move closer and tap Capture again.";
+        }
+    }).catch(function(err) {
+        status.textContent = "OCR error. Try again or type manually.";
+    });
+}
+
 function stopVINScan() {
-    if (codeReader) { codeReader.reset(); codeReader = null; }
+    var video = document.getElementById("scanVideo");
+    if (video.srcObject) {
+        video.srcObject.getTracks().forEach(function(t) { t.stop(); });
+        video.srcObject = null;
+    }
     document.getElementById("scanModal").style.display = "none";
+    var captureBtn = document.getElementById("captureBtn");
+    if (captureBtn) captureBtn.style.display = "none";
 }
 </script>
 
