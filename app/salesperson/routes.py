@@ -286,3 +286,45 @@ def register_routes(bp):
             print(f"Vehicle delete error: {e}")
 
         return redirect(f"/{sp.profile_url_slug}")
+
+    @bp.route("/vehicles/share/<int:vehicle_id>", methods=["GET", "POST"])
+    @login_required
+    def share_vehicle(vehicle_id):
+        from app.models.vehicle import Vehicle
+        from app.models.salesperson import Salesperson
+        from app.utils.email import send_vehicle_email
+
+        sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
+        if not sp:
+            flash("Set up your profile first.", "error")
+            return redirect(url_for("salesperson.profile_setup"))
+
+        vehicle = Vehicle.query.get_or_404(vehicle_id)
+        if vehicle.salesperson_id != sp.salesperson_id:
+            flash("You don't have permission to share this vehicle.", "error")
+            return redirect(f"/{sp.profile_url_slug}")
+
+        if request.method == "POST":
+            emails_raw = request.form.get("emails", "")
+            personal_msg = request.form.get("message", "")
+            
+            # Split by commas, newlines, or semicolons
+            import re
+            email_list = re.split(r'[,;\n]+', emails_raw)
+            email_list = [e.strip() for e in email_list if e.strip() and "@" in e]
+
+            if not email_list:
+                flash("Please enter at least one valid email address.", "error")
+                return render_template("salesperson/share_vehicle.html", vehicle=vehicle, sp=sp)
+
+            sent, errors = send_vehicle_email(email_list, vehicle, sp, personal_msg)
+            
+            if sent > 0:
+                flash(f"Vehicle sent to {sent} recipient(s)!", "success")
+            if errors > 0:
+                flash(f"{errors} email(s) failed to send.", "error")
+            
+            return redirect(f"/{sp.profile_url_slug}")
+
+        return render_template("salesperson/share_vehicle.html", vehicle=vehicle, sp=sp)
+

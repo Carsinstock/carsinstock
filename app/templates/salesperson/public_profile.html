@@ -47,6 +47,7 @@
                     <p class="vehicle-detail">{{ v.transmission }}</p>
                     {% if session.get("user_id") == sp.user_id %}
                     <a href="/vehicles/edit/{{ v.id }}" style="display:inline-block; margin-top:8px; padding:6px 16px; background:#4CAF50; color:white; border-radius:6px; text-decoration:none; font-size:13px;">Edit</a>
+                    <a href="/vehicles/share/{{ v.id }}" style="display:inline-block; margin-top:8px; margin-left:5px; padding:6px 16px; background:#6C2BD9; color:white; border-radius:6px; text-decoration:none; font-size:13px;">📧 Share</a>
                     {% endif %}
                     {% endif %}
                     <button class="interested-btn" onclick="showLeadForm({{ v.id }}, '{{ v.year }} {{ v.make }} {{ v.model }}')">I'm Interested</button>

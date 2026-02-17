@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width:600px; margin:20px auto; padding:0 15px;">
+    <h2>📧 Share Vehicle</h2>
+    
+    {% if vehicle.image_url %}
+    <img src="{{ vehicle.image_url }}" style="width:100%; border-radius:10px; margin-bottom:10px;">
+    {% endif %}
+    <p style="font-size:18px; font-weight:600; margin:5px 0;">{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }} {{ vehicle.trim or '' }}</p>
+    <p style="color:#6C2BD9; font-size:20px; font-weight:bold; margin:5px 0;">${{ "{:,.0f}".format(vehicle.price) }}</p>
+
+    <form method="POST" style="margin-top:20px;">
+        <label style="font-size:14px; color:#666; font-weight:600;">Email Addresses</label>
+        <textarea name="emails" rows="4" placeholder="Enter email addresses separated by commas or one per line&#10;&#10;john@email.com, jane@email.com&#10;bob@email.com" 
+            style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:15px; box-sizing:border-box; margin-top:5px; font-family:Arial;"></textarea>
+        
+        <label style="font-size:14px; color:#666; font-weight:600; display:block; margin-top:15px;">Personal Message (optional)</label>
+        <textarea name="message" rows="3" placeholder="Hey, check out this car I have for you!"
+            style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:15px; box-sizing:border-box; margin-top:5px; font-family:Arial;"></textarea>
+
+        <button type="submit" style="width:100%; padding:14px; background:#6C2BD9; color:white; border:none; border-radius:10px; font-size:16px; font-weight:600; cursor:pointer; margin-top:20px;">📧 Send to All</button>
+    </form>
+
+    <a href="/{{ sp.profile_url_slug }}" style="display:block; text-align:center; margin-top:15px; color:#666;">← Back to storefront</a>
+</div>
+{% endblock %}
