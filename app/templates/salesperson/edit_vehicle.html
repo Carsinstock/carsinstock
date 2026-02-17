@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width:600px; margin:20px auto; padding:0 15px;">
+    <h2>Edit Vehicle</h2>
+    <p style="color:#666;">{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}</p>
+
+    {% if vehicle.image_url %}
+    <img src="{{ vehicle.image_url }}" style="width:100%; border-radius:10px; margin-bottom:15px;">
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px;">
+            <div>
+                <label style="font-size:13px; color:#666;">Year</label>
+                <input type="text" name="year" value="{{ vehicle.year }}" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+            </div>
+            <div>
+                <label style="font-size:13px; color:#666;">Make</label>
+                <input type="text" name="make" value="{{ vehicle.make }}" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+            </div>
+            <div>
+                <label style="font-size:13px; color:#666;">Model</label>
+                <input type="text" name="model" value="{{ vehicle.model }}" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+            </div>
+            <div>
+                <label style="font-size:13px; color:#666;">Trim</label>
+                <input type="text" name="trim" value="{{ vehicle.trim or '' }}" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+            </div>
+            <div>
+                <label style="font-size:13px; color:#666;">Price</label>
+                <input type="text" name="price" value="{{ '{:,.0f}'.format(vehicle.price) }}" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+            </div>
+            <div>
+                <label style="font-size:13px; color:#666;">Mileage</label>
+                <input type="text" name="mileage" value="{{ vehicle.mileage }}" inputmode="numeric" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+            </div>
+            <div>
+                <label style="font-size:13px; color:#666;">VIN</label>
+                <input type="text" name="vin" value="{{ vehicle.vin or '' }}" maxlength="17" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+            </div>
+            <div>
+                <label style="font-size:13px; color:#666;">Exterior Color</label>
+                <input type="text" name="exterior_color" value="{{ vehicle.exterior_color or '' }}" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+            </div>
+            <div>
+                <label style="font-size:13px; color:#666;">Interior Color</label>
+                <input type="text" name="interior_color" value="{{ vehicle.interior_color or '' }}" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+            </div>
+            <div>
+                <label style="font-size:13px; color:#666;">Transmission</label>
+                <input type="text" name="transmission" value="{{ vehicle.transmission or '' }}" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+            </div>
+            <div>
+                <label style="font-size:13px; color:#666;">Fuel Type</label>
+                <input type="text" name="fuel_type" value="{{ vehicle.fuel_type or '' }}" style="width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+            </div>
+        </div>
+
+        <div style="margin-bottom:15px;">
+            <label style="font-size:13px; color:#666;">Replace Photo</label>
+            <input type="file" name="photo" accept="image/*" capture="environment" style="width:100%; padding:10px; box-sizing:border-box;">
+        </div>
+
+        <button type="submit" style="width:100%; padding:14px; background:#4CAF50; color:white; border:none; border-radius:10px; font-size:16px; font-weight:600; cursor:pointer;">Save Changes</button>
+    </form>
+
+    <form method="POST" action="/vehicles/delete/{{ vehicle.id }}" style="margin-top:15px;" onsubmit="return confirm('Delete this vehicle? This cannot be undone.');">
+        <button type="submit" style="width:100%; padding:14px; background:#e74c3c; color:white; border:none; border-radius:10px; font-size:16px; font-weight:600; cursor:pointer;">Delete Vehicle</button>
+    </form>
+
+    <a href="/{{ sp.profile_url_slug }}" style="display:block; text-align:center; margin-top:15px; color:#666;">← Back to storefront</a>
+</div>
+{% endblock %}

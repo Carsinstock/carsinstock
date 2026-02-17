@@ -200,3 +200,89 @@ def register_routes(bp):
         if result:
             return jsonify(result)
         return jsonify({"error": "Could not decode VIN"}), 404
+
+
+    @bp.route("/vehicles/edit/<int:vehicle_id>", methods=["GET", "POST"])
+    @login_required
+    def edit_vehicle(vehicle_id):
+        from app.models.vehicle import Vehicle
+        from app.models.salesperson import Salesperson
+        import cloudinary.uploader
+
+        sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
+        if not sp:
+            flash("Set up your profile first.", "error")
+            return redirect(url_for("salesperson.profile_setup"))
+
+        vehicle = Vehicle.query.get_or_404(vehicle_id)
+
+        # Security: only the owner can edit
+        if vehicle.salesperson_id != sp.salesperson_id:
+            flash("You don't have permission to edit this vehicle.", "error")
+            return redirect(url_for("salesperson.public_profile", slug=sp.profile_url_slug))
+
+        if request.method == "POST":
+            vehicle.year = int(request.form.get("year", vehicle.year))
+            vehicle.make = request.form.get("make", vehicle.make)
+            vehicle.model = request.form.get("model", vehicle.model)
+            vehicle.trim = request.form.get("trim", vehicle.trim)
+            vehicle.vin = request.form.get("vin", vehicle.vin)
+            vehicle.mileage = int(request.form.get("mileage", vehicle.mileage))
+            vehicle.exterior_color = request.form.get("exterior_color", vehicle.exterior_color)
+            vehicle.interior_color = request.form.get("interior_color", vehicle.interior_color)
+            vehicle.transmission = request.form.get("transmission", vehicle.transmission)
+            vehicle.fuel_type = request.form.get("fuel_type", vehicle.fuel_type)
+
+            price = request.form.get("price", "").replace(",", "").replace("$", "")
+            try:
+                vehicle.price = float(price)
+            except ValueError:
+                pass
+
+            photo = request.files.get("photo")
+            if photo and photo.filename:
+                result = cloudinary.uploader.upload(photo)
+                vehicle.image_url = result["secure_url"]
+
+            try:
+                from app.models import db
+                db.session.commit()
+                flash(f"{vehicle.year} {vehicle.make} {vehicle.model} updated!", "success")
+                return redirect(f"/{sp.profile_url_slug}")
+            except Exception as e:
+                db.session.rollback()
+                flash("Error updating vehicle.", "error")
+                print(f"Vehicle edit error: {e}")
+
+        return render_template("salesperson/edit_vehicle.html", vehicle=vehicle, sp=sp)
+
+
+    @bp.route("/vehicles/delete/<int:vehicle_id>", methods=["POST"])
+    @login_required
+    def delete_vehicle(vehicle_id):
+        from app.models.vehicle import Vehicle
+        from app.models.salesperson import Salesperson
+        from app.models import db
+
+        sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
+        if not sp:
+            flash("Set up your profile first.", "error")
+            return redirect(url_for("salesperson.profile_setup"))
+
+        vehicle = Vehicle.query.get_or_404(vehicle_id)
+
+        if vehicle.salesperson_id != sp.salesperson_id:
+            flash("You don't have permission to delete this vehicle.", "error")
+            return redirect(f"/{sp.profile_url_slug}")
+
+        name = f"{vehicle.year} {vehicle.make} {vehicle.model}"
+        try:
+            db.session.delete(vehicle)
+            db.session.commit()
+            flash(f"{name} deleted.", "success")
+        except Exception as e:
+            db.session.rollback()
+            flash("Error deleting vehicle.", "error")
+            print(f"Vehicle delete error: {e}")
+
+        return redirect(f"/{sp.profile_url_slug}")
