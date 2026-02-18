@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width:700px; margin:20px auto; padding:0 15px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2 style="margin:0;">My Customers</h2>
+        <a href="/customers/add" style="padding:10px 20px; background:#4CAF50; color:white; border-radius:8px; text-decoration:none; font-size:14px; font-weight:600;">+ Add Customer</a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div style="padding:10px 15px; margin-bottom:10px; border-radius:8px; background:{{ '#d4edda' if category == 'success' else '#f8d7da' }}; color:{{ '#155724' if category == 'success' else '#721c24' }};">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    {% if customers %}
+    <p style="color:#666; margin-bottom:15px;">{{ customers|length }} customer{{ 's' if customers|length != 1 else '' }}</p>
+    {% for c in customers %}
+    <div style="border:1px solid #e0e0e0; border-radius:10px; padding:15px; margin-bottom:10px; background:white;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+                <p style="font-weight:600; font-size:16px; margin:0 0 5px;">{{ c.name }}</p>
+                {% if c.email %}<p style="color:#666; font-size:14px; margin:2px 0;">📧 {{ c.email }}{% if c.unsubscribed %} <span style="color:red; font-size:12px;">(unsubscribed)</span>{% endif %}</p>{% endif %}
+                {% if c.phone %}<p style="color:#666; font-size:14px; margin:2px 0;">📱 {{ c.phone }}</p>{% endif %}
+                {% if c.notes %}<p style="color:#999; font-size:13px; margin:5px 0 0; font-style:italic;">{{ c.notes }}</p>{% endif %}
+            </div>
+            <div style="display:flex; gap:5px;">
+                <a href="/customers/edit/{{ c.id }}" style="padding:5px 12px; background:#4CAF50; color:white; border-radius:6px; text-decoration:none; font-size:12px;">Edit</a>
+                <form method="POST" action="/customers/delete/{{ c.id }}" style="margin:0;" onsubmit="return confirm('Delete {{ c.name }}?');">
+                    <button type="submit" style="padding:5px 12px; background:#e74c3c; color:white; border:none; border-radius:6px; font-size:12px; cursor:pointer;">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div style="text-align:center; padding:40px; color:#999;">
+        <p style="font-size:18px;">No customers yet</p>
+        <p>Start building your contact list by adding customers.</p>
+    </div>
+    {% endif %}
+
+    <a href="/{{ sp.profile_url_slug }}" style="display:block; text-align:center; margin-top:20px; color:#666;">← Back to storefront</a>
+</div>
+{% endblock %}

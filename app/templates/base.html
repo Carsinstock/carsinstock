@@ -70,6 +70,7 @@
             <div class="nav-links">
                 {% if session.get('user_id') %}
                     <a href="/vehicles/add" class="nav-add-vehicle">+ Add Vehicle</a>
+                    <a href="/customers/list">My Customers</a>
                     {% if session.get('slug') %}
                     <a href="/{{ session.get('slug') }}">My Storefront</a>
                     {% endif %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width:500px; margin:20px auto; padding:0 15px;">
+    <h2>{{ 'Edit' if customer else 'Add' }} Customer</h2>
+
+    <form method="POST">
+        <div style="margin-bottom:12px;">
+            <label style="font-size:13px; color:#666;">Name *</label>
+            <input type="text" name="name" value="{{ customer.name if customer else '' }}" required style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:15px; box-sizing:border-box;">
+        </div>
+        <div style="margin-bottom:12px;">
+            <label style="font-size:13px; color:#666;">Email</label>
+            <input type="email" name="email" value="{{ customer.email if customer else '' }}" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:15px; box-sizing:border-box;">
+        </div>
+        <div style="margin-bottom:12px;">
+            <label style="font-size:13px; color:#666;">Phone</label>
+            <input type="tel" name="phone" value="{{ customer.phone if customer else '' }}" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:15px; box-sizing:border-box;">
+        </div>
+        <div style="margin-bottom:12px;">
+            <label style="font-size:13px; color:#666;">Notes</label>
+            <textarea name="notes" rows="3" placeholder="Looking for SUV under $30k..." style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:15px; box-sizing:border-box; font-family:Arial;">{{ customer.notes if customer else '' }}</textarea>
+        </div>
+        <button type="submit" style="width:100%; padding:14px; background:#4CAF50; color:white; border:none; border-radius:10px; font-size:16px; font-weight:600; cursor:pointer;">{{ 'Save Changes' if customer else 'Add Customer' }}</button>
+    </form>
+    <a href="/customers" style="display:block; text-align:center; margin-top:15px; color:#666;">← Back to My Customers</a>
+</div>
+{% endblock %}

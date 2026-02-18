@@ -10,8 +10,30 @@
     <p style="color:#6C2BD9; font-size:20px; font-weight:bold; margin:5px 0;">${{ "{:,.0f}".format(vehicle.price) }}</p>
 
     <form method="POST" style="margin-top:20px;">
-        <label style="font-size:14px; color:#666; font-weight:600;">Email Addresses</label>
-        <textarea name="emails" rows="4" placeholder="Enter email addresses separated by commas or one per line&#10;&#10;john@email.com, jane@email.com&#10;bob@email.com" 
+        {% if customers %}
+        <div style="border:1px solid #ddd; border-radius:10px; padding:15px; margin-bottom:15px; background:#f9f9f9;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <label style="font-size:14px; font-weight:600; color:#333;">My Customers</label>
+                <label style="font-size:13px; color:#6C2BD9; cursor:pointer;">
+                    <input type="checkbox" id="selectAll" onclick="toggleAll()" style="margin-right:4px;">Select All ({{ customers|length }})
+                </label>
+            </div>
+            <div style="max-height:200px; overflow-y:auto;">
+            {% for c in customers %}
+            <label style="display:flex; align-items:center; padding:8px 0; border-bottom:1px solid #eee; cursor:pointer;">
+                <input type="checkbox" name="customer_ids" value="{{ c.id }}" class="cust-check" style="margin-right:10px; width:18px; height:18px;">
+                <div>
+                    <span style="font-weight:500;">{{ c.name }}</span>
+                    <span style="color:#999; font-size:12px; margin-left:5px;">{{ c.email }}</span>
+                </div>
+            </label>
+            {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <label style="font-size:14px; color:#666; font-weight:600;">Additional Email Addresses</label>
+        <textarea name="emails" rows="3" placeholder="Add more emails separated by commas&#10;john@email.com, jane@email.com" 
             style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:15px; box-sizing:border-box; margin-top:5px; font-family:Arial;"></textarea>
         
         <label style="font-size:14px; color:#666; font-weight:600; display:block; margin-top:15px;">Personal Message (optional)</label>
@@ -23,4 +45,11 @@
 
     <a href="/{{ sp.profile_url_slug }}" style="display:block; text-align:center; margin-top:15px; color:#666;">← Back to storefront</a>
 </div>
+
+<script>
+function toggleAll() {
+    var checked = document.getElementById('selectAll').checked;
+    document.querySelectorAll('.cust-check').forEach(function(cb) { cb.checked = checked; });
+}
+</script>
 {% endblock %}

@@ -12,6 +12,9 @@ def salespeople():
 
 @main.route('/customers')
 def customers():
+    from flask import session
+    if session.get('user_id'):
+        return redirect('/customers/list')
     return render_template('customers.html')
 
 @main.route('/search-cars')

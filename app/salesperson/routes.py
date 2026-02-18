@@ -293,6 +293,7 @@ def register_routes(bp):
         from app.models.vehicle import Vehicle
         from app.models.salesperson import Salesperson
         from app.utils.email import send_vehicle_email
+        from app.models.customer import Customer
 
         sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
         if not sp:
@@ -304,27 +305,133 @@ def register_routes(bp):
             flash("You don't have permission to share this vehicle.", "error")
             return redirect(f"/{sp.profile_url_slug}")
 
+        customers = Customer.query.filter_by(salesperson_id=sp.salesperson_id, unsubscribed=False).filter(Customer.email != '', Customer.email != None).order_by(Customer.name).all()
+
         if request.method == "POST":
             emails_raw = request.form.get("emails", "")
             personal_msg = request.form.get("message", "")
-            
-            # Split by commas, newlines, or semicolons
+
+            # Get emails from selected customers
+            customer_ids = request.form.getlist("customer_ids")
+            customer_emails = []
+            if customer_ids:
+                selected = Customer.query.filter(Customer.id.in_(customer_ids), Customer.salesperson_id == sp.salesperson_id, Customer.unsubscribed == False).all()
+                customer_emails = [c.email for c in selected if c.email]
+
+            # Split additional emails
             import re
-            email_list = re.split(r'[,;\n]+', emails_raw)
-            email_list = [e.strip() for e in email_list if e.strip() and "@" in e]
+            extra_emails = re.split(r'[,;\n]+', emails_raw)
+            extra_emails = [e.strip() for e in extra_emails if e.strip() and "@" in e]
+
+            email_list = list(set(customer_emails + extra_emails))
 
             if not email_list:
                 flash("Please enter at least one valid email address.", "error")
-                return render_template("salesperson/share_vehicle.html", vehicle=vehicle, sp=sp)
+                return render_template("salesperson/share_vehicle.html", vehicle=vehicle, sp=sp, customers=customers)
 
             sent, errors = send_vehicle_email(email_list, vehicle, sp, personal_msg)
-            
+
             if sent > 0:
                 flash(f"Vehicle sent to {sent} recipient(s)!", "success")
             if errors > 0:
                 flash(f"{errors} email(s) failed to send.", "error")
-            
+
             return redirect(f"/{sp.profile_url_slug}")
 
-        return render_template("salesperson/share_vehicle.html", vehicle=vehicle, sp=sp)
+        return render_template("salesperson/share_vehicle.html", vehicle=vehicle, sp=sp, customers=customers)
+
+    @bp.route("/customers/list", methods=["GET"])
+    @login_required
+    def my_customers():
+        from app.models.salesperson import Salesperson
+        from app.models.customer import Customer
+
+        sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
+        if not sp:
+            flash("Set up your profile first.", "error")
+            return redirect(url_for("salesperson.profile_setup"))
+
+        customers = Customer.query.filter_by(salesperson_id=sp.salesperson_id).order_by(Customer.name).all()
+        return render_template("salesperson/my_customers.html", customers=customers, sp=sp)
+
+    @bp.route("/customers/add", methods=["GET", "POST"])
+    @login_required
+    def add_customer():
+        from app.models.salesperson import Salesperson
+        from app.models.customer import Customer
+        from app.models import db
+
+        sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
+        if not sp:
+            flash("Set up your profile first.", "error")
+            return redirect(url_for("salesperson.profile_setup"))
+
+        if request.method == "POST":
+            name = request.form.get("name", "").strip()
+            if not name:
+                flash("Name is required.", "error")
+                return render_template("salesperson/add_customer.html", customer=None, sp=sp)
+
+            customer = Customer(
+                salesperson_id=sp.salesperson_id,
+                name=name,
+                email=request.form.get("email", "").strip(),
+                phone=request.form.get("phone", "").strip(),
+                notes=request.form.get("notes", "").strip()
+            )
+            db.session.add(customer)
+            db.session.commit()
+            flash(f"{name} added!", "success")
+            return redirect(url_for("salesperson.my_customers"))
+
+        return render_template("salesperson/add_customer.html", customer=None, sp=sp)
+
+    @bp.route("/customers/edit/<int:customer_id>", methods=["GET", "POST"])
+    @login_required
+    def edit_customer(customer_id):
+        from app.models.salesperson import Salesperson
+        from app.models.customer import Customer
+        from app.models import db
+
+        sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
+        if not sp:
+            return redirect(url_for("salesperson.profile_setup"))
+
+        customer = Customer.query.get_or_404(customer_id)
+        if customer.salesperson_id != sp.salesperson_id:
+            flash("Permission denied.", "error")
+            return redirect(url_for("salesperson.my_customers"))
+
+        if request.method == "POST":
+            customer.name = request.form.get("name", customer.name).strip()
+            customer.email = request.form.get("email", "").strip()
+            customer.phone = request.form.get("phone", "").strip()
+            customer.notes = request.form.get("notes", "").strip()
+            db.session.commit()
+            flash(f"{customer.name} updated!", "success")
+            return redirect(url_for("salesperson.my_customers"))
+
+        return render_template("salesperson/add_customer.html", customer=customer, sp=sp)
+
+    @bp.route("/customers/delete/<int:customer_id>", methods=["POST"])
+    @login_required
+    def delete_customer(customer_id):
+        from app.models.salesperson import Salesperson
+        from app.models.customer import Customer
+        from app.models import db
+
+        sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
+        if not sp:
+            return redirect(url_for("salesperson.profile_setup"))
+
+        customer = Customer.query.get_or_404(customer_id)
+        if customer.salesperson_id != sp.salesperson_id:
+            flash("Permission denied.", "error")
+            return redirect(url_for("salesperson.my_customers"))
+
+        name = customer.name
+        db.session.delete(customer)
+        db.session.commit()
+        flash(f"{name} deleted.", "success")
+        return redirect(url_for("salesperson.my_customers"))
 
