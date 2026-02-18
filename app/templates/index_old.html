@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarsInStock - Real Salespeople. Real Inventory. Real Fresh.</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1a1a1a; line-height: 1.6; }
+        
+        /* Header */
+        header { background: white; border-bottom: 1px solid #e0e0e0; padding: 1rem 0; position: sticky; top: 0; z-index: 100; }
+        nav { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; display: flex; justify-content: space-between; align-items: center; position: relative; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: #0066ff; text-decoration: none; }
+        .nav-links { display: flex; gap: 2rem; list-style: none; }
+        .hamburger { display: none; background: none; border: none; cursor: pointer; padding: 8px; }
+        .hamburger span { display: block; width: 24px; height: 3px; background: #2d1d36; margin: 5px 0; border-radius: 2px; }
+        .nav-links a { text-decoration: none; color: #1a1a1a; font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover { color: #0066ff; }
+        
+        /* Hero */
+        .hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 5rem 1.5rem; text-align: center; }
+        .hero h1 { font-size: 3rem; margin-bottom: 1rem; font-weight: 700; }
+        .hero p { font-size: 1.25rem; margin-bottom: 2rem; opacity: 0.95; }
+        .search-bar { max-width: 600px; margin: 2rem auto; }
+        .search-bar input { width: 100%; padding: 1rem 1.5rem; font-size: 1.1rem; border: none; border-radius: 50px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+        .cta-buttons { display: flex; gap: 1rem; justify-content: center; margin-top: 2rem; flex-wrap: wrap; }
+        .btn { padding: 0.875rem 2rem; border-radius: 50px; text-decoration: none; font-weight: 600; transition: all 0.2s; display: inline-block; }
+        .btn-primary { background: white; color: #667eea; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+        .btn-secondary { background: rgba(255,255,255,0.2); color: white; border: 2px solid white; }
+        .btn-secondary:hover { background: rgba(255,255,255,0.3); }
+        
+        /* Sections */
+        section { max-width: 1200px; margin: 0 auto; padding: 4rem 1.5rem; }
+        h2 { font-size: 2.5rem; margin-bottom: 1rem; text-align: center; }
+        
+        /* Featured Cars Grid */
+        .cars-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2rem; margin-top: 3rem; }
+        .car-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s; }
+        .car-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+        .car-image { width: 100%; aspect-ratio: 3/4; object-fit: cover; background: #f0f0f0; }
+        .car-info { padding: 1.25rem; }
+        .car-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .car-price { font-size: 1.5rem; font-weight: 700; color: #0066ff; margin-bottom: 0.5rem; }
+        .car-details { font-size: 0.9rem; color: #666; }
+        
+        /* Freshness Callout */
+        .freshness { background: #f8f9fa; text-align: center; padding: 3rem 1.5rem; }
+        .freshness-icon { font-size: 4rem; margin-bottom: 1rem; }
+        .freshness h3 { font-size: 1.75rem; margin-bottom: 0.5rem; }
+        
+        /* How It Works */
+        .how-it-works { background: white; }
+        .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 3rem; margin-top: 3rem; }
+        .step { text-align: center; }
+        .step-number { width: 60px; height: 60px; background: #667eea; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; margin: 0 auto 1rem; }
+        .step h4 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+        
+        /* Footer CTA */
+        .footer-cta { background: #1a1a1a; color: white; text-align: center; padding: 4rem 1.5rem; }
+        .footer-cta h2 { color: white; }
+        
+        /* Mobile */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .hero p { font-size: 1rem; }
+            .hamburger { display: block; }
+            .nav-links { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 12px 20px; z-index: 99; }
+            .nav-links.open { display: flex; }
+            .nav-links li { padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+            .cars-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/" class="logo">CarsInStock</a>
+            <button class="hamburger" onclick="this.classList.toggle('active');document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu">
+                <span></span><span></span><span></span>
+            </button>
+            <ul class="nav-links">
+                <li><a href="/search-cars">Search Cars</a></li>
+                <li><a href="/salespeople">Salespeople</a></li>
+                {% if session.get("user_id") %}<li style="color:#1a1a1a;font-size:0.9rem;">{{ session.get("email","") }}</li><li><a href="/logout" style="color:#1a1a1a;">Logout</a></li>{% else %}<li><a href="/login">Login</a></li>{% endif %}
+                {% if not session.get("user_id") %}<li><a href="/register">Register</a></li>{% endif %}
+            </ul>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>Real Salespeople. Real Inventory. Real Fresh.</h1>
+        <p>All listings expire in 7 days. Only active, available cars. No stale inventory.</p>
+        <div class="search-bar">
+            <form action="/search-cars" method="GET">
+                <input type="text" name="q" placeholder="Search for any car...">
+            </form>
+        </div>
+        <div class="cta-buttons">
+            <a href="/search-cars" class="btn btn-primary">Find a Car</a>
+            <a href="/register" class="btn btn-secondary">Join as a Salesperson</a>
+        </div>
+    </section>
+
+    <section>
+        <h2>Featured Cars</h2>
+        <div class="cars-grid">
+            {% for vehicle in vehicles %}
+            <div class="car-card">
+                <img src="https://via.placeholder.com/400x533/667eea/ffffff?text={{ vehicle.year }}+{{ vehicle.make }}+{{ vehicle.model }}" alt="{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}" class="car-image">
+                <div class="car-info">
+                    <div class="car-title">{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }}</div>
+                    <div class="car-price">${{ "{:,.0f}".format(vehicle.price) }}</div>
+                    <div class="car-details">{{ "{:,}".format(vehicle.mileage|int) }} miles • {{ vehicle.exterior_color }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="freshness">
+        <div class="freshness-icon">⏱️</div>
+        <h3>Fresh Inventory Guaranteed</h3>
+        <p>Every listing automatically expires after 7 days. This means you'll never see outdated or sold cars cluttering our platform. Our salespeople keep their inventory current, and you get the freshest selection.</p>
+    </section>
+
+    <section class="how-it-works">
+        <h2>How It Works</h2>
+        <div class="steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h4>Search</h4>
+                <p>Browse fresh inventory from trusted salespeople</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h4>Connect</h4>
+                <p>Contact the salesperson directly</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h4>Buy</h4>
+                <p>Get personal service from someone you trust</p>
+            </div>
+        </div>
+        <div class="steps" style="margin-top: 4rem;">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h4>Sign Up</h4>
+                <p>Create your salesperson profile</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h4>Feature Cars</h4>
+                <p>Showcase your best inventory</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h4>Get Leads</h4>
+                <p>Connect with serious buyers</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="footer-cta">
+        <h2>Ready to Get Started?</h2>
+        <div class="cta-buttons" style="margin-top: 2rem;">
+            <a href="/search-cars" class="btn btn-primary">Find Your Car</a>
+            <a href="/register" class="btn btn-secondary">Join as Salesperson</a>
+        </div>
+    </section>
+</body>
+</html>
