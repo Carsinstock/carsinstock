@@ -70,7 +70,7 @@ def send_welcome_email(to_email):
     return send_email(to_email, subject, html_content)
 
 
-def send_vehicle_email(to_emails, vehicle, salesperson, personal_message=""):
+def send_vehicle_email(to_emails, vehicle, salesperson, personal_message="", customer_id=None):
     """Send vehicle listing to multiple email addresses"""
     from sendgrid import SendGridAPIClient
     from sendgrid.helpers.mail import Mail, Email, To
@@ -119,7 +119,8 @@ def send_vehicle_email(to_emails, vehicle, salesperson, personal_message=""):
         <div style="border-top: 1px solid #eee; padding: 20px 0; text-align: center;">
             <p style="color: #999; font-size: 12px; margin: 0;">
                 CarsInStock | 76 RT 37 East, Toms River, NJ 08753
-            </p>
+            </p>   """ + (f'<p style="color: #999; font-size: 11px; margin: 10px 0 0 0;"><a href="https://carsinstock.com/unsubscribe/{customer_id}" style="color: #999;">Unsubscribe</a></p>' if customer_id else '') + """
+```
         </div>
     </div>
     """

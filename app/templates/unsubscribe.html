@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width:500px; margin:60px auto; padding:0 15px; text-align:center;">
+    {% if success %}
+    <h2 style="color:#4CAF50;">Unsubscribed</h2>
+    <p style="color:#666; font-size:16px;">{{ name }}, you've been successfully unsubscribed. You will no longer receive vehicle emails from this salesperson.</p>
+    {% else %}
+    <h2 style="color:#e74c3c;">Link Expired</h2>
+    <p style="color:#666; font-size:16px;">This unsubscribe link is no longer valid.</p>
+    {% endif %}
+    <a href="/" style="display:inline-block; margin-top:20px; color:#6C2BD9;">← Back to CarsInStock</a>
+</div>
+{% endblock %}

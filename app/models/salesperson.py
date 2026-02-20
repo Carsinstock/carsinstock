@@ -13,6 +13,8 @@ class Salesperson(db.Model):
     bio = db.Column(db.Text)
     profile_url_slug = db.Column(db.String(255), unique=True, nullable=False)
     subscription_tier = db.Column(db.String(50), default='free')
+    profile_photo = db.Column(db.String(500))
+    cover_photo = db.Column(db.String(500))
     status = db.Column(db.String(50), default='active')
     hired_at = db.Column(db.DateTime, default=datetime.utcnow)
     terminated_at = db.Column(db.DateTime)

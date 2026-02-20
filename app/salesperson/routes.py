@@ -1,5 +1,5 @@
 import re
-from flask import render_template, redirect, url_for, flash, request, session
+from flask import render_template, redirect, url_for, flash, request, session, jsonify
 from datetime import datetime
 from functools import wraps
 
@@ -52,6 +52,10 @@ def register_routes(bp):
             display_name = request.form.get("display_name", "").strip()
             phone = request.form.get("phone", "").strip()
             bio = request.form.get("bio", "").strip()
+            
+            # Handle profile photo upload
+            profile_photo = request.files.get("profile_photo")
+            cover_photo_file = request.files.get("cover_photo")
 
             errors = []
             if not display_name:
@@ -69,6 +73,16 @@ def register_routes(bp):
                 sp.display_name = display_name
                 sp.phone = phone
                 sp.bio = bio
+                if profile_photo and profile_photo.filename:
+                    from app.utils.cloudinary_upload import upload_profile_photo, upload_cover_photo
+                    photo_url = upload_profile_photo(profile_photo, sp.salesperson_id)
+                    if photo_url:
+                        sp.profile_photo = photo_url
+                if cover_photo_file and cover_photo_file.filename:
+                    from app.utils.cloudinary_upload import upload_profile_photo, upload_cover_photo
+                    cover_url = upload_cover_photo(cover_photo_file, sp.salesperson_id)
+                    if cover_url:
+                        sp.cover_photo = cover_url
                 if not sp.profile_url_slug:
                     sp.profile_url_slug = generate_slug(display_name)
             else:
@@ -84,6 +98,13 @@ def register_routes(bp):
                     status="active",
                     hired_at=datetime.utcnow()
                 )
+                if profile_photo and profile_photo.filename:
+                    from app.utils.cloudinary_upload import upload_vehicle_image
+                    db.session.add(sp)
+                    db.session.flush()
+                    photo_url = upload_vehicle_image(profile_photo, sp.salesperson_id)
+                    if photo_url:
+                        sp.profile_photo = photo_url
                 db.session.add(sp)
 
             try:
@@ -435,3 +456,67 @@ def register_routes(bp):
         flash(f"{name} deleted.", "success")
         return redirect(url_for("salesperson.my_customers"))
 
+
+    @bp.route("/profile/remove-photo/<photo_type>", methods=["POST"])
+    @login_required
+    def remove_photo(photo_type):
+        from app.models import db
+        from app.models.salesperson import Salesperson
+        sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
+        if sp:
+            if photo_type == "profile":
+                sp.profile_photo = None
+                flash("Profile photo removed.", "success")
+            elif photo_type == "cover":
+                sp.cover_photo = None
+                flash("Cover photo removed.", "success")
+            db.session.commit()
+        return redirect(url_for("salesperson.profile_setup"))
+
+    @bp.route("/api/generate-bio", methods=["POST"])
+    @login_required
+    def generate_bio_api():
+        from app.utils.ai import generate_bio
+        data = request.get_json()
+        name = data.get("name", "")
+        years = data.get("years", "")
+        dealership = data.get("dealership", "")
+        specialties = data.get("specialties", "")
+        bio = generate_bio(name, years, dealership, specialties)
+        if bio:
+            return jsonify({"success": True, "bio": bio})
+        return jsonify({"success": False, "error": "Could not generate bio"}), 500
+
+    @bp.route("/api/draft-email", methods=["POST"])
+    @login_required
+    def draft_email_api():
+        from app.utils.ai import draft_email
+        data = request.get_json()
+        sp_name = data.get("salesperson_name", "")
+        cust_name = data.get("customer_name", "")
+        vehicle = data.get("vehicle_info", "")
+        tone = data.get("tone", "friendly")
+        email = draft_email(sp_name, cust_name, vehicle, tone)
+        if email:
+            return jsonify({"success": True, "email": email})
+        return jsonify({"success": False, "error": "Could not draft email"}), 500
+
+    @bp.route("/api/chatbot", methods=["POST"])
+    def chatbot_api():
+        from app.utils.ai import chatbot_response
+        from app.models.salesperson import Salesperson
+        data = request.get_json()
+        message = data.get("message", "")
+        history = data.get("history", [])
+        slug = data.get("slug", "")
+        sp = Salesperson.query.filter_by(profile_url_slug=slug).first()
+        if not sp:
+            return jsonify({"response": "Sorry, something went wrong."})
+        # Get inventory summary
+        from app.models.vehicle import Vehicle
+        from datetime import datetime
+        vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status='available').all()
+        vehicles = [v for v in vehicles if not v.expires_at or v.expires_at > datetime.utcnow()]
+        inv_summary = ", ".join([f"{v.year} {v.make} {v.model}" for v in vehicles]) if vehicles else "No vehicles currently listed"
+        response = chatbot_response(message, sp.display_name, inv_summary, history)
+        return jsonify({"response": response})

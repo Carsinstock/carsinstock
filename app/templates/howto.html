@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+    .howto-hero {
+        background: linear-gradient(135deg, #2d1d36 0%, #1a73e8 100%);
+        color: white;
+        padding: 60px 20px;
+        text-align: center;
+        border-radius: 0 0 20px 20px;
+    }
+    .howto-hero h1 {
+        font-size: 36px;
+        font-weight: 800;
+        margin-bottom: 12px;
+    }
+    .howto-hero p {
+        font-size: 18px;
+        opacity: 0.9;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .howto-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 40px 20px;
+    }
+    .howto-step {
+        background: #fff;
+        border-radius: 16px;
+        padding: 32px;
+        margin-bottom: 32px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        border-left: 5px solid #1a73e8;
+        position: relative;
+    }
+    .howto-step:nth-child(2) { border-left-color: #4CAF50; }
+    .howto-step:nth-child(3) { border-left-color: #FF9800; }
+    .howto-step:nth-child(4) { border-left-color: #6C2BD9; }
+    .howto-step:nth-child(5) { border-left-color: #E91E63; }
+    .step-number {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #1a73e8;
+        color: white;
+        font-size: 18px;
+        font-weight: 800;
+        margin-bottom: 16px;
+    }
+    .howto-step:nth-child(2) .step-number { background: #4CAF50; }
+    .howto-step:nth-child(3) .step-number { background: #FF9800; }
+    .howto-step:nth-child(4) .step-number { background: #6C2BD9; }
+    .howto-step:nth-child(5) .step-number { background: #E91E63; }
+    .step-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: #2d1d36;
+        margin-bottom: 12px;
+    }
+    .step-desc {
+        font-size: 16px;
+        color: #555;
+        line-height: 1.7;
+        margin-bottom: 16px;
+    }
+    .step-actions {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 16px 20px;
+        margin-top: 12px;
+    }
+    .step-actions h4 {
+        font-size: 14px;
+        font-weight: 700;
+        color: #2d1d36;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .step-actions ol {
+        margin: 0;
+        padding-left: 20px;
+    }
+    .step-actions li {
+        font-size: 15px;
+        color: #444;
+        margin-bottom: 6px;
+        line-height: 1.5;
+    }
+    .pro-tip {
+        background: linear-gradient(135deg, #fff3e0, #fff8e1);
+        border-radius: 10px;
+        padding: 14px 18px;
+        margin-top: 14px;
+        font-size: 14px;
+        color: #e65100;
+        font-weight: 500;
+    }
+    .pro-tip strong {
+        font-weight: 700;
+    }
+    .cta-bottom {
+        text-align: center;
+        padding: 40px 20px 60px;
+    }
+    .cta-bottom h2 {
+        font-size: 28px;
+        font-weight: 700;
+        color: #2d1d36;
+        margin-bottom: 12px;
+    }
+    .cta-bottom p {
+        font-size: 16px;
+        color: #666;
+        margin-bottom: 24px;
+    }
+    .cta-btn {
+        display: inline-block;
+        background: #1a73e8;
+        color: white;
+        padding: 14px 36px;
+        border-radius: 10px;
+        font-size: 17px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: background 0.2s;
+    }
+    .cta-btn:hover { background: #1557b0; }
+    @media (max-width: 600px) {
+        .howto-hero h1 { font-size: 28px; }
+        .howto-hero p { font-size: 16px; }
+        .howto-step { padding: 24px 18px; }
+        .step-title { font-size: 20px; }
+    }
+</style>
+
+<div class="howto-hero">
+    <h1>Your CarsInStock Playbook</h1>
+    <p>Everything you need to build your brand, move inventory, and turn clicks into customers.</p>
+</div>
+
+<div class="howto-container">
+
+    <!-- STEP 1: PROFILE -->
+    <div class="howto-step">
+        <div class="step-number">1</div>
+        <div class="step-title">Set Up Your Storefront</div>
+        <div class="step-desc">
+            Your storefront is your digital dealership. It's the first thing customers see, so make it count. A complete profile builds trust and gets people reaching out.
+        </div>
+        <div class="step-actions">
+            <h4>Here's how:</h4>
+            <ol>
+                <li>Click <strong>My Profile</strong> in the top menu</li>
+                <li>Add your <strong>display name</strong> (this becomes your storefront URL)</li>
+                <li>Write a short, punchy <strong>bio</strong> &mdash; tell customers why they should work with you</li>
+                <li>Add your <strong>phone number</strong> and <strong>email</strong> so customers can reach you directly</li>
+                <li>Hit <strong>Save</strong> and you're live!</li>
+            </ol>
+        </div>
+        <div class="pro-tip">
+            <strong>Pro Tip:</strong> Your storefront URL is yours to share everywhere &mdash; text it, post it on social media, put it in your email signature. It's your personal brand.
+        </div>
+    </div>
+
+    <!-- STEP 2: VEHICLES -->
+    <div class="howto-step">
+        <div class="step-number">2</div>
+        <div class="step-title">Add & Manage Your Vehicles</div>
+        <div class="step-desc">
+            Fresh inventory is king. Every car you add goes live on your storefront instantly. Listings stay active for 7 days to keep your page fresh &mdash; no ghost cars here.
+        </div>
+        <div class="step-actions">
+            <h4>Here's how:</h4>
+            <ol>
+                <li>Click <strong>+ Add Vehicle</strong> in the top menu</li>
+                <li>Enter the year, make, model, trim, price, and mileage</li>
+                <li>Upload a clean photo &mdash; first impressions matter</li>
+                <li>Add color, transmission, and any extras</li>
+                <li>Hit <strong>Save</strong> and it's live on your storefront</li>
+            </ol>
+        </div>
+        <div class="pro-tip">
+            <strong>Pro Tip:</strong> Listings expire after 7 days automatically. This keeps your page looking active and current. Re-add a car anytime to refresh it.
+        </div>
+    </div>
+
+    <!-- STEP 3: VIN SCANNER -->
+    <div class="howto-step">
+        <div class="step-number">3</div>
+        <div class="step-title">Use the VIN Scanner</div>
+        <div class="step-desc">
+            Skip the typing. The VIN scanner reads the barcode or text on any vehicle and auto-fills the year, make, model, and trim. Walk the lot, scan, and list &mdash; that fast.
+        </div>
+        <div class="step-actions">
+            <h4>Here's how:</h4>
+            <ol>
+                <li>Go to <strong>+ Add Vehicle</strong></li>
+                <li>Click <strong>Scan VIN</strong> at the top of the form</li>
+                <li>Point your phone camera at the VIN barcode or number on the windshield</li>
+                <li>The system reads it and fills in the vehicle details automatically</li>
+                <li>Review, add price and photos, then save</li>
+            </ol>
+        </div>
+        <div class="pro-tip">
+            <strong>Pro Tip:</strong> Walk the lot before your shift starts. Scan 5-10 cars in minutes. By the time the doors open, your storefront is stocked and ready.
+        </div>
+    </div>
+
+    <!-- STEP 4: CUSTOMERS & EMAIL -->
+    <div class="howto-step">
+        <div class="step-number">4</div>
+        <div class="step-title">Manage Customers & Send Emails</div>
+        <div class="step-desc">
+            Every lead that clicks "I'm Interested" becomes a customer in your database. Stay in touch, follow up, and close deals &mdash; all from one place.
+        </div>
+        <div class="step-actions">
+            <h4>Here's how:</h4>
+            <ol>
+                <li>Click <strong>My Customers</strong> to see everyone who's reached out</li>
+                <li>View their name, email, phone, and which vehicle they liked</li>
+                <li>Click <strong>Send Email</strong> to follow up directly</li>
+                <li>Add new customers manually if you meet them in person</li>
+                <li>Keep your list growing &mdash; these are YOUR customers, not the dealership's</li>
+            </ol>
+        </div>
+        <div class="pro-tip">
+            <strong>Pro Tip:</strong> Follow up within 5 minutes of getting a lead. Speed wins deals. A quick "Hey, I saw you liked the Charger &mdash; want to come see it?" goes a long way.
+        </div>
+    </div>
+
+    <!-- STEP 5: SHARE & GROW -->
+    <div class="howto-step">
+        <div class="step-number">5</div>
+        <div class="step-title">Share Your Page & Get Leads</div>
+        <div class="step-desc">
+            Your storefront only works if people see it. The more you share, the more leads you get. Treat your URL like your business card &mdash; hand it out everywhere.
+        </div>
+        <div class="step-actions">
+            <h4>Here's how:</h4>
+            <ol>
+                <li>Copy your storefront link from <strong>My Storefront</strong></li>
+                <li>Text it to customers who ask "what do you have on the lot?"</li>
+                <li>Post it on Facebook, Instagram, TikTok &mdash; wherever your buyers are</li>
+                <li>Add it to your email signature and business cards</li>
+                <li>Share individual vehicles using the <strong>Share</strong> button on each listing</li>
+            </ol>
+        </div>
+        <div class="pro-tip">
+            <strong>Pro Tip:</strong> Post a new vehicle on social media every morning with your storefront link. Consistency builds your following and drives traffic to your page.
+        </div>
+    </div>
+
+</div>
+
+<div class="cta-bottom">
+    <h2>Ready to Start Selling?</h2>
+    <p>Your storefront is waiting. Set it up, stock it, and start sharing.</p>
+    {% if session.get('user_id') %}
+        <a href="/vehicles/add" class="cta-btn">+ Add Your First Vehicle</a>
+    {% else %}
+        <a href="/register" class="cta-btn">Create Your Free Account</a>
+    {% endif %}
+</div>
+{% endblock %}

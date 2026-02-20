@@ -1,8 +1,17 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="profile-page">
-    <div class="profile-header">
-        <div class="profile-avatar">{{ sp.display_name[0] if sp.display_name else '?' }}</div>
+    {% if sp.cover_photo %}
+        <div style="width:100%;height:200px;border-radius:12px 12px 0 0;overflow:hidden;margin-bottom:-40px;">
+            <img src="{{ sp.cover_photo }}" alt="Cover" style="width:100%;height:100%;object-fit:cover;">
+        </div>
+        {% endif %}
+        <div class="profile-header" style="{% if sp.cover_photo %}position:relative;{% endif %}">
+        {% if sp.profile_photo %}
+                <img src="{{ sp.profile_photo }}" alt="{{ sp.display_name }}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">
+            {% else %}
+                <div class="profile-avatar">{{ sp.display_name[0] if sp.display_name else '?' }}</div>
+            {% endif %}
         <h1>{{ sp.display_name }}</h1>
         {% if sp.bio %}
         <p class="profile-bio">{{ sp.bio }}</p>
@@ -45,10 +54,10 @@
                     {% endif %}
                     {% if v.transmission %}
                     <p class="vehicle-detail">{{ v.transmission }}</p>
-                    {% if session.get("user_id") == sp.user_id %}
+                    {% endif %}
+                    {% if is_owner %}
                     <a href="/vehicles/edit/{{ v.id }}" style="display:inline-block; margin-top:8px; padding:6px 16px; background:#4CAF50; color:white; border-radius:6px; text-decoration:none; font-size:13px;">Edit</a>
                     <a href="/vehicles/share/{{ v.id }}" style="display:inline-block; margin-top:8px; margin-left:5px; padding:6px 16px; background:#6C2BD9; color:white; border-radius:6px; text-decoration:none; font-size:13px;">📧 Share</a>
-                    {% endif %}
                     {% endif %}
                     <button class="interested-btn" onclick="showLeadForm({{ v.id }}, '{{ v.year }} {{ v.make }} {{ v.model }}')">I'm Interested</button>
                 </div>
@@ -144,4 +153,70 @@ document.getElementById('leadModal').addEventListener('click', function(e) {
 .alert-error { background: #fff5f5; color: #e53e3e; border: 1px solid #fed7d7; }
 .coming-soon { color: #999; font-style: italic; text-align: center; padding: 40px 0; }
 </style>
+<!-- AI Chatbot Widget -->
+<div id="chatToggle" onclick="toggleChat()" style="position:fixed;bottom:20px;right:20px;width:60px;height:60px;background:linear-gradient(135deg,#6C2BD9,#1a73e8);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.25);z-index:999;transition:transform 0.2s;">
+    <span style="color:white;font-size:28px;">&#x1F4AC;</span>
+</div>
+<div id="chatBox" style="display:none;position:fixed;bottom:90px;right:20px;width:340px;max-height:450px;background:white;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.2);z-index:999;overflow:hidden;flex-direction:column;">
+    <div style="background:linear-gradient(135deg,#6C2BD9,#1a73e8);color:white;padding:16px;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+            <div style="font-weight:700;font-size:15px;">Chat with {{ sp.display_name }}</div>
+            <div style="font-size:12px;opacity:0.8;">Ask me about any vehicle!</div>
+        </div>
+        <span onclick="toggleChat()" style="cursor:pointer;font-size:20px;">&#x2715;</span>
+    </div>
+    <div id="chatMessages" style="padding:14px;height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;">
+        <div style="background:#f0f0f0;padding:10px 14px;border-radius:12px;border-bottom-left-radius:4px;font-size:14px;max-width:85%;color:#333;">
+            Hey there! Don't see what you're looking for? Just because it's not listed doesn't mean I can't get it. Tell me what you need!
+        </div>
+    </div>
+    <div style="padding:10px;border-top:1px solid #eee;display:flex;gap:8px;">
+        <input type="text" id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendChat()" style="flex:1;padding:10px 14px;border:1px solid #ddd;border-radius:20px;font-size:14px;outline:none;">
+        <button onclick="sendChat()" style="background:linear-gradient(135deg,#6C2BD9,#1a73e8);color:white;border:none;border-radius:50%;width:38px;height:38px;cursor:pointer;font-size:16px;">&#x2192;</button>
+    </div>
+</div>
+
+<script>
+var chatSlug = "{{ sp.profile_url_slug }}";
+var chatHistory = [];
+function toggleChat() {
+    var box = document.getElementById('chatBox');
+    box.style.display = box.style.display === 'none' ? 'flex' : 'none';
+}
+function sendChat() {
+    var input = document.getElementById('chatInput');
+    var msg = input.value.trim();
+    if (!msg) return;
+    var messages = document.getElementById('chatMessages');
+    messages.innerHTML += '<div style="background:#1a73e8;color:white;padding:10px 14px;border-radius:12px;border-bottom-right-radius:4px;font-size:14px;max-width:85%;align-self:flex-end;">' + msg + '</div>';
+    input.value = '';
+    messages.scrollTop = messages.scrollHeight;
+    chatHistory.push({role: 'user', content: msg});
+    var typing = document.createElement('div');
+    typing.id = 'typingDot';
+    typing.style.cssText = 'background:#f0f0f0;padding:10px 14px;border-radius:12px;border-bottom-left-radius:4px;font-size:14px;max-width:85%;color:#999;';
+    typing.textContent = 'Typing...';
+    messages.appendChild(typing);
+    messages.scrollTop = messages.scrollHeight;
+    fetch('/api/chatbot', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({message: msg, slug: chatSlug, history: chatHistory})
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        var t = document.getElementById('typingDot');
+        if (t) t.remove();
+        messages.innerHTML += '<div style="background:#f0f0f0;padding:10px 14px;border-radius:12px;border-bottom-left-radius:4px;font-size:14px;max-width:85%;color:#333;">' + data.response + '</div>';
+        messages.scrollTop = messages.scrollHeight;
+        chatHistory.push({role: 'assistant', content: data.response});
+    })
+    .catch(function() {
+        var t = document.getElementById('typingDot');
+        if (t) t.remove();
+        messages.innerHTML += '<div style="background:#f0f0f0;padding:10px 14px;border-radius:12px;border-bottom-left-radius:4px;font-size:14px;max-width:85%;color:#333;">Sorry, something went wrong. Please call or text directly!</div>';
+    });
+}
+</script>
+
 {% endblock %}

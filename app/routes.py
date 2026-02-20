@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, flash
+from flask import Blueprint, render_template, request, redirect, flash, session
 
 main = Blueprint('main', __name__)
 
@@ -22,6 +22,11 @@ def search_cars():
     return render_template('search_cars.html')
 
 
+
+@main.route('/how-to')
+def howto():
+    return render_template('howto.html')
+
 @main.route('/<slug>')
 def public_profile(slug):
     from app.models.salesperson import Salesperson
@@ -33,7 +38,8 @@ def public_profile(slug):
     vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status='available').all()
     # Filter out expired
     vehicles = [v for v in vehicles if not v.expires_at or v.expires_at > datetime.utcnow()]
-    return render_template('salesperson/public_profile.html', sp=sp, vehicles=vehicles)
+    is_owner = (session.get('user_id') == sp.user_id)
+    return render_template('salesperson/public_profile.html', sp=sp, vehicles=vehicles, is_owner=is_owner)
 
 
 @main.route("/lead/submit", methods=["POST"])
@@ -102,3 +108,16 @@ def submit_lead():
         print(f"Lead submit error: {e}")
 
     return redirect(request.referrer or "/")
+
+@main.route('/debug-session')
+def debug_session():
+    from flask import session, jsonify
+    from app.models.salesperson import Salesperson
+    sp = Salesperson.query.first()
+    return jsonify({
+        'session_user_id': session.get('user_id'),
+        'session_user_id_type': str(type(session.get('user_id'))),
+        'sp_user_id': sp.user_id,
+        'sp_user_id_type': str(type(sp.user_id)),
+        'match': session.get('user_id') == sp.user_id
+    })
