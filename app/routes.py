@@ -36,10 +36,14 @@ def public_profile(slug):
         return render_template('index.html')
     from app.models.vehicle import Vehicle
     from datetime import datetime
-    vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status='available').all()
-    # Filter out expired
-    vehicles = [v for v in vehicles if not v.expires_at or v.expires_at > datetime.utcnow()]
     is_owner = (session.get('user_id') == sp.user_id)
+    if is_owner:
+        # Owner sees all vehicles, expired ones marked
+        vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id).all()
+    else:
+        # Public only sees active, non-expired vehicles
+        vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status='available').all()
+        vehicles = [v for v in vehicles if not v.expires_at or v.expires_at > datetime.utcnow()]
     return render_template('salesperson/public_profile.html', sp=sp, vehicles=vehicles, is_owner=is_owner)
 
 

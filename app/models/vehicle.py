@@ -31,6 +31,8 @@ class Vehicle(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     expires_at = db.Column(db.DateTime)
 
+    expiration_warning_sent = db.Column(db.Boolean, default=False)
+
     # Relationship
     salesperson = db.relationship('Salesperson', backref='vehicles')
 

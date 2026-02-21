@@ -265,6 +265,11 @@ def register_routes(bp):
                 result = cloudinary.uploader.upload(photo)
                 vehicle.image_url = result["secure_url"]
 
+            # Renew expired listing
+            if vehicle.is_expired:
+                from datetime import datetime, timedelta
+                vehicle.expires_at = datetime.utcnow() + timedelta(days=7)
+                vehicle.status = 'available'
             try:
                 from app.models import db
                 db.session.commit()
