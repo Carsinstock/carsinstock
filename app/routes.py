@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, flash, session
+from app.models import db
 
 main = Blueprint('main', __name__)
 
@@ -109,15 +110,11 @@ def submit_lead():
 
     return redirect(request.referrer or "/")
 
-@main.route('/debug-session')
-def debug_session():
-    from flask import session, jsonify
-    from app.models.salesperson import Salesperson
-    sp = Salesperson.query.first()
-    return jsonify({
-        'session_user_id': session.get('user_id'),
-        'session_user_id_type': str(type(session.get('user_id'))),
-        'sp_user_id': sp.user_id,
-        'sp_user_id_type': str(type(sp.user_id)),
-        'match': session.get('user_id') == sp.user_id
-    })
+@main.route('/unsubscribe/<int:customer_id>')
+def unsubscribe(customer_id):
+    from app.models.customer import Customer
+    customer = Customer.query.get(customer_id)
+    if customer:
+        customer.unsubscribed = True
+        db.session.commit()
+    return render_template('unsubscribe.html')

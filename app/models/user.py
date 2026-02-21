@@ -3,7 +3,6 @@ from datetime import datetime
 
 class User(db.Model):
     __tablename__ = 'users'
-
     id = db.Column(db.Integer, primary_key=True)
     dealership_id = db.Column(db.Integer, nullable=False, default=1)
     first_name = db.Column(db.String(80), nullable=False, default='')
@@ -15,3 +14,5 @@ class User(db.Model):
     is_active = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     last_login_at = db.Column(db.DateTime)
+    reset_token = db.Column(db.String(100), unique=True, nullable=True)
+    reset_token_expires = db.Column(db.DateTime, nullable=True)
