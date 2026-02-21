@@ -510,10 +510,13 @@ def register_routes(bp):
     def chatbot_api():
         from app.utils.ai import chatbot_response
         from app.models.salesperson import Salesperson
+        from app.models.chat_conversation import ChatConversation
+        import json
         data = request.get_json()
         message = data.get("message", "")
         history = data.get("history", [])
         slug = data.get("slug", "")
+        session_id = data.get("session_id", "")
         sp = Salesperson.query.filter_by(profile_url_slug=slug).first()
         if not sp:
             return jsonify({"response": "Sorry, something went wrong."})
@@ -524,4 +527,94 @@ def register_routes(bp):
         vehicles = [v for v in vehicles if not v.expires_at or v.expires_at > datetime.utcnow()]
         inv_summary = ", ".join([f"{v.year} {v.make} {v.model}" for v in vehicles]) if vehicles else "No vehicles currently listed"
         response = chatbot_response(message, sp.display_name, inv_summary, history)
+        # Save conversation to database
+        try:
+            from app.models import db
+            convo = ChatConversation.query.filter_by(session_id=session_id, salesperson_id=sp.salesperson_id).first()
+            if not convo:
+                convo = ChatConversation(
+                    salesperson_id=sp.salesperson_id,
+                    session_id=session_id,
+                    messages=json.dumps([])
+                )
+                db.session.add(convo)
+            msgs = json.loads(convo.messages)
+            msgs.append({"role": "user", "content": message})
+            msgs.append({"role": "assistant", "content": response})
+            convo.messages = json.dumps(msgs)
+            convo.last_message_at = datetime.utcnow()
+            db.session.commit()
+        except Exception as e:
+            print(f"Chat save error: {e}")
         return jsonify({"response": response})
+
+    @bp.route("/api/chatbot/end", methods=["POST"])
+    def chatbot_end():
+        from app.models.salesperson import Salesperson
+        from app.models.chat_conversation import ChatConversation
+        from app.utils.email import send_email
+        import json
+        data = request.get_json()
+        session_id = data.get("session_id", "")
+        slug = data.get("slug", "")
+        visitor_name = data.get("visitor_name", "")
+        visitor_email = data.get("visitor_email", "")
+        visitor_phone = data.get("visitor_phone", "")
+        sp = Salesperson.query.filter_by(profile_url_slug=slug).first()
+        if not sp:
+            return jsonify({"success": False})
+        from app.models import db
+        convo = ChatConversation.query.filter_by(session_id=session_id, salesperson_id=sp.salesperson_id).first()
+        if not convo or convo.transcript_sent:
+            return jsonify({"success": True})
+        # Update visitor info if provided
+        if visitor_name:
+            convo.visitor_name = visitor_name
+        if visitor_email:
+            convo.visitor_email = visitor_email
+        if visitor_phone:
+            convo.visitor_phone = visitor_phone
+        # Build transcript
+        msgs = json.loads(convo.messages)
+        if not msgs:
+            return jsonify({"success": True})
+        transcript_html = ""
+        for m in msgs:
+            if m["role"] == "user":
+                transcript_html += f'<p style="margin:8px 0;"><strong style="color:#6C2BD9;">Visitor:</strong> {m["content"]}</p>'
+            else:
+                transcript_html += f'<p style="margin:8px 0;"><strong style="color:#333;">Assistant:</strong> {m["content"]}</p>'
+        visitor_info = ""
+        if convo.visitor_name:
+            visitor_info += f"<p><strong>Name:</strong> {convo.visitor_name}</p>"
+        if convo.visitor_email:
+            visitor_info += f"<p><strong>Email:</strong> {convo.visitor_email}</p>"
+        if convo.visitor_phone:
+            visitor_info += f"<p><strong>Phone:</strong> {convo.visitor_phone}</p>"
+        from datetime import datetime
+        time_str = convo.started_at.strftime("%B %d, %Y at %I:%M %p UTC") if convo.started_at else "Unknown"
+        html_content = f"""
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="text-align: center; padding: 20px 0; border-bottom: 3px solid #6C2BD9;">
+                <h1 style="color: #6C2BD9; margin: 0; font-size: 28px;">CarsInStock</h1>
+            </div>
+            <div style="padding: 30px 20px;">
+                <h2 style="color: #333; margin-bottom: 10px;">New Chat Transcript</h2>
+                <p style="color: #666; font-size: 14px;">Started: {time_str}</p>
+                {visitor_info if visitor_info else '<p style="color:#999;">No visitor contact info provided</p>'}
+                <hr style="border:none;border-top:1px solid #eee;margin:20px 0;">
+                <h3 style="color:#333;font-size:16px;">Conversation:</h3>
+                {transcript_html}
+            </div>
+            <div style="border-top: 1px solid #eee; padding: 20px 0; text-align: center;">
+                <p style="color: #999; font-size: 12px; margin: 0;">CarsInStock | 76 RT 37 East, Toms River, NJ 08753</p>
+            </div>
+        </div>
+        """
+        try:
+            send_email(sp.email, "New Chat Transcript from Your Storefront", html_content)
+            convo.transcript_sent = True
+            db.session.commit()
+        except Exception as e:
+            print(f"Transcript email error: {e}")
+        return jsonify({"success": True})

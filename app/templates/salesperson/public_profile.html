@@ -190,6 +190,18 @@ document.getElementById('leadModal').addEventListener('click', function(e) {
 <script>
 var chatSlug = "{{ sp.profile_url_slug }}";
 var chatHistory = [];
+var chatSessionId = 'chat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+// Send transcript when visitor leaves
+window.addEventListener('beforeunload', function() {
+    if (chatHistory.length > 0) {
+        var blob = new Blob([JSON.stringify({
+            session_id: chatSessionId,
+            slug: chatSlug
+        })], {type: 'application/json'});
+        navigator.sendBeacon('/api/chatbot/end', blob);
+    }
+});
 function toggleChat() {
     var box = document.getElementById('chatBox');
     box.style.display = box.style.display === 'none' ? 'flex' : 'none';
@@ -212,7 +224,7 @@ function sendChat() {
     fetch('/api/chatbot', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({message: msg, slug: chatSlug, history: chatHistory})
+        body: JSON.stringify({message: msg, slug: chatSlug, history: chatHistory, session_id: chatSessionId})
     })
     .then(function(r) { return r.json(); })
     .then(function(data) {
