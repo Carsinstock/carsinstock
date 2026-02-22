@@ -20,7 +20,27 @@ def customers():
 
 @main.route('/search-cars')
 def search_cars():
-    return render_template('search_cars.html')
+    from app.models.vehicle import Vehicle
+    from app.models.salesperson import Salesperson
+    from datetime import datetime
+    q = request.args.get('q', '').strip()
+    vehicles = []
+    if q:
+        search = f"%{q}%"
+        vehicles = Vehicle.query.filter(
+            Vehicle.status == 'available',
+            db.or_(
+                Vehicle.make.ilike(search),
+                Vehicle.model.ilike(search),
+                Vehicle.year.cast(db.String).ilike(search),
+                Vehicle.trim.ilike(search),
+                Vehicle.exterior_color.ilike(search),
+                Vehicle.vin.ilike(search)
+            )
+        ).all()
+        # Filter out expired
+        vehicles = [v for v in vehicles if not v.expires_at or v.expires_at > datetime.utcnow()]
+    return render_template('search_cars.html', vehicles=vehicles, query=q)
 
 
 
