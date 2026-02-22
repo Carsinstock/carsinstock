@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="dashboard">
+    <h1>Dashboard</h1>
+    <div class="dash-tabs">
+        <button class="tab-btn active" onclick="showTab('vehicles')">My Vehicles</button>
+        <button class="tab-btn" onclick="showTab('leads')">My Leads</button>
+        <button class="tab-btn" onclick="showTab('chats')">Chat Transcripts</button>
+    </div>
+
+    <!-- MY VEHICLES TAB -->
+    <div id="tab-vehicles" class="tab-content active">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <h2 style="margin:0;">My Vehicles ({{ active_vehicles|length }} active, {{ expired_vehicles|length }} expired)</h2>
+            <a href="/vehicles/add" class="dash-btn-add">+ Add Vehicle</a>
+        </div>
+        {% if active_vehicles %}
+        <h3 style="color:#38a169;font-size:16px;margin-bottom:10px;">Active Listings</h3>
+        <div class="dash-vehicle-list">
+            {% for v in active_vehicles %}
+            <div class="dash-vehicle-row">
+                <div class="dash-vehicle-photo">
+                    {% if v.image_url %}<img src="{{ v.image_url }}" alt="{{ v.year }} {{ v.make }} {{ v.model }}">
+                    {% else %}<div class="dash-no-photo">No Photo</div>{% endif %}
+                </div>
+                <div class="dash-vehicle-info">
+                    <strong>{{ v.year }} {{ v.make }} {{ v.model }}{% if v.trim %} {{ v.trim }}{% endif %}</strong>
+                    <span class="dash-price">${{ "{:,.0f}".format(v.price) }}</span>
+                    <span class="dash-badge dash-badge-active">{{ v.days_remaining }} days left</span>
+                </div>
+                <div class="dash-actions">
+                    <a href="/vehicles/edit/{{ v.id }}" class="dash-btn dash-btn-edit">Edit</a>
+                    <a href="/vehicles/share/{{ v.id }}" class="dash-btn dash-btn-share">Share</a>
+                    <form method="POST" action="/vehicles/delete/{{ v.id }}" style="display:inline;" onsubmit="return confirm('Delete this vehicle?');">
+                        <button type="submit" class="dash-btn dash-btn-delete">Delete</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% if expired_vehicles %}
+        <h3 style="color:#e53e3e;font-size:16px;margin:20px 0 10px;">Expired Listings</h3>
+        <div class="dash-vehicle-list">
+            {% for v in expired_vehicles %}
+            <div class="dash-vehicle-row dash-expired">
+                <div class="dash-vehicle-photo">
+                    {% if v.image_url %}<img src="{{ v.image_url }}" alt="{{ v.year }} {{ v.make }} {{ v.model }}">
+                    {% else %}<div class="dash-no-photo">No Photo</div>{% endif %}
+                </div>
+                <div class="dash-vehicle-info">
+                    <strong>{{ v.year }} {{ v.make }} {{ v.model }}{% if v.trim %} {{ v.trim }}{% endif %}</strong>
+                    <span class="dash-price">${{ "{:,.0f}".format(v.price) }}</span>
+                    <span class="dash-badge dash-badge-expired">EXPIRED</span>
+                </div>
+                <div class="dash-actions">
+                    <a href="/vehicles/edit/{{ v.id }}" class="dash-btn dash-btn-renew">Renew</a>
+                    <form method="POST" action="/vehicles/delete/{{ v.id }}" style="display:inline;" onsubmit="return confirm('Delete this vehicle?');">
+                        <button type="submit" class="dash-btn dash-btn-delete">Delete</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% if not active_vehicles and not expired_vehicles %}
+        <p style="color:#999;text-align:center;padding:40px 0;">No vehicles yet. <a href="/vehicles/add" style="color:#6C2BD9;">Add your first vehicle</a></p>
+        {% endif %}
+    </div>
+
+    <!-- MY LEADS TAB -->
+    <div id="tab-leads" class="tab-content">
+        <h2>My Leads ({{ leads|length }})</h2>
+        {% if leads %}
+        <div class="dash-leads-list">
+            {% for lead in leads %}
+            <div class="dash-lead-row" onclick="this.querySelector('.lead-full').classList.toggle('open')">
+                <div class="lead-summary">
+                    <strong>{{ lead.customer_name }}</strong>
+                    <span class="lead-contact">{{ lead.customer_email }}{% if lead.customer_phone %} | {{ lead.customer_phone }}{% endif %}</span>
+                    <span class="lead-date">{{ lead.created_at.strftime('%b %d, %Y %I:%M %p') }}</span>
+                </div>
+                <div class="lead-full">
+                    {% if lead.message %}<p class="lead-message">{{ lead.message }}</p>{% endif %}
+                    <p class="lead-source">Source: {{ lead.source }} | Status: {{ lead.status }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color:#999;text-align:center;padding:40px 0;">No leads yet. Share your storefront to start receiving leads.</p>
+        {% endif %}
+    </div>
+
+    <!-- CHAT TRANSCRIPTS TAB -->
+    <div id="tab-chats" class="tab-content">
+        <h2>Chat Transcripts ({{ chats|length }})</h2>
+        {% if chats %}
+        <div class="dash-leads-list">
+            {% for chat in chats %}
+            <div class="dash-lead-row" onclick="this.querySelector('.lead-full').classList.toggle('open')">
+                <div class="lead-summary">
+                    <strong>{{ chat.visitor_name or 'Anonymous Visitor' }}</strong>
+                    <span class="lead-contact">{{ chat.visitor_email or 'No email' }}</span>
+                    <span class="lead-date">{{ chat.started_at.strftime('%b %d, %Y %I:%M %p') if chat.started_at else '' }}</span>
+                    <form method="POST" action="/chat/delete/{{ chat.id }}" style="display:inline;margin-left:10px;" onsubmit="event.stopPropagation();return confirm('Delete this transcript?');">
+                        <button type="submit" class="dash-btn dash-btn-delete" style="font-size:11px;padding:3px 10px;">Delete</button>
+                    </form>
+                </div>
+                <div class="lead-full">
+                    <div class="chat-transcript" id="chat-{{ chat.id }}"></div>
+                    <script>
+                    (function(){
+                        try {
+                            var msgs = JSON.parse('{{ chat.messages | replace("\\", "\\\\") | replace("'", "\\'") | safe }}');
+                            var el = document.getElementById('chat-{{ chat.id }}');
+                            var html = '';
+                            for(var i=0;i<msgs.length;i++){
+                                if(msgs[i].role==='user') html+='<p><strong style="color:#6C2BD9;">Visitor:</strong> '+msgs[i].content+'</p>';
+                                else html+='<p><strong>Assistant:</strong> '+msgs[i].content+'</p>';
+                            }
+                            el.innerHTML=html;
+                        } catch(e){ console.log(e); }
+                    })();
+                    </script>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color:#999;text-align:center;padding:40px 0;">No chat transcripts yet.</p>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.dashboard { max-width: 900px; margin: 30px auto; padding: 0 20px; }
+.dashboard h1 { color: #2d1d36; margin-bottom: 20px; }
+.dash-tabs { display: flex; gap: 8px; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 10px; flex-wrap: wrap; }
+.tab-btn { background: none; border: none; padding: 10px 20px; font-size: 15px; font-weight: 600; color: #999; cursor: pointer; border-radius: 6px 6px 0 0; }
+.tab-btn.active { color: #6C2BD9; background: rgba(108,43,217,0.08); }
+.tab-btn:hover { color: #6C2BD9; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.dash-btn-add { background: #6C2BD9; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; }
+.dash-vehicle-list { display: flex; flex-direction: column; gap: 12px; }
+.dash-vehicle-row { display: flex; align-items: center; gap: 15px; background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+.dash-expired { opacity: 0.6; }
+.dash-vehicle-photo { width: 100px; height: 70px; flex-shrink: 0; border-radius: 6px; overflow: hidden; background: #f5f5f5; }
+.dash-vehicle-photo img { width: 100%; height: 100%; object-fit: cover; }
+.dash-no-photo { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #ccc; font-size: 11px; }
+.dash-vehicle-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.dash-vehicle-info strong { font-size: 15px; color: #333; }
+.dash-price { color: #6C2BD9; font-weight: 700; font-size: 16px; }
+.dash-badge { font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 4px; display: inline-block; width: fit-content; }
+.dash-badge-active { background: #f0fdf4; color: #38a169; }
+.dash-badge-expired { background: #fef2f2; color: #e53e3e; }
+.dash-actions { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; }
+.dash-btn { padding: 6px 14px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 600; border: none; cursor: pointer; display: inline-block; }
+.dash-btn-edit { background: #4CAF50; color: white; }
+.dash-btn-share { background: #6C2BD9; color: white; }
+.dash-btn-renew { background: #f59e0b; color: white; }
+.dash-btn-delete { background: #e53e3e; color: white; }
+.dash-leads-list { display: flex; flex-direction: column; gap: 10px; }
+.dash-lead-row { background: #fff; border: 1px solid #eee; border-radius: 10px; padding: 15px; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+.dash-lead-row:hover { border-color: #6C2BD9; }
+.lead-summary { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.lead-summary strong { color: #333; font-size: 15px; }
+.lead-contact { color: #666; font-size: 13px; }
+.lead-date { color: #999; font-size: 12px; margin-left: auto; }
+.lead-full { max-height: 0; overflow: hidden; transition: max-height 0.3s; }
+.lead-full.open { max-height: 500px; padding-top: 10px; }
+.lead-message { color: #555; font-size: 14px; line-height: 1.5; background: #f9f9f9; padding: 10px; border-radius: 6px; margin: 8px 0; }
+.lead-source { color: #999; font-size: 12px; }
+.chat-transcript p { margin: 6px 0; font-size: 14px; line-height: 1.5; }
+@media (max-width: 768px) {
+    .dash-vehicle-row { flex-direction: column; align-items: flex-start; }
+    .dash-vehicle-photo { width: 100%; height: 150px; }
+    .dash-actions { width: 100%; justify-content: flex-start; }
+    .lead-date { margin-left: 0; }
+}
+</style>
+<script>
+function showTab(name) {
+    document.querySelectorAll('.tab-content').forEach(function(t){ t.classList.remove('active'); });
+    document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
+    document.getElementById('tab-'+name).classList.add('active');
+    event.target.classList.add('active');
+}
+</script>
+{% endblock %}

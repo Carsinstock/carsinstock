@@ -69,6 +69,7 @@
             </button>
             <div class="nav-links">
                 {% if session.get('user_id') %}
+                    <a href="/dashboard" style="font-weight:700;">Dashboard</a>
                     <a href="/vehicles/add" class="nav-add-vehicle">+ Add Vehicle</a>
                     <a href="/customers/list">My Customers</a>
                     {% if session.get('slug') %}

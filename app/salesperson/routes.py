@@ -506,6 +506,52 @@ def register_routes(bp):
             return jsonify({"success": True, "email": email})
         return jsonify({"success": False, "error": "Could not draft email"}), 500
 
+    @bp.route("/dashboard")
+    @login_required
+    def dashboard():
+        from app.models.salesperson import Salesperson
+        from app.models.vehicle import Vehicle
+        from app.models.customer import Customer
+        from app.models.chat_conversation import ChatConversation
+        from app.models import db
+        from datetime import datetime
+        import json
+        sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
+        if not sp:
+            flash("Set up your profile first.", "error")
+            return redirect(url_for("salesperson.profile_setup"))
+        # My Vehicles
+        vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id).order_by(Vehicle.created_at.desc()).all()
+        active_vehicles = [v for v in vehicles if not v.is_expired]
+        expired_vehicles = [v for v in vehicles if v.is_expired]
+        # My Leads
+        from app.models.lead import Lead
+        leads = Lead.query.filter_by(salesperson_id=sp.salesperson_id).order_by(Lead.created_at.desc()).all()
+        # Chat Transcripts
+        chats = ChatConversation.query.filter_by(salesperson_id=sp.salesperson_id).order_by(ChatConversation.started_at.desc()).all()
+        return render_template("salesperson/dashboard.html", sp=sp,
+            active_vehicles=active_vehicles, expired_vehicles=expired_vehicles,
+            leads=leads, chats=chats)
+
+    @bp.route("/chat/delete/<int:chat_id>", methods=["POST"])
+    @login_required
+    def delete_chat(chat_id):
+        from app.models.chat_conversation import ChatConversation
+        from app.models.salesperson import Salesperson
+        from app.models import db
+        sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
+        if not sp:
+            flash("Profile not found.", "error")
+            return redirect("/dashboard")
+        chat = ChatConversation.query.get_or_404(chat_id)
+        if chat.salesperson_id != sp.salesperson_id:
+            flash("Permission denied.", "error")
+            return redirect("/dashboard")
+        db.session.delete(chat)
+        db.session.commit()
+        flash("Chat transcript deleted.", "success")
+        return redirect("/dashboard")
+
     @bp.route("/api/chatbot", methods=["POST"])
     def chatbot_api():
         from app.utils.ai import chatbot_response
