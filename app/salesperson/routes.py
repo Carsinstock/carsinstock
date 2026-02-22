@@ -533,6 +533,83 @@ def register_routes(bp):
             active_vehicles=active_vehicles, expired_vehicles=expired_vehicles,
             leads=leads, chats=chats)
 
+    @bp.route("/customers/import", methods=["GET", "POST"])
+    @login_required
+    def import_customers():
+        from app.models.salesperson import Salesperson
+        from app.models.customer import Customer
+        from app.models import db
+        import csv, io, re
+        sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
+        if not sp:
+            flash("Set up your profile first.", "error")
+            return redirect(url_for("salesperson.profile_setup"))
+        if request.method == "POST":
+            paste_data = request.form.get("paste_emails", "").strip()
+            if paste_data:
+                lines = [l.strip() for l in paste_data.splitlines() if l.strip()]
+                imported = 0
+                skipped = 0
+                for line in lines:
+                    email = line.strip().lower()
+                    if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+                        skipped += 1
+                        continue
+                    existing = Customer.query.filter_by(salesperson_id=sp.salesperson_id, email=email).first()
+                    if existing:
+                        skipped += 1
+                        continue
+                    c = Customer(salesperson_id=sp.salesperson_id, name=email.split("@")[0], email=email)
+                    db.session.add(c)
+                    imported += 1
+                db.session.commit()
+                flash(f"{imported} contacts imported. {skipped} skipped (duplicates or invalid).", "success")
+                return redirect(url_for("salesperson.my_customers"))
+            file = request.files.get("csv_file")
+            if not file or not file.filename:
+                flash("Please select a CSV file.", "error")
+                return redirect(url_for("salesperson.import_customers"))
+            if not file.filename.endswith(".csv"):
+                flash("Only .csv files are accepted.", "error")
+                return redirect(url_for("salesperson.import_customers"))
+            try:
+                stream = io.StringIO(file.stream.read().decode("utf-8"))
+                reader = csv.DictReader(stream)
+                email_col = name_col = phone_col = notes_col = None
+                for h in (reader.fieldnames or []):
+                    hl = h.strip().lower()
+                    if hl in ("email", "e-mail", "email_address", "emailaddress"): email_col = h
+                    elif hl in ("name", "full_name", "fullname", "customer_name", "contact"): name_col = h
+                    elif hl in ("phone", "phone_number", "phonenumber", "mobile", "cell"): phone_col = h
+                    elif hl in ("notes", "note", "comments", "comment"): notes_col = h
+                if not email_col:
+                    flash("CSV must have an Email column.", "error")
+                    return redirect(url_for("salesperson.import_customers"))
+                imported = 0
+                skipped = 0
+                for row in reader:
+                    email = row.get(email_col, "").strip().lower()
+                    if not email or not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+                        skipped += 1
+                        continue
+                    existing = Customer.query.filter_by(salesperson_id=sp.salesperson_id, email=email).first()
+                    if existing:
+                        skipped += 1
+                        continue
+                    name = row.get(name_col, "").strip() if name_col else email.split("@")[0]
+                    phone = row.get(phone_col, "").strip() if phone_col else ""
+                    notes = row.get(notes_col, "").strip() if notes_col else ""
+                    c = Customer(salesperson_id=sp.salesperson_id, name=name or email.split("@")[0], email=email, phone=phone, notes=notes)
+                    db.session.add(c)
+                    imported += 1
+                db.session.commit()
+                flash(f"{imported} contacts imported. {skipped} skipped (duplicates or invalid).", "success")
+                return redirect(url_for("salesperson.my_customers"))
+            except Exception as e:
+                flash(f"Error reading CSV: {str(e)}", "error")
+                return redirect(url_for("salesperson.import_customers"))
+        return render_template("salesperson/import_customers.html")
+
     @bp.route("/chat/delete/<int:chat_id>", methods=["POST"])
     @login_required
     def delete_chat(chat_id):

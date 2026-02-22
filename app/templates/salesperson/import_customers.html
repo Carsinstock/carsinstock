@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width:650px;margin:30px auto;padding:0 20px;">
+    <h1 style="color:#2d1d36;margin-bottom:5px;">Import Contacts</h1>
+    <p style="color:#666;margin-bottom:25px;">Add your customers in bulk — no typing one by one.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}{% for category, message in messages %}
+    <div style="padding:12px 16px;border-radius:8px;margin-bottom:15px;background:{{ '#f0fdf4' if category == 'success' else '#fef2f2' }};color:{{ '#16a34a' if category == 'success' else '#dc2626' }};border:1px solid {{ '#bbf7d0' if category == 'success' else '#fecaca' }};font-size:14px;">{{ message }}</div>
+    {% endfor %}{% endif %}
+    {% endwith %}
+
+    <!-- EASIEST WAY -->
+    <div style="background:white;border:2px solid #6C2BD9;border-radius:12px;padding:25px;margin-bottom:20px;">
+        <h2 style="font-size:18px;color:#6C2BD9;margin:0 0 10px;">Easiest Way: Paste Emails</h2>
+        <p style="color:#666;font-size:14px;margin-bottom:15px;">Just paste your customers' email addresses below — one per line. That's it.</p>
+        <form method="POST" action="/customers/import">
+            <textarea name="paste_emails" rows="6" placeholder="john@gmail.com&#10;mike@yahoo.com&#10;sarah@hotmail.com" style="width:100%;padding:12px;border:2px solid #ddd;border-radius:8px;font-size:15px;font-family:Arial,sans-serif;box-sizing:border-box;resize:vertical;"></textarea>
+            <br><br>
+            <button type="submit" style="padding:14px 30px;background:#6C2BD9;color:white;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;width:100%;">Import These Emails</button>
+        </form>
+    </div>
+
+    <!-- CSV UPLOAD -->
+    <div style="background:white;border:1px solid #eee;border-radius:12px;padding:25px;margin-bottom:20px;">
+        <h2 style="font-size:18px;color:#333;margin:0 0 10px;">Upload a Spreadsheet (CSV)</h2>
+        <p style="color:#666;font-size:14px;margin-bottom:15px;">If you have a spreadsheet with names, emails, and phone numbers, you can upload it here.</p>
+
+        <div style="background:#f8f6ff;border-radius:8px;padding:18px;margin-bottom:20px;">
+            <p style="color:#333;font-size:15px;font-weight:600;margin:0 0 12px;">How to create a CSV file (step by step):</p>
+            <p style="color:#555;font-size:14px;line-height:1.8;margin:0;">
+                <strong>Step 1:</strong> Open Excel or Google Sheets<br>
+                <strong>Step 2:</strong> In Row 1, type these column headers:<br>
+            </p>
+            <div style="background:white;border:1px solid #ddd;border-radius:6px;padding:10px 14px;margin:10px 0;font-family:monospace;font-size:14px;">
+                Name &nbsp; | &nbsp; Email &nbsp; | &nbsp; Phone
+            </div>
+            <p style="color:#555;font-size:14px;line-height:1.8;margin:0;">
+                <strong>Step 3:</strong> Fill in your customers starting from Row 2<br>
+                <strong>Step 4:</strong> Go to File &gt; Save As &gt; choose <strong>"CSV"</strong> format<br>
+                <strong>Step 5:</strong> Upload that file below
+            </p>
+        </div>
+
+        <p style="color:#6C2BD9;font-size:14px;margin-bottom:15px;">
+            <a href="/customers/sample-csv" style="color:#6C2BD9;font-weight:600;text-decoration:underline;">Download Sample CSV</a> — open it in Excel, replace the example data with yours, save, and upload.
+        </p>
+
+        <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:12px;margin-bottom:15px;">
+            <p style="color:#999;font-size:12px;margin:0 0 4px;">Example of what your spreadsheet should look like:</p>
+            <table style="width:100%;font-size:13px;border-collapse:collapse;">
+                <tr style="background:#f0f0f0;">
+                    <th style="text-align:left;padding:6px 10px;border:1px solid #ddd;">Name</th>
+                    <th style="text-align:left;padding:6px 10px;border:1px solid #ddd;">Email</th>
+                    <th style="text-align:left;padding:6px 10px;border:1px solid #ddd;">Phone</th>
+                </tr>
+                <tr>
+                    <td style="padding:6px 10px;border:1px solid #ddd;">John Smith</td>
+                    <td style="padding:6px 10px;border:1px solid #ddd;">john@gmail.com</td>
+                    <td style="padding:6px 10px;border:1px solid #ddd;">555-123-4567</td>
+                </tr>
+                <tr>
+                    <td style="padding:6px 10px;border:1px solid #ddd;">Maria Garcia</td>
+                    <td style="padding:6px 10px;border:1px solid #ddd;">maria@yahoo.com</td>
+                    <td style="padding:6px 10px;border:1px solid #ddd;">555-987-6543</td>
+                </tr>
+            </table>
+        </div>
+
+        <form method="POST" action="/customers/import" enctype="multipart/form-data">
+            <input type="file" name="csv_file" accept=".csv" style="margin-bottom:15px;font-size:14px;">
+            <br>
+            <button type="submit" style="padding:14px 30px;background:#4CAF50;color:white;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;width:100%;">Upload & Import</button>
+        </form>
+    </div>
+
+    <p style="text-align:center;margin-top:20px;"><a href="/customers/list" style="color:#6C2BD9;text-decoration:none;font-size:14px;">&larr; Back to My Customers</a></p>
+</div>
+{% endblock %}

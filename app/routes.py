@@ -18,6 +18,12 @@ def customers():
         return redirect('/customers/list')
     return render_template('customers.html')
 
+@main.route('/customers/sample-csv')
+def sample_csv():
+    from flask import Response
+    csv_content = "Name,Email,Phone\nJohn Smith,john@gmail.com,555-123-4567\nMaria Garcia,maria@yahoo.com,555-987-6543\nBob Johnson,bob@hotmail.com,555-456-7890\n"
+    return Response(csv_content, mimetype='text/csv', headers={'Content-Disposition': 'attachment;filename=sample_contacts.csv'})
+
 @main.route('/search-cars')
 def search_cars():
     from app.models.vehicle import Vehicle
