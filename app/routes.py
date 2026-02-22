@@ -59,7 +59,7 @@ def public_profile(slug):
     from app.models.salesperson import Salesperson
     sp = Salesperson.query.filter_by(profile_url_slug=slug).first()
     if not sp:
-        return render_template('index.html')
+        return render_template('404.html'), 404
     from app.models.vehicle import Vehicle
     from datetime import datetime
     is_owner = (session.get('user_id') == sp.user_id)

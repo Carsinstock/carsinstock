@@ -37,7 +37,11 @@
     {% else %}
     <div style="text-align:center; padding:40px; color:#999;">
         <p style="font-size:18px;">No customers yet</p>
-        <p>Start building your contact list by adding customers.</p>
+        <p>Start building your contact list — import a spreadsheet or add them one by one.</p>
+        <div style="margin-top:20px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+            <a href="/customers/import" style="padding:12px 24px;background:#6C2BD9;color:white;border-radius:8px;text-decoration:none;font-weight:600;">Import Contacts</a>
+            <a href="/customers/add" style="padding:12px 24px;background:#4CAF50;color:white;border-radius:8px;text-decoration:none;font-weight:600;">+ Add Customer</a>
+        </div>
     </div>
     {% endif %}
 
