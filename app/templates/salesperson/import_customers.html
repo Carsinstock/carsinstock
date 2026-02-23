@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 <div style="max-width:650px;margin:30px auto;padding:0 20px;">
-    <h1 style="color:#2d1d36;margin-bottom:5px;">Import Contacts</h1>
+    <h1 style="color:#1E293B;margin-bottom:5px;">Import Contacts</h1>
     <p style="color:#666;margin-bottom:25px;">Add your customers in bulk — no typing one by one.</p>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -11,13 +11,13 @@
     {% endwith %}
 
     <!-- EASIEST WAY -->
-    <div style="background:white;border:2px solid #6C2BD9;border-radius:12px;padding:25px;margin-bottom:20px;">
-        <h2 style="font-size:18px;color:#6C2BD9;margin:0 0 10px;">Easiest Way: Paste Emails</h2>
+    <div style="background:white;border:2px solid #00C851;border-radius:12px;padding:25px;margin-bottom:20px;">
+        <h2 style="font-size:18px;color:#00C851;margin:0 0 10px;">Easiest Way: Paste Emails</h2>
         <p style="color:#666;font-size:14px;margin-bottom:15px;">Just paste your customers' email addresses below — one per line. That's it.</p>
         <form method="POST" action="/customers/import">
             <textarea name="paste_emails" rows="6" placeholder="john@gmail.com&#10;mike@yahoo.com&#10;sarah@hotmail.com" style="width:100%;padding:12px;border:2px solid #ddd;border-radius:8px;font-size:15px;font-family:Arial,sans-serif;box-sizing:border-box;resize:vertical;"></textarea>
             <br><br>
-            <button type="submit" style="padding:14px 30px;background:#6C2BD9;color:white;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;width:100%;">Import These Emails</button>
+            <button type="submit" style="padding:14px 30px;background:#00C851;color:white;border:none;border-radius:8px;font-size:16px;font-weight:600;cursor:pointer;width:100%;">Import These Emails</button>
         </form>
     </div>
 
@@ -42,8 +42,8 @@
             </p>
         </div>
 
-        <p style="color:#6C2BD9;font-size:14px;margin-bottom:15px;">
-            <a href="/customers/sample-csv" style="color:#6C2BD9;font-weight:600;text-decoration:underline;">Download Sample CSV</a> — open it in Excel, replace the example data with yours, save, and upload.
+        <p style="color:#00C851;font-size:14px;margin-bottom:15px;">
+            <a href="/customers/sample-csv" style="color:#00C851;font-weight:600;text-decoration:underline;">Download Sample CSV</a> — open it in Excel, replace the example data with yours, save, and upload.
         </p>
 
         <div style="background:#fff;border:1px solid #ddd;border-radius:8px;padding:12px;margin-bottom:15px;">
@@ -74,6 +74,6 @@
         </form>
     </div>
 
-    <p style="text-align:center;margin-top:20px;"><a href="/customers/list" style="color:#6C2BD9;text-decoration:none;font-size:14px;">&larr; Back to My Customers</a></p>
+    <p style="text-align:center;margin-top:20px;"><a href="/customers/list" style="color:#00C851;text-decoration:none;font-size:14px;">&larr; Back to My Customers</a></p>
 </div>
 {% endblock %}

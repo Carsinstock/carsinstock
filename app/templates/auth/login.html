@@ -22,7 +22,7 @@
                 <button type="button" class="toggle-pw" onclick="togglePW('password', this)">Show</button>
             </div>
         </div>
-        <p style="text-align:right;margin-bottom:15px;"><a href="/forgot-password" style="color:#6C2BD9;font-size:13px;text-decoration:none;">Forgot password?</a></p>
+        <p style="text-align:right;margin-bottom:15px;"><a href="/forgot-password" style="color:#00C851;font-size:13px;text-decoration:none;">Forgot password?</a></p>
         <button type="submit" class="btn-primary">Log In</button>
     </form>
     {% if show_resend %}
@@ -30,7 +30,7 @@
         <p style="color:#92400e;font-size:14px;margin-bottom:10px;">Didn't get the email? Check your spam folder or resend it.</p>
         <form method="POST" action="/resend-verification" style="display:inline;">
             <input type="hidden" name="email" value="{{ email }}">
-            <button type="submit" style="background:#6C2BD9;color:white;border:none;padding:8px 20px;border-radius:6px;font-size:14px;cursor:pointer;">Resend Verification Email</button>
+            <button type="submit" style="background:#00C851;color:white;border:none;padding:8px 20px;border-radius:6px;font-size:14px;cursor:pointer;">Resend Verification Email</button>
         </form>
     </div>
     {% endif %}
@@ -38,20 +38,20 @@
 </div>
 <style>
     .auth-container { max-width: 480px; margin: 40px auto; padding: 40px; background: #fff; border-radius: 12px; box-shadow: 0 2px 16px rgba(45,29,54,0.10); }
-    .auth-container h1 { color: #2d1d36; margin-bottom: 8px; font-size: 28px; }
+    .auth-container h1 { color: #1E293B; margin-bottom: 8px; font-size: 28px; }
     .auth-subtitle { color: #666; margin-bottom: 30px; font-size: 14px; }
     .form-group { margin-bottom: 20px; }
-    .form-group label { display: block; margin-bottom: 6px; font-weight: 600; color: #2d1d36; font-size: 14px; }
+    .form-group label { display: block; margin-bottom: 6px; font-weight: 600; color: #1E293B; font-size: 14px; }
     .form-group input { width: 100%; padding: 12px 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; transition: border-color 0.2s; box-sizing: border-box; }
-    .form-group input:focus { outline: none; border-color: #2d1d36; }
+    .form-group input:focus { outline: none; border-color: #1E293B; }
     .password-wrapper { position: relative; }
     .password-wrapper input { padding-right: 70px; }
     .toggle-pw { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: 1px solid #ccc; border-radius: 4px; padding: 4px 10px; font-size: 12px; color: #666; cursor: pointer; }
-    .toggle-pw:hover { border-color: #2d1d36; color: #2d1d36; }
-    .btn-primary { width: 100%; padding: 14px; background: #2d1d36; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-    .btn-primary:hover { background: #3d2a4a; }
+    .toggle-pw:hover { border-color: #1E293B; color: #1E293B; }
+    .btn-primary { width: 100%; padding: 14px; background: #1E293B; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .btn-primary:hover { background: #2a3a4f; }
     .auth-footer { text-align: center; margin-top: 20px; color: #666; font-size: 14px; }
-    .auth-footer a { color: #2d1d36; font-weight: 600; text-decoration: none; }
+    .auth-footer a { color: #1E293B; font-weight: 600; text-decoration: none; }
     .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
     .alert-error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
     .alert-success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }

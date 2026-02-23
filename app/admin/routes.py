@@ -138,8 +138,8 @@ def register_admin_routes(bp):
                     unsub_url = f"https://carsinstock.com/recruitment/unsubscribe/{p.id}"
                     full_html = f"""
                     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
-                        <div style="text-align:center;padding:20px 0;border-bottom:3px solid #6C2BD9;">
-                            <h1 style="color:#6C2BD9;margin:0;font-size:28px;">CarsInStock</h1>
+                        <div style="text-align:center;padding:20px 0;border-bottom:3px solid #00C851;">
+                            <h1 style="color:#00C851;margin:0;font-size:28px;">CarsInStock</h1>
                         </div>
                         <div style="padding:20px;">{body_html}</div>
                         <div style="border-top:1px solid #eee;padding:20px 0;text-align:center;">

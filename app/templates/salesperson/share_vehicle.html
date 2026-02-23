@@ -7,14 +7,14 @@
     <img src="{{ vehicle.image_url }}" style="width:100%; border-radius:10px; margin-bottom:10px;">
     {% endif %}
     <p style="font-size:18px; font-weight:600; margin:5px 0;">{{ vehicle.year }} {{ vehicle.make }} {{ vehicle.model }} {{ vehicle.trim or '' }}</p>
-    <p style="color:#6C2BD9; font-size:20px; font-weight:bold; margin:5px 0;">${{ "{:,.0f}".format(vehicle.price) }}</p>
+    <p style="color:#00C851; font-size:20px; font-weight:bold; margin:5px 0;">${{ "{:,.0f}".format(vehicle.price) }}</p>
 
     <form method="POST" style="margin-top:20px;">
         {% if customers %}
         <div style="border:1px solid #ddd; border-radius:10px; padding:15px; margin-bottom:15px; background:#f9f9f9;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                 <label style="font-size:14px; font-weight:600; color:#333;">My Customers</label>
-                <label style="font-size:13px; color:#6C2BD9; cursor:pointer;">
+                <label style="font-size:13px; color:#00C851; cursor:pointer;">
                     <input type="checkbox" id="selectAll" onclick="toggleAll()" style="margin-right:4px;">Select All ({{ customers|length }})
                 </label>
             </div>
@@ -40,7 +40,7 @@
         <textarea name="message" rows="3" placeholder="Hey, check out this car I have for you!"
             style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:15px; box-sizing:border-box; margin-top:5px; font-family:Arial;"></textarea>
 
-        <button type="submit" style="width:100%; padding:14px; background:#6C2BD9; color:white; border:none; border-radius:10px; font-size:16px; font-weight:600; cursor:pointer; margin-top:20px;">📧 Send to All</button>
+        <button type="submit" style="width:100%; padding:14px; background:#00C851; color:white; border:none; border-radius:10px; font-size:16px; font-weight:600; cursor:pointer; margin-top:20px;">📧 Send to All</button>
     </form>
 
     <a href="/{{ sp.profile_url_slug }}" style="display:block; text-align:center; margin-top:15px; color:#666;">← Back to storefront</a>

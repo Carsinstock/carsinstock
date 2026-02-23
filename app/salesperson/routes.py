@@ -725,7 +725,7 @@ def register_routes(bp):
         transcript_html = ""
         for m in msgs:
             if m["role"] == "user":
-                transcript_html += f'<p style="margin:8px 0;"><strong style="color:#6C2BD9;">Visitor:</strong> {m["content"]}</p>'
+                transcript_html += f'<p style="margin:8px 0;"><strong style="color:#00C851;">Visitor:</strong> {m["content"]}</p>'
             else:
                 transcript_html += f'<p style="margin:8px 0;"><strong style="color:#333;">Assistant:</strong> {m["content"]}</p>'
         visitor_info = ""
@@ -739,8 +739,8 @@ def register_routes(bp):
         time_str = convo.started_at.strftime("%B %d, %Y at %I:%M %p UTC") if convo.started_at else "Unknown"
         html_content = f"""
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <div style="text-align: center; padding: 20px 0; border-bottom: 3px solid #6C2BD9;">
-                <h1 style="color: #6C2BD9; margin: 0; font-size: 28px;">CarsInStock</h1>
+            <div style="text-align: center; padding: 20px 0; border-bottom: 3px solid #00C851;">
+                <h1 style="color: #00C851; margin: 0; font-size: 28px;">CarsInStock</h1>
             </div>
             <div style="padding: 30px 20px;">
                 <h2 style="color: #333; margin-bottom: 10px;">New Chat Transcript</h2>

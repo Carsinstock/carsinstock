@@ -17,10 +17,10 @@
         <p class="profile-bio">{{ sp.bio }}</p>
         {% endif %}
         {% if sp.phone %}
-        <p class="profile-contact"><strong>Phone:</strong> <a href="tel:{{ sp.phone }}" style="color:#6C2BD9; text-decoration:none;">{{ sp.phone }}</a></p>
+        <p class="profile-contact"><strong>Phone:</strong> <a href="tel:{{ sp.phone }}" style="color:#00C851; text-decoration:none;">{{ sp.phone }}</a></p>
         {% endif %}
         {% if sp.email %}
-        <p class="profile-contact"><strong>Email:</strong> <a href="mailto:{{ sp.email }}" style="color:#6C2BD9; text-decoration:none;">{{ sp.email }}</a></p>
+        <p class="profile-contact"><strong>Email:</strong> <a href="mailto:{{ sp.email }}" style="color:#00C851; text-decoration:none;">{{ sp.email }}</a></p>
         {% endif %}
     </div>
 
@@ -64,12 +64,12 @@
                     {% endif %}
                     {% if is_owner %}
                     <a href="/vehicles/edit/{{ v.id }}" style="display:inline-block; margin-top:8px; padding:6px 16px; background:#4CAF50; color:white; border-radius:6px; text-decoration:none; font-size:13px;">Edit</a>
-                    <a href="/vehicles/share/{{ v.id }}" style="display:inline-block; margin-top:8px; margin-left:5px; padding:6px 16px; background:#6C2BD9; color:white; border-radius:6px; text-decoration:none; font-size:13px;">📧 Share</a>
+                    <a href="/vehicles/share/{{ v.id }}" style="display:inline-block; margin-top:8px; margin-left:5px; padding:6px 16px; background:#00C851; color:white; border-radius:6px; text-decoration:none; font-size:13px;">📧 Share</a>
                     {% endif %}
                     {% if not v.is_expired %}
                     <button class="interested-btn" onclick="showLeadForm({{ v.id }}, '{{ v.year }} {{ v.make }} {{ v.model }}')">I'm Interested</button>
                     {% elif is_owner %}
-                    <a href="/vehicles/edit/{{ v.id }}" style="display:inline-block; margin-top:8px; padding:8px 20px; background:#6C2BD9; color:white; border-radius:6px; text-decoration:none; font-size:13px; font-weight:bold;">Renew Listing</a>
+                    <a href="/vehicles/edit/{{ v.id }}" style="display:inline-block; margin-top:8px; padding:8px 20px; background:#00C851; color:white; border-radius:6px; text-decoration:none; font-size:13px; font-weight:bold;">Renew Listing</a>
                     {% endif %}
                 </div>
             </div>
@@ -127,19 +127,19 @@ document.getElementById('leadModal').addEventListener('click', function(e) {
 <style>
 .profile-page { max-width: 800px; margin: 40px auto; padding: 0 20px; }
 .profile-header { background: #fff; border-radius: 12px; padding: 40px; text-align: center; box-shadow: 0 2px 16px rgba(45,29,54,0.10); margin-bottom: 30px; }
-.profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: #2d1d36; color: white; font-size: 36px; font-weight: 700; display: flex; justify-content: center; align-items: center; margin: 0 auto 20px; }
-.profile-header h1 { color: #2d1d36; font-size: 32px; margin-bottom: 12px; }
+.profile-avatar { width: 80px; height: 80px; border-radius: 50%; background: #1E293B; color: white; font-size: 36px; font-weight: 700; display: flex; justify-content: center; align-items: center; margin: 0 auto 20px; }
+.profile-header h1 { color: #1E293B; font-size: 32px; margin-bottom: 12px; }
 .profile-bio { color: #555; font-size: 16px; line-height: 1.6; margin-bottom: 16px; max-width: 600px; margin-left: auto; margin-right: auto; }
 .profile-contact { color: #666; font-size: 14px; margin-bottom: 6px; }
 .profile-inventory { background: #fff; border-radius: 12px; padding: 40px; box-shadow: 0 2px 16px rgba(45,29,54,0.10); }
-.profile-inventory h2 { color: #2d1d36; font-size: 24px; margin-bottom: 24px; }
+.profile-inventory h2 { color: #1E293B; font-size: 24px; margin-bottom: 24px; }
 .vehicle-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
 .vehicle-card { border: 1px solid #e0e0e0; border-radius: 10px; overflow: hidden; background: #fff; transition: box-shadow 0.2s; }
 .vehicle-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.12); }
 .vehicle-img { width: 100%; height: 200px; object-fit: cover; }
 .vehicle-img-placeholder { width: 100%; height: 200px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #999; }
 .vehicle-info { padding: 16px; }
-.vehicle-info h3 { color: #2d1d36; font-size: 18px; margin-bottom: 8px; }
+.vehicle-info h3 { color: #1E293B; font-size: 18px; margin-bottom: 8px; }
 .vehicle-price { color: #1a73e8; font-size: 22px; font-weight: 700; margin-bottom: 8px; }
 .vehicle-detail { color: #666; font-size: 14px; margin-bottom: 4px; }
 .interested-btn { width: 100%; padding: 12px; background: #1a73e8; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 12px; transition: background 0.2s; }
@@ -150,13 +150,13 @@ document.getElementById('leadModal').addEventListener('click', function(e) {
 .lead-modal-content { background: #fff; border-radius: 16px; padding: 32px; max-width: 440px; width: 90%; position: relative; }
 .lead-close { position: absolute; top: 12px; right: 16px; font-size: 28px; cursor: pointer; color: #999; }
 .lead-close:hover { color: #333; }
-.lead-modal-content h2 { color: #2d1d36; font-size: 24px; margin-bottom: 4px; }
+.lead-modal-content h2 { color: #1E293B; font-size: 24px; margin-bottom: 4px; }
 .lead-vehicle-name { color: #1a73e8; font-size: 16px; font-weight: 600; margin-bottom: 20px; }
 .lead-field { margin-bottom: 14px; }
 .lead-field label { display: block; font-size: 14px; font-weight: 600; color: #333; margin-bottom: 4px; }
 .lead-field input, .lead-field textarea { width: 100%; padding: 10px 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 15px; }
 .lead-field input:focus, .lead-field textarea:focus { border-color: #1a73e8; outline: none; }
-.lead-submit-btn { width: 100%; padding: 14px; background: #2d1d36; color: white; border: none; border-radius: 10px; font-size: 17px; font-weight: 700; cursor: pointer; margin-top: 8px; }
+.lead-submit-btn { width: 100%; padding: 14px; background: #1E293B; color: white; border: none; border-radius: 10px; font-size: 17px; font-weight: 700; cursor: pointer; margin-top: 8px; }
 .lead-submit-btn:hover { background: #3d2d46; }
 
 .alert { padding: 14px 20px; border-radius: 10px; margin-bottom: 20px; font-size: 15px; }
@@ -165,11 +165,11 @@ document.getElementById('leadModal').addEventListener('click', function(e) {
 .coming-soon { color: #999; font-style: italic; text-align: center; padding: 40px 0; }
 </style>
 <!-- AI Chatbot Widget -->
-<div id="chatToggle" onclick="toggleChat()" style="position:fixed;bottom:20px;right:20px;width:60px;height:60px;background:linear-gradient(135deg,#6C2BD9,#1a73e8);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.25);z-index:999;transition:transform 0.2s;">
+<div id="chatToggle" onclick="toggleChat()" style="position:fixed;bottom:20px;right:20px;width:60px;height:60px;background:linear-gradient(135deg,#00C851,#1a73e8);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.25);z-index:999;transition:transform 0.2s;">
     <span style="color:white;font-size:28px;">&#x1F4AC;</span>
 </div>
 <div id="chatBox" style="display:none;position:fixed;bottom:90px;right:20px;width:340px;max-height:450px;background:white;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.2);z-index:999;overflow:hidden;flex-direction:column;">
-    <div style="background:linear-gradient(135deg,#6C2BD9,#1a73e8);color:white;padding:16px;display:flex;justify-content:space-between;align-items:center;">
+    <div style="background:linear-gradient(135deg,#00C851,#1a73e8);color:white;padding:16px;display:flex;justify-content:space-between;align-items:center;">
         <div>
             <div style="font-weight:700;font-size:15px;">Chat with {{ sp.display_name }}</div>
             <div style="font-size:12px;opacity:0.8;">Ask me about any vehicle!</div>
@@ -183,7 +183,7 @@ document.getElementById('leadModal').addEventListener('click', function(e) {
     </div>
     <div style="padding:10px;border-top:1px solid #eee;display:flex;gap:8px;">
         <input type="text" id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendChat()" style="flex:1;padding:10px 14px;border:1px solid #ddd;border-radius:20px;font-size:14px;outline:none;">
-        <button onclick="sendChat()" style="background:linear-gradient(135deg,#6C2BD9,#1a73e8);color:white;border:none;border-radius:50%;width:38px;height:38px;cursor:pointer;font-size:16px;">&#x2192;</button>
+        <button onclick="sendChat()" style="background:linear-gradient(135deg,#00C851,#1a73e8);color:white;border:none;border-radius:50%;width:38px;height:38px;cursor:pointer;font-size:16px;">&#x2192;</button>
     </div>
 </div>
 

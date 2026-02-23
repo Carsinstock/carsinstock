@@ -48,8 +48,8 @@ def send_welcome_email(to_email):
     subject = "Welcome to CarsInStock!"
     html_content = """
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <div style="text-align: center; padding: 20px 0; border-bottom: 3px solid #6C2BD9;">
-            <h1 style="color: #6C2BD9; margin: 0; font-size: 28px;">CarsInStock</h1>
+        <div style="text-align: center; padding: 20px 0; border-bottom: 3px solid #00C851;">
+            <h1 style="color: #00C851; margin: 0; font-size: 28px;">CarsInStock</h1>
             <p style="color: #666; margin: 5px 0 0 0; font-size: 14px;">Real Salespeople. Real Inventory. Real Fresh.</p>
         </div>
         <div style="padding: 30px 0;">
@@ -68,7 +68,7 @@ def send_welcome_email(to_email):
             </p>
             <div style="text-align: center; padding: 20px 0;">
                 <a href="https://carsinstock.com/login"
-                   style="background-color: #6C2BD9; color: white; padding: 14px 32px;
+                   style="background-color: #00C851; color: white; padding: 14px 32px;
                           text-decoration: none; border-radius: 6px; font-size: 16px;
                           font-weight: bold; display: inline-block;">
                     Log In Now
@@ -123,7 +123,7 @@ def send_vehicle_email(to_emails, vehicle, salesperson, personal_message="", cus
 
     msg_html = ""
     if personal_message:
-        msg_html = f'<p style="color:#555; font-size:16px; line-height:1.6; font-style:italic; border-left:3px solid #6C2BD9; padding-left:12px;">&ldquo;{personal_message}&rdquo;</p>'
+        msg_html = f'<p style="color:#555; font-size:16px; line-height:1.6; font-style:italic; border-left:3px solid #00C851; padding-left:12px;">&ldquo;{personal_message}&rdquo;</p>'
 
     price_str = f"${vehicle.price:,.0f}" if vehicle.price else "Contact for price"
     mileage_str = f"{vehicle.mileage:,} miles" if vehicle.mileage else ""
@@ -150,20 +150,20 @@ def send_vehicle_email(to_emails, vehicle, salesperson, personal_message="", cus
 
         html_content = f"""
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <div style="text-align: center; padding: 20px 0; border-bottom: 3px solid #6C2BD9;">
-                <h1 style="color: #6C2BD9; margin: 0; font-size: 28px;">CarsInStock</h1>
+            <div style="text-align: center; padding: 20px 0; border-bottom: 3px solid #00C851;">
+                <h1 style="color: #00C851; margin: 0; font-size: 28px;">CarsInStock</h1>
             </div>
             <div style="padding: 20px;">
                 {msg_html}
                 {img_html}
                 <h2 style="color: #333; margin: 10px 0 5px;">{vehicle.year} {vehicle.make} {vehicle.model} {vehicle.trim or ''}</h2>
-                <p style="color: #6C2BD9; font-size: 24px; font-weight: bold; margin: 5px 0;">{price_str}</p>
+                <p style="color: #00C851; font-size: 24px; font-weight: bold; margin: 5px 0;">{price_str}</p>
                 <p style="color: #666; font-size: 15px; margin: 5px 0;">{mileage_str}</p>
                 <p style="color: #666; font-size: 15px; margin: 5px 0;">{vehicle.exterior_color or ''} {vehicle.transmission or ''}</p>
                 <p style="color: #666; font-size: 15px; margin: 5px 0;">VIN: {vehicle.vin or 'N/A'}</p>
                 <div style="text-align: center; padding: 20px 0;">
                     <a href="{storefront_url}"
-                       style="background-color: #6C2BD9; color: white; padding: 14px 32px;
+                       style="background-color: #00C851; color: white; padding: 14px 32px;
                               text-decoration: none; border-radius: 6px; font-size: 16px;
                               font-weight: bold; display: inline-block;">
                         View on My Storefront
