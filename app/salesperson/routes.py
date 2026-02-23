@@ -355,7 +355,13 @@ def register_routes(bp):
                 flash("Please enter at least one valid email address.", "error")
                 return render_template("salesperson/share_vehicle.html", vehicle=vehicle, sp=sp, customers=customers)
 
-            sent, errors = send_vehicle_email(email_list, vehicle, sp, personal_msg)
+            # Build customer_map for unsubscribe links
+            customer_map = {}
+            if customer_ids:
+                for c in selected:
+                    if c.email:
+                        customer_map[c.email] = c.id
+            sent, errors = send_vehicle_email(email_list, vehicle, sp, personal_msg, customer_map=customer_map)
 
             if sent > 0:
                 flash(f"Vehicle sent to {sent} recipient(s)!", "success")

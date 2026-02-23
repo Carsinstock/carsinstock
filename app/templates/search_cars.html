@@ -24,7 +24,7 @@
                     {% if v.mileage %}<p class="search-card-detail">{{ "{:,}".format(v.mileage) }} miles</p>{% endif %}
                     {% if v.exterior_color %}<p class="search-card-detail">{{ v.exterior_color }}</p>{% endif %}
                     {% if v.transmission %}<p class="search-card-detail">{{ v.transmission }}</p>{% endif %}
-                    <p class="search-card-seller">Sold by: {{ v.salesperson.display_name }}</p>
+                    <p class="search-card-seller">For Sale by {{ v.salesperson.display_name }}</p>
                     <a href="/{{ v.salesperson.profile_url_slug }}" class="search-card-btn">View Storefront</a>
                 </div>
             </div>

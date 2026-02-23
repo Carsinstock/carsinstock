@@ -140,11 +140,15 @@ def submit_lead():
 
     return redirect(request.referrer or "/")
 
-@main.route('/unsubscribe/<int:customer_id>')
-def unsubscribe(customer_id):
+@main.route('/unsubscribe/<token>')
+def unsubscribe(token):
     from app.models.customer import Customer
-    customer = Customer.query.get(customer_id)
-    if customer:
-        customer.unsubscribed = True
-        db.session.commit()
-    return render_template('unsubscribe.html')
+    from app.utils.email import verify_unsubscribe_token
+    customer_id = verify_unsubscribe_token(token)
+    if customer_id:
+        customer = Customer.query.get(customer_id)
+        if customer:
+            customer.unsubscribed = True
+            db.session.commit()
+            return render_template('unsubscribe.html', name=customer.name, success=True)
+    return render_template('unsubscribe.html', name=None, success=False)

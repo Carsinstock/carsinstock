@@ -38,7 +38,10 @@ def register():
         try:
             db.session.add(new_user)
             db.session.commit()
-            send_welcome_email(email)
+            try:
+                send_welcome_email(email)
+            except Exception as email_err:
+                print(f"Welcome email failed (non-blocking): {email_err}")
             flash("Account created successfully! Please log in.", "success")
             return redirect(url_for("auth.login"))
         except Exception as e:

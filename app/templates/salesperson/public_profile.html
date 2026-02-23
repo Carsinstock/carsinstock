@@ -17,10 +17,10 @@
         <p class="profile-bio">{{ sp.bio }}</p>
         {% endif %}
         {% if sp.phone %}
-        <p class="profile-contact"><strong>Phone:</strong> {{ sp.phone }}</p>
+        <p class="profile-contact"><strong>Phone:</strong> <a href="tel:{{ sp.phone }}" style="color:#6C2BD9; text-decoration:none;">{{ sp.phone }}</a></p>
         {% endif %}
         {% if sp.email %}
-        <p class="profile-contact"><strong>Email:</strong> {{ sp.email }}</p>
+        <p class="profile-contact"><strong>Email:</strong> <a href="mailto:{{ sp.email }}" style="color:#6C2BD9; text-decoration:none;">{{ sp.email }}</a></p>
         {% endif %}
     </div>
 

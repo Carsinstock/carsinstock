@@ -1,0 +1,16 @@
+{
+  "name": "CarsInStock",
+  "short_name": "CarsInStock",
+  "description": "Real Salespeople. Real Inventory. Real Fresh.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#6C2BD9",
+  "icons": [
+    {
+      "src": "/static/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
