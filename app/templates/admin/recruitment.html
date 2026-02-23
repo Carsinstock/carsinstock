@@ -1,0 +1,44 @@
+{% extends "admin/base_admin.html" %}
+{% block content %}
+<h2 class="section-title">Recruitment</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:25px;">
+    <div style="background:white;border-radius:10px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+        <h3 style="margin-bottom:15px;font-size:16px;">Upload Prospect Emails (CSV)</h3>
+        <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="action" value="upload_csv">
+            <p style="color:#666;font-size:13px;margin-bottom:10px;">CSV format: email, name (one per row)</p>
+            <input type="file" name="csv_file" accept=".csv" style="margin-bottom:10px;font-size:14px;">
+            <br><button type="submit" class="btn btn-primary">Upload CSV</button>
+        </form>
+    </div>
+    <div style="background:white;border-radius:10px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+        <h3 style="margin-bottom:15px;font-size:16px;">Send Recruitment Email</h3>
+        <form method="POST">
+            <input type="hidden" name="action" value="send_recruitment">
+            <div class="form-group">
+                <label>Subject</label>
+                <input type="text" name="subject" placeholder="Join CarsInStock - Your Own Digital Storefront" required>
+            </div>
+            <div class="form-group">
+                <label>Body (HTML supported)</label>
+                <textarea name="body" rows="6" placeholder="Write your recruitment message..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-success" onclick="return confirm('Send to ALL prospects?')">Send to All Prospects</button>
+        </form>
+    </div>
+</div>
+<h3 class="section-title">Prospects ({{ prospects|length }})</h3>
+<table>
+    <tr><th>Email</th><th>Name</th><th>Status</th></tr>
+    {% for p in prospects %}
+    <tr>
+        <td>{{ p.email }}</td>
+        <td>{{ p.name or '-' }}</td>
+        <td><span class="badge {{ 'badge-red' if p.unsubscribed else 'badge-green' }}">{{ 'Unsubscribed' if p.unsubscribed else 'Active' }}</span></td>
+    </tr>
+    {% endfor %}
+    {% if not prospects %}
+    <tr><td colspan="3" style="text-align:center;color:#999;padding:20px;">No prospects yet. Upload a CSV to get started.</td></tr>
+    {% endif %}
+</table>
+{% endblock %}

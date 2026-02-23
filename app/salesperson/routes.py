@@ -355,6 +355,21 @@ def register_routes(bp):
                 flash("Please enter at least one valid email address.", "error")
                 return render_template("salesperson/share_vehicle.html", vehicle=vehicle, sp=sp, customers=customers)
 
+            # Rate limit: 50 blasts per day per salesperson
+            from datetime import datetime, timedelta
+            today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+            try:
+                from app.models import db as rate_db
+                blast_count = rate_db.session.execute(
+                    rate_db.text("SELECT COUNT(*) FROM email_blasts WHERE salesperson_id = :sid AND sent_at >= :today"),
+                    {"sid": sp.salesperson_id, "today": today_start}
+                ).scalar() or 0
+            except:
+                blast_count = 0
+            if blast_count >= 50:
+                flash("Daily email limit reached (50/day). Try again tomorrow.", "error")
+                return render_template("salesperson/share_vehicle.html", vehicle=vehicle, sp=sp, customers=customers)
+
             # Build customer_map for unsubscribe links
             customer_map = {}
             if customer_ids:

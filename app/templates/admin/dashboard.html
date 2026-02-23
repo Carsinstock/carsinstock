@@ -1,0 +1,21 @@
+{% extends "admin/base_admin.html" %}
+{% block content %}
+<h2 class="section-title">Dashboard</h2>
+<div class="stats-grid">
+    <div class="stat-card"><div class="num">{{ user_count }}</div><div class="label">Users</div></div>
+    <div class="stat-card"><div class="num">{{ sp_count }}</div><div class="label">Salespeople</div></div>
+    <div class="stat-card"><div class="num">{{ vehicle_count }}</div><div class="label">Vehicles</div></div>
+    <div class="stat-card"><div class="num">{{ lead_count }}</div><div class="label">Leads</div></div>
+</div>
+<h3 class="section-title">Recent Registrations</h3>
+<table>
+    <tr><th>Email</th><th>Joined</th><th>Status</th></tr>
+    {% for u in recent_users %}
+    <tr>
+        <td>{{ u.email }}</td>
+        <td>{{ u.created_at.strftime('%b %d, %Y') }}</td>
+        <td><span class="badge {{ 'badge-green' if u.is_active else 'badge-red' }}">{{ 'Active' if u.is_active else 'Suspended' }}</span></td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

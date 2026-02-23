@@ -1,0 +1,27 @@
+{% extends "admin/base_admin.html" %}
+{% block content %}
+<h2 class="section-title">Email Activity Log</h2>
+<p style="color:#666;margin-bottom:20px;">Email activity is tracked via SendGrid. <a href="https://app.sendgrid.com/email_activity" target="_blank" class="btn btn-primary">View in SendGrid Dashboard</a></p>
+<div id="email-log" style="background:white;border-radius:10px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+    <p style="color:#999;">Loading recent email activity...</p>
+</div>
+<script>
+fetch('/admin/email-log-data')
+.then(r=>r.json())
+.then(data=>{
+    if(data.messages && data.messages.length){
+        let html='<table><tr><th>To</th><th>Subject</th><th>Status</th><th>Time</th></tr>';
+        data.messages.forEach(m=>{
+            let badge = m.status==='delivered'?'badge-green':m.status==='bounce'?'badge-red':'badge-blue';
+            html+=`<tr><td>${m.to_email}</td><td>${m.subject}</td><td><span class="badge ${badge}">${m.status}</span></td><td>${new Date(m.last_event_time).toLocaleString()}</td></tr>`;
+        });
+        html+='</table>';
+        document.getElementById('email-log').innerHTML=html;
+    } else {
+        document.getElementById('email-log').innerHTML='<p>No recent email activity found.</p>';
+    }
+}).catch(()=>{
+    document.getElementById('email-log').innerHTML='<p>Could not load email activity. Check SendGrid dashboard directly.</p>';
+});
+</script>
+{% endblock %}

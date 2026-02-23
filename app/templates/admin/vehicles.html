@@ -1,0 +1,21 @@
+{% extends "admin/base_admin.html" %}
+{% block content %}
+<h2 class="section-title">All Vehicles ({{ vehicles|length }})</h2>
+<table>
+    <tr><th>Photo</th><th>Vehicle</th><th>Price</th><th>Salesperson</th><th>Listed</th><th>Actions</th></tr>
+    {% for v in vehicles %}
+    <tr>
+        <td>{% if v.image_url %}<img src="{{ v.image_url }}" style="width:60px;height:40px;object-fit:cover;border-radius:4px;">{% else %}-{% endif %}</td>
+        <td>{{ v.year }} {{ v.make }} {{ v.model }}</td>
+        <td>${{ "{:,.0f}".format(v.price) if v.price else 'N/A' }}</td>
+        <td>{{ v.salesperson.display_name if v.salesperson else 'Unknown' }}</td>
+        <td>{{ v.created_at.strftime('%b %d') }}</td>
+        <td>
+            <form method="POST" action="/admin/vehicles/{{ v.id }}/delete" style="display:inline;" onsubmit="return confirm('Delete this vehicle?')">
+                <button class="btn btn-danger" type="submit">Delete</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}
