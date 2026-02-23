@@ -18,5 +18,8 @@ class User(db.Model):
     subscription_status = db.Column(db.String(20), nullable=False, default='trial')
     trial_end_date = db.Column(db.DateTime, nullable=True)
     stripe_customer_id = db.Column(db.String(100), nullable=True)
+    email_verified = db.Column(db.Boolean, nullable=False, default=False)
+    verification_token = db.Column(db.String(100), unique=True, nullable=True)
+    verification_token_expires = db.Column(db.DateTime, nullable=True)
     reset_token = db.Column(db.String(100), unique=True, nullable=True)
     reset_token_expires = db.Column(db.DateTime, nullable=True)

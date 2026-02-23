@@ -25,6 +25,15 @@
         <p style="text-align:right;margin-bottom:15px;"><a href="/forgot-password" style="color:#6C2BD9;font-size:13px;text-decoration:none;">Forgot password?</a></p>
         <button type="submit" class="btn-primary">Log In</button>
     </form>
+    {% if show_resend %}
+    <div style="background:#fef3cd;border:1px solid #f59e0b;border-radius:8px;padding:15px;margin-bottom:15px;text-align:center;">
+        <p style="color:#92400e;font-size:14px;margin-bottom:10px;">Didn't get the email? Check your spam folder or resend it.</p>
+        <form method="POST" action="/resend-verification" style="display:inline;">
+            <input type="hidden" name="email" value="{{ email }}">
+            <button type="submit" style="background:#6C2BD9;color:white;border:none;padding:8px 20px;border-radius:6px;font-size:14px;cursor:pointer;">Resend Verification Email</button>
+        </form>
+    </div>
+    {% endif %}
     <p class="auth-footer">Don't have an account? <a href="{{ url_for('auth.register') }}">Register here</a></p>
 </div>
 <style>

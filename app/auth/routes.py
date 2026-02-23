@@ -54,15 +54,48 @@ def register():
             for error in errors:
                 flash(error, "error")
             return render_template("auth/register.html", email=email, turnstile_site_key=os.environ.get("TURNSTILE_SITE_KEY", ""))
-        new_user = User(email=email, password_hash=generate_password_hash(password))
+        verification_token = str(uuid.uuid4())
+        new_user = User(
+            email=email,
+            password_hash=generate_password_hash(password),
+            verification_token=verification_token,
+            verification_token_expires=datetime.utcnow() + timedelta(hours=24)
+        )
         try:
             db.session.add(new_user)
             db.session.commit()
+            # Send verification email
+            verify_url = f"https://carsinstock.com/verify-email/{verification_token}"
+            verify_html = f"""
+            <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+                <div style="text-align:center;padding:20px 0;border-bottom:3px solid #6C2BD9;">
+                    <h1 style="color:#6C2BD9;margin:0;font-size:28px;">CarsInStock</h1>
+                </div>
+                <div style="padding:30px 20px;">
+                    <h2 style="color:#333;">Verify Your Email</h2>
+                    <p style="color:#555;font-size:16px;line-height:1.6;">
+                        Thanks for signing up! Click the button below to verify your email and activate your account.
+                    </p>
+                    <div style="text-align:center;padding:25px 0;">
+                        <a href="{verify_url}"
+                           style="background-color:#6C2BD9;color:white;padding:14px 32px;
+                                  text-decoration:none;border-radius:6px;font-size:16px;
+                                  font-weight:bold;display:inline-block;">
+                            Verify My Email
+                        </a>
+                    </div>
+                    <p style="color:#999;font-size:13px;">This link expires in 24 hours.</p>
+                </div>
+                <div style="border-top:1px solid #eee;padding:20px 0;text-align:center;">
+                    <p style="color:#999;font-size:12px;">CarsInStock | 76 RT 37 East, Toms River, NJ 08753</p>
+                </div>
+            </div>
+            """
             try:
-                send_welcome_email(email)
+                send_email(email, "Verify Your CarsInStock Account", verify_html)
             except Exception as email_err:
-                print(f"Welcome email failed (non-blocking): {email_err}")
-            flash("Account created successfully! Please log in.", "success")
+                print(f"Verification email failed: {email_err}")
+            flash("Account created! Please check your email to verify your account.", "success")
             return redirect(url_for("auth.login"))
         except Exception as e:
             db.session.rollback()
@@ -81,6 +114,9 @@ def login():
             return render_template("auth/login.html", email=email)
         user = User.query.filter_by(email=email).first()
         if user and check_password_hash(user.password_hash, password):
+            if not user.email_verified:
+                flash("Please verify your email before logging in. Check your inbox for the verification link.", "error")
+                return render_template("auth/login.html", email=email, show_resend=True)
             session["user_id"] = user.id
             session["email"] = user.email
             from app.models.salesperson import Salesperson
@@ -103,6 +139,60 @@ def logout():
     flash("You have been logged out.", "success")
     return redirect(url_for("auth.login"))
 
+
+@auth.route("/verify-email/<token>")
+def verify_email(token):
+    user = User.query.filter_by(verification_token=token).first()
+    if not user:
+        flash("Invalid verification link.", "error")
+        return redirect(url_for("auth.login"))
+    if user.verification_token_expires and user.verification_token_expires < datetime.utcnow():
+        flash("This verification link has expired. Please request a new one.", "error")
+        return redirect(url_for("auth.login"))
+    user.email_verified = True
+    user.verification_token = None
+    user.verification_token_expires = None
+    db.session.commit()
+    try:
+        from app.utils.email import send_welcome_email
+        send_welcome_email(user.email)
+    except:
+        pass
+    flash("Email verified successfully! You can now log in.", "success")
+    return redirect(url_for("auth.login"))
+
+
+@auth.route("/resend-verification", methods=["POST"])
+def resend_verification():
+    email = request.form.get("email", "").strip().lower()
+    if email:
+        user = User.query.filter_by(email=email, email_verified=False).first()
+        if user:
+            token = str(uuid.uuid4())
+            user.verification_token = token
+            user.verification_token_expires = datetime.utcnow() + timedelta(hours=24)
+            db.session.commit()
+            verify_url = "https://carsinstock.com/verify-email/" + token
+            verify_html = (
+                '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">'
+                '<div style="text-align:center;padding:20px 0;border-bottom:3px solid #6C2BD9;">'
+                '<h1 style="color:#6C2BD9;margin:0;font-size:28px;">CarsInStock</h1></div>'
+                '<div style="padding:30px 20px;">'
+                '<h2 style="color:#333;">Verify Your Email</h2>'
+                '<p style="color:#555;font-size:16px;line-height:1.6;">Click the button below to verify your email and activate your account.</p>'
+                '<div style="text-align:center;padding:25px 0;">'
+                '<a href="' + verify_url + '" style="background-color:#6C2BD9;color:white;padding:14px 32px;text-decoration:none;border-radius:6px;font-size:16px;font-weight:bold;display:inline-block;">Verify My Email</a>'
+                '</div><p style="color:#999;font-size:13px;">This link expires in 24 hours.</p>'
+                '</div><div style="border-top:1px solid #eee;padding:20px 0;text-align:center;">'
+                '<p style="color:#999;font-size:12px;">CarsInStock | 76 RT 37 East, Toms River, NJ 08753</p>'
+                '</div></div>'
+            )
+            try:
+                send_email(email, "Verify Your CarsInStock Account", verify_html)
+            except:
+                pass
+    flash("If an unverified account exists with that email, a new verification link has been sent.", "success")
+    return redirect(url_for("auth.login"))
 
 @auth.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
