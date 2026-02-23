@@ -6,23 +6,33 @@
     .hp-hero-logo { font-size: 36px; margin-bottom: 24px; }
     .hp-hero-logo .cars { font-weight: 400; color: #1E293B; }
     .hp-hero-logo .instock { font-weight: 700; color: #00C851; }
-    .hp-hero h1 { font-size: 40px; font-weight: 700; color: #1E293B; margin-bottom: 16px; line-height: 1.2; }
+    .hp-hero h1 { font-size: 38px; font-weight: 700; color: #1E293B; margin-bottom: 16px; line-height: 1.2; }
     .hp-hero p.sub { font-size: 18px; color: #64748B; font-weight: 400; margin-bottom: 32px; }
-    .hp-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+    .hp-btns { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; }
     .btn-green { background: #00C851; color: white; border: none; padding: 14px 32px; border-radius: 8px; font-size: 16px; font-weight: 600; text-decoration: none; display: inline-block; cursor: pointer; font-family: 'Inter', sans-serif; }
     .btn-green:hover { background: #00b348; }
     .btn-coral { background: white; color: #FF6B4A; border: 2px solid #FF6B4A; padding: 12px 30px; border-radius: 8px; font-size: 16px; font-weight: 600; text-decoration: none; display: inline-block; cursor: pointer; font-family: 'Inter', sans-serif; }
     .btn-coral:hover { background: #FFF5F3; }
-    .hp-tagline { font-size: 14px; color: #64748B; font-style: italic; }
-    .hp-section { max-width: 900px; margin: 0 auto; padding: 60px 20px; }
-    .hp-section h2 { font-size: 28px; font-weight: 700; color: #1E293B; margin-bottom: 12px; text-align: center; }
+    .hp-below-btns { font-size: 15px; color: #64748B; line-height: 1.8; }
+    .hp-below-btns strong { color: #1E293B; }
+    .hp-below-btns .green { color: #00C851; font-weight: 600; }
+    .hp-section { max-width: 800px; margin: 0 auto; padding: 60px 20px; }
+    .hp-section h2 { font-size: 28px; font-weight: 700; color: #1E293B; margin-bottom: 20px; text-align: center; }
     .hp-section p.lead { font-size: 17px; color: #64748B; text-align: center; line-height: 1.7; margin-bottom: 40px; }
     .hp-divider { border: none; border-top: 1px solid #E2E8F0; margin: 0; }
+    .hp-bullets { max-width: 700px; margin: 0 auto; list-style: none; padding: 0; }
+    .hp-bullets li { font-size: 17px; color: #1E293B; line-height: 1.8; padding: 8px 0; padding-left: 28px; position: relative; }
+    .hp-bullets li::before { content: "✓"; color: #00C851; font-weight: 700; position: absolute; left: 0; }
+    .hp-bullets li strong { color: #1E293B; }
+    .hp-bullets li span { color: #64748B; }
+    /* Real Talk */
+    .hp-real { background: #F9F8F6; text-align: center; padding: 50px 20px; }
+    .hp-real p { font-size: 18px; color: #64748B; line-height: 1.8; max-width: 600px; margin: 0 auto; }
+    .hp-real p.big { font-size: 22px; font-weight: 700; color: #1E293B; margin-top: 16px; }
     /* How It Works */
-    .hp-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; margin-bottom: 20px; }
+    .hp-steps { display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px; max-width: 700px; margin: 0 auto; }
     .hp-step { text-align: center; }
-    .hp-step-icon { font-size: 40px; margin-bottom: 12px; }
-    .hp-step h3 { font-size: 18px; font-weight: 600; color: #1E293B; margin-bottom: 8px; }
+    .hp-step h3 { font-size: 20px; font-weight: 700; color: #1E293B; margin-bottom: 8px; letter-spacing: 1px; }
     .hp-step p { font-size: 15px; color: #64748B; line-height: 1.6; }
     /* 7-Day Rule */
     .hp-rule { background: #F9F8F6; }
@@ -30,43 +40,26 @@
     .hp-rule-inner h2 { font-size: 28px; font-weight: 700; color: #1E293B; margin-bottom: 16px; }
     .hp-rule-inner p { font-size: 17px; color: #64748B; line-height: 1.8; }
     .hp-rule-inner p strong { color: #1E293B; }
-    /* For Salespeople */
-    .hp-sales { background: #1E293B; color: white; }
-    .hp-sales-inner { max-width: 700px; margin: 0 auto; padding: 60px 20px; text-align: center; }
-    .hp-sales-inner h2 { font-size: 28px; font-weight: 700; color: white; margin-bottom: 16px; }
-    .hp-sales-inner p { font-size: 17px; color: #94A3B8; line-height: 1.8; margin-bottom: 8px; }
-    .hp-sales-inner .pricing { color: #00C851; font-size: 18px; font-weight: 600; margin: 24px 0; }
-    /* Vehicle Grid */
-    .hp-inventory { background: #F9F8F6; padding: 60px 20px; }
-    .hp-inventory h2 { text-align: center; font-size: 28px; font-weight: 700; color: #1E293B; margin-bottom: 32px; }
-    .hp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; max-width: 1100px; margin: 0 auto; }
-    .hp-card { background: white; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: transform 0.2s; }
-    .hp-card:hover { transform: translateY(-2px); }
-    .hp-card img { width: 100%; height: 200px; object-fit: cover; }
-    .hp-card-body { padding: 16px; }
-    .hp-card-title { font-size: 18px; font-weight: 600; color: #1E293B; margin-bottom: 4px; }
-    .hp-card-price { font-size: 20px; font-weight: 700; color: #00C851; margin-bottom: 8px; }
-    .hp-card-details { font-size: 14px; color: #64748B; margin-bottom: 4px; }
-    .hp-card-seller { font-size: 14px; color: #64748B; }
-    .hp-card-btn { display: block; text-align: center; background: #00C851; color: white; padding: 10px; border-radius: 6px; font-size: 14px; font-weight: 600; text-decoration: none; margin-top: 12px; }
-    .hp-card-btn:hover { background: #00b348; }
-    .hp-card-badge { position: absolute; top: 12px; right: 12px; background: #E6F9EF; color: #00A344; padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; }
-    .hp-card-img-wrap { position: relative; }
+    /* CTA */
+    .hp-cta { background: #1E293B; color: white; }
+    .hp-cta-inner { max-width: 700px; margin: 0 auto; padding: 60px 20px; text-align: center; }
+    .hp-cta-inner h2 { font-size: 28px; font-weight: 700; color: white; margin-bottom: 16px; }
+    .hp-cta-inner p { font-size: 17px; color: #94A3B8; line-height: 1.8; margin-bottom: 8px; }
+    .hp-cta-inner .pricing { color: #00C851; font-size: 18px; font-weight: 600; margin: 24px 0; }
     /* Footer */
-    .hp-footer { background: #1E293B; color: #94A3B8; padding: 40px 20px; text-align: center; }
+    .hp-footer { background: #1E293B; border-top: 1px solid #2a3a4f; color: #94A3B8; padding: 40px 20px; text-align: center; }
     .hp-footer-logo { font-size: 24px; margin-bottom: 12px; }
     .hp-footer-logo .cars { color: white; font-weight: 400; }
     .hp-footer-logo .instock { color: #00C851; font-weight: 700; }
     .hp-footer a { color: #94A3B8; text-decoration: none; margin: 0 12px; font-size: 14px; }
     .hp-footer a:hover { color: white; }
-    .hp-footer .tagline { font-style: italic; font-size: 14px; margin: 16px 0 8px; }
+    .hp-footer .tagline { font-style: italic; font-size: 14px; margin: 16px 0 8px; color: #94A3B8; }
     .hp-footer .copy { font-size: 12px; }
     @media (max-width: 768px) {
         .hp-hero h1 { font-size: 28px; }
         .hp-hero p.sub { font-size: 16px; }
         .hp-steps { grid-template-columns: 1fr; gap: 24px; }
         .hp-section h2 { font-size: 24px; }
-        .hp-grid { grid-template-columns: 1fr; }
     }
 </style>
 
@@ -74,20 +67,35 @@
     <!-- Hero -->
     <div class="hp-hero">
         <div class="hp-hero-logo"><span class="cars">Cars</span> <span class="instock">IN STOCK</span></div>
-        <h1>Posted by the People Who Sell Them.</h1>
-        <p class="sub">Every listing expires in 7 days to keep inventory as current as possible.</p>
+        <h1>Posted by YOU. Owned by YOU. Sold by YOU.</h1>
+        <p class="sub">Tired of BDC no-shows? Tired of fighting for the same ups?</p>
         <div class="hp-btns">
-            <a href="/search-cars" class="btn-green">Find a Car</a>
-            <a href="/register" class="btn-coral">Join as a Salesperson</a>
+            <a href="/demo" class="btn-green">Demo Page</a>
+            <a href="/register" class="btn-coral">Get Your Storefront</a>
         </div>
-        <p class="hp-tagline">"Fresh Cars. Real People."</p>
-        <p style="font-size:15px;color:#64748B;margin-top:8px;">No outdated listings. No games. No wasted time.</p>
+        <div class="hp-below-btns">
+            <strong>Your solution:</strong> CarsInStock.com/YourName<br>
+            <span class="green">14-day free trial. $2 per car afterward.</span>
+        </div>
     </div>
 
-    <!-- Why CarsInStock -->
+    <hr class="hp-divider">
+
+    <!-- What You Get -->
     <div class="hp-section">
-        <h2>No ghost cars. No stale listings. No wasted time.</h2>
-        <p class="lead">Every vehicle on CarsInStock is posted by a real salesperson and auto-expires in 7 days. If it's listed, it's available. Period.</p>
+        <h2>What you get:</h2>
+        <ul class="hp-bullets">
+            <li><strong>Your personal page</strong> <span>— carsinstock.com/your-name (share it everywhere)</span></li>
+            <li><strong>Pick your best 5-10 cars</strong> <span>— the ones YOU know move</span></li>
+            <li><strong>Direct email</strong> <span>— Send up to 50 emails a day to your own customers. One click.</span></li>
+            <li><strong>Auto-expires in 7 days</strong> <span>— fresh inventory, clean reputation, no stale listings</span></li>
+        </ul>
+    </div>
+
+    <!-- Real Talk -->
+    <div class="hp-real">
+        <p>Out of 100 cars on the lot, maybe 20 are actually worth selling.</p>
+        <p class="big">Post the winners.</p>
     </div>
 
     <hr class="hp-divider">
@@ -97,94 +105,29 @@
         <h2>How It Works — Buyers</h2>
         <div class="hp-steps">
             <div class="hp-step">
-                <div class="hp-step-icon">&#x1F50D;</div>
-                <h3>Find</h3>
-                <p>See what's available — posted by the salespeople who sell them.</p>
+                <h3>FIND</h3>
+                <p>Fresh cars posted by the sellers who actually have them.</p>
             </div>
             <div class="hp-step">
-                <div class="hp-step-icon">&#x1F4AC;</div>
-                <h3>Connect</h3>
-                <p>Reach the salesperson directly. A real person, not a call center.</p>
-            </div>
-            <div class="hp-step">
-                <div class="hp-step-icon">&#x1F91D;</div>
-                <h3>Buy</h3>
-                <p>Meet at the dealership. Close the deal with someone you trust.</p>
+                <h3>CONNECT</h3>
+                <p>Reach the salesperson directly. No forms. No BDC.</p>
             </div>
         </div>
     </div>
 
-    <hr class="hp-divider">
-
-    <!-- How It Works - Salespeople -->
-    <div class="hp-section">
-        <h2>How It Works — Salespeople</h2>
-        <div class="hp-steps">
-            <div class="hp-step">
-                <div class="hp-step-icon">&#x1F517;</div>
-                <h3>Get Your Page</h3>
-                <p>Get your own link: CarsInStock.com/your-name</p>
-            </div>
-            <div class="hp-step">
-                <div class="hp-step-icon">&#x1F4F8;</div>
-                <h3>Post Your Best</h3>
-                <p>Showcase the vehicles you want to sell.</p>
-            </div>
-            <div class="hp-step">
-                <div class="hp-step-icon">&#x1F4E9;</div>
-                <h3>Get Direct Leads</h3>
-                <p>Buyers contact you directly. Your customer. Your sale.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- The 14-Day Rule -->
+    <!-- Every Listing Expires -->
     <div class="hp-rule">
         <div class="hp-rule-inner">
             <h2>Every listing expires in 7 days.</h2>
             <p>That's not a bug — it's the whole point.</p>
-            <p>We don't do stale inventory. We don't do ghost cars. We don't waste your time.</p>
-            <p>If it's on CarsInStock, it's <strong>actually available. Guaranteed.</strong></p>
+            <p>We don't do stale inventory. We don't waste time. We pick the winners.</p>
+            <p>If it's on your CarsInStock, <strong>it belongs there.</strong></p>
         </div>
     </div>
 
-    <!-- Fresh Inventory -->
-    <div class="hp-inventory">
-        <h2>Fresh Inventory</h2>
-        <div class="hp-grid">
-            {% for v in vehicles %}
-            <div class="hp-card">
-                <div class="hp-card-img-wrap">
-                    {% if v.image_url %}
-                    <img src="{{ v.image_url }}" alt="{{ v.year }} {{ v.make }} {{ v.model }}">
-                    {% else %}
-                    <div style="width:100%;height:200px;background:#E2E8F0;display:flex;align-items:center;justify-content:center;color:#94A3B8;">No Photo</div>
-                    {% endif %}
-                    {% if v.expires_at %}
-                    <span class="hp-card-badge">{{ ((v.expires_at - now).days) }} days left</span>
-                    {% endif %}
-                </div>
-                <div class="hp-card-body">
-                    <div class="hp-card-title">{{ v.year }} {{ v.make }} {{ v.model }}</div>
-                    <div class="hp-card-price">${{ "{:,.0f}".format(v.price) if v.price else 'Call' }}</div>
-                    <div class="hp-card-details">{{ "{:,.0f}".format(v.mileage) if v.mileage else '' }} miles &bull; {{ v.exterior_color or '' }}</div>
-                    <div class="hp-card-seller">For Sale by {{ v.salesperson.display_name if v.salesperson else 'Unknown' }}</div>
-                    <a href="/{{ v.salesperson.profile_url_slug if v.salesperson else '#' }}" class="hp-card-btn">View Storefront</a>
-                </div>
-            </div>
-            {% endfor %}
-            {% if not vehicles %}
-            <div style="grid-column:1/-1;text-align:center;padding:40px;color:#64748B;">
-                <p style="font-size:18px;">Fresh inventory coming soon. Check back!</p>
-                <a href="/register" class="btn-green" style="margin-top:16px;">Join as a Salesperson</a>
-            </div>
-            {% endif %}
-        </div>
-    </div>
-
-    <!-- For Salespeople -->
-    <div class="hp-sales">
-        <div class="hp-sales-inner">
+    <!-- CTA -->
+    <div class="hp-cta">
+        <div class="hp-cta-inner">
             <h2>Stop waiting for ups. Start creating them.</h2>
             <p>Your page. Your cars. Your customers. CarsInStock gives you a storefront you actually own — share it everywhere, build your book, grow your business.</p>
             <div class="pricing">14-day free trial. $2 per vehicle after that.</div>
@@ -196,7 +139,7 @@
     <div class="hp-footer">
         <div class="hp-footer-logo"><span class="cars">Cars</span> <span class="instock">IN STOCK</span></div>
         <div><a href="/howto">About</a> <a href="mailto:support@carsinstock.com">Contact</a> <a href="/privacy">Privacy</a> <a href="/terms">Terms</a></div>
-        <div class="tagline">"Fresh Cars. Real People."</div>
+        <div class="tagline">"Stop fighting for ups. Start owning them."</div>
         <div class="copy">&copy; 2026 CarsInStock</div>
     </div>
 </div>
