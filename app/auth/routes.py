@@ -1,3 +1,4 @@
+import os
 from flask import render_template, redirect, url_for, flash, request, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
@@ -30,10 +31,29 @@ def register():
             existing_user = User.query.filter_by(email=email).first()
             if existing_user:
                 errors.append("An account with this email already exists.")
+        # Verify Turnstile CAPTCHA
+        turnstile_response = request.form.get("cf-turnstile-response", "")
+        if not turnstile_response:
+            errors.append("Please complete the CAPTCHA verification.")
+        else:
+            import requests as http_requests
+            verify_url = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+            verify_data = {
+                "secret": os.environ.get("TURNSTILE_SECRET_KEY", ""),
+                "response": turnstile_response,
+                "remoteip": request.remote_addr
+            }
+            try:
+                verify_result = http_requests.post(verify_url, data=verify_data, timeout=5).json()
+                if not verify_result.get("success"):
+                    errors.append("CAPTCHA verification failed. Please try again.")
+            except:
+                pass  # Allow registration if Turnstile is unreachable
+
         if errors:
             for error in errors:
                 flash(error, "error")
-            return render_template("auth/register.html", email=email)
+            return render_template("auth/register.html", email=email, turnstile_site_key=os.environ.get("TURNSTILE_SITE_KEY", ""))
         new_user = User(email=email, password_hash=generate_password_hash(password))
         try:
             db.session.add(new_user)
@@ -47,8 +67,8 @@ def register():
         except Exception as e:
             db.session.rollback()
             flash("Something went wrong. Please try again.", "error")
-            return render_template("auth/register.html", email=email)
-    return render_template("auth/register.html")
+            return render_template("auth/register.html", email=email, turnstile_site_key=os.environ.get("TURNSTILE_SITE_KEY", ""))
+    return render_template("auth/register.html", turnstile_site_key=os.environ.get("TURNSTILE_SITE_KEY", ""))
 
 
 @auth.route("/login", methods=["GET", "POST"])
