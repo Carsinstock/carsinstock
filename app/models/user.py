@@ -15,5 +15,8 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     last_login_at = db.Column(db.DateTime)
     is_admin = db.Column(db.Boolean, nullable=False, default=False)
+    subscription_status = db.Column(db.String(20), nullable=False, default='trial')
+    trial_end_date = db.Column(db.DateTime, nullable=True)
+    stripe_customer_id = db.Column(db.String(100), nullable=True)
     reset_token = db.Column(db.String(100), unique=True, nullable=True)
     reset_token_expires = db.Column(db.DateTime, nullable=True)
