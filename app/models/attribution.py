@@ -15,6 +15,6 @@ class Attribution(db.Model):
     def __init__(self, **kwargs):
         super(Attribution, self).__init__(**kwargs)
         if not self.expires_at and self.assigned_at:
-            self.expires_at = self.assigned_at + timedelta(days=7)
+            self.expires_at = self.assigned_at + timedelta(days=14)
         elif not self.expires_at:
-            self.expires_at = datetime.utcnow() + timedelta(days=7)
+            self.expires_at = datetime.utcnow() + timedelta(days=14)

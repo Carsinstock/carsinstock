@@ -58,7 +58,7 @@ with app.app_context():
                     </a>
                 </div>
                 <p style="color: #999; font-size: 13px;">
-                    Listings on CarsInStock expire after 7 days to keep inventory fresh. Renewing is free.
+                    Listings on CarsInStock expire after 14 days to keep inventory fresh. Renewing is free.
                 </p>
             </div>
             <div style="border-top: 1px solid #eee; padding: 20px 0; text-align: center;">

@@ -39,7 +39,7 @@ class Vehicle(db.Model):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         if not self.expires_at:
-            self.expires_at = datetime.utcnow() + timedelta(days=7)
+            self.expires_at = datetime.utcnow() + timedelta(days=14)
 
     @property
     def is_expired(self):

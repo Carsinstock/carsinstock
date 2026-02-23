@@ -75,7 +75,7 @@ def send_welcome_email(to_email):
                 </a>
             </div>
             <p style="color: #555; font-size: 16px; line-height: 1.6;">
-                Every listing on CarsInStock expires after 7 days so customers always see
+                Every listing on CarsInStock expires after 14 days so customers always see
                 what is actually on your lot. No ghost cars. No stale inventory.
             </p>
         </div>
