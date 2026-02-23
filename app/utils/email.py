@@ -81,7 +81,7 @@ def send_welcome_email(to_email):
         </div>
         <div style="border-top: 1px solid #eee; padding: 20px 0; text-align: center;">
             <p style="color: #999; font-size: 12px; margin: 0;">
-                CarsInStock | 76 RT 37 East, Toms River, NJ 08753<br>
+                Fresh Cars. Real People. | CarsInStock | 76 RT 37 East, Toms River, NJ 08753<br>
                 Questions? Reply to sales@carsinstock.com
             </p>
         </div>
@@ -101,7 +101,7 @@ def _build_unsubscribe_footer(customer_id=None):
     return f"""
         <div style="border-top: 1px solid #eee; padding: 20px 0; text-align: center;">
             <p style="color: #999; font-size: 12px; margin: 0;">
-                CarsInStock | 76 RT 37 East, Toms River, NJ 08753
+                Fresh Cars. Real People. | CarsInStock | 76 RT 37 East, Toms River, NJ 08753
             </p>
             {unsub_html}
         </div>

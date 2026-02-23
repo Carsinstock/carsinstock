@@ -69,7 +69,7 @@ def register():
             verify_html = f"""
             <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
                 <div style="text-align:center;padding:20px 0;border-bottom:3px solid #00C851;">
-                    <h1 style="color:#00C851;margin:0;font-size:28px;">CarsInStock</h1>
+                    <h1 style="margin:0;font-size:28px;"><span style="color:#1E293B;font-weight:400;">Cars</span> <span style="color:#00C851;font-weight:700;">IN STOCK</span></h1>
                 </div>
                 <div style="padding:30px 20px;">
                     <h2 style="color:#333;">Verify Your Email</h2>
@@ -87,7 +87,7 @@ def register():
                     <p style="color:#999;font-size:13px;">This link expires in 24 hours.</p>
                 </div>
                 <div style="border-top:1px solid #eee;padding:20px 0;text-align:center;">
-                    <p style="color:#999;font-size:12px;">CarsInStock | 76 RT 37 East, Toms River, NJ 08753</p>
+                    <p style="color:#999;font-size:12px;">Fresh Cars. Real People. | CarsInStock | 76 RT 37 East, Toms River, NJ 08753</p>
                 </div>
             </div>
             """
@@ -176,7 +176,7 @@ def resend_verification():
             verify_html = (
                 '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">'
                 '<div style="text-align:center;padding:20px 0;border-bottom:3px solid #00C851;">'
-                '<h1 style="color:#00C851;margin:0;font-size:28px;">CarsInStock</h1></div>'
+                '<h1 style="margin:0;font-size:28px;"><span style="color:#1E293B;font-weight:400;">Cars</span> <span style="color:#00C851;font-weight:700;">IN STOCK</span></h1></div>'
                 '<div style="padding:30px 20px;">'
                 '<h2 style="color:#333;">Verify Your Email</h2>'
                 '<p style="color:#555;font-size:16px;line-height:1.6;">Click the button below to verify your email and activate your account.</p>'
@@ -184,7 +184,7 @@ def resend_verification():
                 '<a href="' + verify_url + '" style="background-color:#00C851;color:white;padding:14px 32px;text-decoration:none;border-radius:6px;font-size:16px;font-weight:bold;display:inline-block;">Verify My Email</a>'
                 '</div><p style="color:#999;font-size:13px;">This link expires in 24 hours.</p>'
                 '</div><div style="border-top:1px solid #eee;padding:20px 0;text-align:center;">'
-                '<p style="color:#999;font-size:12px;">CarsInStock | 76 RT 37 East, Toms River, NJ 08753</p>'
+                '<p style="color:#999;font-size:12px;">Fresh Cars. Real People. | CarsInStock | 76 RT 37 East, Toms River, NJ 08753</p>'
                 '</div></div>'
             )
             try:
@@ -231,7 +231,7 @@ def forgot_password():
                     </div>
                     <div style="border-top: 1px solid #eee; padding: 20px 0; text-align: center;">
                         <p style="color: #999; font-size: 12px; margin: 0;">
-                            CarsInStock | 76 RT 37 East, Toms River, NJ 08753
+                            Fresh Cars. Real People. | CarsInStock | 76 RT 37 East, Toms River, NJ 08753
                         </p>
                     </div>
                 </div>

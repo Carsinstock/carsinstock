@@ -63,7 +63,7 @@ with app.app_context():
             </div>
             <div style="border-top: 1px solid #eee; padding: 20px 0; text-align: center;">
                 <p style="color: #999; font-size: 12px; margin: 0;">
-                    CarsInStock | 76 RT 37 East, Toms River, NJ 08753
+                    Fresh Cars. Real People. | CarsInStock | 76 RT 37 East, Toms River, NJ 08753
                 </p>
             </div>
         </div>
