@@ -5,7 +5,7 @@ from functools import wraps
 
 RESERVED_SLUGS = {
     'login', 'logout', 'register', 'profile', 'admin', 'api',
-    'search-cars', 'salespeople', 'customers', 'about', 'contact',
+    'search-cars', 'salespeople', 'customers', 'about', 'contact', 'demo',
     'pricing', 'terms', 'privacy', 'help', 'support', 'settings',
     'dashboard', 'static', 's', 'vehicles', 'leads', 'reports'
 }

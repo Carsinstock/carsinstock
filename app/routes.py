@@ -54,6 +54,14 @@ def search_cars():
 def howto():
     return render_template('howto.html')
 
+@main.route('/demo')
+def demo_page():
+    from app.models.salesperson import Salesperson
+    from app.models.vehicle import Vehicle
+    sp = Salesperson.query.filter_by(profile_url_slug="demo").first_or_404()
+    vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status="available").all()
+    return render_template("salesperson/public_profile.html", sp=sp, vehicles=vehicles, is_owner=False, is_demo=True)
+
 @main.route('/<slug>')
 def public_profile(slug):
     from app.models.salesperson import Salesperson
@@ -70,7 +78,7 @@ def public_profile(slug):
         # Public only sees active, non-expired vehicles
         vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status='available').all()
         vehicles = [v for v in vehicles if not v.expires_at or v.expires_at > datetime.utcnow()]
-    return render_template('salesperson/public_profile.html', sp=sp, vehicles=vehicles, is_owner=is_owner)
+    return render_template('salesperson/public_profile.html', sp=sp, vehicles=vehicles, is_owner=is_owner, is_demo=False)
 
 
 @main.route("/lead/submit", methods=["POST"])

@@ -18,10 +18,10 @@
         <p class="profile-bio">{{ sp.bio }}</p>
         {% endif %}
         {% if sp.phone %}
-        <p class="profile-contact"><strong>Phone:</strong> <a href="tel:{{ sp.phone }}" style="color:#00C851; text-decoration:none;">{{ sp.phone }}</a></p>
+        <p class="profile-contact"><strong>Phone:</strong> {% if is_demo %}{{ sp.phone }}{% else %}<a href="tel:{{ sp.phone }}" style="color:#00C851; text-decoration:none;">{{ sp.phone }}</a>{% endif %}</p>
         {% endif %}
         {% if sp.email %}
-        <p class="profile-contact"><strong>Email:</strong> <a href="mailto:{{ sp.email }}" style="color:#00C851; text-decoration:none;">{{ sp.email }}</a></p>
+        <p class="profile-contact"><strong>Email:</strong> {% if is_demo %}{{ sp.email }}{% else %}<a href="mailto:{{ sp.email }}" style="color:#00C851; text-decoration:none;">{{ sp.email }}</a>{% endif %}</p>
         {% endif %}
     </div>
 
@@ -43,7 +43,7 @@
                 <div style="background:#EF4444;color:white;text-align:center;padding:6px;font-weight:bold;font-size:13px;">EXPIRED</div>
                 {% elif is_owner and v.days_remaining <= 1 %}
                 <div style="background:#f59e0b;color:white;text-align:center;padding:6px;font-weight:bold;font-size:13px;">Expires tomorrow</div>
-                {% elif v.days_remaining %}
+                {% elif v.days_remaining and not is_demo %}
                 <div style="position:absolute;top:12px;right:12px;background:#E6F9EF;color:#00A344;padding:4px 10px;border-radius:4px;font-size:12px;font-weight:600;z-index:1;">{{ v.days_remaining }} days left</div>
                 {% endif %}
                 <div style="position:relative;">
@@ -69,7 +69,9 @@
                     <a href="/vehicles/edit/{{ v.id }}" style="display:inline-block; margin-top:8px; padding:6px 16px; background:#4CAF50; color:white; border-radius:6px; text-decoration:none; font-size:13px;">Edit</a>
                     <a href="/vehicles/share/{{ v.id }}" style="display:inline-block; margin-top:8px; margin-left:5px; padding:6px 16px; background:#00C851; color:white; border-radius:6px; text-decoration:none; font-size:13px;">📧 Share</a>
                     {% endif %}
-                    {% if not v.is_expired %}
+                    {% if is_demo %}
+                    <button class="interested-btn" onclick="showDemoModal()">I'm Interested</button>
+                    {% elif not v.is_expired %}
                     <button class="interested-btn" onclick="showLeadForm({{ v.id }}, '{{ v.year }} {{ v.make }} {{ v.model }}')">I'm Interested</button>
                     {% elif is_owner %}
                     <a href="/vehicles/edit/{{ v.id }}" style="display:inline-block; margin-top:8px; padding:8px 20px; background:#00C851; color:white; border-radius:6px; text-decoration:none; font-size:13px; font-weight:bold;">Renew Listing</a>
@@ -168,6 +170,7 @@ document.getElementById('leadModal').addEventListener('click', function(e) {
 .coming-soon { color: #999; font-style: italic; text-align: center; padding: 40px 0; }
 </style>
 <!-- AI Chatbot Widget -->
+{% if not is_demo %}
 <div id="chatToggle" onclick="toggleChat()" style="position:fixed;bottom:20px;right:20px;width:60px;height:60px;background:linear-gradient(135deg,#00C851,#1E293B);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.25);z-index:999;transition:transform 0.2s;">
     <span style="color:white;font-size:28px;">&#x1F4AC;</span>
 </div>
@@ -244,5 +247,26 @@ function sendChat() {
     });
 }
 </script>
+{% endif %}
+
+
+{% if is_demo %}
+<div id="demoModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:16px;padding:32px;max-width:440px;width:90%;text-align:center;position:relative;">
+        <span onclick="document.getElementById('demoModal').style.display='none'" style="position:absolute;top:12px;right:16px;font-size:28px;cursor:pointer;color:#999;">&times;</span>
+        <h2 style="color:#1E293B;font-size:24px;margin-bottom:12px;">This is a Demo Page</h2>
+        <p style="color:#64748B;font-size:16px;line-height:1.6;margin-bottom:24px;">Create your own storefront to receive real leads from buyers!</p>
+        <a href="/register" style="display:inline-block;background:#00C851;color:white;padding:14px 32px;border-radius:8px;font-size:16px;font-weight:600;text-decoration:none;">Get Your Storefront</a>
+    </div>
+</div>
+<script>
+function showDemoModal() {
+    document.getElementById('demoModal').style.display = 'flex';
+}
+document.getElementById('demoModal').addEventListener('click', function(e) {
+    if (e.target === this) this.style.display = 'none';
+});
+</script>
+{% endif %}
 
 {% endblock %}
