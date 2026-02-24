@@ -1,5 +1,39 @@
 {% extends "base.html" %}
 {% block content %}
+{% if is_demo %}
+<style>
+.demo-layout { display: flex; max-width: 1200px; margin: 0 auto; gap: 0; }
+.demo-sidebar { width: 280px; flex-shrink: 0; position: sticky; top: 60px; height: fit-content; padding: 30px 24px; background: white; border-right: 1px solid #E2E8F0; align-self: flex-start; }
+.demo-sidebar .theme { font-size: 20px; font-weight: 700; color: #1E293B; line-height: 1.4; margin-bottom: 20px; }
+.demo-sidebar hr { border: none; border-top: 1px solid #E2E8F0; margin: 16px 0; }
+.demo-sidebar .bullet { margin-bottom: 16px; }
+.demo-sidebar .bullet .check { color: #00C851; font-size: 16px; margin-right: 6px; }
+.demo-sidebar .bullet .headline { font-size: 14px; font-weight: 600; color: #1E293B; }
+.demo-sidebar .bullet .desc { font-size: 13px; color: #64748B; margin-top: 2px; padding-left: 24px; }
+.demo-sidebar .pricing { font-size: 14px; color: #1E293B; line-height: 1.6; margin-bottom: 16px; }
+.demo-sidebar .cta-btn { display: block; text-align: center; background: #00C851; color: white; padding: 12px 20px; border-radius: 8px; font-size: 15px; font-weight: 600; text-decoration: none; }
+.demo-sidebar .cta-btn:hover { background: #00b348; }
+.demo-main { flex: 1; min-width: 0; }
+@media (max-width: 900px) {
+    .demo-layout { flex-direction: column; }
+    .demo-sidebar { width: 100%; position: static; border-right: none; border-bottom: 1px solid #E2E8F0; }
+}
+</style>
+<div class="demo-layout">
+<div class="demo-sidebar">
+    <div class="theme">Posted by YOU.<br>Owned by YOU.<br>Sold by YOU.</div>
+    <hr>
+    <div class="bullet"><span class="check">✅</span><span class="headline">Your own page</span><div class="desc">CarsInStock.com/your-name</div></div>
+    <div class="bullet"><span class="check">✅</span><span class="headline">Post your best inventory</span><div class="desc">The cars YOU want to sell</div></div>
+    <div class="bullet"><span class="check">✅</span><span class="headline">Direct leads</span><div class="desc">Buyers contact you, not the BDC</div></div>
+    <div class="bullet"><span class="check">✅</span><span class="headline">Email your customers</span><div class="desc">Send 50 emails a day, one click</div></div>
+    <div class="bullet"><span class="check">✅</span><span class="headline">Auto-expires in 7 days</span><div class="desc">Fresh inventory, clean reputation</div></div>
+    <hr>
+    <div class="pricing">14-day free trial.<br>$2 per vehicle after that.</div>
+    <a href="/register" class="cta-btn">Get Your Storefront</a>
+</div>
+<div class="demo-main">
+{% endif %}
 <div class="profile-page">
     {% if sp.cover_photo %}
         <div style="width:100%;height:200px;border-radius:12px 12px 0 0;overflow:hidden;margin-bottom:-40px;">
@@ -86,6 +120,10 @@
     </div>
 </div>
 
+{% if is_demo %}
+</div><!-- end demo-main -->
+</div><!-- end demo-layout -->
+{% endif %}
 <!-- Lead Form Modal -->
 <div id="leadModal" class="lead-modal" style="display:none;">
     <div class="lead-modal-content">
