@@ -170,7 +170,6 @@ document.getElementById('leadModal').addEventListener('click', function(e) {
 .coming-soon { color: #999; font-style: italic; text-align: center; padding: 40px 0; }
 </style>
 <!-- AI Chatbot Widget -->
-{% if not is_demo %}
 <div id="chatToggle" onclick="toggleChat()" style="position:fixed;bottom:20px;right:20px;width:60px;height:60px;background:linear-gradient(135deg,#00C851,#1E293B);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.25);z-index:999;transition:transform 0.2s;">
     <span style="color:white;font-size:28px;">&#x1F4AC;</span>
 </div>
@@ -247,7 +246,6 @@ function sendChat() {
     });
 }
 </script>
-{% endif %}
 
 
 {% if is_demo %}
@@ -266,6 +264,31 @@ function showDemoModal() {
 document.getElementById('demoModal').addEventListener('click', function(e) {
     if (e.target === this) this.style.display = 'none';
 });
+</script>
+
+
+{% if is_demo %}
+<script>
+// Override chatbot for demo
+document.addEventListener('DOMContentLoaded', function() {
+    var msgs = document.getElementById('chatMessages');
+    if (msgs) {
+        msgs.innerHTML = '<div style="background:#f0f0f0;padding:10px 14px;border-radius:12px;border-bottom-left-radius:4px;font-size:14px;max-width:85%;color:#333;">Hi! This is a demo page. When you create your own storefront, customers can chat with you directly here. Ready to get started?</div>' +
+        '<div style="text-align:center;padding:10px;"><a href="/register" style="display:inline-block;background:#00C851;color:white;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;">Get Your Storefront</a></div>';
+    }
+});
+function sendChat() {
+    var input = document.getElementById('chatInput');
+    var msg = input.value.trim();
+    if (!msg) return;
+    var messages = document.getElementById('chatMessages');
+    messages.innerHTML += '<div style="background:#00C851;color:white;padding:10px 14px;border-radius:12px;border-bottom-right-radius:4px;font-size:14px;max-width:85%;align-self:flex-end;">' + msg + '</div>';
+    input.value = '';
+    setTimeout(function() {
+        messages.innerHTML += '<div style="background:#f0f0f0;padding:10px 14px;border-radius:12px;border-bottom-left-radius:4px;font-size:14px;max-width:85%;color:#333;">This is just a demo! Create your own storefront to chat with real customers. <a href="/register" style="color:#00C851;font-weight:600;">Get started here.</a></div>';
+        messages.scrollTop = messages.scrollHeight;
+    }, 800);
+}
 </script>
 {% endif %}
 
