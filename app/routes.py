@@ -160,3 +160,79 @@ def unsubscribe(token):
             db.session.commit()
             return render_template('unsubscribe.html', name=customer.name, success=True)
     return render_template('unsubscribe.html', name=None, success=False)
+
+@main.route('/contact', methods=['GET', 'POST'])
+def contact():
+    import os
+    turnstile_site_key = os.environ.get("TURNSTILE_SITE_KEY", "")
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        email = request.form.get('email', '').strip()
+        message = request.form.get('message', '').strip()
+
+        # Verify Turnstile
+        turnstile_response = request.form.get("cf-turnstile-response", "")
+        if not turnstile_response:
+            flash("Please complete the CAPTCHA verification.", "error")
+            return render_template('contact.html', turnstile_site_key=turnstile_site_key)
+
+        import requests as http_requests
+        verify_url = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+        verify_data = {
+            "secret": os.environ.get("TURNSTILE_SECRET_KEY", ""),
+            "response": turnstile_response,
+            "remoteip": request.remote_addr
+        }
+        try:
+            verify_result = http_requests.post(verify_url, data=verify_data, timeout=5).json()
+            if not verify_result.get("success"):
+                flash("CAPTCHA verification failed. Please try again.", "error")
+                return render_template('contact.html', turnstile_site_key=turnstile_site_key)
+        except:
+            pass
+
+        if not name or not email or not message:
+            flash("All fields are required.", "error")
+            return render_template('contact.html', turnstile_site_key=turnstile_site_key)
+
+        # Send via SendGrid
+        try:
+            from sendgrid import SendGridAPIClient
+            from sendgrid.helpers.mail import Mail
+            sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+            msg = Mail(
+                from_email=('noreply@carsinstock.com', 'CarsInStock Contact'),
+                to_emails='support@carsinstock.com',
+                subject=f'Contact Form: {name}',
+                html_content=f"""
+                <div style="font-family:Inter,sans-serif;max-width:600px;">
+                    <h2 style="color:#1E293B;">New Contact Form Submission</h2>
+                    <p><strong>Name:</strong> {name}</p>
+                    <p><strong>Email:</strong> {email}</p>
+                    <p><strong>Message:</strong></p>
+                    <p style="background:#F8FAFC;padding:16px;border-radius:8px;color:#475569;">{message}</p>
+                </div>
+                """
+            )
+            msg.reply_to = email
+            sg.send(msg)
+        except Exception as e:
+            print(f"Contact form email error: {e}")
+
+        flash("Message sent! We'll get back to you soon.", "success")
+        return redirect('/contact')
+
+    return render_template('contact.html', turnstile_site_key=turnstile_site_key)
+
+
+@main.route('/about')
+def about():
+    return render_template('about.html')
+
+@main.route('/privacy')
+def privacy():
+    return render_template('privacy.html')
+
+@main.route('/terms')
+def terms():
+    return render_template('terms.html')
