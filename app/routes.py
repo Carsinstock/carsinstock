@@ -58,7 +58,7 @@ def howto():
 def demo_page():
     from app.models.salesperson import Salesperson
     from app.models.vehicle import Vehicle
-    sp = Salesperson.query.filter_by(profile_url_slug="demo").first_or_404()
+    sp = Salesperson.query.filter_by(profile_url_slug="jsmith").first_or_404()
     vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status="available").all()
     return render_template("salesperson/public_profile.html", sp=sp, vehicles=vehicles, is_owner=False, is_demo=True)
 

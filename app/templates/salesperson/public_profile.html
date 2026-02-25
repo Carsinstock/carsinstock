@@ -57,6 +57,11 @@
         {% if sp.email %}
         <p class="profile-contact"><strong>Email:</strong> {% if is_demo %}{{ sp.email }}{% else %}<a href="mailto:{{ sp.email }}" style="color:#00C851; text-decoration:none;">{{ sp.email }}</a>{% endif %}</p>
         {% endif %}
+        <div style="margin-top:14px;display:inline-block;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:8px 18px;">
+            <span style="font-size:14px;color:#64748B;">🌐</span>
+            <span style="font-size:15px;font-weight:600;color:#1E293B;">CarsInStock.com/{{ sp.profile_url_slug }}</span>
+        </div>
+
     </div>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -68,7 +73,8 @@
     {% endwith %}
 
     <div class="profile-inventory">
-        <h2>My Inventory</h2>
+        <h2 style="display:flex;align-items:center;gap:10px;">🚗 {{ sp.display_name }}'s Top Picks — Fresh & In Stock</h2>
+        <p style="color:#64748B;font-size:14px;margin-top:-16px;margin-bottom:20px;">Listings refresh every 7 days, so you're never browsing stale inventory. If it's posted, it's worth a conversation.</p>
         {% if vehicles %}
         <div class="vehicle-grid">
             {% for v in vehicles %}
@@ -121,6 +127,11 @@
 </div>
 
 {% if is_demo %}
+<div style="text-align:center;padding:40px 20px;margin-top:20px;background:#F8FAFC;border-radius:12px;border:1px solid #E2E8F0;">
+    <h2 style="color:#1E293B;font-size:24px;margin-bottom:8px;">This could be YOUR storefront.</h2>
+    <p style="color:#64748B;font-size:16px;margin-bottom:20px;">Your name. Your cars. Your leads. 14 days free.</p>
+    <a href="/register" style="display:inline-block;background:#00C851;color:white;padding:14px 32px;border-radius:8px;font-size:16px;font-weight:600;text-decoration:none;">Get Your Storefront →</a>
+</div>
 </div><!-- end demo-main -->
 </div><!-- end demo-layout -->
 {% endif %}
