@@ -161,7 +161,7 @@ def verify_email(token):
         send_welcome_email(user.email)
     except:
         pass
-    flash("Email verified successfully! You can now log in.", "success")
+    flash("Email verified! Your 14-day free trial is now active. Log in to get started.", "success")
     return redirect(url_for("auth.login"))
 
 

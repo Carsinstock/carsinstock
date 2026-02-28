@@ -586,9 +586,19 @@ def register_routes(bp):
             ).scalar() or 0
         except:
             blast_count = 0
+        # Trial calculation
+        from app.models.user import User
+        user = User.query.get(session["user_id"])
+        from datetime import timedelta
+        trial_end = user.created_at + timedelta(days=14)
+        now = datetime.utcnow()
+        trial_days_left = max(0, (trial_end - now).days)
+        trial_active = trial_days_left > 0
+
         return render_template("salesperson/dashboard.html", sp=sp,
             active_vehicles=active_vehicles, expired_vehicles=expired_vehicles,
-            leads=leads, chats=chats, customers=customers, blast_count=blast_count)
+            leads=leads, chats=chats, customers=customers, blast_count=blast_count,
+            trial_days_left=trial_days_left, trial_active=trial_active)
 
     @bp.route("/customers/import", methods=["GET", "POST"])
     @login_required
