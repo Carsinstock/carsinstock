@@ -72,6 +72,7 @@ def register_routes(bp):
             if sp:
                 sp.display_name = display_name
                 sp.phone = phone
+                sp.dealership_name = request.form.get("dealership_name", "").strip()
                 sp.bio = bio
                 if profile_photo and profile_photo.filename:
                     from app.utils.cloudinary_upload import upload_profile_photo, upload_cover_photo
@@ -94,6 +95,7 @@ def register_routes(bp):
                     phone=phone,
                     email=user.email,
                     bio=bio,
+                    dealership_name=request.form.get("dealership_name", "").strip(),
                     profile_url_slug=slug,
                     status="active",
                     hired_at=datetime.utcnow()
@@ -527,6 +529,29 @@ def register_routes(bp):
             return jsonify({"success": True, "email": email})
         return jsonify({"success": False, "error": "Could not draft email"}), 500
 
+
+    @bp.route("/vehicles/renew/<int:vehicle_id>", methods=["POST"])
+    @login_required
+    def renew_vehicle(vehicle_id):
+        from app.models.salesperson import Salesperson
+        from app.models.vehicle import Vehicle
+        from app.models import db
+        from datetime import datetime, timedelta
+        sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
+        if not sp:
+            flash("Set up your profile first.", "error")
+            return redirect(url_for("salesperson.profile_setup"))
+        vehicle = Vehicle.query.filter_by(id=vehicle_id, salesperson_id=sp.salesperson_id).first()
+        if not vehicle:
+            flash("Vehicle not found.", "error")
+            return redirect(url_for("salesperson.dashboard"))
+        vehicle.expires_at = datetime.utcnow() + timedelta(days=7)
+        vehicle.created_at = datetime.utcnow()
+        vehicle.expiration_warning_sent = False
+        db.session.commit()
+        flash(f"{vehicle.year} {vehicle.make} {vehicle.model} renewed for 7 days!", "success")
+        return redirect(url_for("salesperson.dashboard"))
+
     @bp.route("/dashboard")
     @login_required
     def dashboard():
@@ -550,9 +575,20 @@ def register_routes(bp):
         leads = Lead.query.filter_by(salesperson_id=sp.salesperson_id).order_by(Lead.created_at.desc()).all()
         # Chat Transcripts
         chats = ChatConversation.query.filter_by(salesperson_id=sp.salesperson_id).order_by(ChatConversation.started_at.desc()).all()
+        # My Customers
+        customers = Customer.query.filter_by(salesperson_id=sp.salesperson_id).order_by(Customer.name).all()
+        # Email blast count today
+        today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+        try:
+            blast_count = db.session.execute(
+                db.text("SELECT COUNT(*) FROM email_blasts WHERE salesperson_id = :sid AND sent_at >= :today"),
+                {"sid": sp.salesperson_id, "today": today_start}
+            ).scalar() or 0
+        except:
+            blast_count = 0
         return render_template("salesperson/dashboard.html", sp=sp,
             active_vehicles=active_vehicles, expired_vehicles=expired_vehicles,
-            leads=leads, chats=chats)
+            leads=leads, chats=chats, customers=customers, blast_count=blast_count)
 
     @bp.route("/customers/import", methods=["GET", "POST"])
     @login_required
@@ -690,6 +726,43 @@ def register_routes(bp):
             db.session.commit()
         except Exception as e:
             print(f"Chat save error: {e}")
+        return jsonify({"response": response})
+
+
+    @bp.route("/api/chatbot/homepage", methods=["POST"])
+    def homepage_chatbot():
+        data = request.get_json()
+        message = data.get("message", "")
+        history = data.get("history", [])
+        system_prompt = """You are the CarsInStock sales assistant on the homepage. Your job is to convince car salespeople to sign up for CarsInStock.
+
+Your personality: You think like a top 10% car salesman. You are confident, direct, relatable, and you understand the pain points of working at a dealership. You know what it is like to lose deals to the BDC, to have customers ghosted by internet leads, and to watch other salespeople steal your ups.
+
+Key selling points you should weave into conversation naturally:
+- Your own page: CarsInStock.com/your-name - YOUR cars, YOUR leads
+- No more BDC stealing your customers - buyers contact YOU directly
+- Post the cars YOU want to sell, not what the dealer website shows
+- 2 dollars per car, 14-day free trial, no monthly fees
+- AI chatbot on your page talks to customers for you 24/7
+- Email up to 50 customers a day with one click
+- Every listing auto-expires in 7 days - your page always looks fresh
+- Takes 2 minutes to set up
+
+Always guide the conversation toward signing up. Be helpful but always be closing. Never be pushy - be like a friend who is already making money doing this and wants to help you get in. Keep responses short - 2-3 sentences max. End every response with a soft CTA."""
+        try:
+            import anthropic, os
+            client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+            messages = [{"role": m["role"], "content": m["content"]} for m in history]
+            messages.append({"role": "user", "content": message})
+            resp = client.messages.create(
+                model="claude-sonnet-4-20250514",
+                max_tokens=300,
+                system=system_prompt,
+                messages=messages
+            )
+            response = resp.content[0].text
+        except Exception as e:
+            print(f"Homepage chatbot error: {e}")
         return jsonify({"response": response})
 
     @bp.route("/api/chatbot/end", methods=["POST"])

@@ -125,8 +125,11 @@ def login():
                 session["slug"] = sp.profile_url_slug
             user.last_login_at = datetime.utcnow()
             db.session.commit()
+            if not sp or not sp.display_name:
+                flash("Welcome! Let's set up your storefront.", "success")
+                return redirect(url_for("salesperson.profile_setup"))
             flash("Welcome back!", "success")
-            return redirect("/" + session.get("slug", ""))
+            return redirect(url_for("salesperson.dashboard"))
         else:
             flash("Invalid email or password.", "error")
             return render_template("auth/login.html", email=email)

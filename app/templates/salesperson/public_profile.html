@@ -1,4 +1,16 @@
 {% extends "base.html" %}
+{% block meta %}
+<meta property="og:title" content="{{ sp.display_name }} — Cars In Stock">
+<meta property="og:description" content="Check out {{ sp.display_name }}'s latest inventory. Fresh cars, updated weekly.">
+<meta property="og:image" content="{{ sp.cover_photo or sp.profile_photo or 'https://res.cloudinary.com/dbpa9qqtb/image/upload/v1772163049/demo/demo_cover_photo.jpg' }}">
+<meta property="og:url" content="https://carsinstock.com/{{ sp.profile_url_slug }}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="CarsInStock">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ sp.display_name }} — Cars In Stock">
+<meta name="twitter:description" content="Check out {{ sp.display_name }}'s latest inventory. Fresh cars, updated weekly.">
+<meta name="twitter:image" content="{{ sp.cover_photo or sp.profile_photo or 'https://res.cloudinary.com/dbpa9qqtb/image/upload/v1772163049/demo/demo_cover_photo.jpg' }}">
+{% endblock %}
 {% block content %}
 {% if is_demo %}
 <style>
@@ -26,10 +38,10 @@
     <div class="bullet"><span class="check">✅</span><span class="headline">Your own page</span><div class="desc">CarsInStock.com/your-name</div></div>
     <div class="bullet"><span class="check">✅</span><span class="headline">Post your best inventory</span><div class="desc">The cars YOU want to sell</div></div>
     <div class="bullet"><span class="check">✅</span><span class="headline">Direct leads</span><div class="desc">Buyers contact you, not the BDC</div></div>
-    <div class="bullet"><span class="check">✅</span><span class="headline">Email your customers</span><div class="desc">Send 50 emails a day, one click</div></div>
+    <div class="bullet"><span class="check">✅</span><span class="headline">Email your customers</span><div class="desc">Copy-paste your contacts or upload a file — send your storefront to up to 50 people a day with one click.</div></div>
     <div class="bullet"><span class="check">✅</span><span class="headline">Auto-expires in 7 days</span><div class="desc">Fresh inventory, clean reputation</div></div>
     <hr>
-    <div class="pricing">14-day free trial.<br>$2 per vehicle after that.</div>
+    <div class="pricing">14-day free trial. No monthly fees.<br>Just $2 per car you post. That's it.</div>
     <a href="/register" class="cta-btn">Get Your Storefront</a>
 </div>
 <div class="demo-main">
@@ -83,10 +95,11 @@
                 <div style="background:#EF4444;color:white;text-align:center;padding:6px;font-weight:bold;font-size:13px;">EXPIRED</div>
                 {% elif is_owner and v.days_remaining <= 1 %}
                 <div style="background:#f59e0b;color:white;text-align:center;padding:6px;font-weight:bold;font-size:13px;">Expires tomorrow</div>
-                {% elif v.days_remaining and not is_demo %}
-                <div style="position:absolute;top:12px;right:12px;background:#E6F9EF;color:#00A344;padding:4px 10px;border-radius:4px;font-size:12px;font-weight:600;z-index:1;">{{ v.days_remaining }} days left</div>
                 {% endif %}
                 <div style="position:relative;">
+                {% if not (is_owner and v.is_expired) and v.days_remaining and v.days_remaining > 0 %}
+                <div style="position:absolute;top:10px;right:10px;background:#FF6B35;color:white;padding:4px 10px;border-radius:5px;font-size:12px;font-weight:700;z-index:2;letter-spacing:0.3px;">{{ v.days_remaining }} Days Left</div>
+                {% endif %}
                 {% if v.image_url %}
                 <img src="{{ v.image_url }}" alt="{{ v.year }} {{ v.make }} {{ v.model }}" class="vehicle-img">
                 {% else %}
@@ -114,7 +127,7 @@
                     {% elif not v.is_expired %}
                     <button class="interested-btn" onclick="showLeadForm({{ v.id }}, '{{ v.year }} {{ v.make }} {{ v.model }}')">I'm Interested</button>
                     {% elif is_owner %}
-                    <a href="/vehicles/edit/{{ v.id }}" style="display:inline-block; margin-top:8px; padding:8px 20px; background:#00C851; color:white; border-radius:6px; text-decoration:none; font-size:13px; font-weight:bold;">Renew Listing</a>
+                    <form method="POST" action="/vehicles/renew/{{ v.id }}" style="display:inline;"><button type="submit" style="margin-top:8px;padding:8px 20px;background:#00C851;color:white;border:none;border-radius:6px;font-size:13px;font-weight:bold;cursor:pointer;">Renew Listing</button></form>
                     {% endif %}
                 </div>
             </div>

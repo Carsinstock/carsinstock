@@ -2,12 +2,19 @@
 {% block content %}
 <div class="dashboard">
     <h1>Dashboard</h1>
-    <div class="dash-tabs">
-        <button class="tab-btn active" onclick="showTab('vehicles')">My Vehicles</button>
-        <button class="tab-btn" onclick="showTab('leads')">My Leads</button>
-        <button class="tab-btn" onclick="showTab('chats')">Chat Transcripts</button>
+{% if session.get('slug') %}
+    <div style="margin-bottom:20px;padding:12px 20px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+        <span style="font-size:15px;color:#1E293B;">🌐 Your storefront: <a href="/{{ session.get('slug') }}" style="color:#00C851;font-weight:600;">CarsInStock.com/{{ session.get('slug') }}</a></span>
+        <a href="/{{ session.get('slug') }}" target="_blank" style="background:#00C851;color:white;padding:8px 18px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;">View My Page →</a>
     </div>
-
+    {% endif %}
+    <div class="dash-tabs">
+        <button class="tab-btn active" onclick="showTab('vehicles', this)">My Vehicles</button>
+<button class="tab-btn" onclick="showTab('leads', this)">My Leads</button>
+        <button class="tab-btn" onclick="showTab('customers', this)">My Customers</button>
+        <button class="tab-btn" onclick="showTab('email', this)">Email Blast</button>
+        <button class="tab-btn" onclick="showTab('chats', this)">Chat Transcripts</button>
+    </div>
     <!-- MY VEHICLES TAB -->
     <div id="tab-vehicles" class="tab-content active">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
@@ -54,7 +61,7 @@
                     <span class="dash-badge dash-badge-expired">EXPIRED</span>
                 </div>
                 <div class="dash-actions">
-                    <a href="/vehicles/edit/{{ v.id }}" class="dash-btn dash-btn-renew">Renew</a>
+                    <form method="POST" action="/vehicles/renew/{{ v.id }}" style="display:inline;"><button type="submit" class="dash-btn dash-btn-renew">Renew</button></form>
                     <form method="POST" action="/vehicles/delete/{{ v.id }}" style="display:inline;" onsubmit="return confirm('Delete this vehicle?');">
                         <button type="submit" class="dash-btn dash-btn-delete">Delete</button>
                     </form>
@@ -131,6 +138,57 @@
         <p style="color:#999;text-align:center;padding:40px 0;">No chat transcripts yet.</p>
         {% endif %}
     </div>
+<!-- MY CUSTOMERS TAB -->
+    <div id="tab-customers" class="tab-content">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <h2 style="margin:0;">My Customers ({{ customers|length if customers else 0 }})</h2>
+            <div style="display:flex;gap:8px;">
+                <a href="/customers/add" class="dash-btn-add" style="font-size:13px;padding:8px 16px;">+ Add Customer</a>
+                <a href="/customers/import" class="dash-btn-add" style="font-size:13px;padding:8px 16px;background:#1E293B;">📁 Import CSV</a>
+            </div>
+        </div>
+        {% if customers %}
+        <div class="dash-leads-list">
+            {% for c in customers %}
+            <div class="dash-lead-row" style="cursor:default;">
+                <div class="lead-summary">
+                    <strong>{{ c.name }}</strong>
+                    <span class="lead-contact">{{ c.email }}{% if c.phone %} | {{ c.phone }}{% endif %}</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color:#999;text-align:center;padding:40px 0;">No customers yet. <a href="/customers/add" style="color:#00C851;">Add your first customer</a> or <a href="/customers/import" style="color:#00C851;">import from a CSV file</a>.</p>
+        {% endif %}
+    </div>
+
+    <!-- EMAIL BLAST TAB -->
+    <div id="tab-email" class="tab-content">
+        <h2>Email Blast</h2>
+        {% if not customers or customers|length == 0 %}
+        <div style="text-align:center;padding:40px 20px;">
+            <p style="color:#999;font-size:16px;">You need customers first before you can send emails.</p>
+            <a href="/customers/add" style="color:#00C851;font-weight:600;">+ Add your first customer</a>
+        </div>
+        {% elif not active_vehicles or active_vehicles|length == 0 %}
+        <div style="text-align:center;padding:40px 20px;">
+            <p style="color:#999;font-size:16px;">Post a vehicle first so you have something to share!</p>
+            <a href="/vehicles/add" style="color:#00C851;font-weight:600;">+ Add a vehicle</a>
+        </div>
+        {% else %}
+        <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:24px;margin-bottom:20px;">
+            <p style="margin:0 0 8px;font-size:15px;color:#1E293B;"><strong>{{ customers|length }}</strong> customer{{ 's' if customers|length != 1 else '' }} · <strong>{{ active_vehicles|length }}</strong> active vehicle{{ 's' if active_vehicles|length != 1 else '' }}</p>
+            <p style="margin:0;font-size:13px;color:#64748B;">Emails sent today: {{ blast_count }}/50</p>
+        </div>
+        <p style="color:#555;font-size:14px;margin-bottom:20px;">Share a vehicle with your customers by going to your <strong>My Vehicles</strong> tab and clicking <strong>Share</strong> on any active listing. You can select which customers to email and add a personal message.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <a href="#" onclick="showTab('vehicles', this);return false;" class="dash-btn dash-btn-edit" style="padding:10px 20px;">Go to My Vehicles</a>
+            <a href="/customers/add" class="dash-btn dash-btn-share" style="padding:10px 20px;">+ Add More Customers</a>
+        </div>
+        <p style="color:#94A3B8;font-size:12px;margin-top:16px;">Daily limit: 50 emails per day. Customers can unsubscribe at any time.</p>
+        {% endif %}
+    </div>
 </div>
 
 <style>
@@ -181,11 +239,11 @@
 }
 </style>
 <script>
-function showTab(name) {
+function showTab(name, btn) { try {
     document.querySelectorAll('.tab-content').forEach(function(t){ t.classList.remove('active'); });
     document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.remove('active'); });
     document.getElementById('tab-'+name).classList.add('active');
-    event.target.classList.add('active');
-}
+    if(btn) btn.classList.add('active');
+} catch(e){ console.log(e); } }
 </script>
 {% endblock %}

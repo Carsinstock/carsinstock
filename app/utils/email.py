@@ -74,8 +74,15 @@ def send_welcome_email(to_email):
                     Log In Now
                 </a>
             </div>
+            
+                <div style="background:#F0FDF4;border-radius:8px;padding:20px;margin-bottom:20px;">
+                <h3 style="color:#1E293B;margin-top:0;font-size:18px;">🎉 Your 14-Day Free Trial Has Started!</h3>
+                <p style="color:#555;font-size:15px;line-height:1.6;margin:0;">
+                    Post vehicles at no charge for 14 days. After your trial, it&#39;s just $2 per vehicle posted. No monthly fees, no hidden costs. You&#39;ll receive an invoice via email around day 11 of each billing cycle.
+                </p>
+            </div>
             <p style="color: #555; font-size: 16px; line-height: 1.6;">
-                Every listing on CarsInStock expires after 14 days so customers always see
+                Every listing on CarsInStock expires after 7 days so customers always see
                 what is actually on your lot. No ghost cars. No stale inventory.
             </p>
         </div>

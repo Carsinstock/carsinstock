@@ -1,4 +1,16 @@
 {% extends "base.html" %}
+{% block meta %}
+<meta property="og:title" content="CarsInStock — Fresh Cars. Real People.">
+<meta property="og:description" content="Your own storefront. Your cars. Your leads. No ghost cars, no stale inventory. 14-day free trial.">
+<meta property="og:image" content="https://res.cloudinary.com/dbpa9qqtb/image/upload/v1772163049/demo/demo_cover_photo.jpg">
+<meta property="og:url" content="https://carsinstock.com">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="CarsInStock">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CarsInStock — Fresh Cars. Real People.">
+<meta name="twitter:description" content="Your own storefront. Your cars. Your leads. 14-day free trial.">
+<meta name="twitter:image" content="https://res.cloudinary.com/dbpa9qqtb/image/upload/v1772163049/demo/demo_cover_photo.jpg">
+{% endblock %}
 {% block content %}
 <style>
     .hp { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; color: #1E293B; }
@@ -69,6 +81,7 @@
         <div class="hp-hero-logo"><span class="cars">Cars</span> <span class="instock">IN STOCK</span></div>
         <h1>Posted by YOU. Owned by YOU. Sold by YOU.</h1>
         <p class="sub">Tired of BDC no-shows? Tired of fighting for the same ups?</p>
+        <h2 style="color:#1E293B;font-size:28px;font-weight:700;margin-bottom:12px;">Sell More Cars.</h2>
         <div class="hp-btns">
             <a href="/demo" class="btn-green">Demo Page</a>
             <a href="/register" class="btn-coral">Get Your Storefront</a>
@@ -143,4 +156,70 @@
         <div class="copy">&copy; 2026 CarsInStock</div>
     </div>
 </div>
+<!-- Homepage Sales Chatbot -->
+<div id="chatToggle" onclick="toggleChat()" style="position:fixed;bottom:20px;right:20px;width:60px;height:60px;background:linear-gradient(135deg,#00C851,#1E293B);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.25);z-index:999;transition:transform 0.2s;">
+    <span style="color:white;font-size:28px;">&#x1F4AC;</span>
+</div>
+<div id="chatBox" style="display:none;position:fixed;bottom:90px;right:20px;width:340px;max-height:450px;background:white;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,0.2);z-index:999;overflow:hidden;flex-direction:column;">
+    <div style="background:linear-gradient(135deg,#00C851,#1E293B);color:white;padding:16px;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+            <div style="font-weight:700;font-size:15px;">CarsInStock</div>
+            <div style="font-size:12px;opacity:0.8;">Talk to us about selling more cars</div>
+        </div>
+        <span onclick="toggleChat()" style="cursor:pointer;font-size:20px;">&#x2715;</span>
+    </div>
+    <div id="chatMessages" style="padding:14px;height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;">
+        <div style="background:#f0f0f0;padding:10px 14px;border-radius:12px;border-bottom-left-radius:4px;font-size:14px;max-width:85%;color:#333;">
+            Hey! You sell cars? I might be able to help you make more money. What's your situation?
+        </div>
+    </div>
+    <div style="padding:10px;border-top:1px solid #eee;display:flex;gap:8px;">
+        <input type="text" id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendChat()" style="flex:1;padding:10px 14px;border:1px solid #E2E8F0;border-radius:20px;font-size:14px;outline:none;">
+        <button onclick="sendChat()" style="background:linear-gradient(135deg,#00C851,#1E293B);color:white;border:none;border-radius:50%;width:38px;height:38px;cursor:pointer;font-size:16px;">&#x2192;</button>
+    </div>
+</div>
+<script>
+var hpChatHistory = [];
+function toggleChat() {
+    var box = document.getElementById('chatBox');
+    box.style.display = box.style.display === 'none' ? 'flex' : 'none';
+}
+function sendChat() {
+    var input = document.getElementById('chatInput');
+    var msg = input.value.trim();
+    if (!msg) return;
+    var messages = document.getElementById('chatMessages');
+    messages.innerHTML += '<div style="background:#00C851;color:white;padding:10px 14px;border-radius:12px;border-bottom-right-radius:4px;font-size:14px;max-width:85%;align-self:flex-end;">' + msg + '</div>';
+    input.value = '';
+    messages.scrollTop = messages.scrollHeight;
+    hpChatHistory.push({role: 'user', content: msg});
+    var typing = document.createElement('div');
+    typing.id = 'typingDot';
+    typing.style.cssText = 'background:#f0f0f0;padding:10px 14px;border-radius:12px;border-bottom-left-radius:4px;font-size:14px;max-width:85%;color:#999;';
+    typing.textContent = 'Typing...';
+    messages.appendChild(typing);
+    messages.scrollTop = messages.scrollHeight;
+    fetch('/api/chatbot/homepage', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({message: msg, history: hpChatHistory})
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        var t = document.getElementById('typingDot');
+        if (t) t.remove();
+        messages.innerHTML += '<div style="background:#f0f0f0;padding:10px 14px;border-radius:12px;border-bottom-left-radius:4px;font-size:14px;max-width:85%;color:#333;">' + data.response + '</div>';
+        messages.scrollTop = messages.scrollHeight;
+        hpChatHistory.push({role: 'assistant', content: data.response});
+    })
+    .catch(function() {
+        var t = document.getElementById('typingDot');
+        if (t) t.remove();
+        messages.innerHTML += '<div style="background:#f0f0f0;padding:10px 14px;border-radius:12px;border-bottom-left-radius:4px;font-size:14px;max-width:85%;color:#333;">Something went wrong — but seriously, check out the <a href="/demo" style="color:#00C851;font-weight:600;">demo page</a> to see what you get!</div>';
+    });
+}
+</script>
 {% endblock %}
+
+
+
