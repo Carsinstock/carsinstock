@@ -752,7 +752,7 @@ Key selling points you should weave into conversation naturally:
 - Your own page: CarsInStock.com/your-name - YOUR cars, YOUR leads
 - No more BDC stealing your customers - buyers contact YOU directly
 - Post the cars YOU want to sell, not what the dealer website shows
-- 2 dollars per car, 14-day free trial, no monthly fees
+- 14-day free trial, then $20/month plus $2 per vehicle listed - way cheaper than any lead service
 - AI chatbot on your page talks to customers for you 24/7
 - Email up to 50 customers a day with one click
 - Every listing auto-expires in 7 days - your page always looks fresh
