@@ -60,6 +60,7 @@
             {% endif %}
         <h1>{{ sp.display_name }}</h1>
         {% if sp.dealership_name %}<p style="color:#64748B;font-size:16px;margin-bottom:8px;">{{ sp.dealership_name }}</p>{% endif %}
+        {% if sp.dealership_address %}<p style="color:#64748B;font-size:14px;margin-bottom:8px;">📍 {{ sp.dealership_address }}</p>{% endif %}
         {% if sp.bio %}
         <p class="profile-bio">{{ sp.bio }}</p>
         {% endif %}

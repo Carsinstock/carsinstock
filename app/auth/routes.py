@@ -87,7 +87,7 @@ def register():
                     <p style="color:#999;font-size:13px;">This link expires in 24 hours.</p>
                 </div>
                 <div style="border-top:1px solid #eee;padding:20px 0;text-align:center;">
-                    <p style="color:#999;font-size:12px;">Fresh Cars. Real People. | CarsInStock | 76 RT 37 East, Toms River, NJ 08753</p>
+                    <p style="color:#999;font-size:12px;">Fresh Cars. Real People. | CarsInStock.com</p>
                 </div>
             </div>
             """
@@ -187,7 +187,7 @@ def resend_verification():
                 '<a href="' + verify_url + '" style="background-color:#00C851;color:white;padding:14px 32px;text-decoration:none;border-radius:6px;font-size:16px;font-weight:bold;display:inline-block;">Verify My Email</a>'
                 '</div><p style="color:#999;font-size:13px;">This link expires in 24 hours.</p>'
                 '</div><div style="border-top:1px solid #eee;padding:20px 0;text-align:center;">'
-                '<p style="color:#999;font-size:12px;">Fresh Cars. Real People. | CarsInStock | 76 RT 37 East, Toms River, NJ 08753</p>'
+                '<p style="color:#999;font-size:12px;">Fresh Cars. Real People. | CarsInStock.com</p>'
                 '</div></div>'
             )
             try:
@@ -234,7 +234,7 @@ def forgot_password():
                     </div>
                     <div style="border-top: 1px solid #eee; padding: 20px 0; text-align: center;">
                         <p style="color: #999; font-size: 12px; margin: 0;">
-                            Fresh Cars. Real People. | CarsInStock | 76 RT 37 East, Toms River, NJ 08753
+                            Fresh Cars. Real People. | CarsInStock.com
                         </p>
                     </div>
                 </div>

@@ -143,7 +143,7 @@ def register_admin_routes(bp):
                         </div>
                         <div style="padding:20px;">{body_html}</div>
                         <div style="border-top:1px solid #eee;padding:20px 0;text-align:center;">
-                            <p style="color:#999;font-size:12px;">Fresh Cars. Real People. | CarsInStock | 76 RT 37 East, Toms River, NJ 08753</p>
+                            <p style="color:#999;font-size:12px;">Fresh Cars. Real People. | CarsInStock.com</p>
                             <p style="color:#999;font-size:11px;"><a href="{unsub_url}" style="color:#999;">Unsubscribe</a></p>
                         </div>
                     </div>

@@ -73,6 +73,7 @@ def register_routes(bp):
                 sp.display_name = display_name
                 sp.phone = phone
                 sp.dealership_name = request.form.get("dealership_name", "").strip()
+                sp.dealership_address = request.form.get("dealership_address", "").strip()
                 sp.bio = bio
                 if profile_photo and profile_photo.filename:
                     from app.utils.cloudinary_upload import upload_profile_photo, upload_cover_photo
@@ -96,6 +97,7 @@ def register_routes(bp):
                     email=user.email,
                     bio=bio,
                     dealership_name=request.form.get("dealership_name", "").strip(),
+                    dealership_address=request.form.get("dealership_address", "").strip(),
                     profile_url_slug=slug,
                     status="active",
                     hired_at=datetime.utcnow()
@@ -559,6 +561,7 @@ def register_routes(bp):
         from app.models.vehicle import Vehicle
         from app.models.customer import Customer
         from app.models.chat_conversation import ChatConversation
+        from app.models.user import User
         from app.models import db
         from datetime import datetime
         import json
@@ -598,7 +601,7 @@ def register_routes(bp):
         return render_template("salesperson/dashboard.html", sp=sp,
             active_vehicles=active_vehicles, expired_vehicles=expired_vehicles,
             leads=leads, chats=chats, customers=customers, blast_count=blast_count,
-            trial_days_left=trial_days_left, trial_active=trial_active)
+            trial_days_left=trial_days_left, trial_active=trial_active, is_admin=User.query.get(session.get("user_id")).is_admin)
 
     @bp.route("/customers/import", methods=["GET", "POST"])
     @login_required
@@ -681,6 +684,7 @@ def register_routes(bp):
     @login_required
     def delete_chat(chat_id):
         from app.models.chat_conversation import ChatConversation
+        from app.models.user import User
         from app.models.salesperson import Salesperson
         from app.models import db
         sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
@@ -701,6 +705,7 @@ def register_routes(bp):
         from app.utils.ai import chatbot_response
         from app.models.salesperson import Salesperson
         from app.models.chat_conversation import ChatConversation
+        from app.models.user import User
         import json
         data = request.get_json()
         message = data.get("message", "")
@@ -779,6 +784,7 @@ Always guide the conversation toward signing up. Be helpful but always be closin
     def chatbot_end():
         from app.models.salesperson import Salesperson
         from app.models.chat_conversation import ChatConversation
+        from app.models.user import User
         from app.utils.email import send_email
         import json
         data = request.get_json()
@@ -834,7 +840,7 @@ Always guide the conversation toward signing up. Be helpful but always be closin
                 {transcript_html}
             </div>
             <div style="border-top: 1px solid #eee; padding: 20px 0; text-align: center;">
-                <p style="color: #999; font-size: 12px; margin: 0;">CarsInStock | 76 RT 37 East, Toms River, NJ 08753</p>
+                <p style="color: #999; font-size: 12px; margin: 0;">CarsInStock.com</p>
             </div>
         </div>
         """
@@ -845,3 +851,191 @@ Always guide the conversation toward signing up. Be helpful but always be closin
         except Exception as e:
             print(f"Transcript email error: {e}")
         return jsonify({"success": True})
+
+    # ---- ADMIN EMAIL BLAST ----
+    @bp.route("/admin/blast", methods=["GET", "POST"])
+    @login_required
+    def admin_blast():
+        from app.models import db
+        from app.models.user import User
+        from app.models.salesperson import Salesperson
+        from app.utils.email import send_email
+
+        user = User.query.get(session.get("user_id"))
+        if not user or not user.is_admin:
+            flash("Unauthorized", "error")
+            return redirect("/")
+
+        TEMPLATES = {
+            "welcome": {
+                "name": "Welcome & Announcement",
+                "subject": "Welcome to CarsInStock — Your Personal Storefront is Ready",
+                "body": """
+                    <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#fff;">
+                        <div style="background:#1E293B;padding:30px;text-align:center;">
+                            <h1 style="color:#fff;margin:0;font-size:24px;">Cars <span style="color:#00C851;">IN STOCK</span></h1>
+                        </div>
+                        <div style="padding:30px 20px;">
+                            <h2 style="color:#1E293B;">Your personal car storefront is here.</h2>
+                            <p style="color:#555;font-size:16px;line-height:1.6;">CarsInStock gives you your own page — <strong>carsinstock.com/your-name</strong> — where buyers can see your real, current inventory and contact you directly.</p>
+                            <p style="color:#555;font-size:16px;line-height:1.6;">No ghost cars. No stale listings. Every vehicle expires after 7 days so customers always see what is actually available.</p>
+                            <div style="text-align:center;margin:30px 0;">
+                                <a href="https://carsinstock.com/register" style="background:#00C851;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;">Claim Your Page — Free for 14 Days</a>
+                            </div>
+                            <p style="color:#555;font-size:14px;">Fresh Cars. Real People. That is what CarsInStock is all about.</p>
+                        </div>
+                        <div style="border-top:1px solid #eee;padding:20px 0;text-align:center;">
+                            <p style="color:#999;font-size:12px;">Fresh Cars. Real People. | CarsInStock.com</p>
+                        </div>
+                    </div>"""
+            },
+            "feature": {
+                "name": "Feature Update",
+                "subject": "New on CarsInStock — Check Out What is New",
+                "body": """
+                    <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#fff;">
+                        <div style="background:#1E293B;padding:30px;text-align:center;">
+                            <h1 style="color:#fff;margin:0;font-size:24px;">Cars <span style="color:#00C851;">IN STOCK</span></h1>
+                        </div>
+                        <div style="padding:30px 20px;">
+                            <h2 style="color:#1E293B;">We have been busy building for you.</h2>
+                            <p style="color:#555;font-size:16px;line-height:1.6;">Here is what is new on your CarsInStock storefront:</p>
+                            <ul style="color:#555;font-size:16px;line-height:2;">
+                                <li>One-click vehicle renewal — keep your best listings fresh</li>
+                                <li>AI-powered chatbot — engages buyers on your page 24/7</li>
+                                <li>Email blast tool — send your inventory to up to 50 customers a day</li>
+                            </ul>
+                            <div style="text-align:center;margin:30px 0;">
+                                <a href="https://carsinstock.com/login" style="background:#00C851;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;">Log In & Check It Out</a>
+                            </div>
+                        </div>
+                        <div style="border-top:1px solid #eee;padding:20px 0;text-align:center;">
+                            <p style="color:#999;font-size:12px;">Fresh Cars. Real People. | CarsInStock.com</p>
+                        </div>
+                    </div>"""
+            },
+            "engage": {
+                "name": "Re-Engagement",
+                "subject": "Your CarsInStock Page is Waiting — Buyers Are Looking",
+                "body": """
+                    <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;background:#fff;">
+                        <div style="background:#1E293B;padding:30px;text-align:center;">
+                            <h1 style="color:#fff;margin:0;font-size:24px;">Cars <span style="color:#00C851;">IN STOCK</span></h1>
+                        </div>
+                        <div style="padding:30px 20px;">
+                            <h2 style="color:#1E293B;">Buyers are searching. Are your cars listed?</h2>
+                            <p style="color:#555;font-size:16px;line-height:1.6;">Your CarsInStock page is your 24/7 digital storefront. When you keep it fresh, buyers find you — not the other way around.</p>
+                            <p style="color:#555;font-size:16px;line-height:1.6;">It only takes 5 minutes to post a few cars. Share your link and let the leads come to you.</p>
+                            <div style="text-align:center;margin:30px 0;">
+                                <a href="https://carsinstock.com/login" style="background:#00C851;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:16px;">Update Your Inventory Now</a>
+                            </div>
+                        </div>
+                        <div style="border-top:1px solid #eee;padding:20px 0;text-align:center;">
+                            <p style="color:#999;font-size:12px;">Fresh Cars. Real People. | CarsInStock.com</p>
+                        </div>
+                    </div>"""
+            }
+        }
+
+        results = None
+        if request.method == "POST":
+            template_key = request.form.get("template")
+            if template_key not in TEMPLATES:
+                flash("Invalid template selected", "error")
+                return redirect(url_for("salesperson.admin_blast"))
+
+            template = TEMPLATES[template_key]
+            salespeople = Salesperson.query.filter_by(status="active").all()
+
+            if not salespeople:
+                flash("No active salespeople found", "error")
+                return redirect(url_for("salesperson.admin_blast"))
+
+            sent = 0
+            failed = 0
+            for sp in salespeople:
+                if sp.email:
+                    success = send_email(sp.email, template["subject"], template["body"])
+                    if success:
+                        sent += 1
+                    else:
+                        failed += 1
+
+            results = {"sent": sent, "failed": failed, "template": template["name"]}
+            flash(f"Blast sent: {sent} delivered, {failed} failed", "success" if failed == 0 else "warning")
+
+        return f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Admin Email Blast - CarsInStock</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+            <style>
+                * {{ margin:0; padding:0; box-sizing:border-box; }}
+                body {{ font-family:Inter,sans-serif; background:#f1f5f9; }}
+                .header {{ background:#1E293B; padding:20px 30px; display:flex; justify-content:space-between; align-items:center; }}
+                .header h1 {{ color:#fff; font-size:20px; }}
+                .header h1 span {{ color:#00C851; }}
+                .header a {{ color:#94a3b8; text-decoration:none; font-size:14px; }}
+                .container {{ max-width:800px; margin:30px auto; padding:0 20px; }}
+                h2 {{ color:#1E293B; margin-bottom:20px; }}
+                .template-card {{ background:#fff; border-radius:12px; padding:24px; margin-bottom:16px; border:2px solid #e2e8f0; cursor:pointer; transition:all 0.2s; }}
+                .template-card:hover {{ border-color:#00C851; }}
+                .template-card.selected {{ border-color:#00C851; background:#f0fdf4; }}
+                .template-card h3 {{ color:#1E293B; margin-bottom:8px; }}
+                .template-card p {{ color:#64748B; font-size:14px; }}
+                .send-btn {{ background:#00C851; color:#fff; border:none; padding:14px 32px; border-radius:8px; font-size:16px; font-weight:600; cursor:pointer; margin-top:20px; }}
+                .send-btn:hover {{ background:#00b348; }}
+                .send-btn:disabled {{ background:#94a3b8; cursor:not-allowed; }}
+                .results {{ background:#fff; border-radius:12px; padding:24px; margin-bottom:20px; border-left:4px solid #00C851; }}
+                .back-link {{ color:#00C851; text-decoration:none; font-size:14px; }}
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>Cars <span>IN STOCK</span> — Admin Blast</h1>
+                <a href="/salesperson/dashboard">← Back to Dashboard</a>
+            </div>
+            <div class="container">
+                {"<div class='results'><h3>Blast Results</h3><p>Template: " + results['template'] + "</p><p>Sent: " + str(results['sent']) + " | Failed: " + str(results['failed']) + "</p></div>" if results else ""}
+                <h2>Send Email Blast to All Salespeople</h2>
+                <form method="POST" id="blastForm">
+                    <div class="template-card" onclick="selectTemplate('welcome', this)">
+                        <h3>Welcome & Announcement</h3>
+                        <p>Introduce CarsInStock to new salespeople. Includes CTA to claim their page with 14-day free trial.</p>
+                    </div>
+                    <div class="template-card" onclick="selectTemplate('feature', this)">
+                        <h3>Feature Update</h3>
+                        <p>Announce new features like one-click renewal, AI chatbot, and email blast tools.</p>
+                    </div>
+                    <div class="template-card" onclick="selectTemplate('engage', this)">
+                        <h3>Re-Engagement</h3>
+                        <p>Nudge inactive salespeople to update their inventory and start getting leads.</p>
+                    </div>
+                    <input type="hidden" name="template" id="templateInput" value="">
+                    <button type="submit" class="send-btn" id="sendBtn" disabled>Select a Template to Send</button>
+                </form>
+            </div>
+            <script>
+                function selectTemplate(key, el) {{
+                    document.querySelectorAll('.template-card').forEach(c => c.classList.remove('selected'));
+                    el.classList.add('selected');
+                    document.getElementById('templateInput').value = key;
+                    var btn = document.getElementById('sendBtn');
+                    btn.disabled = false;
+                    btn.textContent = 'Send Blast Now';
+                }}
+                document.getElementById('blastForm').addEventListener('submit', function(e) {{
+                    if (!document.getElementById('templateInput').value) {{
+                        e.preventDefault();
+                        alert('Please select a template first');
+                    }} else if (!confirm('Send this blast to ALL active salespeople?')) {{
+                        e.preventDefault();
+                    }}
+                }});
+            </script>
+        </body>
+        </html>
+        """
+

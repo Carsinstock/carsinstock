@@ -29,6 +29,7 @@
         <button class="tab-btn" onclick="showTab('customers', this)">My Customers</button>
         <button class="tab-btn" onclick="showTab('email', this)">Email Blast</button>
         <button class="tab-btn" onclick="showTab('chats', this)">Chat Transcripts</button>
+        {% if is_admin %}<a href="/salesperson/admin/blast" class="tab-btn" style="background:#1E293B;color:#00C851;text-decoration:none;">⚡ Admin Blast</a>{% endif %}
     </div>
     <!-- MY VEHICLES TAB -->
     <div id="tab-vehicles" class="tab-content active">

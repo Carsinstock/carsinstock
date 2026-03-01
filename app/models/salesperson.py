@@ -16,6 +16,7 @@ class Salesperson(db.Model):
     profile_photo = db.Column(db.String(500))
     cover_photo = db.Column(db.String(500))
     dealership_name = db.Column(db.String(200))
+    dealership_address = db.Column(db.String(500))
     status = db.Column(db.String(50), default='active')
     hired_at = db.Column(db.DateTime, default=datetime.utcnow)
     terminated_at = db.Column(db.DateTime)
