@@ -161,6 +161,19 @@ def unsubscribe(token):
             return render_template('unsubscribe.html', name=customer.name, success=True)
     return render_template('unsubscribe.html', name=None, success=False)
 
+
+@main.route('/track/click/<tracking_id>')
+def track_click(tracking_id):
+    from datetime import datetime
+    try:
+        db.engine.execute(
+            db.text("UPDATE recruitment_contacts SET status = 'clicked', clicked_at = :now WHERE tracking_id = :tid AND status != 'converted'"),
+            {"now": datetime.utcnow(), "tid": tracking_id}
+        )
+    except:
+        pass
+    return redirect("https://carsinstock.com/demo")
+
 @main.route('/contact', methods=['GET', 'POST'])
 def contact():
     import os

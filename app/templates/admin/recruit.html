@@ -1,0 +1,415 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Recruitment Hub - CarsInStock Admin{% endblock %}
+{% block content %}
+<style>
+.stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+.stat-card { background:#fff; border-radius:12px; padding:18px; box-shadow:0 2px 8px rgba(0,0,0,0.06); text-align:center; }
+.stat-card .num { font-size:28px; font-weight:700; }
+.stat-card .label { font-size:13px; color:#64748B; margin-top:4px; }
+.stat-card:nth-child(1) { border-top:3px solid #1E293B; }
+.stat-card:nth-child(1) .num { color:#1E293B; }
+.stat-card:nth-child(2) { border-top:3px solid #3B82F6; }
+.stat-card:nth-child(2) .num { color:#3B82F6; }
+.stat-card:nth-child(3) { border-top:3px solid #00C851; }
+.stat-card:nth-child(3) .num { color:#00C851; }
+.stat-card:nth-child(4) { border-top:3px solid #F59E0B; }
+.stat-card:nth-child(4) .num { color:#F59E0B; }
+.r-tabs { display:flex; gap:8px; margin-bottom:20px; border-bottom:2px solid #e2e8f0; padding-bottom:10px; flex-wrap:wrap; }
+.r-tab-btn { padding:10px 20px; border:none; background:transparent; font-size:14px; font-weight:500; color:#64748B; cursor:pointer; border-radius:8px 8px 0 0; font-family:Inter,sans-serif; }
+.r-tab-btn.active { background:#fff; color:#1E293B; box-shadow:0 2px 8px rgba(0,0,0,0.06); font-weight:600; }
+.r-tab { display:none; }
+.r-tab.active { display:block; }
+.card { background:#fff; border-radius:12px; padding:20px; box-shadow:0 2px 8px rgba(0,0,0,0.06); margin-bottom:16px; }
+.btn { padding:10px 20px; border:none; border-radius:8px; font-size:14px; font-weight:600; cursor:pointer; font-family:Inter,sans-serif; display:inline-flex; align-items:center; gap:6px; }
+.btn-green { background:#00C851; color:#fff; }
+.btn-green:hover { background:#00b348; }
+.btn-navy { background:#1E293B; color:#fff; }
+.btn-navy:hover { background:#334155; }
+.btn-red { background:#EF4444; color:#fff; }
+.btn-red:hover { background:#DC2626; }
+.btn-outline { background:transparent; border:2px solid #e2e8f0; color:#64748B; }
+.btn-outline:hover { border-color:#00C851; color:#00C851; }
+.actions { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+.filters { display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; align-items:center; }
+.filters select, .filters input { padding:8px 12px; border:2px solid #e2e8f0; border-radius:8px; font-size:13px; font-family:Inter,sans-serif; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th { background:#f8fafc; padding:10px 8px; text-align:left; font-weight:600; color:#64748B; border-bottom:2px solid #e2e8f0; }
+td { padding:10px 8px; border-bottom:1px solid #f1f5f9; }
+tr:nth-child(even) { background:#f8fafc; }
+tr.clicked-row { border-left:3px solid #00C851; }
+.badge { padding:3px 10px; border-radius:12px; font-size:11px; font-weight:600; display:inline-block; }
+.badge-new { background:#f1f5f9; color:#64748B; }
+.badge-sent { background:#DBEAFE; color:#2563EB; }
+.badge-clicked { background:#D1FAE5; color:#059669; }
+.badge-converted { background:#FEF3C7; color:#D97706; }
+.modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center; }
+.modal-overlay.show { display:flex; }
+.modal { background:#fff; border-radius:12px; padding:24px; max-width:500px; width:90%; max-height:90vh; overflow-y:auto; }
+.modal h3 { margin-bottom:16px; }
+.fg { margin-bottom:12px; }
+.fg label { display:block; font-size:13px; font-weight:600; color:#64748B; margin-bottom:4px; }
+.fg input, .fg textarea, .fg select { width:100%; padding:10px 12px; border:2px solid #e2e8f0; border-radius:8px; font-size:14px; font-family:Inter,sans-serif; box-sizing:border-box; }
+.fg textarea { resize:vertical; min-height:120px; }
+.merge-btns { display:flex; gap:4px; flex-wrap:wrap; margin-bottom:8px; }
+.merge-btn { padding:4px 10px; background:#f1f5f9; border:1px solid #e2e8f0; border-radius:6px; font-size:11px; cursor:pointer; font-family:Inter,sans-serif; }
+.merge-btn:hover { background:#D1FAE5; border-color:#00C851; }
+.ro { padding:12px; border:2px solid #e2e8f0; border-radius:8px; margin-bottom:8px; cursor:pointer; }
+.ro:hover, .ro.sel { border-color:#00C851; background:#f0fdf4; }
+.ro input[type=radio] { margin-right:8px; }
+.checklist { max-height:200px; overflow-y:auto; border:2px solid #e2e8f0; border-radius:8px; padding:8px; }
+.checklist label { display:flex; align-items:center; gap:8px; padding:4px 0; font-size:13px; }
+.batch-alert { background:#FEF3C7; border-left:4px solid #F59E0B; padding:12px 16px; border-radius:8px; margin-bottom:12px; font-size:14px; }
+.track-pills { display:flex; gap:16px; margin-bottom:16px; flex-wrap:wrap; }
+.track-pill { padding:12px 20px; border-radius:8px; font-size:14px; }
+@media(max-width:768px) {
+    .stats { grid-template-columns:repeat(2,1fr); }
+    table { font-size:11px; }
+    .actions, .filters { flex-direction:column; }
+    .modal { padding:16px; }
+}
+</style>
+
+{% for b in active_batches %}
+<div class="batch-alert">&#9203; Active batch: {{ b.batches_sent }}/{{ b.total_batches }} batches sent ({{ b.batch_size }}/batch). Next batch queued.</div>
+{% endfor %}
+
+<div class="stats">
+    <div class="stat-card"><div class="num">{{ total }}</div><div class="label">Total Contacts</div></div>
+    <div class="stat-card"><div class="num">{{ total_sent }}</div><div class="label">Emails Sent</div></div>
+    <div class="stat-card"><div class="num">{{ total_clicked }}</div><div class="label">Link Clicks</div></div>
+    <div class="stat-card"><div class="num">{{ click_rate }}%</div><div class="label">Click Rate</div></div>
+</div>
+
+<div class="r-tabs">
+    <button class="r-tab-btn active" onclick="showRTab('contacts',this)">&#128203; Contacts</button>
+    <button class="r-tab-btn" onclick="showRTab('compose',this)">&#9993;&#65039; Compose & Send</button>
+    <button class="r-tab-btn" onclick="showRTab('tracking',this)">&#128200; Tracking</button>
+</div>
+
+<!-- CONTACTS TAB -->
+<div id="rtab-contacts" class="r-tab active">
+    <div class="actions">
+        <button class="btn btn-green" onclick="document.getElementById('addModal').classList.add('show')">+ Add Contact</button>
+        <button class="btn btn-navy" onclick="document.getElementById('importModal').classList.add('show')">&#128193; Import CSV</button>
+        <button class="btn btn-red" onclick="deleteSelected()">&#128465; Delete Selected</button>
+    </div>
+    <div class="filters">
+        <select id="filterStatus" onchange="filterContacts()">
+            <option value="all">All Status</option>
+            <option value="new">New</option>
+            <option value="sent">Sent</option>
+            <option value="clicked">Clicked</option>
+            <option value="converted">Converted</option>
+        </select>
+        <select id="filterDealer" onchange="filterContacts()">
+            <option value="all">All Dealerships</option>
+            {% for d in dealerships %}
+            <option value="{{ d }}">{{ d }}</option>
+            {% endfor %}
+        </select>
+        <input type="text" id="searchBox" placeholder="Search name or email..." oninput="filterContacts()" style="flex:1;min-width:180px;">
+    </div>
+    <div class="card" style="overflow-x:auto;">
+        <form id="contactsForm" method="POST">
+            <input type="hidden" name="action" value="delete_selected">
+            <table>
+                <thead><tr>
+                    <th><input type="checkbox" id="selectAll" onchange="toggleAll(this)"></th>
+                    <th>First Name</th><th>Last Name</th><th>Email</th><th>Dealership</th><th>City/State</th><th>Status</th><th>Sent</th>
+                </tr></thead>
+                <tbody id="contactsBody"></tbody>
+            </table>
+        </form>
+    </div>
+</div>
+
+<!-- COMPOSE TAB -->
+<div id="rtab-compose" class="r-tab">
+    <div class="card">
+        <h3 style="margin-bottom:16px;">Compose Recruitment Email</h3>
+        <div class="fg">
+            <label>Template</label>
+            <select id="templateSelect" onchange="loadTemplate(this.value)">
+                <option value="custom">Custom Email (write your own)</option>
+                {% for key, t in templates.items() %}
+                <option value="{{ key }}">{{ t.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="fg">
+            <label>Subject Line</label>
+            <div class="merge-btns">
+                <span class="merge-btn" onclick="insertVar('composeSubject','&#123;&#123;First Name&#125;&#125;')">&#123;&#123;First Name&#125;&#125;</span>
+                <span class="merge-btn" onclick="insertVar('composeSubject','&#123;&#123;Last Name&#125;&#125;')">&#123;&#123;Last Name&#125;&#125;</span>
+                <span class="merge-btn" onclick="insertVar('composeSubject','&#123;&#123;Dealership Name&#125;&#125;')">&#123;&#123;Dealership Name&#125;&#125;</span>
+                <span class="merge-btn" onclick="insertVar('composeSubject','&#123;&#123;City/State&#125;&#125;')">&#123;&#123;City/State&#125;&#125;</span>
+                <span class="merge-btn" onclick="insertVar('composeSubject','&#123;&#123;Custom&#125;&#125;')">&#123;&#123;Custom&#125;&#125;</span>
+            </div>
+            <input type="text" id="composeSubject" placeholder="Email subject...">
+        </div>
+        <div class="fg">
+            <label>Body</label>
+            <div class="merge-btns">
+                <span class="merge-btn" onclick="insertVar('composeBody','&#123;&#123;First Name&#125;&#125;')">&#123;&#123;First Name&#125;&#125;</span>
+                <span class="merge-btn" onclick="insertVar('composeBody','&#123;&#123;Last Name&#125;&#125;')">&#123;&#123;Last Name&#125;&#125;</span>
+                <span class="merge-btn" onclick="insertVar('composeBody','&#123;&#123;Dealership Name&#125;&#125;')">&#123;&#123;Dealership Name&#125;&#125;</span>
+                <span class="merge-btn" onclick="insertVar('composeBody','&#123;&#123;City/State&#125;&#125;')">&#123;&#123;City/State&#125;&#125;</span>
+                <span class="merge-btn" onclick="insertVar('composeBody','&#123;&#123;Custom&#125;&#125;')">&#123;&#123;Custom&#125;&#125;</span>
+            </div>
+            <textarea id="composeBody" rows="12" placeholder="Write your email..."></textarea>
+            <small style="color:#94A3B8;">Merge variables will be replaced with each contact's info when sent.</small>
+        </div>
+        <div class="fg">
+            <label>Recipients</label>
+            <div class="ro sel" onclick="selectRecipient('all',this)">
+                <input type="radio" name="rf" value="all" checked> Send to All Contacts ({{ total }})
+            </div>
+            <div class="ro" onclick="selectRecipient('new_only',this)">
+                <input type="radio" name="rf" value="new_only"> Send to New Contacts Only ({{ count_new }})
+            </div>
+            <div class="ro" onclick="selectRecipient('selected',this)">
+                <input type="radio" name="rf" value="selected"> Send to Selected Contacts Only
+            </div>
+            <div id="selectedChecklist" class="checklist" style="display:none;margin-top:8px;">
+                {% for c in contacts %}
+                <label><input type="checkbox" value="{{ c.id }}" class="campaign-check"> {{ c.first_name }} {{ c.last_name or '' }} — {{ c.email }}</label>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="fg">
+            <label>Batch Control</label>
+            <div class="ro sel" onclick="selectBatch('all_at_once',this)">
+                <input type="radio" name="bm" value="all_at_once" checked> Send all at once
+            </div>
+            <div class="ro" onclick="selectBatch('batched',this)">
+                <input type="radio" name="bm" value="batched"> Send in daily batches of:
+                <select id="batchSize" style="padding:4px 8px;border:1px solid #e2e8f0;border-radius:4px;margin-left:8px;">
+                    <option value="5">5</option><option value="10" selected>10</option><option value="20">20</option><option value="30">30</option><option value="50">50</option>
+                </select>
+            </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:20px;flex-wrap:wrap;">
+            <button class="btn btn-navy" onclick="sendTest()">&#128231; Send Test to Myself</button>
+            <button class="btn btn-green" onclick="sendCampaign()">&#128640; Send Campaign</button>
+        </div>
+    </div>
+</div>
+
+<!-- TRACKING TAB -->
+<div id="rtab-tracking" class="r-tab">
+    <div class="card">
+        <h3 style="margin-bottom:16px;">Email Tracking</h3>
+        <div class="track-pills">
+            <div class="track-pill" style="background:#DBEAFE;"><strong>{{ total_sent }}</strong> Sent</div>
+            <div class="track-pill" style="background:#D1FAE5;"><strong>{{ total_clicked }}</strong> Clicked</div>
+            <div class="track-pill" style="background:#FEF3C7;"><strong>{{ click_rate }}%</strong> Click Rate</div>
+        </div>
+        <div style="overflow-x:auto;">
+            <table>
+                <thead><tr><th>Name</th><th>Email</th><th>Dealership</th><th>Template</th><th>Sent</th><th>Clicked</th><th>Click Date</th></tr></thead>
+                <tbody>
+                {% for c in sent_contacts %}
+                <tr class="{{ 'clicked-row' if c.status == 'clicked' else '' }}">
+                    <td>{{ c.first_name }} {{ c.last_name or '' }}</td>
+                    <td>{{ c.email }}</td>
+                    <td>{{ c.dealership_name or '-' }}</td>
+                    <td>{{ c.template_used or '-' }}</td>
+                    <td>{{ c.sent_at.strftime('%m/%d/%Y') if c.sent_at else '-' }}</td>
+                    <td>{% if c.status == 'clicked' %}<span class="badge badge-clicked">Yes</span>{% elif c.status == 'sent' %}<span class="badge badge-sent">No</span>{% else %}-{% endif %}</td>
+                    <td>{{ c.clicked_at.strftime('%m/%d/%Y %I:%M %p') if c.clicked_at else '-' }}</td>
+                </tr>
+                {% endfor %}
+                {% if not sent_contacts %}
+                <tr><td colspan="7" style="text-align:center;color:#94A3B8;padding:20px;">No emails sent yet.</td></tr>
+                {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ADD CONTACT MODAL -->
+<div class="modal-overlay" id="addModal">
+    <div class="modal">
+        <h3>Add Contact</h3>
+        <form method="POST">
+            <input type="hidden" name="action" value="add_contact">
+            <div class="fg"><label>First Name *</label><input name="first_name" required></div>
+            <div class="fg"><label>Last Name</label><input name="last_name"></div>
+            <div class="fg"><label>Email *</label><input name="email" type="email" required></div>
+            <div class="fg"><label>Dealership Name</label><input name="dealership_name"></div>
+            <div class="fg"><label>City/State</label><input name="city_state"></div>
+            <div class="fg"><label>Custom Field</label><input name="custom_field"></div>
+            <div style="display:flex;gap:8px;margin-top:16px;">
+                <button type="submit" class="btn btn-green">Save Contact</button>
+                <button type="button" class="btn btn-outline" onclick="document.getElementById('addModal').classList.remove('show')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- IMPORT CSV MODAL -->
+<div class="modal-overlay" id="importModal">
+    <div class="modal">
+        <h3>Import CSV</h3>
+        <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="action" value="import_csv">
+            <p style="font-size:13px;color:#64748B;margin-bottom:12px;">CSV headers: <code>first_name, last_name, email, dealership_name, city_state, custom_field</code></p>
+            <div class="fg"><input type="file" name="csv_file" accept=".csv" required></div>
+            <div style="display:flex;gap:8px;margin-top:16px;">
+                <button type="submit" class="btn btn-green">Import</button>
+                <button type="button" class="btn btn-outline" onclick="document.getElementById('importModal').classList.remove('show')">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal">
+        <h3>Confirm Campaign Send</h3>
+        <p id="confirmText" style="margin-bottom:16px;"></p>
+        <div style="display:flex;gap:8px;">
+            <button class="btn btn-green" id="confirmSendBtn">&#128640; Send Now</button>
+            <button class="btn btn-outline" onclick="document.getElementById('confirmModal').classList.remove('show')">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script>
+var ALL_CONTACTS = {{ contacts_json|safe }};
+var TEMPLATES = {{ templates_json|safe }};
+var currentRF = 'all';
+var currentBM = 'all_at_once';
+
+function showRTab(id, btn) {
+    document.querySelectorAll('.r-tab').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.r-tab-btn').forEach(function(b) { b.classList.remove('active'); });
+    document.getElementById('rtab-'+id).classList.add('active');
+    if(btn) btn.classList.add('active');
+}
+
+function renderContacts() {
+    var status = document.getElementById('filterStatus').value;
+    var dealer = document.getElementById('filterDealer').value;
+    var search = document.getElementById('searchBox').value.toLowerCase();
+    var html = '';
+    var count = 0;
+    ALL_CONTACTS.forEach(function(c) {
+        if (status !== 'all' && c.status !== status) return;
+        if (dealer !== 'all' && c.dealership_name !== dealer) return;
+        var fullText = (c.first_name+' '+c.last_name+' '+c.email).toLowerCase();
+        if (search && fullText.indexOf(search) === -1) return;
+        var bc = c.status === 'clicked' ? 'badge-clicked' : c.status === 'sent' ? 'badge-sent' : c.status === 'converted' ? 'badge-converted' : 'badge-new';
+        var rc = c.status === 'clicked' ? ' clicked-row' : '';
+        html += '<tr class="'+rc+'">';
+        html += '<td><input type="checkbox" name="selected_ids" value="'+c.id+'" class="contact-check"></td>';
+        html += '<td>'+c.first_name+'</td><td>'+c.last_name+'</td><td>'+c.email+'</td>';
+        html += '<td>'+c.dealership_name+'</td><td>'+c.city_state+'</td>';
+        html += '<td><span class="badge '+bc+'">'+c.status+'</span></td>';
+        html += '<td>'+c.sent_at+'</td></tr>';
+        count++;
+    });
+    if (!count) html = '<tr><td colspan="8" style="text-align:center;color:#94A3B8;padding:20px;">No contacts found.</td></tr>';
+    document.getElementById('contactsBody').innerHTML = html;
+}
+
+function filterContacts() { renderContacts(); }
+function toggleAll(el) { document.querySelectorAll('.contact-check').forEach(function(cb) { cb.checked = el.checked; }); }
+
+function deleteSelected() {
+    var checks = document.querySelectorAll('.contact-check:checked');
+    if (checks.length === 0) { alert('No contacts selected.'); return; }
+    if (!confirm('Delete '+checks.length+' contacts? This cannot be undone.')) return;
+    document.getElementById('contactsForm').submit();
+}
+
+function loadTemplate(key) {
+    if (key === 'custom') {
+        document.getElementById('composeSubject').value = '';
+        document.getElementById('composeBody').value = '';
+        return;
+    }
+    var t = TEMPLATES[key];
+    if (t) {
+        document.getElementById('composeSubject').value = t.subject;
+        document.getElementById('composeBody').value = t.body;
+    }
+}
+
+function insertVar(fieldId, variable) {
+    var decoded = variable.replace(/&#123;/g,'{').replace(/&#125;/g,'}');
+    var field = document.getElementById(fieldId);
+    var start = field.selectionStart;
+    var end = field.selectionEnd;
+    var text = field.value;
+    field.value = text.substring(0, start) + decoded + text.substring(end);
+    field.selectionStart = field.selectionEnd = start + decoded.length;
+    field.focus();
+}
+
+function selectRecipient(value, el) {
+    currentRF = value;
+    document.querySelectorAll('.ro').forEach(function(o) { o.classList.remove('sel'); });
+    el.classList.add('sel');
+    el.querySelector('input[type=radio]').checked = true;
+    document.getElementById('selectedChecklist').style.display = value === 'selected' ? 'block' : 'none';
+}
+
+function selectBatch(value, el) {
+    currentBM = value;
+    el.querySelector('input[type=radio]').checked = true;
+}
+
+function sendTest() {
+    var subject = document.getElementById('composeSubject').value;
+    var body = document.getElementById('composeBody').value;
+    if (!subject || !body) { alert('Fill in subject and body first.'); return; }
+    var form = document.createElement('form');
+    form.method = 'POST';
+    form.style.display = 'none';
+    var h = '<input name="action" value="send_test">';
+    h += '<input name="template_key" value="'+document.getElementById('templateSelect').value+'">';
+    h += '<input name="subject" value="'+subject.replace(/"/g,'&quot;')+'">';
+    h += '<textarea name="body">'+body+'<\/textarea>';
+    form.innerHTML = h;
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function sendCampaign() {
+    var subject = document.getElementById('composeSubject').value;
+    var body = document.getElementById('composeBody').value;
+    if (!subject || !body) { alert('Fill in subject and body first.'); return; }
+    var selectedIds = [];
+    if (currentRF === 'selected') {
+        document.querySelectorAll('.campaign-check:checked').forEach(function(cb) { selectedIds.push(cb.value); });
+        if (selectedIds.length === 0) { alert('Select at least one contact.'); return; }
+    }
+    var count = currentRF === 'all' ? {{ total }} : currentRF === 'new_only' ? {{ count_new }} : selectedIds.length;
+    var tName = document.getElementById('templateSelect').selectedOptions[0].text;
+    document.getElementById('confirmText').textContent = 'You are about to send "'+tName+'" to '+count+' contacts. This cannot be undone. Proceed?';
+    document.getElementById('confirmModal').classList.add('show');
+    document.getElementById('confirmSendBtn').onclick = function() {
+        var form = document.createElement('form');
+        form.method = 'POST';
+        form.style.display = 'none';
+        var bs = document.getElementById('batchSize').value;
+        var h = '<input name="action" value="send_campaign">';
+        h += '<input name="template_key" value="'+document.getElementById('templateSelect').value+'">';
+        h += '<input name="template_name" value="'+tName.replace(/"/g,'&quot;')+'">';
+        h += '<input name="subject" value="'+subject.replace(/"/g,'&quot;')+'">';
+        h += '<textarea name="body">'+body+'<\/textarea>';
+        h += '<input name="recipient_filter" value="'+currentRF+'">';
+        h += '<input name="batch_mode" value="'+currentBM+'">';
+        h += '<input name="batch_size" value="'+bs+'">';
+        h += '<input name="campaign_selected_ids" value="'+selectedIds.join(",")+'">';
+        form.innerHTML = h;
+        document.body.appendChild(form);
+        form.submit();
+    };
+}
+
+renderContacts();
+</script>
+{% endblock %}
