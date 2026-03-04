@@ -95,6 +95,20 @@ def register_admin_routes(bp):
         flash("Vehicle deleted.", "success")
         return redirect(url_for("admin.vehicles"))
 
+
+    @bp.route("/leads")
+    @admin_required
+    def leads():
+        from app.models.lead import Lead
+        all_leads = Lead.query.order_by(Lead.created_at.desc()).all()
+        lead_data = []
+        for l in all_leads:
+            sp = Salesperson.query.get(l.salesperson_id)
+            v = Vehicle.query.get(l.vehicle_id) if l.vehicle_id else None
+            lead_data.append({"lead": l, "salesperson": sp, "vehicle": v})
+        salespeople = Salesperson.query.all()
+        return render_template("admin/leads.html", lead_data=lead_data, salespeople=salespeople)
+
     @bp.route("/email-log")
     @admin_required
     def email_log():
