@@ -31,12 +31,15 @@ def replace_merge_vars(text, contact):
     return text
 
 def build_recruitment_email(body_text, tracking_id):
+    import re
     paragraphs = body_text.strip().split("\n\n")
     html_body = ""
     for p in paragraphs:
         p = p.replace("\n", "<br>")
         html_body += '<p style="color:#333;font-size:15px;line-height:1.7;margin-bottom:16px;">' + p + '</p>'
-    return '<div style="max-width:600px;margin:0 auto;font-family:Inter,Arial,sans-serif;"><div style="background:#1E293B;padding:24px;text-align:center;border-radius:12px 12px 0 0;"><h1 style="margin:0;font-size:28px;"><span style="color:white;">Cars</span><span style="color:#00C851;">InStock</span></h1><p style="color:#94A3B8;font-size:14px;margin:6px 0 0;">Real Salespeople. Real Inventory. Real Fresh.</p></div><div style="height:4px;background:linear-gradient(to right,#00C851,#1E293B);"></div><div style="padding:32px 24px;background:white;">' + html_body + '<div style="text-align:center;margin:30px 0;"><a href="https://carsinstock.com/track/click/' + tracking_id + '" style="display:inline-block;background:#00C851;color:white;padding:14px 32px;border-radius:8px;font-size:16px;font-weight:600;text-decoration:none;">See the Demo &rarr;</a></div></div><div style="border-top:1px solid #E2E8F0;padding:20px;text-align:center;background:#F8FAFC;border-radius:0 0 12px 12px;"><p style="color:#64748B;font-size:13px;margin:0;">Fresh Cars. Real People.</p><p style="color:#94A3B8;font-size:12px;margin:4px 0 0;">CarsInStock.com</p></div></div>'
+    html_body = re.sub(r'CarsInStock\.com/[-\w]+', lambda m: '<span style="color:#00C851;font-weight:600;">' + m.group(0) + '</span>', html_body)
+    unsub = '<p style="color:#94A3B8;font-size:11px;margin-top:12px;"><a href="https://carsinstock.com/recruit/unsubscribe/' + tracking_id + '" style="color:#94A3B8;text-decoration:underline;">Unsubscribe</a></p>'
+    return '<div style="max-width:600px;margin:0 auto;font-family:Inter,Arial,sans-serif;"><div style="background:#1E293B;padding:24px;text-align:center;border-radius:12px 12px 0 0;"><h1 style="margin:0;font-size:28px;"><span style="color:white;">Cars</span><span style="color:#00C851;">InStock</span></h1><p style="color:#94A3B8;font-size:14px;margin:6px 0 0;">Real Salespeople. Real Inventory. Real Fresh.</p></div><div style="height:4px;background:linear-gradient(to right,#00C851,#1E293B);"></div><div style="padding:32px 24px;background:white;">' + html_body + '<div style="text-align:center;margin:30px 0;"><a href="https://carsinstock.com/track/click/' + tracking_id + '" style="display:inline-block;background:#00C851;color:white;padding:14px 32px;border-radius:8px;font-size:16px;font-weight:600;text-decoration:none;">See the Demo &rarr;</a></div></div><div style="border-top:1px solid #E2E8F0;padding:20px;text-align:center;background:#F8FAFC;border-radius:0 0 12px 12px;"><p style="color:#64748B;font-size:13px;margin:0;">Fresh Cars. Real People.</p><p style="color:#94A3B8;font-size:12px;margin:4px 0 0;">CarsInStock.com</p>' + unsub + '</div></div>'
 
 with app.app_context():
     import uuid

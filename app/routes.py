@@ -162,6 +162,24 @@ def unsubscribe(token):
     return render_template('unsubscribe.html', name=None, success=False)
 
 
+
+@main.route('/recruit/unsubscribe/<tracking_id>')
+def recruit_unsubscribe(tracking_id):
+    from datetime import datetime
+    try:
+        db.engine.execute(
+            db.text("UPDATE recruitment_contacts SET status = 'unsubscribed' WHERE tracking_id = :tid"),
+            {"tid": tracking_id}
+        )
+    except:
+        pass
+    return """<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width,initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Inter,sans-serif;background:#f1f5f9;display:flex;justify-content:center;align-items:center;min-height:100vh;}
+    .card{background:#fff;border-radius:12px;padding:40px;max-width:500px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06);}
+    h2{color:#1E293B;margin-bottom:12px;}p{color:#64748B;font-size:16px;}</style></head>
+    <body><div class="card"><h2>You have been unsubscribed.</h2><p>You will not receive any more emails from CarsInStock.</p></div></body></html>"""
+
 @main.route('/track/click/<tracking_id>')
 def track_click(tracking_id):
     from datetime import datetime
