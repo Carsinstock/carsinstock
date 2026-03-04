@@ -31,10 +31,14 @@ def register_admin_routes(bp):
         vehicle_count = Vehicle.query.count()
         lead_count = Lead.query.count()
         sp_count = Salesperson.query.count()
+        try:
+            recruit_count = db.engine.execute(db.text("SELECT COUNT(*) FROM recruitment_contacts")).scalar()
+        except:
+            recruit_count = 0
         recent_users = User.query.order_by(User.created_at.desc()).limit(5).all()
         return render_template("admin/dashboard.html",
             user_count=user_count, vehicle_count=vehicle_count,
-            lead_count=lead_count, sp_count=sp_count, recent_users=recent_users)
+            lead_count=lead_count, sp_count=sp_count, recruit_count=recruit_count, recent_users=recent_users)
 
     @bp.route("/users")
     @admin_required

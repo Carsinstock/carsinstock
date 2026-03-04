@@ -2,10 +2,11 @@
 {% block content %}
 <h2 class="section-title">Dashboard</h2>
 <div class="stats-grid">
-    <div class="stat-card"><div class="num">{{ user_count }}</div><div class="label">Users</div></div>
-    <div class="stat-card"><div class="num">{{ sp_count }}</div><div class="label">Salespeople</div></div>
-    <div class="stat-card"><div class="num">{{ vehicle_count }}</div><div class="label">Vehicles</div></div>
-    <div class="stat-card"><div class="num">{{ lead_count }}</div><div class="label">Leads</div></div>
+    <a href="/admin/users" style="text-decoration:none;"><div class="stat-card"><div class="num">{{ user_count }}</div><div class="label">Users</div></div></a>
+    <a href="/admin/users" style="text-decoration:none;"><div class="stat-card"><div class="num">{{ sp_count }}</div><div class="label">Salespeople</div></div></a>
+    <a href="/admin/vehicles" style="text-decoration:none;"><div class="stat-card"><div class="num">{{ vehicle_count }}</div><div class="label">Vehicles</div></div></a>
+    <a href="/admin" style="text-decoration:none;"><div class="stat-card"><div class="num">{{ lead_count }}</div><div class="label">Leads</div></div></a>
+    <a href="/admin/recruit" style="text-decoration:none;"><div class="stat-card"><div class="num">{{ recruit_count }}</div><div class="label">Recruitment Contacts</div></div></a>
 </div>
 <h3 class="section-title">Recent Registrations</h3>
 <table>
