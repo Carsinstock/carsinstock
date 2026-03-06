@@ -463,7 +463,7 @@ def register_admin_routes(bp):
                 json={
                     "searchStringsArray": [search_term],
                     "locationQuery": search_location,
-                    "maxCrawledPlacesPerSearch": 50,
+                    "maxCrawledPlacesPerSearch": 10,
                     "language": "en"
                 },
                 timeout=30
