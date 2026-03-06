@@ -458,7 +458,7 @@ def register_admin_routes(bp):
         run_id = run_row.id
         try:
             resp = requests.post(
-                "https://api.apify.com/v2/acts/nwua9Gu5YkAVvmFb8/runs",
+                "https://api.apify.com/v2/acts/compass~crawler-google-places/runs",
                 headers={"Authorization": "Bearer " + api_key, "Content-Type": "application/json"},
                 json={
                     "searchStringsArray": [search_term],
@@ -485,7 +485,7 @@ def register_admin_routes(bp):
         api_key = os.environ.get("APIFY_API_KEY")
         try:
             resp = requests.get(
-                "https://api.apify.com/v2/acts/nwua9Gu5YkAVvmFb8/runs/" + apify_run_id,
+                "https://api.apify.com/v2/acts/compass~crawler-google-places/runs/" + apify_run_id,
                 headers={"Authorization": "Bearer " + api_key},
                 timeout=15
             )
@@ -493,7 +493,7 @@ def register_admin_routes(bp):
             if status == "SUCCEEDED":
                 # Fetch results
                 results_resp = requests.get(
-                    "https://api.apify.com/v2/acts/nwua9Gu5YkAVvmFb8/runs/" + apify_run_id + "/dataset/items",
+                    "https://api.apify.com/v2/acts/compass~crawler-google-places/runs/" + apify_run_id + "/dataset/items",
                     headers={"Authorization": "Bearer " + api_key},
                     timeout=30
                 )
