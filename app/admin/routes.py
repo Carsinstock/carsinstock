@@ -408,6 +408,338 @@ def register_admin_routes(bp):
         return render_template("admin/recruit.html", contacts=contacts, total=total, total_sent=total_sent, total_clicked=total_clicked, click_rate=click_rate, count_new=count_new, dealerships=dealerships, sent_contacts=sent_contacts, active_batches=active_batches, contacts_json=contacts_json, templates_json=templates_json, templates=RECRUIT_TEMPLATES)
 
 
+
+    @bp.route("/lead-engine")
+    @admin_required
+    def lead_engine():
+        import json
+        # Stats
+        try:
+            total_dealerships = db.engine.execute(db.text("SELECT COUNT(*) FROM lead_engine_dealerships")).scalar()
+            total_contacts = db.engine.execute(db.text("SELECT COUNT(*) FROM lead_engine_contacts")).scalar()
+            pending_count = db.engine.execute(db.text("SELECT COUNT(*) FROM lead_engine_contacts WHERE status='pending'")).scalar()
+            approved_count = db.engine.execute(db.text("SELECT COUNT(*) FROM lead_engine_contacts WHERE status='approved'")).scalar()
+            pushed_count = db.engine.execute(db.text("SELECT COUNT(*) FROM lead_engine_contacts WHERE recruit_synced=1")).scalar()
+            rejected_count = db.engine.execute(db.text("SELECT COUNT(*) FROM lead_engine_contacts WHERE status='rejected'")).scalar()
+            raw_domains = db.engine.execute(db.text("SELECT COUNT(*) FROM lead_engine_dealerships WHERE status='raw'")).scalar()
+            daily_limit = db.engine.execute(db.text("SELECT value FROM lead_engine_settings WHERE key='daily_send_limit'")).scalar() or '10'
+            recent_runs = db.engine.execute(db.text("SELECT * FROM lead_engine_runs ORDER BY created_at DESC LIMIT 10")).fetchall()
+            pending_contacts = db.engine.execute(db.text("SELECT c.*, d.name as dealer_name FROM lead_engine_contacts c LEFT JOIN lead_engine_dealerships d ON c.dealership_id = d.id WHERE c.status='pending' ORDER BY c.created_at DESC LIMIT 50")).fetchall()
+            approved_contacts = db.engine.execute(db.text("SELECT * FROM lead_engine_contacts WHERE status='approved' ORDER BY approved_at DESC")).fetchall()
+        except Exception as e:
+            print("Lead engine stats error: " + str(e))
+            total_dealerships = total_contacts = pending_count = approved_count = pushed_count = rejected_count = raw_domains = 0
+            daily_limit = '10'
+            recent_runs = []
+            pending_contacts = []
+            approved_contacts = []
+        return render_template("admin/lead_engine.html",
+            total_dealerships=total_dealerships, total_contacts=total_contacts,
+            pending_count=pending_count, approved_count=approved_count,
+            pushed_count=pushed_count, rejected_count=rejected_count,
+            raw_domains=raw_domains, daily_limit=daily_limit,
+            recent_runs=recent_runs, pending_contacts=pending_contacts,
+            approved_contacts=approved_contacts)
+
+    @bp.route("/lead-engine/scrape", methods=["POST"])
+    @admin_required
+    def le_scrape():
+        import os, requests, json
+        from datetime import datetime
+        search_term = request.form.get("search_term", "car dealerships")
+        search_location = request.form.get("search_location", "Toms River, NJ")
+        api_key = os.environ.get("APIFY_API_KEY")
+        if not api_key:
+            return json.dumps({"error": "APIFY_API_KEY not set"}), 500
+        # Create run record
+        db.engine.execute(db.text("INSERT INTO lead_engine_runs (run_type, search_term, search_location, status, created_at) VALUES ('apify_scrape', :st, :sl, 'running', :now)"),
+            {"st": search_term, "sl": search_location, "now": datetime.utcnow()})
+        run_row = db.engine.execute(db.text("SELECT id FROM lead_engine_runs ORDER BY id DESC LIMIT 1")).fetchone()
+        run_id = run_row.id
+        try:
+            resp = requests.post(
+                "https://api.apify.com/v2/acts/nwua9Gu5YkAVvmFb8/runs",
+                headers={"Authorization": "Bearer " + api_key, "Content-Type": "application/json"},
+                json={
+                    "searchStringsArray": [search_term],
+                    "locationQuery": search_location,
+                    "maxCrawledPlacesPerSearch": 50,
+                    "language": "en"
+                },
+                timeout=30
+            )
+            data = resp.json()
+            apify_run_id = data.get("data", {}).get("id", "")
+            return json.dumps({"success": True, "run_id": run_id, "apify_run_id": apify_run_id})
+        except Exception as e:
+            db.engine.execute(db.text("UPDATE lead_engine_runs SET status='failed', error_message=:err, completed_at=:now WHERE id=:rid"),
+                {"err": str(e), "now": datetime.utcnow(), "rid": run_id})
+            return json.dumps({"error": str(e)}), 500
+
+    @bp.route("/lead-engine/scrape/status/<apify_run_id>")
+    @admin_required
+    def le_scrape_status(apify_run_id):
+        import os, requests, json
+        from datetime import datetime
+        from urllib.parse import urlparse
+        api_key = os.environ.get("APIFY_API_KEY")
+        try:
+            resp = requests.get(
+                "https://api.apify.com/v2/acts/nwua9Gu5YkAVvmFb8/runs/" + apify_run_id,
+                headers={"Authorization": "Bearer " + api_key},
+                timeout=15
+            )
+            status = resp.json().get("data", {}).get("status", "RUNNING")
+            if status == "SUCCEEDED":
+                # Fetch results
+                results_resp = requests.get(
+                    "https://api.apify.com/v2/acts/nwua9Gu5YkAVvmFb8/runs/" + apify_run_id + "/dataset/items",
+                    headers={"Authorization": "Bearer " + api_key},
+                    timeout=30
+                )
+                items = results_resp.json()
+                inserted = 0
+                skipped = 0
+                for item in items:
+                    name = item.get("title", "")
+                    website = item.get("website") or item.get("url") or ""
+                    if not website:
+                        skipped += 1
+                        continue
+                    # Extract domain
+                    try:
+                        parsed = urlparse(website if website.startswith("http") else "https://" + website)
+                        domain = parsed.netloc.replace("www.", "").lower()
+                    except:
+                        skipped += 1
+                        continue
+                    if not domain:
+                        skipped += 1
+                        continue
+                    # Check duplicate domain
+                    existing = db.engine.execute(db.text("SELECT id FROM lead_engine_dealerships WHERE domain=:d"), {"d": domain}).fetchone()
+                    if existing:
+                        skipped += 1
+                        continue
+                    address = item.get("address") or item.get("street") or ""
+                    city = item.get("city") or ""
+                    state = item.get("state") or ""
+                    phone = item.get("phone") or item.get("phoneUnformatted") or ""
+                    search_term = item.get("searchString") or ""
+                    db.engine.execute(db.text("INSERT INTO lead_engine_dealerships (name, website, domain, address, city, state, phone, search_term, search_location, status, created_at) VALUES (:n, :w, :d, :a, :c, :s, :p, :st, :sl, 'raw', :now)"),
+                        {"n": name, "w": website, "d": domain, "a": address, "c": city, "s": state, "p": phone, "st": search_term, "sl": request.args.get("location", ""), "now": datetime.utcnow()})
+                    inserted += 1
+                # Update run record
+                db.engine.execute(db.text("UPDATE lead_engine_runs SET status='complete', records_found=:rf, completed_at=:now WHERE run_type='apify_scrape' AND status='running' ORDER BY id DESC LIMIT 1"),
+                    {"rf": inserted, "now": datetime.utcnow()})
+                return json.dumps({"status": "SUCCEEDED", "inserted": inserted, "skipped": skipped})
+            return json.dumps({"status": status})
+        except Exception as e:
+            return json.dumps({"status": "ERROR", "error": str(e)}), 500
+
+    @bp.route("/lead-engine/discover", methods=["POST"])
+    @admin_required
+    def le_discover():
+        import os, requests, json, time, re
+        from datetime import datetime
+        api_key = os.environ.get("ANYMAILFINDER_API_KEY")
+        if not api_key:
+            return json.dumps({"error": "ANYMAILFINDER_API_KEY not set"}), 500
+        # Get raw domains
+        domains = db.engine.execute(db.text("SELECT id, name, domain, city, state FROM lead_engine_dealerships WHERE status='raw'")).fetchall()
+        if not domains:
+            return json.dumps({"error": "No raw domains to process"}), 400
+        # Create run record
+        db.engine.execute(db.text("INSERT INTO lead_engine_runs (run_type, search_term, records_found, emails_found, status, created_at) VALUES ('anymailfinder', :st, :rf, 0, 'running', :now)"),
+            {"st": str(len(domains)) + " domains", "rf": len(domains), "now": datetime.utcnow()})
+        GENERIC_PREFIXES = ['info', 'sales', 'service', 'parts', 'finance', 'reception', 'contact', 'support', 'admin', 'hr', 'marketing', 'webmaster', 'noreply', 'no-reply']
+        total_emails = 0
+        for d in domains:
+            try:
+                resp = requests.post(
+                    "https://api.anymailfinder.com/v5.0/search/company.json",
+                    headers={"Authorization": "Bearer " + api_key, "Content-Type": "application/json"},
+                    json={"company_domain": d.domain},
+                    timeout=15
+                )
+                data = resp.json()
+                results = data.get("results") or data.get("emails") or []
+                if isinstance(results, dict):
+                    results = results.get("emails", [])
+                for r in results:
+                    email = r.get("email", "").lower().strip() if isinstance(r, dict) else str(r).lower().strip()
+                    validation = r.get("validation", "unknown") if isinstance(r, dict) else "unknown"
+                    if not email or "@" not in email:
+                        continue
+                    prefix = email.split("@")[0]
+                    if prefix in GENERIC_PREFIXES:
+                        continue
+                    if validation == "unknown":
+                        continue
+                    # Parse name from email
+                    first_name = ""
+                    last_name = ""
+                    if "." in prefix:
+                        parts = prefix.split(".")
+                        first_name = parts[0].capitalize()
+                        last_name = parts[-1].capitalize()
+                    elif "_" in prefix:
+                        parts = prefix.split("_")
+                        first_name = parts[0].capitalize()
+                        last_name = parts[-1].capitalize()
+                    else:
+                        first_name = prefix.capitalize()
+                    city_state = ""
+                    if d.city and d.state:
+                        city_state = d.city + ", " + d.state
+                    elif d.city:
+                        city_state = d.city
+                    try:
+                        db.engine.execute(db.text("INSERT OR IGNORE INTO lead_engine_contacts (dealership_id, first_name, last_name, email, email_status, dealership_name, city_state, status, created_at) VALUES (:did, :fn, :ln, :em, :es, :dn, :cs, 'pending', :now)"),
+                            {"did": d.id, "fn": first_name, "ln": last_name, "em": email, "es": validation, "dn": d.name, "cs": city_state, "now": datetime.utcnow()})
+                        total_emails += 1
+                    except:
+                        pass
+                db.engine.execute(db.text("UPDATE lead_engine_dealerships SET status='processed' WHERE id=:did"), {"did": d.id})
+                time.sleep(0.5)
+            except Exception as e:
+                print("Anymailfinder error for " + d.domain + ": " + str(e))
+                continue
+        # Update run
+        db.engine.execute(db.text("UPDATE lead_engine_runs SET status='complete', emails_found=:ef, completed_at=:now WHERE run_type='anymailfinder' AND status='running' ORDER BY id DESC LIMIT 1"),
+            {"ef": total_emails, "now": datetime.utcnow()})
+        return json.dumps({"success": True, "emails_found": total_emails, "domains_processed": len(domains)})
+
+    @bp.route("/lead-engine/contacts/approve", methods=["POST"])
+    @admin_required
+    def le_approve():
+        import json
+        from datetime import datetime
+        ids = request.json.get("ids", [])
+        if not ids:
+            return json.dumps({"error": "No contacts selected"}), 400
+        for cid in ids:
+            db.engine.execute(db.text("UPDATE lead_engine_contacts SET status='approved', approved_at=:now WHERE id=:cid AND status='pending'"),
+                {"now": datetime.utcnow(), "cid": cid})
+        return json.dumps({"success": True, "approved": len(ids)})
+
+    @bp.route("/lead-engine/contacts/reject", methods=["POST"])
+    @admin_required
+    def le_reject():
+        import json
+        ids = request.json.get("ids", [])
+        if not ids:
+            return json.dumps({"error": "No contacts selected"}), 400
+        for cid in ids:
+            db.engine.execute(db.text("UPDATE lead_engine_contacts SET status='rejected' WHERE id=:cid AND status='pending'"), {"cid": cid})
+        return json.dumps({"success": True, "rejected": len(ids)})
+
+    @bp.route("/lead-engine/contacts/approve-all", methods=["POST"])
+    @admin_required
+    def le_approve_all():
+        import json
+        from datetime import datetime
+        result = db.engine.execute(db.text("UPDATE lead_engine_contacts SET status='approved', approved_at=:now WHERE status='pending'"), {"now": datetime.utcnow()})
+        return json.dumps({"success": True})
+
+    @bp.route("/lead-engine/contacts/edit", methods=["POST"])
+    @admin_required
+    def le_edit_contact():
+        import json
+        cid = request.json.get("id")
+        db.engine.execute(db.text("UPDATE lead_engine_contacts SET first_name=:fn, last_name=:ln, dealership_name=:dn, city_state=:cs, custom=:cu WHERE id=:cid"),
+            {"fn": request.json.get("first_name", ""), "ln": request.json.get("last_name", ""), "dn": request.json.get("dealership_name", ""), "cs": request.json.get("city_state", ""), "cu": request.json.get("custom", ""), "cid": cid})
+        return json.dumps({"success": True})
+
+    @bp.route("/lead-engine/push-to-recruit", methods=["POST"])
+    @admin_required
+    def le_push_to_recruit():
+        import json
+        from datetime import datetime
+        from app.models.recruitment_contact import RecruitmentContact
+        contacts = db.engine.execute(db.text("SELECT * FROM lead_engine_contacts WHERE status='approved' AND recruit_synced=0")).fetchall()
+        pushed = 0
+        skipped = 0
+        for c in contacts:
+            existing = RecruitmentContact.query.filter_by(email=c.email).first()
+            if existing:
+                db.engine.execute(db.text("UPDATE lead_engine_contacts SET recruit_synced=1, recruit_contact_id=:rcid WHERE id=:cid"), {"rcid": existing.id, "cid": c.id})
+                skipped += 1
+                continue
+            rc = RecruitmentContact(first_name=c.first_name or "", last_name=c.last_name or "", email=c.email, dealership_name=c.dealership_name or "", city_state=c.city_state or "", custom_field=c.custom or "")
+            db.session.add(rc)
+            db.session.flush()
+            db.engine.execute(db.text("UPDATE lead_engine_contacts SET recruit_synced=1, recruit_contact_id=:rcid WHERE id=:cid"), {"rcid": rc.id, "cid": c.id})
+            pushed += 1
+        db.session.commit()
+        return json.dumps({"success": True, "pushed": pushed, "skipped": skipped})
+
+    @bp.route("/lead-engine/export-csv")
+    @admin_required
+    def le_export_csv():
+        import csv, io
+        from datetime import datetime
+        from flask import Response
+        contacts = db.engine.execute(db.text("SELECT first_name, last_name, email, dealership_name, city_state, custom FROM lead_engine_contacts WHERE status='approved'")).fetchall()
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(["first_name", "last_name", "email", "dealership_name", "city_state", "custom_field"])
+        for c in contacts:
+            writer.writerow([c.first_name or "", c.last_name or "", c.email, c.dealership_name or "", c.city_state or "", c.custom or ""])
+        filename = "CarsInStock_Leads_" + datetime.utcnow().strftime("%Y-%m-%d") + ".csv"
+        return Response(output.getvalue(), mimetype="text/csv", headers={"Content-Disposition": "attachment;filename=" + filename})
+
+    @bp.route("/lead-engine/import-csv", methods=["POST"])
+    @admin_required
+    def le_import_csv():
+        import csv, io, json
+        from datetime import datetime
+        file = request.files.get("csv_file")
+        if not file or not file.filename.endswith(".csv"):
+            return json.dumps({"error": "Invalid CSV file"}), 400
+        content = file.stream.read().decode("utf-8")
+        reader = csv.DictReader(io.StringIO(content))
+        imported = 0
+        skipped = 0
+        for row in reader:
+            email = row.get("email", "").strip().lower()
+            if not email:
+                skipped += 1
+                continue
+            # Check both tables
+            existing_le = db.engine.execute(db.text("SELECT id FROM lead_engine_contacts WHERE email=:e"), {"e": email}).fetchone()
+            existing_rc = db.engine.execute(db.text("SELECT id FROM recruitment_contacts WHERE email=:e"), {"e": email}).fetchone()
+            if existing_le or existing_rc:
+                skipped += 1
+                continue
+            db.engine.execute(db.text("INSERT INTO lead_engine_contacts (first_name, last_name, email, dealership_name, city_state, custom, status, created_at) VALUES (:fn, :ln, :em, :dn, :cs, :cu, 'pending', :now)"),
+                {"fn": row.get("first_name", ""), "ln": row.get("last_name", ""), "em": email, "dn": row.get("dealership_name", ""), "cs": row.get("city_state", ""), "cu": row.get("custom_field", row.get("custom", "")), "now": datetime.utcnow()})
+            imported += 1
+        return json.dumps({"success": True, "imported": imported, "skipped": skipped})
+
+    @bp.route("/lead-engine/send-limit", methods=["POST"])
+    @admin_required
+    def le_send_limit():
+        import json
+        limit = request.json.get("limit", 10)
+        if int(limit) > 100:
+            limit = 100
+        db.engine.execute(db.text("UPDATE lead_engine_settings SET value=:v WHERE key='daily_send_limit'"), {"v": str(limit)})
+        return json.dumps({"success": True, "limit": limit})
+
+    @bp.route("/lead-engine/stats")
+    @admin_required
+    def le_stats():
+        import json
+        total_dealerships = db.engine.execute(db.text("SELECT COUNT(*) FROM lead_engine_dealerships")).scalar()
+        total_contacts = db.engine.execute(db.text("SELECT COUNT(*) FROM lead_engine_contacts")).scalar()
+        pending = db.engine.execute(db.text("SELECT COUNT(*) FROM lead_engine_contacts WHERE status='pending'")).scalar()
+        approved = db.engine.execute(db.text("SELECT COUNT(*) FROM lead_engine_contacts WHERE status='approved'")).scalar()
+        pushed = db.engine.execute(db.text("SELECT COUNT(*) FROM lead_engine_contacts WHERE recruit_synced=1")).scalar()
+        rejected = db.engine.execute(db.text("SELECT COUNT(*) FROM lead_engine_contacts WHERE status='rejected'")).scalar()
+        raw = db.engine.execute(db.text("SELECT COUNT(*) FROM lead_engine_dealerships WHERE status='raw'")).scalar()
+        return json.dumps({"total_dealerships": total_dealerships, "total_contacts": total_contacts, "pending": pending, "approved": approved, "pushed": pushed, "rejected": rejected, "raw_domains": raw})
+
     @bp.route("/recruitment/unsubscribe/<int:prospect_id>")
     def recruitment_unsubscribe(prospect_id):
         try:

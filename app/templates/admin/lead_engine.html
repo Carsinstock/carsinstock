@@ -1,0 +1,316 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Lead Engine - CarsInStock Admin{% endblock %}
+{% block content %}
+<style>
+.le-stats { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin-bottom:20px; }
+.le-stat { background:#fff; border-radius:10px; padding:14px; text-align:center; box-shadow:0 1px 3px rgba(0,0,0,0.1); }
+.le-stat .num { font-size:24px; font-weight:700; }
+.le-stat .lbl { font-size:11px; color:#64748B; margin-top:2px; }
+.le-section { background:#fff; border-radius:10px; padding:20px; margin-bottom:16px; box-shadow:0 1px 3px rgba(0,0,0,0.1); }
+.le-section h3 { margin-bottom:12px; font-size:16px; }
+.le-input { padding:8px 12px; border:1px solid #ddd; border-radius:8px; font-size:13px; font-family:Inter,sans-serif; }
+.le-btn { padding:8px 16px; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; font-family:Inter,sans-serif; }
+.le-btn-green { background:#00C851; color:#fff; }
+.le-btn-navy { background:#1E293B; color:#fff; }
+.le-btn-red { background:#EF4444; color:#fff; }
+.le-btn-outline { background:transparent; border:2px solid #e2e8f0; color:#64748B; }
+.le-btn:hover { opacity:0.85; }
+.le-progress { background:#e2e8f0; border-radius:8px; height:8px; margin:8px 0; }
+.le-progress-bar { background:#00C851; height:100%; border-radius:8px; transition:width 0.3s; }
+.le-table { width:100%; border-collapse:collapse; font-size:12px; }
+.le-table th { background:#f8fafc; padding:8px 6px; text-align:left; font-weight:600; color:#64748B; border-bottom:2px solid #e2e8f0; }
+.le-table td { padding:8px 6px; border-bottom:1px solid #f1f5f9; }
+.le-table tr:nth-child(even) { background:#f8fafc; }
+.le-badge { padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600; }
+.le-badge-verified { background:#D1FAE5; color:#059669; }
+.le-badge-catchall { background:#FEF3C7; color:#D97706; }
+.le-badge-pending { background:#DBEAFE; color:#2563EB; }
+.le-badge-approved { background:#D1FAE5; color:#059669; }
+.le-edit { border:1px solid #e2e8f0; border-radius:4px; padding:3px 6px; font-size:12px; width:100%; font-family:Inter,sans-serif; }
+.le-filters { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; align-items:center; }
+#scrapeStatus, #discoverStatus { font-size:13px; color:#64748B; margin-top:8px; }
+@media(max-width:768px) {
+    .le-stats { grid-template-columns:repeat(3,1fr); }
+    .le-table { font-size:11px; }
+}
+</style>
+
+<!-- STATS BAR -->
+<div class="le-stats">
+    <div class="le-stat"><div class="num" style="color:#1E293B;">{{ total_dealerships }}</div><div class="lbl">Dealerships</div></div>
+    <div class="le-stat"><div class="num" style="color:#3B82F6;">{{ total_contacts }}</div><div class="lbl">Contacts Found</div></div>
+    <div class="le-stat"><div class="num" style="color:#F59E0B;">{{ pending_count }}</div><div class="lbl">Pending Review</div></div>
+    <div class="le-stat"><div class="num" style="color:#00C851;">{{ approved_count }}</div><div class="lbl">Approved</div></div>
+    <div class="le-stat"><div class="num" style="color:#8B5CF6;">{{ pushed_count }}</div><div class="lbl">Pushed to Recruit</div></div>
+    <div class="le-stat"><div class="num" style="color:#EF4444;">{{ rejected_count }}</div><div class="lbl">Rejected</div></div>
+</div>
+
+<!-- SECTION B: SCRAPE CONTROLS -->
+<div class="le-section">
+    <h3>Phase 1 — Scrape Dealerships (Google Maps via Apify)</h3>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end;">
+        <div>
+            <label style="font-size:12px;font-weight:600;color:#64748B;display:block;margin-bottom:4px;">Search Term</label>
+            <input type="text" id="scrapeSearch" class="le-input" value="car dealerships" style="width:200px;">
+        </div>
+        <div>
+            <label style="font-size:12px;font-weight:600;color:#64748B;display:block;margin-bottom:4px;">Location</label>
+            <input type="text" id="scrapeLocation" class="le-input" value="Toms River, NJ" style="width:200px;">
+        </div>
+        <button class="le-btn le-btn-green" onclick="runScrape()" id="scrapeBtn">Run Scrape</button>
+        <label class="le-btn le-btn-navy" style="cursor:pointer;">
+            Upload CSV <input type="file" id="csvUpload" accept=".csv" style="display:none;" onchange="uploadCSV(this)">
+        </label>
+    </div>
+    <div id="scrapeStatus"></div>
+</div>
+
+<!-- SECTION C: EMAIL DISCOVERY -->
+<div class="le-section">
+    <h3>Phase 2 — Email Discovery (Anymailfinder)</h3>
+    <p style="font-size:13px;color:#64748B;margin-bottom:8px;">{{ raw_domains }} dealerships ready for email discovery</p>
+    <button class="le-btn le-btn-green" onclick="runDiscover()" id="discoverBtn" {% if raw_domains == 0 %}disabled style="opacity:0.5;"{% endif %}>Run Email Discovery</button>
+    <div id="discoverStatus"></div>
+</div>
+
+<!-- SECTION D: REVIEW QUEUE -->
+<div class="le-section">
+    <h3>Phase 3 — Review & Approve ({{ pending_count }} pending)</h3>
+    <div class="le-filters">
+        <select id="leFilterStatus" class="le-input" onchange="filterQueue()">
+            <option value="all">All Status</option>
+            <option value="verified">Verified Only</option>
+            <option value="catch-all">Catch-All Only</option>
+        </select>
+        <input type="text" id="leSearch" class="le-input" placeholder="Search name, email, dealership..." oninput="filterQueue()" style="flex:1;min-width:180px;">
+        <button class="le-btn le-btn-green" onclick="approveAll()">Approve All</button>
+        <button class="le-btn le-btn-red" onclick="rejectSelected()">Reject Selected</button>
+        <button class="le-btn le-btn-navy" onclick="approveSelected()">Approve Selected</button>
+    </div>
+    <div style="overflow-x:auto;">
+        <table class="le-table" id="queueTable">
+            <thead><tr>
+                <th><input type="checkbox" id="leSelectAll" onchange="leToggleAll(this)"></th>
+                <th>First Name</th><th>Last Name</th><th>Email</th><th>Status</th><th>Dealership</th><th>City/State</th><th>Custom</th><th>Actions</th>
+            </tr></thead>
+            <tbody>
+            {% for c in pending_contacts %}
+            <tr class="queue-row" data-id="{{ c.id }}" data-status="{{ c.email_status or '' }}" data-search="{{ (c.first_name or '')|lower }} {{ (c.last_name or '')|lower }} {{ c.email|lower }} {{ (c.dealership_name or '')|lower }}">
+                <td><input type="checkbox" class="le-check" value="{{ c.id }}"></td>
+                <td><input class="le-edit" value="{{ c.first_name or '' }}" data-field="first_name" onchange="editContact({{ c.id }}, this)"></td>
+                <td><input class="le-edit" value="{{ c.last_name or '' }}" data-field="last_name" onchange="editContact({{ c.id }}, this)"></td>
+                <td>{{ c.email }}</td>
+                <td><span class="le-badge {{ 'le-badge-verified' if c.email_status == 'verified' else 'le-badge-catchall' }}">{{ c.email_status or 'unknown' }}</span></td>
+                <td><input class="le-edit" value="{{ c.dealership_name or '' }}" data-field="dealership_name" onchange="editContact({{ c.id }}, this)"></td>
+                <td><input class="le-edit" value="{{ c.city_state or '' }}" data-field="city_state" onchange="editContact({{ c.id }}, this)"></td>
+                <td><input class="le-edit" value="{{ c.custom or '' }}" data-field="custom" onchange="editContact({{ c.id }}, this)" placeholder="Note..."></td>
+                <td style="white-space:nowrap;">
+                    <button class="le-btn le-btn-green" style="padding:4px 10px;font-size:11px;" onclick="approveOne({{ c.id }},this)">Approve</button>
+                    <button class="le-btn le-btn-red" style="padding:4px 10px;font-size:11px;" onclick="rejectOne({{ c.id }},this)">Reject</button>
+                </td>
+            </tr>
+            {% endfor %}
+            {% if not pending_contacts %}
+            <tr><td colspan="9" style="text-align:center;color:#94A3B8;padding:20px;">No pending contacts.</td></tr>
+            {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- SECTION: PUSH & EXPORT -->
+<div class="le-section">
+    <h3>Phase 4 — Push to Recruit & Export</h3>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <button class="le-btn le-btn-green" onclick="pushToRecruit()">Push {{ approved_count }} Approved to Recruit</button>
+        <a href="/admin/lead-engine/export-csv" class="le-btn le-btn-navy" style="text-decoration:none;">Export CSV</a>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+            <label style="font-size:12px;font-weight:600;color:#64748B;">Daily Send Limit:</label>
+            <input type="number" id="sendLimit" class="le-input" value="{{ daily_limit }}" min="1" max="100" style="width:70px;">
+            <button class="le-btn le-btn-outline" onclick="saveSendLimit()">Save</button>
+        </div>
+    </div>
+    <div id="pushStatus" style="font-size:13px;color:#64748B;margin-top:8px;"></div>
+</div>
+
+<!-- RECENT RUNS LOG -->
+<div class="le-section">
+    <h3>Run History</h3>
+    <table class="le-table">
+        <thead><tr><th>Type</th><th>Search</th><th>Records</th><th>Emails</th><th>Status</th><th>Date</th></tr></thead>
+        <tbody>
+        {% for r in recent_runs %}
+        <tr>
+            <td><span class="badge {{ 'badge-blue' if r.run_type == 'apify_scrape' else 'badge-green' }}">{{ r.run_type }}</span></td>
+            <td>{{ r.search_term or '-' }}</td>
+            <td>{{ r.records_found or 0 }}</td>
+            <td>{{ r.emails_found or 0 }}</td>
+            <td><span class="badge {{ 'badge-green' if r.status == 'complete' else 'badge-red' if r.status == 'failed' else 'badge-blue' }}">{{ r.status }}</span></td>
+            <td>{{ r.created_at }}</td>
+        </tr>
+        {% endfor %}
+        {% if not recent_runs %}
+        <tr><td colspan="6" style="text-align:center;color:#94A3B8;padding:16px;">No runs yet.</td></tr>
+        {% endif %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+function runScrape() {
+    var btn = document.getElementById('scrapeBtn');
+    btn.disabled = true; btn.textContent = 'Scraping...';
+    var st = document.getElementById('scrapeSearch').value;
+    var sl = document.getElementById('scrapeLocation').value;
+    var form = new FormData();
+    form.append('search_term', st);
+    form.append('search_location', sl);
+    fetch('/admin/lead-engine/scrape', {method:'POST', body:form})
+    .then(function(r){return r.json();})
+    .then(function(data) {
+        if (data.error) {
+            document.getElementById('scrapeStatus').innerHTML = '<span style="color:#EF4444;">Error: '+data.error+'</span>';
+            btn.disabled = false; btn.textContent = 'Run Scrape';
+            return;
+        }
+        document.getElementById('scrapeStatus').textContent = 'Scrape started. Polling for results...';
+        pollScrape(data.apify_run_id);
+    })
+    .catch(function(e) {
+        document.getElementById('scrapeStatus').innerHTML = '<span style="color:#EF4444;">Error: '+e+'</span>';
+        btn.disabled = false; btn.textContent = 'Run Scrape';
+    });
+}
+
+function pollScrape(apifyRunId) {
+    fetch('/admin/lead-engine/scrape/status/'+apifyRunId)
+    .then(function(r){return r.json();})
+    .then(function(data) {
+        if (data.status === 'SUCCEEDED') {
+            document.getElementById('scrapeStatus').innerHTML = '<span style="color:#00C851;">Scrape complete! '+data.inserted+' dealerships added, '+data.skipped+' skipped.</span>';
+            document.getElementById('scrapeBtn').disabled = false;
+            document.getElementById('scrapeBtn').textContent = 'Run Scrape';
+            setTimeout(function(){location.reload();}, 2000);
+        } else if (data.status === 'FAILED' || data.status === 'ERROR') {
+            document.getElementById('scrapeStatus').innerHTML = '<span style="color:#EF4444;">Scrape failed: '+(data.error||'Unknown error')+'</span>';
+            document.getElementById('scrapeBtn').disabled = false;
+            document.getElementById('scrapeBtn').textContent = 'Run Scrape';
+        } else {
+            document.getElementById('scrapeStatus').textContent = 'Status: '+data.status+'... polling again in 3s';
+            setTimeout(function(){pollScrape(apifyRunId);}, 3000);
+        }
+    });
+}
+
+function runDiscover() {
+    var btn = document.getElementById('discoverBtn');
+    btn.disabled = true; btn.textContent = 'Discovering emails...';
+    fetch('/admin/lead-engine/discover', {method:'POST'})
+    .then(function(r){return r.json();})
+    .then(function(data) {
+        if (data.error) {
+            document.getElementById('discoverStatus').innerHTML = '<span style="color:#EF4444;">Error: '+data.error+'</span>';
+        } else {
+            document.getElementById('discoverStatus').innerHTML = '<span style="color:#00C851;">Discovery complete! '+data.emails_found+' emails found from '+data.domains_processed+' domains.</span>';
+            setTimeout(function(){location.reload();}, 2000);
+        }
+        btn.disabled = false; btn.textContent = 'Run Email Discovery';
+    })
+    .catch(function(e) {
+        document.getElementById('discoverStatus').innerHTML = '<span style="color:#EF4444;">Error: '+e+'</span>';
+        btn.disabled = false; btn.textContent = 'Run Email Discovery';
+    });
+}
+
+function uploadCSV(input) {
+    var file = input.files[0];
+    if (!file) return;
+    var form = new FormData();
+    form.append('csv_file', file);
+    fetch('/admin/lead-engine/import-csv', {method:'POST', body:form})
+    .then(function(r){return r.json();})
+    .then(function(data) {
+        if (data.error) alert('Error: '+data.error);
+        else { alert('Imported '+data.imported+' contacts, '+data.skipped+' skipped.'); location.reload(); }
+    });
+}
+
+function editContact(id, el) {
+    var row = el.closest('tr');
+    var data = {id: id};
+    row.querySelectorAll('.le-edit').forEach(function(inp) { data[inp.dataset.field] = inp.value; });
+    fetch('/admin/lead-engine/contacts/edit', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)});
+}
+
+function approveOne(id, btn) {
+    fetch('/admin/lead-engine/contacts/approve', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ids:[id]})})
+    .then(function(){btn.closest('tr').remove(); refreshStats();});
+}
+
+function rejectOne(id, btn) {
+    fetch('/admin/lead-engine/contacts/reject', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ids:[id]})})
+    .then(function(){btn.closest('tr').remove(); refreshStats();});
+}
+
+function getSelectedIds() {
+    var ids = [];
+    document.querySelectorAll('.le-check:checked').forEach(function(cb){ids.push(parseInt(cb.value));});
+    return ids;
+}
+
+function approveSelected() {
+    var ids = getSelectedIds();
+    if (!ids.length) {alert('Select contacts first.'); return;}
+    fetch('/admin/lead-engine/contacts/approve', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ids:ids})})
+    .then(function(){location.reload();});
+}
+
+function rejectSelected() {
+    var ids = getSelectedIds();
+    if (!ids.length) {alert('Select contacts first.'); return;}
+    if (!confirm('Reject '+ids.length+' contacts?')) return;
+    fetch('/admin/lead-engine/contacts/reject', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ids:ids})})
+    .then(function(){location.reload();});
+}
+
+function approveAll() {
+    if (!confirm('Approve ALL pending contacts?')) return;
+    fetch('/admin/lead-engine/contacts/approve-all', {method:'POST'})
+    .then(function(){location.reload();});
+}
+
+function pushToRecruit() {
+    fetch('/admin/lead-engine/push-to-recruit', {method:'POST'})
+    .then(function(r){return r.json();})
+    .then(function(data) {
+        document.getElementById('pushStatus').innerHTML = '<span style="color:#00C851;">Pushed '+data.pushed+' to Recruit, '+data.skipped+' already existed.</span>';
+        setTimeout(function(){location.reload();}, 2000);
+    });
+}
+
+function saveSendLimit() {
+    var limit = document.getElementById('sendLimit').value;
+    fetch('/admin/lead-engine/send-limit', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({limit:parseInt(limit)})})
+    .then(function(){alert('Daily send limit saved: '+limit);});
+}
+
+function leToggleAll(el) { document.querySelectorAll('.le-check').forEach(function(cb){cb.checked=el.checked;}); }
+
+function filterQueue() {
+    var status = document.getElementById('leFilterStatus').value;
+    var search = document.getElementById('leSearch').value.toLowerCase();
+    document.querySelectorAll('.queue-row').forEach(function(row) {
+        var matchStatus = status === 'all' || row.dataset.status === status;
+        var matchSearch = !search || row.dataset.search.indexOf(search) !== -1;
+        row.style.display = (matchStatus && matchSearch) ? '' : 'none';
+    });
+}
+
+function refreshStats() {
+    fetch('/admin/lead-engine/stats').then(function(r){return r.json();}).then(function(data) {
+        document.querySelectorAll('.le-stat .num')[2].textContent = data.pending;
+        document.querySelectorAll('.le-stat .num')[3].textContent = data.approved;
+    });
+}
+</script>
+{% endblock %}
