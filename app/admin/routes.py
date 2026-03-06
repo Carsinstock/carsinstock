@@ -1,4 +1,4 @@
-from flask import render_template, session, redirect, flash, request, url_for
+from flask import render_template, session, redirect, flash, request, url_for, jsonify
 from functools import wraps
 from app.models import db
 from app.models.user import User
@@ -450,7 +450,7 @@ def register_admin_routes(bp):
         search_location = request.form.get("search_location", "Toms River, NJ")
         api_key = os.environ.get("APIFY_API_KEY")
         if not api_key:
-            return json.dumps({"error": "APIFY_API_KEY not set"}), 500
+            return jsonify({"error": "APIFY_API_KEY not set"}), 500
         # Create run record
         db.engine.execute(db.text("INSERT INTO lead_engine_runs (run_type, search_term, search_location, status, created_at) VALUES ('apify_scrape', :st, :sl, 'running', :now)"),
             {"st": search_term, "sl": search_location, "now": datetime.utcnow()})
@@ -470,11 +470,11 @@ def register_admin_routes(bp):
             )
             data = resp.json()
             apify_run_id = data.get("data", {}).get("id", "")
-            return json.dumps({"success": True, "run_id": run_id, "apify_run_id": apify_run_id})
+            return jsonify({"success": True, "run_id": run_id, "apify_run_id": apify_run_id})
         except Exception as e:
             db.engine.execute(db.text("UPDATE lead_engine_runs SET status='failed', error_message=:err, completed_at=:now WHERE id=:rid"),
                 {"err": str(e), "now": datetime.utcnow(), "rid": run_id})
-            return json.dumps({"error": str(e)}), 500
+            return jsonify({"error": str(e)}), 500
 
     @bp.route("/lead-engine/scrape/status/<apify_run_id>")
     @admin_required
@@ -532,10 +532,10 @@ def register_admin_routes(bp):
                 # Update run record
                 db.engine.execute(db.text("UPDATE lead_engine_runs SET status='complete', records_found=:rf, completed_at=:now WHERE run_type='apify_scrape' AND status='running' ORDER BY id DESC LIMIT 1"),
                     {"rf": inserted, "now": datetime.utcnow()})
-                return json.dumps({"status": "SUCCEEDED", "inserted": inserted, "skipped": skipped})
-            return json.dumps({"status": status})
+                return jsonify({"status": "SUCCEEDED", "inserted": inserted, "skipped": skipped})
+            return jsonify({"status": status})
         except Exception as e:
-            return json.dumps({"status": "ERROR", "error": str(e)}), 500
+            return jsonify({"status": "ERROR", "error": str(e)}), 500
 
     @bp.route("/lead-engine/discover", methods=["POST"])
     @admin_required
@@ -544,11 +544,11 @@ def register_admin_routes(bp):
         from datetime import datetime
         api_key = os.environ.get("ANYMAILFINDER_API_KEY")
         if not api_key:
-            return json.dumps({"error": "ANYMAILFINDER_API_KEY not set"}), 500
+            return jsonify({"error": "ANYMAILFINDER_API_KEY not set"}), 500
         # Get raw domains
         domains = db.engine.execute(db.text("SELECT id, name, domain, city, state FROM lead_engine_dealerships WHERE status='raw'")).fetchall()
         if not domains:
-            return json.dumps({"error": "No raw domains to process"}), 400
+            return jsonify({"error": "No raw domains to process"}), 400
         # Create run record
         db.engine.execute(db.text("INSERT INTO lead_engine_runs (run_type, search_term, records_found, emails_found, status, created_at) VALUES ('anymailfinder', :st, :rf, 0, 'running', :now)"),
             {"st": str(len(domains)) + " domains", "rf": len(domains), "now": datetime.utcnow()})
@@ -608,7 +608,7 @@ def register_admin_routes(bp):
         # Update run
         db.engine.execute(db.text("UPDATE lead_engine_runs SET status='complete', emails_found=:ef, completed_at=:now WHERE run_type='anymailfinder' AND status='running' ORDER BY id DESC LIMIT 1"),
             {"ef": total_emails, "now": datetime.utcnow()})
-        return json.dumps({"success": True, "emails_found": total_emails, "domains_processed": len(domains)})
+        return jsonify({"success": True, "emails_found": total_emails, "domains_processed": len(domains)})
 
     @bp.route("/lead-engine/contacts/approve", methods=["POST"])
     @admin_required
@@ -617,11 +617,11 @@ def register_admin_routes(bp):
         from datetime import datetime
         ids = request.json.get("ids", [])
         if not ids:
-            return json.dumps({"error": "No contacts selected"}), 400
+            return jsonify({"error": "No contacts selected"}), 400
         for cid in ids:
             db.engine.execute(db.text("UPDATE lead_engine_contacts SET status='approved', approved_at=:now WHERE id=:cid AND status='pending'"),
                 {"now": datetime.utcnow(), "cid": cid})
-        return json.dumps({"success": True, "approved": len(ids)})
+        return jsonify({"success": True, "approved": len(ids)})
 
     @bp.route("/lead-engine/contacts/reject", methods=["POST"])
     @admin_required
@@ -629,10 +629,10 @@ def register_admin_routes(bp):
         import json
         ids = request.json.get("ids", [])
         if not ids:
-            return json.dumps({"error": "No contacts selected"}), 400
+            return jsonify({"error": "No contacts selected"}), 400
         for cid in ids:
             db.engine.execute(db.text("UPDATE lead_engine_contacts SET status='rejected' WHERE id=:cid AND status='pending'"), {"cid": cid})
-        return json.dumps({"success": True, "rejected": len(ids)})
+        return jsonify({"success": True, "rejected": len(ids)})
 
     @bp.route("/lead-engine/contacts/approve-all", methods=["POST"])
     @admin_required
@@ -640,7 +640,7 @@ def register_admin_routes(bp):
         import json
         from datetime import datetime
         result = db.engine.execute(db.text("UPDATE lead_engine_contacts SET status='approved', approved_at=:now WHERE status='pending'"), {"now": datetime.utcnow()})
-        return json.dumps({"success": True})
+        return jsonify({"success": True})
 
     @bp.route("/lead-engine/contacts/edit", methods=["POST"])
     @admin_required
@@ -649,7 +649,7 @@ def register_admin_routes(bp):
         cid = request.json.get("id")
         db.engine.execute(db.text("UPDATE lead_engine_contacts SET first_name=:fn, last_name=:ln, dealership_name=:dn, city_state=:cs, custom=:cu WHERE id=:cid"),
             {"fn": request.json.get("first_name", ""), "ln": request.json.get("last_name", ""), "dn": request.json.get("dealership_name", ""), "cs": request.json.get("city_state", ""), "cu": request.json.get("custom", ""), "cid": cid})
-        return json.dumps({"success": True})
+        return jsonify({"success": True})
 
     @bp.route("/lead-engine/push-to-recruit", methods=["POST"])
     @admin_required
@@ -672,7 +672,7 @@ def register_admin_routes(bp):
             db.engine.execute(db.text("UPDATE lead_engine_contacts SET recruit_synced=1, recruit_contact_id=:rcid WHERE id=:cid"), {"rcid": rc.id, "cid": c.id})
             pushed += 1
         db.session.commit()
-        return json.dumps({"success": True, "pushed": pushed, "skipped": skipped})
+        return jsonify({"success": True, "pushed": pushed, "skipped": skipped})
 
     @bp.route("/lead-engine/export-csv")
     @admin_required
@@ -696,7 +696,7 @@ def register_admin_routes(bp):
         from datetime import datetime
         file = request.files.get("csv_file")
         if not file or not file.filename.endswith(".csv"):
-            return json.dumps({"error": "Invalid CSV file"}), 400
+            return jsonify({"error": "Invalid CSV file"}), 400
         content = file.stream.read().decode("utf-8")
         reader = csv.DictReader(io.StringIO(content))
         imported = 0
@@ -715,7 +715,7 @@ def register_admin_routes(bp):
             db.engine.execute(db.text("INSERT INTO lead_engine_contacts (first_name, last_name, email, dealership_name, city_state, custom, status, created_at) VALUES (:fn, :ln, :em, :dn, :cs, :cu, 'pending', :now)"),
                 {"fn": row.get("first_name", ""), "ln": row.get("last_name", ""), "em": email, "dn": row.get("dealership_name", ""), "cs": row.get("city_state", ""), "cu": row.get("custom_field", row.get("custom", "")), "now": datetime.utcnow()})
             imported += 1
-        return json.dumps({"success": True, "imported": imported, "skipped": skipped})
+        return jsonify({"success": True, "imported": imported, "skipped": skipped})
 
     @bp.route("/lead-engine/send-limit", methods=["POST"])
     @admin_required
@@ -725,7 +725,7 @@ def register_admin_routes(bp):
         if int(limit) > 100:
             limit = 100
         db.engine.execute(db.text("UPDATE lead_engine_settings SET value=:v WHERE key='daily_send_limit'"), {"v": str(limit)})
-        return json.dumps({"success": True, "limit": limit})
+        return jsonify({"success": True, "limit": limit})
 
     @bp.route("/lead-engine/stats")
     @admin_required
@@ -738,7 +738,7 @@ def register_admin_routes(bp):
         pushed = db.engine.execute(db.text("SELECT COUNT(*) FROM lead_engine_contacts WHERE recruit_synced=1")).scalar()
         rejected = db.engine.execute(db.text("SELECT COUNT(*) FROM lead_engine_contacts WHERE status='rejected'")).scalar()
         raw = db.engine.execute(db.text("SELECT COUNT(*) FROM lead_engine_dealerships WHERE status='raw'")).scalar()
-        return json.dumps({"total_dealerships": total_dealerships, "total_contacts": total_contacts, "pending": pending, "approved": approved, "pushed": pushed, "rejected": rejected, "raw_domains": raw})
+        return jsonify({"total_dealerships": total_dealerships, "total_contacts": total_contacts, "pending": pending, "approved": approved, "pushed": pushed, "rejected": rejected, "raw_domains": raw})
 
     @bp.route("/recruitment/unsubscribe/<int:prospect_id>")
     def recruitment_unsubscribe(prospect_id):
