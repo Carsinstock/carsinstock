@@ -469,6 +469,9 @@ def register_admin_routes(bp):
                 timeout=30
             )
             data = resp.json()
+            if isinstance(data, str):
+                import json as json_mod
+                data = json_mod.loads(data)
             apify_run_id = data.get("data", {}).get("id", "")
             return jsonify({"success": True, "run_id": run_id, "apify_run_id": apify_run_id})
         except Exception as e:
