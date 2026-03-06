@@ -448,6 +448,8 @@ def register_admin_routes(bp):
         from datetime import datetime
         search_term = request.form.get("search_term", "car dealerships")
         search_location = request.form.get("search_location", "Toms River, NJ")
+        from dotenv import load_dotenv
+        load_dotenv("/home/eddie/carsinstock/.env")
         api_key = os.environ.get("APIFY_API_KEY")
         if not api_key:
             return jsonify({"error": "APIFY_API_KEY not set"}), 500
@@ -475,8 +477,15 @@ def register_admin_routes(bp):
             apify_run_id = data.get("data", {}).get("id", "")
             return jsonify({"success": True, "run_id": run_id, "apify_run_id": apify_run_id})
         except Exception as e:
-            db.engine.execute(db.text("UPDATE lead_engine_runs SET status='failed', error_message=:err, completed_at=:now WHERE id=:rid"),
-                {"err": str(e), "now": datetime.utcnow(), "rid": run_id})
+            import traceback
+            err_detail = traceback.format_exc()
+            with open("/home/eddie/carsinstock/scrape_error.log", "a") as ef:
+                ef.write(err_detail + "\n")
+            try:
+                db.engine.execute(db.text("UPDATE lead_engine_runs SET status='failed', error_message=:err, completed_at=:now WHERE id=:rid"),
+                    {"err": str(e), "now": datetime.utcnow(), "rid": run_id})
+            except:
+                pass
             return jsonify({"error": str(e)}), 500
 
     @bp.route("/lead-engine/scrape/status/<apify_run_id>")
@@ -485,10 +494,12 @@ def register_admin_routes(bp):
         import os, requests, json
         from datetime import datetime
         from urllib.parse import urlparse
+        from dotenv import load_dotenv
+        load_dotenv("/home/eddie/carsinstock/.env")
         api_key = os.environ.get("APIFY_API_KEY")
         try:
             resp = requests.get(
-                "https://api.apify.com/v2/acts/compass~crawler-google-places/runs/" + apify_run_id,
+                "https://api.apify.com/v2/actor-runs/" + apify_run_id,
                 headers={"Authorization": "Bearer " + api_key},
                 timeout=15
             )
@@ -496,7 +507,7 @@ def register_admin_routes(bp):
             if status == "SUCCEEDED":
                 # Fetch results
                 results_resp = requests.get(
-                    "https://api.apify.com/v2/acts/compass~crawler-google-places/runs/" + apify_run_id + "/dataset/items",
+                    "https://api.apify.com/v2/actor-runs/" + apify_run_id + "/dataset/items",
                     headers={"Authorization": "Bearer " + api_key},
                     timeout=30
                 )
@@ -545,6 +556,8 @@ def register_admin_routes(bp):
     def le_discover():
         import os, requests, json, time, re
         from datetime import datetime
+        from dotenv import load_dotenv
+        load_dotenv("/home/eddie/carsinstock/.env")
         api_key = os.environ.get("ANYMAILFINDER_API_KEY")
         if not api_key:
             return jsonify({"error": "ANYMAILFINDER_API_KEY not set"}), 500
