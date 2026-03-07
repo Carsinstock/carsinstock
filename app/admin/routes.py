@@ -604,6 +604,10 @@ def register_admin_routes(bp):
                         parts = prefix.split("_")
                         first_name = parts[0].capitalize()
                         last_name = parts[-1].capitalize()
+                    elif len(prefix) > 1 and prefix[0].isalpha():
+                        # Single word like 'kkowalik' -> First: K, Last: Kowalik
+                        first_name = prefix[0].upper()
+                        last_name = prefix[1:].capitalize()
                     else:
                         first_name = prefix.capitalize()
                     city_state = ""
