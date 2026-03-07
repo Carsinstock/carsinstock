@@ -575,22 +575,23 @@ def register_admin_routes(bp):
                 resp = requests.post(
                     "https://api.anymailfinder.com/v5.0/search/company.json",
                     headers={"Authorization": "Bearer " + api_key, "Content-Type": "application/json"},
-                    json={"company_domain": d.domain},
+                    json={"domain": d.domain},
                     timeout=15
                 )
                 data = resp.json()
-                results = data.get("results") or data.get("emails") or []
-                if isinstance(results, dict):
-                    results = results.get("emails", [])
-                for r in results:
-                    email = r.get("email", "").lower().strip() if isinstance(r, dict) else str(r).lower().strip()
-                    validation = r.get("validation", "unknown") if isinstance(r, dict) else "unknown"
+                if not data.get("success"):
+                    db.engine.execute(db.text("UPDATE lead_engine_dealerships SET status='processed' WHERE id=:did"), {"did": d.id})
+                    time.sleep(0.5)
+                    continue
+                results_obj = data.get("results", {})
+                emails_list = results_obj.get("emails", []) if isinstance(results_obj, dict) else []
+                validation = results_obj.get("validation", "unknown") if isinstance(results_obj, dict) else "unknown"
+                for r in emails_list:
+                    email = str(r).lower().strip()
                     if not email or "@" not in email:
                         continue
                     prefix = email.split("@")[0]
                     if prefix in GENERIC_PREFIXES:
-                        continue
-                    if validation == "unknown":
                         continue
                     # Parse name from email
                     first_name = ""
@@ -612,7 +613,7 @@ def register_admin_routes(bp):
                         city_state = d.city
                     try:
                         db.engine.execute(db.text("INSERT OR IGNORE INTO lead_engine_contacts (dealership_id, first_name, last_name, email, email_status, dealership_name, city_state, status, created_at) VALUES (:did, :fn, :ln, :em, :es, :dn, :cs, 'pending', :now)"),
-                            {"did": d.id, "fn": first_name, "ln": last_name, "em": email, "es": validation, "dn": d.name, "cs": city_state, "now": datetime.utcnow()})
+                            {"did": d.id, "fn": first_name, "ln": last_name, "em": email, "es": validation if validation != "valid" else "verified", "dn": d.name, "cs": city_state, "now": datetime.utcnow()})
                         total_emails += 1
                     except:
                         pass
