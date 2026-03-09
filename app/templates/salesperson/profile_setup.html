@@ -15,7 +15,15 @@
         <!-- Cover Photo -->
         <div class="form-group">
             <label>Cover Photo</label>
-            <small style="color:#888;font-size:12px;display:block;margin-bottom:8px;">A wide banner image — your dealership, lot, or anything that represents your brand</small>
+            <small style="color:#888;font-size:12px;display:block;margin-bottom:8px;">Choose a pre-made banner or upload your own</small>
+            <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+                <div onclick="selectBanner('navy')" class="banner-opt" style="width:120px;height:36px;border-radius:6px;cursor:pointer;border:2px solid #e2e8f0;background:linear-gradient(135deg,#1E293B 0%,#334155 100%);position:relative;"><span style="position:absolute;bottom:2px;left:6px;color:#fff;font-size:9px;">Navy Gradient</span></div>
+                <div onclick="selectBanner('dark')" class="banner-opt" style="width:120px;height:36px;border-radius:6px;cursor:pointer;border:2px solid #e2e8f0;background:linear-gradient(135deg,#0f0f0f 0%,#1a1a2e 100%);position:relative;"><span style="position:absolute;bottom:2px;left:6px;color:#fff;font-size:9px;">Black Gradient</span></div>
+                <div onclick="selectBanner('green')" class="banner-opt" style="width:120px;height:36px;border-radius:6px;cursor:pointer;border:2px solid #e2e8f0;background:linear-gradient(135deg,#1E293B 0%,#00C851 100%);position:relative;"><span style="position:absolute;bottom:2px;left:6px;color:#fff;font-size:9px;">Navy-Green</span></div>
+                <div onclick="selectBanner('steel')" class="banner-opt" style="width:120px;height:36px;border-radius:6px;cursor:pointer;border:2px solid #e2e8f0;background:linear-gradient(135deg,#64748B 0%,#94A3B8 100%);position:relative;"><span style="position:absolute;bottom:2px;left:6px;color:#fff;font-size:9px;">Steel Gray</span></div>
+                <div onclick="selectBanner('custom')" class="banner-opt" style="width:120px;height:36px;border-radius:6px;cursor:pointer;border:2px dashed #94A3B8;display:flex;align-items:center;justify-content:center;"><span style="color:#64748B;font-size:10px;font-weight:600;">+ Custom Upload</span></div>
+            </div>
+            <input type="hidden" name="banner_template" id="bannerTemplate" value="">
             <div class="cover-preview" id="coverPreview" onclick="document.getElementById('cover_photo').click()">
                 {% if sp and sp.cover_photo %}
                     <img src="{{ sp.cover_photo }}" alt="Cover Photo" id="coverImg">
@@ -32,6 +40,7 @@
                 {% endif %}
             </div>
             <input type="file" id="cover_photo" name="cover_photo" accept="image/*" style="display:none;" onchange="previewCover(this)">
+            <small style="color:#888;font-size:12px;display:block;margin-top:6px;">Recommended size: 1200 x 300px</small>
         </div>
 
         <!-- Profile Photo -->
@@ -100,11 +109,32 @@ function previewPhoto(input) {
         reader.readAsDataURL(input.files[0]);
     }
 }
+function selectBanner(type) {
+    var gradients = {
+        'navy': 'linear-gradient(135deg,#1E293B 0%,#334155 100%)',
+        'dark': 'linear-gradient(135deg,#0f0f0f 0%,#1a1a2e 100%)',
+        'green': 'linear-gradient(135deg,#1E293B 0%,#00C851 100%)',
+        'steel': 'linear-gradient(135deg,#64748B 0%,#94A3B8 100%)'
+    };
+    document.querySelectorAll('.banner-opt').forEach(function(el){el.style.borderColor='#e2e8f0';});
+    if (type === 'custom') {
+        document.getElementById('bannerTemplate').value = '';
+        document.getElementById('cover_photo').click();
+        return;
+    }
+    document.getElementById('bannerTemplate').value = type;
+    var preview = document.getElementById('coverPreview');
+    preview.style.background = gradients[type];
+    preview.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.3);font-size:14px;">Banner Preview</div>';
+    event.target.closest('.banner-opt').style.borderColor = '#00C851';
+}
 function previewCover(input) {
     if (input.files && input.files[0]) {
+        document.getElementById('bannerTemplate').value = '';
         var reader = new FileReader();
         reader.onload = function(e) {
             document.getElementById('coverPreview').innerHTML = '<img src="' + e.target.result + '" alt="Cover Preview" id="coverImg">';
+            document.getElementById('coverPreview').style.background = 'none';
         }
         reader.readAsDataURL(input.files[0]);
     }

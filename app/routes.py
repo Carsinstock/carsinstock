@@ -140,6 +140,39 @@ def submit_lead():
             except Exception as e:
                 print(f"Lead email error: {e}")
 
+        # Send confirmation to customer with unsubscribe link
+        try:
+            from app.models.customer import Customer
+            from app.utils.email import generate_unsubscribe_token
+            # Find or create customer record for unsubscribe token
+            customer = Customer.query.filter_by(email=customer_email, salesperson_id=vehicle.salesperson_id).first()
+            if customer:
+                unsub_token = generate_unsubscribe_token(customer.id)
+                unsub_url = f"https://carsinstock.com/unsubscribe/{unsub_token}"
+                unsub_link = f'<p style="color:#999;font-size:11px;margin-top:12px;"><a href="{unsub_url}" style="color:#999;text-decoration:underline;">Unsubscribe from future emails</a></p>'
+            else:
+                unsub_link = ""
+            customer_html = f"""
+            <div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto;">
+                <div style="background:#1E293B;padding:24px;text-align:center;border-radius:12px 12px 0 0;">
+                    <h1 style="margin:0;font-size:24px;"><span style="color:#fff;">Cars</span> <span style="color:#00C851;">IN STOCK</span></h1>
+                </div>
+                <div style="padding:24px;">
+                    <h2 style="color:#1E293B;">Thanks for your interest, {customer_name}!</h2>
+                    <p style="color:#555;font-size:15px;line-height:1.6;">{sp.display_name} at {sp.dealership_name or 'the dealership'} has received your inquiry about the {vehicle.year} {vehicle.make} {vehicle.model} and will be in touch soon.</p>
+                    <p style="color:#555;font-size:15px;">In the meantime, check out more inventory:</p>
+                    <div style="text-align:center;margin:20px 0;">
+                        <a href="https://carsinstock.com/{sp.profile_url_slug}" style="background:#00C851;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;font-weight:600;">View Full Inventory</a>
+                    </div>
+                </div>
+                <div style="border-top:1px solid #eee;padding:16px;text-align:center;">
+                    <p style="color:#999;font-size:12px;">Fresh Cars. Real People. | CarsInStock.com</p>
+                    {unsub_link}
+                </div>
+            </div>"""
+            send_email(customer_email, f"Thanks for your interest in the {vehicle.year} {vehicle.make} {vehicle.model}!", customer_html)
+        except Exception as e:
+            print(f"Customer confirmation email error: {e}")
         flash("Thanks! The salesperson will be in touch soon.", "success")
     except Exception as e:
         db.session.rollback()

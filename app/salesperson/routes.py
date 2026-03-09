@@ -74,6 +74,7 @@ def register_routes(bp):
                 sp.phone = phone
                 sp.dealership_name = request.form.get("dealership_name", "").strip()
                 sp.dealership_address = request.form.get("dealership_address", "").strip()
+                sp.banner_template = request.form.get("banner_template", "").strip()
                 sp.bio = bio
                 if profile_photo and profile_photo.filename:
                     from app.utils.cloudinary_upload import upload_profile_photo, upload_cover_photo
@@ -145,7 +146,7 @@ def register_routes(bp):
             model = request.form.get("model", "").strip()
             trim = request.form.get("trim", "").strip()
             vin = request.form.get("vin", "").strip().upper()
-            mileage = request.form.get("mileage", "").strip()
+            mileage = request.form.get("mileage", "").strip().replace(",", "").replace(" ", "")
             price = request.form.get("price", "").strip()
             exterior_color = request.form.get("exterior_color", "").strip()
             interior_color = request.form.get("interior_color", "").strip()
@@ -162,7 +163,7 @@ def register_routes(bp):
                 errors.append("Model is required.")
             if not vin or len(vin) != 17:
                 errors.append("Valid 17-character VIN is required.")
-            if not mileage or not mileage.isdigit():
+            if not mileage or not mileage.replace(".", "").isdigit():
                 errors.append("Valid mileage is required.")
             if not price:
                 errors.append("Price is required.")
