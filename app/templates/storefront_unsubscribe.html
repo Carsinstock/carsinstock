@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width:500px;margin:40px auto;padding:20px;">
+    <div style="background:#fff;border-radius:12px;padding:40px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+        {% if success %}
+            <h2 style="color:#1E293B;margin-bottom:12px;">You have been unsubscribed.</h2>
+            <p style="color:#64748B;font-size:16px;">{{ email }} will no longer receive emails from {{ sp_name }}.</p>
+            <p style="color:#94A3B8;font-size:13px;margin-top:16px;">This may take up to 10 business days to fully process.</p>
+            <a href="/" style="display:inline-block;margin-top:20px;color:#00C851;text-decoration:none;font-weight:600;">Back to CarsInStock</a>
+        {% elif error %}
+            <h2 style="color:#1E293B;margin-bottom:12px;">Unsubscribe from {{ sp_name }}</h2>
+            <p style="color:#EF4444;font-size:14px;margin-bottom:16px;">{{ error }}</p>
+            <form method="POST">
+                <input type="email" name="email" placeholder="Enter your email address" required style="width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:8px;font-size:15px;font-family:Inter,sans-serif;box-sizing:border-box;margin-bottom:12px;">
+                <button type="submit" style="width:100%;padding:12px;background:#1E293B;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">Unsubscribe</button>
+            </form>
+        {% else %}
+            <h2 style="color:#1E293B;margin-bottom:12px;">Unsubscribe from {{ sp_name }}</h2>
+            <p style="color:#64748B;font-size:15px;margin-bottom:20px;">Enter your email address to stop receiving emails from this salesperson.</p>
+            <form method="POST">
+                <input type="email" name="email" placeholder="Enter your email address" required style="width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:8px;font-size:15px;font-family:Inter,sans-serif;box-sizing:border-box;margin-bottom:12px;">
+                <button type="submit" style="width:100%;padding:12px;background:#1E293B;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;font-family:Inter,sans-serif;">Unsubscribe</button>
+            </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

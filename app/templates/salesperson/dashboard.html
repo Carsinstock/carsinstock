@@ -169,7 +169,7 @@
             <div class="dash-lead-row" style="cursor:default;">
                 <div class="lead-summary">
                     <strong>{{ c.name }}</strong>
-                    <span class="lead-contact">{{ c.email }}{% if c.phone %} | {{ c.phone }}{% endif %}</span>
+                    <span class="lead-contact">{{ c.email }}{% if c.phone %} | {{ c.phone }}{% endif %}{% if c.unsubscribed %} <span style="background:#f8d7da;color:#721c24;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;margin-left:6px;">Unsubscribed</span>{% endif %}</span>
                 </div>
             </div>
             {% endfor %}

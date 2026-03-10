@@ -196,6 +196,26 @@ def unsubscribe(token):
 
 
 
+
+@main.route('/storefront/unsubscribe/<slug>', methods=['GET', 'POST'])
+def storefront_unsubscribe(slug):
+    from app.models.salesperson import Salesperson
+    from app.models.customer import Customer
+    from app.models import db
+    sp = Salesperson.query.filter_by(profile_url_slug=slug).first()
+    sp_name = sp.display_name if sp else "this salesperson"
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip().lower()
+        if not email:
+            return render_template('storefront_unsubscribe.html', sp_name=sp_name, slug=slug, error="Please enter your email address.")
+        if sp:
+            customer = Customer.query.filter_by(email=email, salesperson_id=sp.salesperson_id).first()
+            if customer:
+                customer.unsubscribed = True
+                db.session.commit()
+        return render_template('storefront_unsubscribe.html', sp_name=sp_name, slug=slug, success=True, email=email)
+    return render_template('storefront_unsubscribe.html', sp_name=sp_name, slug=slug)
+
 @main.route('/recruit/unsubscribe/<tracking_id>')
 def recruit_unsubscribe(tracking_id):
     from datetime import datetime
