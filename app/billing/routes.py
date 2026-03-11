@@ -21,28 +21,36 @@ def login_required(f):
     return decorated
 
 
-def get_or_create_price_id():
-    """Get price ID from env, or create the product+price in Stripe and save it."""
-    price_id = os.environ.get('STRIPE_PRICE_ID')
-    if price_id:
-        return price_id
-    # Create product
-    product = stripe.Product.create(name='CarsInStock Monthly Subscription')
-    price = stripe.Price.create(
-        product=product.id,
-        unit_amount=2000,  # $20.00 base
-        currency='usd',
-        recurring={'interval': 'month'},
-    )
-    # Persist to .env file for future runs
-    env_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), '.env')
-    try:
-        with open(env_path, 'a') as f:
-            f.write(f'\nSTRIPE_PRICE_ID={price.id}\n')
-    except Exception:
-        pass
-    os.environ['STRIPE_PRICE_ID'] = price.id
-    return price.id
+FOUNDING_CUTOFF = '2026-04-30'
+FOUNDING_VEHICLE_MIN = 5
+
+
+def is_founding_eligible(user, sp):
+    from datetime import datetime, timedelta
+    cutoff = datetime.strptime(FOUNDING_CUTOFF, '%Y-%m-%d')
+    if user.created_at >= cutoff:
+        return False
+    trial_end = user.trial_end_date or (user.created_at + timedelta(days=14))
+    if sp:
+        from app.models.vehicle import Vehicle
+        count = Vehicle.query.filter(
+            Vehicle.salesperson_id == sp.salesperson_id,
+            Vehicle.created_at <= trial_end
+        ).count()
+        if count >= FOUNDING_VEHICLE_MIN:
+            return True
+    return False
+
+
+def get_price_id(user=None, sp=None):
+    if user and sp and is_founding_eligible(user, sp):
+        founding_id = os.environ.get('STRIPE_FOUNDING_PRICE_ID')
+        if founding_id:
+            return founding_id, True
+    standard_id = os.environ.get('STRIPE_PRICE_ID')
+    if standard_id:
+        return standard_id, False
+    raise RuntimeError('STRIPE_PRICE_ID not set in .env')
 
 
 @billing_bp.route('/checkout')
@@ -68,7 +76,7 @@ def checkout():
             Vehicle.expires_at > db.func.now()
         ).count() if hasattr(Vehicle, 'expires_at') else 0
 
-    price_id = get_or_create_price_id()
+    price_id, is_founding = get_price_id(user, sp)
 
     checkout_session = stripe.checkout.Session.create(
         customer=user.stripe_customer_id,
@@ -77,8 +85,8 @@ def checkout():
         mode='subscription',
         success_url=url_for('billing.success', _external=True) + '?session_id={CHECKOUT_SESSION_ID}',
         cancel_url=url_for('salesperson.dashboard', _external=True),
-        metadata={'user_id': user.id},
-        subscription_data={'metadata': {'user_id': user.id}},
+        metadata={'user_id': user.id, 'founding': str(is_founding)},
+        subscription_data={'metadata': {'user_id': user.id, 'founding': str(is_founding)}},
     )
     return redirect(checkout_session.url, code=303)
 

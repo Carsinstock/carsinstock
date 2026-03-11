@@ -78,7 +78,7 @@ def send_welcome_email(to_email):
                 <div style="background:#F0FDF4;border-radius:8px;padding:20px;margin-bottom:20px;">
                 <h3 style="color:#1E293B;margin-top:0;font-size:18px;">🎉 Your 14-Day Free Trial Has Started!</h3>
                 <p style="color:#555;font-size:15px;line-height:1.6;margin:0;">
-                    Post vehicles at no charge for 14 days. After your trial, it&#39;s just $2 per vehicle posted. No monthly fees, no hidden costs. You&#39;ll receive an invoice via email around day 11 of each billing cycle.
+                    Post unlimited vehicles at no charge for 14 days. After your trial, it&#39;s just $39/month — unlimited cars, cancel anytime.
                 </p>
             </div>
             <p style="color: #555; font-size: 16px; line-height: 1.6;">
