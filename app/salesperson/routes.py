@@ -169,7 +169,7 @@ def register_routes(bp):
                 errors.append("Model is required.")
             if not vin or len(vin) != 17:
                 errors.append("Valid 17-character VIN is required.")
-            if not mileage or not mileage.replace(".", "").isdigit():
+            if mileage and not mileage.replace(".", "").isdigit():
                 errors.append("Valid mileage is required.")
             if not price:
                 errors.append("Price is required.")
@@ -200,7 +200,7 @@ def register_routes(bp):
                 model=model,
                 trim=trim,
                 vin=vin,
-                mileage=int(mileage),
+                mileage=int(mileage) if mileage else None,
                 price=price_val,
                 exterior_color=exterior_color,
                 interior_color=interior_color,
@@ -259,7 +259,8 @@ def register_routes(bp):
             vehicle.model = request.form.get("model", vehicle.model)
             vehicle.trim = request.form.get("trim", vehicle.trim)
             vehicle.vin = request.form.get("vin", vehicle.vin)
-            vehicle.mileage = int(request.form.get("mileage", vehicle.mileage))
+            raw_mileage = request.form.get("mileage", "").strip().replace(",", "")
+            vehicle.mileage = int(raw_mileage) if raw_mileage and raw_mileage.isdigit() else vehicle.mileage
             vehicle.exterior_color = request.form.get("exterior_color", vehicle.exterior_color)
             vehicle.interior_color = request.form.get("interior_color", vehicle.interior_color)
             vehicle.transmission = request.form.get("transmission", vehicle.transmission)
