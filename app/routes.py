@@ -78,6 +78,11 @@ def public_profile(slug):
         # Public only sees active, non-expired vehicles
         vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status='available').all()
         vehicles = [v for v in vehicles if not v.expires_at or v.expires_at > datetime.utcnow()]
+    # Gate storefront if owner's subscription is locked
+    from app.models.user import User as _User
+    sp_user = _User.query.get(sp.user_id)
+    if sp_user and sp_user.is_locked:
+        return render_template('billing/storefront_locked.html', sp=sp), 402
     return render_template('salesperson/public_profile.html', sp=sp, vehicles=vehicles, is_owner=is_owner, is_demo=False)
 
 

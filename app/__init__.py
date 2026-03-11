@@ -35,6 +35,9 @@ def create_app():
     register_routes(salesperson_bp)
     app.register_blueprint(salesperson_bp)
 
+    from app.billing.routes import billing_bp
+    app.register_blueprint(billing_bp)
+
     @app.errorhandler(404)
     def not_found(e):
         from flask import render_template

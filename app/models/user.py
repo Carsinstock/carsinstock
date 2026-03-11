@@ -1,5 +1,5 @@
 from app.models import db
-from datetime import datetime
+from datetime import datetime, timedelta
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -23,3 +23,15 @@ class User(db.Model):
     verification_token_expires = db.Column(db.DateTime, nullable=True)
     reset_token = db.Column(db.String(100), unique=True, nullable=True)
     reset_token_expires = db.Column(db.DateTime, nullable=True)
+    stripe_subscription_id = db.Column(db.String(100), nullable=True)
+
+    @property
+    def is_locked(self):
+        """True when trial expired AND not an active subscriber AND not admin."""
+        if self.is_admin:
+            return False
+        if self.subscription_status == 'active':
+            return False
+        # trial window
+        trial_end = self.trial_end_date or (self.created_at + timedelta(days=14))
+        return datetime.utcnow() > trial_end

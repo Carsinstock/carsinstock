@@ -141,6 +141,11 @@ def register_routes(bp):
             flash("Please set up your profile first.", "error")
             return redirect(url_for("salesperson.profile_setup"))
 
+        from app.models.user import User as _User
+        _u = _User.query.get(user_id)
+        if _u and _u.is_locked:
+            return redirect(url_for("billing.checkout"))
+
         if request.method == "POST":
             year = request.form.get("year", "").strip()
             make = request.form.get("make", "").strip()
@@ -361,6 +366,11 @@ def register_routes(bp):
                 flash("Please enter at least one valid email address.", "error")
                 return render_template("salesperson/share_vehicle.html", vehicle=vehicle, sp=sp, customers=customers)
 
+            # Subscription gate
+            from app.models.user import User as _User
+            _u2 = _User.query.get(session["user_id"])
+            if _u2 and _u2.is_locked:
+                return redirect(url_for("billing.checkout"))
             # Rate limit: 50 blasts per day per salesperson
             from datetime import datetime, timedelta
             today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)

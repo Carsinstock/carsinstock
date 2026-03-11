@@ -155,6 +155,10 @@ def verify_email(token):
     user.email_verified = True
     user.verification_token = None
     user.verification_token_expires = None
+    user.subscription_status = 'trial'
+    if not user.trial_end_date:
+        from datetime import timedelta
+        user.trial_end_date = datetime.utcnow() + timedelta(days=14)
     db.session.commit()
     try:
         from app.utils.email import send_welcome_email
