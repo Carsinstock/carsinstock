@@ -24,13 +24,17 @@
                 <div onclick="selectBanner('custom')" class="banner-opt" style="width:120px;height:36px;border-radius:6px;cursor:pointer;border:2px dashed #94A3B8;display:flex;align-items:center;justify-content:center;"><span style="color:#64748B;font-size:10px;font-weight:600;">+ Custom Upload</span></div>
             </div>
             <input type="hidden" name="banner_template" id="bannerTemplate" value="">
-            <div class="cover-preview" id="coverPreview" onclick="document.getElementById('cover_photo').click()">
+            <input type="hidden" name="cover_photo_y_offset" id="coverYOffset" value="{{ sp.cover_photo_y_offset if sp and sp.cover_photo_y_offset is not none else 50 }}">
+            <div class="cover-preview" id="coverPreview" style="cursor: {% if sp and sp.cover_photo %}ns-resize{% else %}pointer{% endif %}; user-select:none; -webkit-user-select:none;" onclick="{% if not (sp and sp.cover_photo) %}document.getElementById('cover_photo').click(){% endif %}">
                 {% if sp and sp.cover_photo %}
-                    <img src="{{ sp.cover_photo }}" alt="Cover Photo" id="coverImg">
+                    <img src="{{ sp.cover_photo }}" alt="Cover Photo" id="coverImg" style="object-position: center {{ sp.cover_photo_y_offset if sp and sp.cover_photo_y_offset is not none else 50 }}%;">
                 {% else %}
                     <div class="cover-placeholder">
                         <span>+ Add Cover Photo</span>
                     </div>
+                {% endif %}
+                {% if sp and sp.cover_photo %}
+                <div id="dragHint" style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.55);color:#fff;font-size:12px;padding:3px 10px;border-radius:20px;pointer-events:none;">↕ Drag to reposition</div>
                 {% endif %}
             </div>
             <div style="display:flex;gap:8px;margin-top:8px;">
@@ -133,12 +137,40 @@ function previewCover(input) {
         document.getElementById('bannerTemplate').value = '';
         var reader = new FileReader();
         reader.onload = function(e) {
-            document.getElementById('coverPreview').innerHTML = '<img src="' + e.target.result + '" alt="Cover Preview" id="coverImg">';
-            document.getElementById('coverPreview').style.background = 'none';
+            var preview = document.getElementById('coverPreview');
+            preview.style.background = 'none';
+            preview.style.cursor = 'ns-resize';
+            preview.onclick = null;
+            preview.innerHTML = '<img src="' + e.target.result + '" alt="Cover Preview" id="coverImg" style="object-fit:cover;width:100%;height:100%;object-position:center 50%;"><div id="dragHint" style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.55);color:#fff;font-size:12px;padding:3px 10px;border-radius:20px;pointer-events:none;">↕ Drag to reposition</div>';
+            document.getElementById('coverYOffset').value = 50;
+            initCoverDrag();
         }
         reader.readAsDataURL(input.files[0]);
     }
 }
+
+function initCoverDrag() {
+    var frame = document.getElementById('coverPreview');
+    var img = document.getElementById('coverImg');
+    var offsetInput = document.getElementById('coverYOffset');
+    if (!frame || !img) return;
+    var isDragging = false, startY = 0, startOffset = parseInt(offsetInput.value) || 50, currentOffset = startOffset;
+    function applyOffset(val) {
+        val = Math.max(0, Math.min(100, val));
+        currentOffset = val;
+        img.style.objectPosition = 'center ' + val + '%';
+        offsetInput.value = val;
+    }
+    frame.onmousedown = function(e) { isDragging = true; startY = e.clientY; startOffset = currentOffset; e.preventDefault(); };
+    document.addEventListener('mousemove', function(e) { if (!isDragging) return; var delta = Math.round((e.clientY - startY) / frame.offsetHeight * 100); applyOffset(startOffset + delta); });
+    document.addEventListener('mouseup', function() { isDragging = false; });
+    frame.ontouchstart = function(e) { isDragging = true; startY = e.touches[0].clientY; startOffset = currentOffset; e.preventDefault(); };
+    document.addEventListener('touchmove', function(e) { if (!isDragging) return; var delta = Math.round((e.touches[0].clientY - startY) / frame.offsetHeight * 100); applyOffset(startOffset + delta); }, {passive:false});
+    document.addEventListener('touchend', function() { isDragging = false; });
+}
+
+// Init drag if cover photo already exists on page load
+if (document.getElementById('coverImg')) { initCoverDrag(); }
 </script>
 <style>
     .auth-container { max-width: 520px; margin: 40px auto; padding: 40px; background: #fff; border-radius: 12px; box-shadow: 0 2px 16px rgba(45,29,54,0.10); }
