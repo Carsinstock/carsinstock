@@ -16,12 +16,26 @@
         <div class="form-group">
             <label>Cover Photo</label>
             <small style="color:#888;font-size:12px;display:block;margin-bottom:8px;">Choose a pre-made banner or upload your own</small>
-            <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-                <div onclick="selectBanner('navy')" class="banner-opt" style="width:120px;height:36px;border-radius:6px;cursor:pointer;border:2px solid #e2e8f0;background:linear-gradient(135deg,#1E293B 0%,#334155 100%);position:relative;"><span style="position:absolute;bottom:2px;left:6px;color:#fff;font-size:9px;">Navy Gradient</span></div>
-                <div onclick="selectBanner('dark')" class="banner-opt" style="width:120px;height:36px;border-radius:6px;cursor:pointer;border:2px solid #e2e8f0;background:linear-gradient(135deg,#0f0f0f 0%,#1a1a2e 100%);position:relative;"><span style="position:absolute;bottom:2px;left:6px;color:#fff;font-size:9px;">Black Gradient</span></div>
-                <div onclick="selectBanner('green')" class="banner-opt" style="width:120px;height:36px;border-radius:6px;cursor:pointer;border:2px solid #e2e8f0;background:linear-gradient(135deg,#1E293B 0%,#00C851 100%);position:relative;"><span style="position:absolute;bottom:2px;left:6px;color:#fff;font-size:9px;">Navy-Green</span></div>
-                <div onclick="selectBanner('steel')" class="banner-opt" style="width:120px;height:36px;border-radius:6px;cursor:pointer;border:2px solid #e2e8f0;background:linear-gradient(135deg,#64748B 0%,#94A3B8 100%);position:relative;"><span style="position:absolute;bottom:2px;left:6px;color:#fff;font-size:9px;">Steel Gray</span></div>
-                <div onclick="selectBanner('custom')" class="banner-opt" style="width:120px;height:36px;border-radius:6px;cursor:pointer;border:2px dashed #94A3B8;display:flex;align-items:center;justify-content:center;"><span style="color:#64748B;font-size:10px;font-weight:600;">+ Custom Upload</span></div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;">
+                <div onclick="selectBanner('brand')" class="banner-opt" style="height:48px;border-radius:6px;cursor:pointer;border:2px solid #e2e8f0;background:linear-gradient(135deg,#1E293B 0%,#00C851 100%);position:relative;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;padding:4px 6px;">
+                    <span style="color:#00C851;font-size:8px;font-weight:700;letter-spacing:0.5px;">Fresh Cars. Real People.</span>
+                    <span style="color:rgba(255,255,255,0.7);font-size:8px;">CarsInStock Brand</span>
+                </div>
+                <div onclick="selectBanner('showroom')" class="banner-opt" style="height:48px;border-radius:6px;cursor:pointer;border:2px solid #e2e8f0;background:url('https://images.unsplash.com/photo-1567818735868-e71b99932e29?w=400&q=80') center/cover no-repeat;position:relative;">
+                    <span style="position:absolute;bottom:2px;left:6px;color:#fff;font-size:9px;text-shadow:0 1px 3px rgba(0,0,0,0.8);">Showroom</span>
+                </div>
+                <div onclick="selectBanner('road')" class="banner-opt" style="height:48px;border-radius:6px;cursor:pointer;border:2px solid #e2e8f0;background:url('https://images.unsplash.com/photo-1468818438311-4bab781ab9b8?w=400&q=80') center/cover no-repeat;position:relative;">
+                    <span style="position:absolute;bottom:2px;left:6px;color:#fff;font-size:9px;text-shadow:0 1px 3px rgba(0,0,0,0.8);">Open Road</span>
+                </div>
+                <div onclick="selectBanner('solid_navy')" class="banner-opt" style="height:48px;border-radius:6px;cursor:pointer;border:2px solid #e2e8f0;background:#1E293B;position:relative;">
+                    <span style="position:absolute;bottom:2px;left:6px;color:#fff;font-size:9px;">Solid Navy</span>
+                </div>
+                <div onclick="selectBanner('solid_black')" class="banner-opt" style="height:48px;border-radius:6px;cursor:pointer;border:2px solid #e2e8f0;background:#000;position:relative;">
+                    <span style="position:absolute;bottom:2px;left:6px;color:#fff;font-size:9px;">Solid Black</span>
+                </div>
+                <div onclick="selectBanner('custom')" class="banner-opt" style="height:48px;border-radius:6px;cursor:pointer;border:2px dashed #94A3B8;display:flex;align-items:center;justify-content:center;background:#f8fafc;">
+                    <span style="color:#64748B;font-size:10px;font-weight:600;">+ Upload Photo</span>
+                </div>
             </div>
             <input type="hidden" name="banner_template" id="bannerTemplate" value="">
             <input type="hidden" name="cover_photo_y_offset" id="coverYOffset" value="{{ sp.cover_photo_y_offset if sp and sp.cover_photo_y_offset is not none else 50 }}">
@@ -118,7 +132,14 @@ function selectBanner(type) {
         'navy': 'linear-gradient(135deg,#1E293B 0%,#334155 100%)',
         'dark': 'linear-gradient(135deg,#0f0f0f 0%,#1a1a2e 100%)',
         'green': 'linear-gradient(135deg,#1E293B 0%,#00C851 100%)',
-        'steel': 'linear-gradient(135deg,#64748B 0%,#94A3B8 100%)'
+        'steel': 'linear-gradient(135deg,#64748B 0%,#94A3B8 100%)',
+        'brand': 'linear-gradient(135deg,#1E293B 0%,#00C851 100%)',
+        'solid_navy': '#1E293B',
+        'solid_black': '#000000'
+    };
+    var photoBanners = {
+        'showroom': 'https://images.unsplash.com/photo-1567818735868-e71b99932e29?w=1200&q=85',
+        'road': 'https://images.unsplash.com/photo-1468818438311-4bab781ab9b8?w=1200&q=85'
     };
     document.querySelectorAll('.banner-opt').forEach(function(el){el.style.borderColor='#e2e8f0';});
     if (type === 'custom') {
@@ -128,8 +149,16 @@ function selectBanner(type) {
     }
     document.getElementById('bannerTemplate').value = type;
     var preview = document.getElementById('coverPreview');
-    preview.style.background = gradients[type];
-    preview.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.3);font-size:14px;">Banner Preview</div>';
+    if (photoBanners[type]) {
+        preview.style.background = 'url(' + photoBanners[type] + ') center/cover no-repeat';
+        preview.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.3);font-size:14px;">Banner Preview</div>';
+    } else if (type === 'brand') {
+        preview.style.background = gradients[type];
+        preview.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;"><span style="color:#00C851;font-size:18px;font-weight:700;letter-spacing:1px;">Fresh Cars. Real People.</span><span style="color:rgba(255,255,255,0.5);font-size:13px;">CarsInStock</span></div>';
+    } else {
+        preview.style.background = gradients[type];
+        preview.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.3);font-size:14px;">Banner Preview</div>';
+    }
     event.target.closest('.banner-opt').style.borderColor = '#00C851';
 }
 function previewCover(input) {
