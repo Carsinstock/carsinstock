@@ -40,9 +40,9 @@
             <input type="hidden" name="banner_template" id="bannerTemplate" value="">
             <input type="hidden" name="cover_photo_y_offset" id="coverYOffset" value="{{ sp.cover_photo_y_offset if sp and sp.cover_photo_y_offset is not none else 50 }}">
             <input type="hidden" name="banner_x_offset" id="bannerXOffset" value="{{ sp.banner_x_offset if sp and sp.banner_x_offset is not none else 50 }}">
-            <div class="cover-preview" id="coverPreview" style="cursor: {% if sp and sp.cover_photo %}ns-resize{% else %}pointer{% endif %}; user-select:none; -webkit-user-select:none;" onclick="{% if not (sp and sp.cover_photo) %}document.getElementById('cover_photo').click(){% endif %}">
+            <div class="cover-preview" id="coverPreview" style="cursor: {% if sp and sp.cover_photo %}move{% else %}pointer{% endif %}; user-select:none; -webkit-user-select:none;" onclick="{% if not (sp and sp.cover_photo) %}document.getElementById('cover_photo').click(){% endif %}">
                 {% if sp and sp.cover_photo %}
-                    <img src="{{ sp.cover_photo }}" alt="Cover Photo" id="coverImg" style="object-position: {{ sp.banner_x_offset if sp and sp.banner_x_offset is not none else 50 }}% {{ sp.cover_photo_y_offset if sp and sp.cover_photo_y_offset is not none else 50 }}%;">
+                    <img src="{{ sp.cover_photo }}" alt="Cover Photo" id="coverImg" style="width:100%;height:100%;object-fit:contain;background:#1a1a1a;object-position: {{ sp.banner_x_offset if sp and sp.banner_x_offset is not none else 50 }}% {{ sp.cover_photo_y_offset if sp and sp.cover_photo_y_offset is not none else 50 }}%;">
                 {% else %}
                     <div class="cover-placeholder">
                         <span>+ Add Cover Photo</span>
@@ -171,7 +171,7 @@ function previewCover(input) {
             preview.style.background = 'none';
             preview.style.cursor = 'ns-resize';
             preview.onclick = null;
-            preview.innerHTML = '<img src="' + e.target.result + '" alt="Cover Preview" id="coverImg" style="object-fit:cover;width:100%;height:100%;object-position:center 50%;"><div id="dragHint" style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.55);color:#fff;font-size:12px;padding:3px 10px;border-radius:20px;pointer-events:none;">✥ Drag to reposition</div>';
+            preview.innerHTML = '<img src="' + e.target.result + '" alt="Cover Preview" id="coverImg" style="object-fit:contain;background:#1a1a1a;width:100%;height:100%;object-position:50% 50%;"><div id="dragHint" style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.55);color:#fff;font-size:12px;padding:3px 10px;border-radius:20px;pointer-events:none;">✥ Drag to reposition</div>';
             document.getElementById('coverYOffset').value = 50;
             document.getElementById('bannerXOffset').value = 50;
             initCoverDrag();
@@ -246,7 +246,7 @@ if (document.getElementById('coverImg')) { initCoverDrag(); }
     .alert-success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
     .cover-preview { width: 100%; height: 180px; border-radius: 12px; overflow: hidden; background: #f0f0f0; border: 2px dashed #ccc; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: border-color 0.2s; }
     .cover-preview:hover { border-color: #1E293B; }
-    .cover-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .cover-preview img { width: 100%; height: 100%; object-fit: contain; background: #1a1a1a; }
     .cover-placeholder { text-align: center; }
     .cover-placeholder span { color: #999; font-size: 16px; font-weight: 600; }
     .photo-preview { width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 12px; overflow: hidden; background: #1E293B; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: opacity 0.2s; }
