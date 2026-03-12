@@ -39,16 +39,17 @@
             </div>
             <input type="hidden" name="banner_template" id="bannerTemplate" value="">
             <input type="hidden" name="cover_photo_y_offset" id="coverYOffset" value="{{ sp.cover_photo_y_offset if sp and sp.cover_photo_y_offset is not none else 50 }}">
+            <input type="hidden" name="banner_x_offset" id="bannerXOffset" value="{{ sp.banner_x_offset if sp and sp.banner_x_offset is not none else 50 }}">
             <div class="cover-preview" id="coverPreview" style="cursor: {% if sp and sp.cover_photo %}ns-resize{% else %}pointer{% endif %}; user-select:none; -webkit-user-select:none;" onclick="{% if not (sp and sp.cover_photo) %}document.getElementById('cover_photo').click(){% endif %}">
                 {% if sp and sp.cover_photo %}
-                    <img src="{{ sp.cover_photo }}" alt="Cover Photo" id="coverImg" style="object-position: center {{ sp.cover_photo_y_offset if sp and sp.cover_photo_y_offset is not none else 50 }}%;">
+                    <img src="{{ sp.cover_photo }}" alt="Cover Photo" id="coverImg" style="object-position: {{ sp.banner_x_offset if sp and sp.banner_x_offset is not none else 50 }}% {{ sp.cover_photo_y_offset if sp and sp.cover_photo_y_offset is not none else 50 }}%;">
                 {% else %}
                     <div class="cover-placeholder">
                         <span>+ Add Cover Photo</span>
                     </div>
                 {% endif %}
                 {% if sp and sp.cover_photo %}
-                <div id="dragHint" style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.55);color:#fff;font-size:12px;padding:3px 10px;border-radius:20px;pointer-events:none;">↕ Drag to reposition</div>
+                <div id="dragHint" style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.55);color:#fff;font-size:12px;padding:3px 10px;border-radius:20px;pointer-events:none;">✥ Drag to reposition</div>
                 {% endif %}
             </div>
             <div style="display:flex;gap:8px;margin-top:8px;">
@@ -170,8 +171,9 @@ function previewCover(input) {
             preview.style.background = 'none';
             preview.style.cursor = 'ns-resize';
             preview.onclick = null;
-            preview.innerHTML = '<img src="' + e.target.result + '" alt="Cover Preview" id="coverImg" style="object-fit:cover;width:100%;height:100%;object-position:center 50%;"><div id="dragHint" style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.55);color:#fff;font-size:12px;padding:3px 10px;border-radius:20px;pointer-events:none;">↕ Drag to reposition</div>';
+            preview.innerHTML = '<img src="' + e.target.result + '" alt="Cover Preview" id="coverImg" style="object-fit:cover;width:100%;height:100%;object-position:center 50%;"><div id="dragHint" style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.55);color:#fff;font-size:12px;padding:3px 10px;border-radius:20px;pointer-events:none;">✥ Drag to reposition</div>';
             document.getElementById('coverYOffset').value = 50;
+            document.getElementById('bannerXOffset').value = 50;
             initCoverDrag();
         }
         reader.readAsDataURL(input.files[0]);
@@ -181,20 +183,47 @@ function previewCover(input) {
 function initCoverDrag() {
     var frame = document.getElementById('coverPreview');
     var img = document.getElementById('coverImg');
-    var offsetInput = document.getElementById('coverYOffset');
+    var yInput = document.getElementById('coverYOffset');
+    var xInput = document.getElementById('bannerXOffset');
     if (!frame || !img) return;
-    var isDragging = false, startY = 0, startOffset = parseInt(offsetInput.value) || 50, currentOffset = startOffset;
-    function applyOffset(val) {
-        val = Math.max(0, Math.min(100, val));
-        currentOffset = val;
-        img.style.objectPosition = 'center ' + val + '%';
-        offsetInput.value = val;
+    var isDragging = false;
+    var startX = 0, startY = 0;
+    var startOffsetX = parseInt(xInput.value) || 50;
+    var startOffsetY = parseInt(yInput.value) || 50;
+    var currentX = startOffsetX, currentY = startOffsetY;
+    function applyOffset(x, y) {
+        x = Math.max(0, Math.min(100, x));
+        y = Math.max(0, Math.min(100, y));
+        currentX = x; currentY = y;
+        img.style.objectPosition = x + '% ' + y + '%';
+        xInput.value = x;
+        yInput.value = y;
     }
-    frame.onmousedown = function(e) { isDragging = true; startY = e.clientY; startOffset = currentOffset; e.preventDefault(); };
-    document.addEventListener('mousemove', function(e) { if (!isDragging) return; var delta = Math.round((e.clientY - startY) / frame.offsetHeight * 100); applyOffset(startOffset + delta); });
+    frame.onmousedown = function(e) {
+        isDragging = true;
+        startX = e.clientX; startY = e.clientY;
+        startOffsetX = currentX; startOffsetY = currentY;
+        e.preventDefault();
+    };
+    document.addEventListener('mousemove', function(e) {
+        if (!isDragging) return;
+        var dx = Math.round((e.clientX - startX) / frame.offsetWidth * -100);
+        var dy = Math.round((e.clientY - startY) / frame.offsetHeight * -100);
+        applyOffset(startOffsetX + dx, startOffsetY + dy);
+    });
     document.addEventListener('mouseup', function() { isDragging = false; });
-    frame.ontouchstart = function(e) { isDragging = true; startY = e.touches[0].clientY; startOffset = currentOffset; e.preventDefault(); };
-    document.addEventListener('touchmove', function(e) { if (!isDragging) return; var delta = Math.round((e.touches[0].clientY - startY) / frame.offsetHeight * 100); applyOffset(startOffset + delta); }, {passive:false});
+    frame.ontouchstart = function(e) {
+        isDragging = true;
+        startX = e.touches[0].clientX; startY = e.touches[0].clientY;
+        startOffsetX = currentX; startOffsetY = currentY;
+        e.preventDefault();
+    };
+    document.addEventListener('touchmove', function(e) {
+        if (!isDragging) return;
+        var dx = Math.round((e.touches[0].clientX - startX) / frame.offsetWidth * -100);
+        var dy = Math.round((e.touches[0].clientY - startY) / frame.offsetHeight * -100);
+        applyOffset(startOffsetX + dx, startOffsetY + dy);
+    }, {passive:false});
     document.addEventListener('touchend', function() { isDragging = false; });
 }
 

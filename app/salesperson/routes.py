@@ -76,6 +76,7 @@ def register_routes(bp):
                 sp.dealership_address = request.form.get("dealership_address", "").strip()
                 sp.banner_template = request.form.get("banner_template", "").strip()
                 sp.cover_photo_y_offset = max(0, min(100, int(request.form.get("cover_photo_y_offset", 50) or 50)))
+                sp.banner_x_offset = max(0, min(100, int(request.form.get("banner_x_offset", 50) or 50)))
                 sp.bio = bio
                 if profile_photo and profile_photo.filename:
                     from app.utils.cloudinary_upload import upload_profile_photo, upload_cover_photo
