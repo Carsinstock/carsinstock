@@ -51,7 +51,7 @@ def upload_cover_photo(file, salesperson_id):
             file,
             folder=f"carsinstock/{salesperson_id}/cover",
             transformation=[
-                {'width': 1200, 'height': 300, 'crop': 'fill', 'gravity': 'auto', 'quality': 'auto'}
+                {'width': 1200, 'height': 300, 'crop': 'fit', 'quality': 'auto'}
             ]
         )
         return result['secure_url']
