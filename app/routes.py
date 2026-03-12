@@ -60,7 +60,7 @@ def demo_page():
     from app.models.vehicle import Vehicle
     sp = Salesperson.query.filter_by(profile_url_slug="jsmith").first_or_404()
     vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status="available").all()
-    return render_template("salesperson/public_profile.html", sp=sp, vehicles=vehicles, is_owner=False, is_demo=True)
+    return render_template("salesperson/public_profile.html", sp=sp, vehicles=vehicles, is_owner=False, is_demo=True, hide_nav_auth=True)
 
 @main.route('/<slug>')
 def public_profile(slug):
@@ -83,7 +83,7 @@ def public_profile(slug):
     sp_user = _User.query.get(sp.user_id)
     if sp_user and sp_user.is_locked:
         return render_template('billing/storefront_locked.html', sp=sp), 402
-    return render_template('salesperson/public_profile.html', sp=sp, vehicles=vehicles, is_owner=is_owner, is_demo=False)
+    return render_template('salesperson/public_profile.html', sp=sp, vehicles=vehicles, is_owner=is_owner, is_demo=False, hide_nav_auth=not is_owner)
 
 
 @main.route("/lead/submit", methods=["POST"])

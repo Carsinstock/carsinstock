@@ -98,8 +98,10 @@
                     <a href="/logout" class="nav-logout">Logout</a>
                 {% else %}
                     
+                    {% if not hide_nav_auth %}
                     <a href="/login">Login</a>
                     <a href="/register">Register</a>
+                    {% endif %}
                 {% endif %}
             </div>
         </div>
