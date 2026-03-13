@@ -344,7 +344,7 @@ def register_routes(bp):
             flash("You don't have permission to share this vehicle.", "error")
             return redirect(f"/{sp.profile_url_slug}")
 
-        customers = Customer.query.filter_by(salesperson_id=sp.salesperson_id, unsubscribed=False).filter(Customer.email != '', Customer.email != None).order_by(Customer.name).all()
+        customers = Customer.query.filter_by(salesperson_id=sp.salesperson_id, unsubscribed=False).filter(Customer.email != '', Customer.email != None).order_by(Customer.first_name).all()
 
         if request.method == "POST":
             emails_raw = request.form.get("emails", "")
@@ -416,7 +416,7 @@ def register_routes(bp):
             flash("Set up your profile first.", "error")
             return redirect(url_for("salesperson.profile_setup"))
 
-        customers = Customer.query.filter_by(salesperson_id=sp.salesperson_id).order_by(Customer.name).all()
+        customers = Customer.query.filter_by(salesperson_id=sp.salesperson_id).order_by(Customer.first_name).all()
         return render_template("salesperson/my_customers.html", customers=customers, sp=sp)
 
     @bp.route("/customers/add", methods=["GET", "POST"])
@@ -468,7 +468,8 @@ def register_routes(bp):
             return redirect(url_for("salesperson.my_customers"))
 
         if request.method == "POST":
-            customer.name = request.form.get("name", customer.name).strip()
+            customer.first_name = request.form.get("first_name", customer.first_name).strip()
+            customer.last_name = request.form.get("last_name", customer.last_name).strip()
             customer.email = request.form.get("email", "").strip()
             customer.phone = request.form.get("phone", "").strip()
             customer.notes = request.form.get("notes", "").strip()
@@ -593,7 +594,7 @@ def register_routes(bp):
         # Chat Transcripts
         chats = ChatConversation.query.filter_by(salesperson_id=sp.salesperson_id).order_by(ChatConversation.started_at.desc()).all()
         # My Customers
-        customers = Customer.query.filter_by(salesperson_id=sp.salesperson_id).order_by(Customer.name).all()
+        customers = Customer.query.filter_by(salesperson_id=sp.salesperson_id).order_by(Customer.first_name).all()
         # Email blast count today
         today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
         try:
@@ -659,10 +660,12 @@ def register_routes(bp):
             try:
                 stream = io.StringIO(file.stream.read().decode("utf-8"))
                 reader = csv.DictReader(stream)
-                email_col = name_col = phone_col = notes_col = None
+                email_col = first_name_col = last_name_col = name_col = phone_col = notes_col = None
                 for h in (reader.fieldnames or []):
                     hl = h.strip().lower()
                     if hl in ("email", "e-mail", "email_address", "emailaddress"): email_col = h
+                    elif hl in ("first_name", "firstname", "first"): first_name_col = h
+                    elif hl in ("last_name", "lastname", "last"): last_name_col = h
                     elif hl in ("name", "full_name", "fullname", "customer_name", "contact"): name_col = h
                     elif hl in ("phone", "phone_number", "phonenumber", "mobile", "cell"): phone_col = h
                     elif hl in ("notes", "note", "comments", "comment"): notes_col = h
@@ -680,10 +683,21 @@ def register_routes(bp):
                     if existing:
                         skipped += 1
                         continue
-                    name = row.get(name_col, "").strip() if name_col else email.split("@")[0]
+                    # Resolve first/last name from dedicated cols, or split full name col
+                    if first_name_col or last_name_col:
+                        first_name = row.get(first_name_col, "").strip() if first_name_col else ""
+                        last_name = row.get(last_name_col, "").strip() if last_name_col else ""
+                    elif name_col:
+                        full = row.get(name_col, "").strip()
+                        parts = full.split(" ", 1)
+                        first_name = parts[0]
+                        last_name = parts[1] if len(parts) > 1 else ""
+                    else:
+                        first_name = email.split("@")[0]
+                        last_name = ""
                     phone = row.get(phone_col, "").strip() if phone_col else ""
                     notes = row.get(notes_col, "").strip() if notes_col else ""
-                    c = Customer(salesperson_id=sp.salesperson_id, name=name or email.split("@")[0], email=email, phone=phone, notes=notes)
+                    c = Customer(salesperson_id=sp.salesperson_id, first_name=first_name, last_name=last_name, email=email, phone=phone, notes=notes)
                     db.session.add(c)
                     imported += 1
                 db.session.commit()

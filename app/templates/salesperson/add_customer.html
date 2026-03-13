@@ -4,9 +4,15 @@
     <h2>{{ 'Edit' if customer else 'Add' }} Customer</h2>
 
     <form method="POST">
-        <div style="margin-bottom:12px;">
-            <label style="font-size:13px; color:#666;">Name *</label>
-            <input type="text" name="name" value="{{ customer.name if customer else '' }}" required style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:15px; box-sizing:border-box;">
+        <div style="margin-bottom:12px; display:flex; gap:10px;">
+            <div style="flex:1;">
+                <label style="font-size:13px; color:#666;">First Name *</label>
+                <input type="text" name="first_name" value="{{ customer.first_name if customer else '' }}" required style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:15px; box-sizing:border-box;">
+            </div>
+            <div style="flex:1;">
+                <label style="font-size:13px; color:#666;">Last Name</label>
+                <input type="text" name="last_name" value="{{ customer.last_name if customer else '' }}" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:15px; box-sizing:border-box;">
+            </div>
         </div>
         <div style="margin-bottom:12px;">
             <label style="font-size:13px; color:#666;">Email</label>

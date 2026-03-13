@@ -154,6 +154,10 @@ def send_vehicle_email(to_emails, vehicle, salesperson, personal_message="", cus
         # Build per-recipient footer with their unsubscribe link
         cust_id = customer_map.get(email_addr)
         footer_html = _build_unsubscribe_footer(customer_id=cust_id)
+        # Personalize {{first_name}} if we have a customer record
+        from app.models.customer import Customer
+        cust = Customer.query.filter_by(id=cust_id).first() if cust_id else None
+        first_name = cust.first_name if cust and cust.first_name else ""
 
         html_content = f"""
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
