@@ -1,5 +1,6 @@
 from app.models import db
 from datetime import datetime, timedelta
+import math
 
 class Vehicle(db.Model):
     __tablename__ = 'vehicles'
@@ -39,7 +40,7 @@ class Vehicle(db.Model):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         if not self.expires_at:
-            self.expires_at = datetime.utcnow() + timedelta(days=14)
+            self.expires_at = datetime.utcnow() + timedelta(days=7)
 
     @property
     def is_expired(self):
@@ -48,4 +49,4 @@ class Vehicle(db.Model):
     @property
     def days_remaining(self):
         delta = self.expires_at - datetime.utcnow()
-        return max(0, delta.days)
+        return max(0, math.ceil(delta.total_seconds() / 86400))

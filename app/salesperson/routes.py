@@ -281,7 +281,7 @@ def register_routes(bp):
             # Renew expired listing
             if vehicle.is_expired:
                 from datetime import datetime, timedelta
-                vehicle.expires_at = datetime.utcnow() + timedelta(days=14)
+                vehicle.expires_at = datetime.utcnow() + timedelta(days=7)
                 vehicle.status = 'available'
             try:
                 from app.models import db
