@@ -221,6 +221,11 @@
             <div id="blastProgress" style="display:none;margin-bottom:12px;padding:12px;background:#F0FDF4;border:1px solid #00C851;border-radius:8px;color:#1E293B;font-size:14px;">
                 Sending...
             </div>
+            <div style="margin-bottom:10px;">
+                <label style="font-size:13px;color:#666;display:block;margin-bottom:4px;">Test Email Address</label>
+                <input type="email" id="testEmailAddr" value="{{ sp.salesperson_id and '' or '' }}" placeholder="you@example.com, colleague@example.com" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;box-sizing:border-box;">
+                <p style="font-size:11px;color:#94A3B8;margin:4px 0 0;">Separate multiple addresses with commas</p>
+            </div>
             <div style="display:flex;gap:10px;margin-bottom:0;">
                 <button onclick="sendTestBlast()" id="testBtn" style="flex:0 0 auto;padding:14px 20px;background:#1E293B;color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">
                     📧 Send Test
@@ -263,9 +268,12 @@
     progress.style.borderColor = '#F59E0B';
     progress.style.color = '#92400E';
     progress.textContent = 'Sending test email to your inbox...';
+    const testEmail = document.getElementById('testEmailAddr').value.trim();
+    if (!testEmail) { alert('Please enter a test email address.'); btn.disabled = false; btn.textContent = '📧 Send Test'; return; }
     const fd = new FormData();
     fd.append('subject', subject);
     fd.append('body', body);
+    fd.append('test_email', testEmail);
     fetch('/blast/test', { method: 'POST', body: fd })
         .then(r => r.json())
         .then(data => {

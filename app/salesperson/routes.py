@@ -429,7 +429,9 @@ def register_routes(bp):
             return jsonify({"error": "Subject and message are required"}), 400
 
         user = _User.query.get(session["user_id"])
-        test_email = user.email
+        test_email_raw = request.form.get("test_email", "").strip() or user.email
+        test_emails = [e.strip() for e in test_email_raw.split(",") if e.strip() and "@" in e]
+        test_email = test_emails[0] if test_emails else user.email
 
         vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status='available').all()
         vehicles = [v for v in vehicles if not v.expires_at or v.expires_at > datetime.utcnow()]
@@ -470,14 +472,17 @@ def register_routes(bp):
 
         try:
             sg = sendgrid.SendGridAPIClient(api_key=os.environ.get('SENDGRID_API_KEY'))
-            msg = Mail(
-                from_email=(os.environ.get('SENDGRID_FROM_EMAIL', 'noreply@carsinstock.com'), sp.display_name + ' via CarsInStock'),
-                to_emails=test_email,
-                subject=f"[TEST] {subject}",
-                html_content=html
-            )
-            sg.send(msg)
-            return jsonify({"sent": 1, "email": test_email})
+            sent_to = []
+            for te in test_emails:
+                msg = Mail(
+                    from_email=(os.environ.get('SENDGRID_FROM_EMAIL', 'noreply@carsinstock.com'), sp.display_name + ' via CarsInStock'),
+                    to_emails=te,
+                    subject=f"[TEST] {subject}",
+                    html_content=html
+                )
+                sg.send(msg)
+                sent_to.append(te)
+            return jsonify({"sent": len(sent_to), "email": ", ".join(sent_to)})
         except Exception as e:
             return jsonify({"error": str(e)}), 500
 
