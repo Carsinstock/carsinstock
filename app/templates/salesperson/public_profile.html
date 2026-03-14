@@ -105,13 +105,6 @@
         <h2 style="display:flex;align-items:center;gap:10px;">🚗 {{ sp.display_name }}'s Top Picks — Fresh & In Stock</h2>
         <p style="color:#64748B;font-size:14px;margin-top:-16px;margin-bottom:20px;">Listings refresh every 7 days, so you're never browsing stale inventory. If it's posted, it's worth a conversation.</p>
         {% if vehicles %}
-        <div style="margin-bottom:16px;text-align:right;">
-            <select id="sortVehicles" onchange="sortGrid(this.value)" style="padding:8px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;color:#1E293B;background:#fff;cursor:pointer;">
-                <option value="default">Sort by Price</option>
-                <option value="low">Price: Low to High</option>
-                <option value="high">Price: High to Low</option>
-            </select>
-        </div>
         <div class="vehicle-grid" id="vehicleGrid">
             {% for v in vehicles %}
             <div class="vehicle-card" data-price="{{ v.price }}" {% if is_owner and v.is_expired %}style="opacity:0.6;border:2px solid #e53e3e;"{% endif %}>
