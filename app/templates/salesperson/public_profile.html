@@ -101,11 +101,18 @@
     {% endwith %}
 
     <div class="profile-inventory">
-    <p style="text-align:center;color:#94A3B8;font-size:12px;margin-bottom:16px;">You're receiving this because you requested updates from this salesperson.</p>
+    <p style="text-align:center;color:#94A3B8;font-size:12px;margin-bottom:16px;">You're receiving this because you requested updates from {{ sp.display_name }}{% if sp.dealership_name %} at {{ sp.dealership_name }}{% endif %}.</p>
         <h2 style="display:flex;align-items:center;gap:10px;">🚗 {{ sp.display_name }}'s Top Picks — Fresh & In Stock</h2>
         <p style="color:#64748B;font-size:14px;margin-top:-16px;margin-bottom:20px;">Listings refresh every 7 days, so you're never browsing stale inventory. If it's posted, it's worth a conversation.</p>
         {% if vehicles %}
-        <div class="vehicle-grid">
+        <div style="margin-bottom:16px;text-align:right;">
+            <select id="sortVehicles" onchange="sortGrid(this.value)" style="padding:8px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;color:#1E293B;background:#fff;cursor:pointer;">
+                <option value="default">Sort by Price</option>
+                <option value="low">Price: Low to High</option>
+                <option value="high">Price: High to Low</option>
+            </select>
+        </div>
+        <div class="vehicle-grid" id="vehicleGrid">
             {% for v in vehicles %}
             <div class="vehicle-card" {% if is_owner and v.is_expired %}style="opacity:0.6;border:2px solid #e53e3e;"{% endif %}>
                 {% if is_owner and v.is_expired %}
@@ -385,3 +392,18 @@ function sendChat() {
     <p style="color:#94A3B8;font-size:11px;">&copy; 2026 CarsInStock LLC. All rights reserved. | <a href="/storefront/unsubscribe/{{ sp.profile_url_slug }}" style="color:#94A3B8;text-decoration:underline;">Unsubscribe</a></p>
 </div>
 {% endblock %}
+
+<script>
+function sortGrid(order) {
+    if (order === 'default') return;
+    const grid = document.getElementById('vehicleGrid');
+    if (!grid) return;
+    const cards = Array.from(grid.querySelectorAll('.vehicle-card'));
+    cards.sort(function(a, b) {
+        const priceA = parseFloat((a.querySelector('.vehicle-price') || {innerText:''}).innerText.replace(/[^0-9.]/g,'')) || 0;
+        const priceB = parseFloat((b.querySelector('.vehicle-price') || {innerText:''}).innerText.replace(/[^0-9.]/g,'')) || 0;
+        return order === 'low' ? priceA - priceB : priceB - priceA;
+    });
+    cards.forEach(c => grid.appendChild(c));
+}
+</script>
