@@ -39,8 +39,15 @@
             <a href="/vehicles/add" class="dash-btn-add">+ Add Vehicle</a>
         </div>
         {% if active_vehicles %}
-        <h3 style="color:#38a169;font-size:16px;margin-bottom:10px;">Active Listings</h3>
-        <div class="dash-vehicle-list">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <h3 style="color:#38a169;font-size:16px;margin:0;">Active Listings</h3>
+            <select id="dashSort" onchange="sortDash(this.value)" style="padding:6px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;color:#1E293B;background:#fff;cursor:pointer;">
+                <option value="default">Sort by Price</option>
+                <option value="low">Price: Low to High</option>
+                <option value="high">Price: High to Low</option>
+            </select>
+        </div>
+        <div class="dash-vehicle-list" id="dashVehicleList">
             {% for v in active_vehicles %}
             <div class="dash-vehicle-row">
                 <div class="dash-vehicle-photo">
@@ -265,5 +272,19 @@ function showTab(name, btn) { try {
     document.getElementById('tab-'+name).classList.add('active');
     if(btn) btn.classList.add('active');
 } catch(e){ console.log(e); } }
+
+function sortDash(order) {
+    if (order === 'default') return;
+    const list = document.getElementById('dashVehicleList');
+    if (!list) return;
+    const rows = Array.from(list.querySelectorAll('.dash-vehicle-row'));
+    rows.sort(function(a, b) {
+        const getText = el => (el.querySelector('.dash-price') || {innerText:''}).innerText;
+        const priceA = parseFloat(getText(a).replace(/[^0-9.]/g,'')) || 0;
+        const priceB = parseFloat(getText(b).replace(/[^0-9.]/g,'')) || 0;
+        return order === 'low' ? priceA - priceB : priceB - priceA;
+    });
+    rows.forEach(r => list.appendChild(r));
+}
 </script>
 {% endblock %}
