@@ -738,14 +738,16 @@ def register_routes(bp):
         trial_days_left = max(0, (trial_end - now).days)
         trial_active = trial_days_left > 0
 
-        return render_template("salesperson/dashboard.html", sp=sp,
-            active_vehicles=active_vehicles, expired_vehicles=expired_vehicles,
-            from app.models import db as _db2
-            blast_history = list(reversed(_db2.session.execute(
+        from app.models import db as _db2
+        try:
+            blast_history = _db2.session.execute(
                 _db2.text("SELECT id, subject, recipient_count, sent_at FROM email_blasts WHERE salesperson_id=:sid AND blast_type='bulk' ORDER BY sent_at DESC LIMIT 10"),
                 {"sid": sp.salesperson_id}
-            ).fetchall()))
-            blast_history = list(reversed(blast_history))
+            ).fetchall()
+        except:
+            blast_history = []
+        return render_template("salesperson/dashboard.html", sp=sp,
+            active_vehicles=active_vehicles, expired_vehicles=expired_vehicles,
             leads=leads, chats=chats, customers=customers, blast_count=blast_count, blast_history=blast_history,
             trial_days_left=trial_days_left, trial_active=trial_active, is_admin=User.query.get(session.get("user_id")).is_admin)
 
