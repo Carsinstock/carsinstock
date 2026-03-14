@@ -407,6 +407,80 @@ def register_routes(bp):
         return render_template("salesperson/share_vehicle.html", vehicle=vehicle, sp=sp, customers=customers)
 
 
+
+    @bp.route("/blast/test", methods=["POST"])
+    @login_required
+    def send_test_blast():
+        from app.models import db
+        from app.models.vehicle import Vehicle
+        from app.models.user import User as _User
+        from app.utils.email import _build_unsubscribe_footer
+        from datetime import datetime
+        import sendgrid, os
+        from sendgrid.helpers.mail import Mail
+
+        sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
+        if not sp:
+            return jsonify({"error": "Profile not found"}), 400
+
+        subject = request.form.get("subject", "").strip()
+        body = request.form.get("body", "").strip()
+        if not subject or not body:
+            return jsonify({"error": "Subject and message are required"}), 400
+
+        user = _User.query.get(session["user_id"])
+        test_email = user.email
+
+        vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status='available').all()
+        vehicles = [v for v in vehicles if not v.expires_at or v.expires_at > datetime.utcnow()]
+
+        storefront_url = f"https://carsinstock.com/{sp.profile_url_slug}"
+        vehicle_html = ""
+        for v in vehicles[:6]:
+            price = f"${v.price:,.0f}" if v.price else ""
+            vehicle_html += f"""
+            <div style="border:1px solid #eee;border-radius:8px;padding:12px;margin-bottom:10px;background:#fafafa;">
+                <strong style="font-size:15px;color:#1E293B;">{v.year} {v.make} {v.model}</strong><br>
+                <span style="color:#00C851;font-weight:700;font-size:16px;">{price}</span>
+                {f'<br><span style="color:#666;font-size:13px;">{v.mileage:,} miles</span>' if v.mileage else ''}
+            </div>"""
+
+        first = sp.display_name.split()[0] if sp.display_name else "there"
+        personal_body = body.replace("{{first_name}}", first)
+        footer_html = _build_unsubscribe_footer()
+
+        html = f"""
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+            <div style="background:#1E293B;padding:20px;text-align:center;border-radius:8px 8px 0 0;">
+                <span style="color:#00C851;font-size:22px;font-weight:700;">Cars IN STOCK</span>
+            </div>
+            <div style="background:#fffbea;border:2px dashed #f59e0b;padding:10px;text-align:center;font-size:13px;color:#92400e;">
+                ⚠️ TEST EMAIL — Sent to {test_email} only. Not sent to customers.
+            </div>
+            <div style="padding:24px;background:#fff;">
+                <p style="font-size:16px;color:#1E293B;line-height:1.6;">{personal_body}</p>
+                {'<hr style="border:none;border-top:1px solid #eee;margin:20px 0;">' + vehicle_html if vehicle_html else ''}
+                <div style="text-align:center;margin:24px 0;">
+                    <a href="{storefront_url}" style="background:#00C851;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;">View My Current Inventory →</a>
+                </div>
+                <p style="color:#666;font-size:13px;">— {sp.display_name}{f", {sp.dealership_name}" if sp.dealership_name else ""}</p>
+            </div>
+            {footer_html}
+        </div>"""
+
+        try:
+            sg = sendgrid.SendGridAPIClient(api_key=os.environ.get('SENDGRID_API_KEY'))
+            msg = Mail(
+                from_email=(os.environ.get('SENDGRID_FROM_EMAIL', 'noreply@carsinstock.com'), sp.display_name + ' via CarsInStock'),
+                to_emails=test_email,
+                subject=f"[TEST] {subject}",
+                html_content=html
+            )
+            sg.send(msg)
+            return jsonify({"sent": 1, "email": test_email})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
     @bp.route("/blast/send", methods=["POST"])
     @login_required
     def send_bulk_blast():
@@ -445,8 +519,8 @@ def register_routes(bp):
         except:
             sent_today = 0
 
-        if sent_today >= 500:
-            return jsonify({"error": "Daily send limit reached (500/day). Try again tomorrow."}), 429
+        if sent_today >= 1000:
+            return jsonify({"error": "Daily send limit reached (1,000/day). Try again tomorrow."}), 429
 
         # Get customers
         q = Customer.query.filter_by(salesperson_id=sp.salesperson_id, unsubscribed=False).filter(Customer.email != None, Customer.email != '')
@@ -456,7 +530,7 @@ def register_routes(bp):
             return jsonify({"error": "No eligible customers to send to"}), 400
 
         # Cap at remaining daily allowance
-        remaining = 500 - int(sent_today)
+        remaining = 1000 - int(sent_today)
         customers = customers[:remaining]
 
         # Get active vehicles for storefront link section

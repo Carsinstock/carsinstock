@@ -199,7 +199,7 @@
         <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:20px;margin-bottom:20px;display:flex;gap:24px;flex-wrap:wrap;">
             <div><span style="font-size:24px;font-weight:700;color:#1E293B;">{{ customers|length }}</span><br><span style="font-size:13px;color:#64748B;">customers</span></div>
             <div><span style="font-size:24px;font-weight:700;color:#1E293B;">{{ active_vehicles|length }}</span><br><span style="font-size:13px;color:#64748B;">active vehicles</span></div>
-            <div><span style="font-size:24px;font-weight:700;color:#00C851;">{{ 500 - blast_count }}</span><br><span style="font-size:13px;color:#64748B;">sends remaining today</span></div>
+            <div><span style="font-size:24px;font-weight:700;color:#00C851;">{{ 1000 - blast_count }}</span><br><span style="font-size:13px;color:#64748B;">sends remaining today</span></div>
         </div>
 
         <div style="background:#fff;border:1px solid #E2E8F0;border-radius:10px;padding:24px;margin-bottom:20px;">
@@ -221,9 +221,14 @@
             <div id="blastProgress" style="display:none;margin-bottom:12px;padding:12px;background:#F0FDF4;border:1px solid #00C851;border-radius:8px;color:#1E293B;font-size:14px;">
                 Sending...
             </div>
-            <button onclick="sendBlast()" id="blastBtn" style="width:100%;padding:14px;background:#00C851;color:white;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;">
-                🚀 Send Blast to {{ customers|length }} Customers
-            </button>
+            <div style="display:flex;gap:10px;margin-bottom:0;">
+                <button onclick="sendTestBlast()" id="testBtn" style="flex:0 0 auto;padding:14px 20px;background:#1E293B;color:white;border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">
+                    📧 Send Test
+                </button>
+                <button onclick="sendBlast()" id="blastBtn" style="flex:1;padding:14px;background:#00C851;color:white;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;">
+                    🚀 Send Blast to {{ customers|length }} Customers
+                </button>
+            </div>
             <p style="color:#94A3B8;font-size:12px;margin-top:10px;text-align:center;">Your storefront link and active vehicles are included automatically. All emails include an unsubscribe link.</p>
         </div>
 
@@ -245,7 +250,43 @@
     </div>
 
     <script>
-    function sendBlast() {
+    function sendTestBlast() {
+    const subject = document.getElementById('blastSubject').value.trim();
+    const body = document.getElementById('blastBody').value.trim();
+    if (!subject || !body) { alert('Please enter a subject and message first.'); return; }
+    const btn = document.getElementById('testBtn');
+    const progress = document.getElementById('blastProgress');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    progress.style.display = 'block';
+    progress.style.background = '#FFF7ED';
+    progress.style.borderColor = '#F59E0B';
+    progress.style.color = '#92400E';
+    progress.textContent = 'Sending test email to your inbox...';
+    const fd = new FormData();
+    fd.append('subject', subject);
+    fd.append('body', body);
+    fetch('/blast/test', { method: 'POST', body: fd })
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) {
+                progress.textContent = 'Error: ' + data.error;
+            } else {
+                progress.style.background = '#F0FDF4';
+                progress.style.borderColor = '#00C851';
+                progress.style.color = '#1E293B';
+                progress.textContent = '✅ Test sent to ' + data.email + ' — check your inbox!';
+            }
+            btn.disabled = false;
+            btn.textContent = '📧 Send Test';
+        })
+        .catch(() => {
+            progress.textContent = 'Network error. Try again.';
+            btn.disabled = false;
+            btn.textContent = '📧 Send Test';
+        });
+}
+function sendBlast() {
         const subject = document.getElementById('blastSubject').value.trim();
         const body = document.getElementById('blastBody').value.trim();
         const segment = document.getElementById('blastSegment').value;
