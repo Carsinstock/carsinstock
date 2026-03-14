@@ -73,10 +73,22 @@ def public_profile(slug):
     is_owner = (session.get('user_id') == sp.user_id)
     if is_owner:
         # Owner sees all vehicles, expired ones marked
-        vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id).all()
+        sort = sp.vehicle_sort_order or 'newest'
+        if sort == 'price_low':
+            vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id).order_by(Vehicle.price.asc()).all()
+        elif sort == 'price_high':
+            vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id).order_by(Vehicle.price.desc()).all()
+        else:
+            vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id).order_by(Vehicle.created_at.desc()).all()
     else:
         # Public only sees active, non-expired vehicles
-        vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status='available').all()
+        sort = sp.vehicle_sort_order or 'newest'
+        if sort == 'price_low':
+            vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status='available').order_by(Vehicle.price.asc()).all()
+        elif sort == 'price_high':
+            vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status='available').order_by(Vehicle.price.desc()).all()
+        else:
+            vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status='available').order_by(Vehicle.created_at.desc()).all()
         vehicles = [v for v in vehicles if not v.expires_at or v.expires_at > datetime.utcnow()]
     # Gate storefront if owner's subscription is locked
     from app.models.user import User as _User

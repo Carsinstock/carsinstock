@@ -20,6 +20,7 @@ class Salesperson(db.Model):
     banner_template = db.Column(db.String(50))
     cover_photo_y_offset = db.Column(db.Integer, default=50)
     banner_x_offset = db.Column(db.Integer, default=50)
+    vehicle_sort_order = db.Column(db.String(20), default='newest')
     status = db.Column(db.String(50), default='active')
     hired_at = db.Column(db.DateTime, default=datetime.utcnow)
     terminated_at = db.Column(db.DateTime)

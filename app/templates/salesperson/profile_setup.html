@@ -55,7 +55,15 @@
             <div style="display:flex;gap:8px;margin-top:8px;">
                 <label for="cover_photo" class="photo-upload-btn">Choose Cover Photo</label>
                 {% if sp and sp.cover_photo %}
-                <button type="submit" formaction="/profile/remove-photo/cover" class="photo-remove-btn">Remove Cover</button>
+                <div style="margin-bottom:16px;">
+            <label style="display:block; font-size:13px; color:#666; margin-bottom:4px;">Vehicle Sort Order</label>
+            <select name="vehicle_sort_order" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:15px; box-sizing:border-box;">
+                <option value="newest" {% if sp and sp.vehicle_sort_order == 'newest' %}selected{% endif %}>Newest First (default)</option>
+                <option value="price_low" {% if sp and sp.vehicle_sort_order == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                <option value="price_high" {% if sp and sp.vehicle_sort_order == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+            </select>
+        </div>
+        <button type="submit" formaction="/profile/remove-photo/cover" class="photo-remove-btn">Remove Cover</button>
                 {% endif %}
             </div>
             <input type="file" id="cover_photo" name="cover_photo" accept="image/*" style="display:none;" onchange="previewCover(this)">

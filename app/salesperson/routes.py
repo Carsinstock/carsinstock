@@ -77,6 +77,7 @@ def register_routes(bp):
                 sp.banner_template = request.form.get("banner_template", "").strip()
                 sp.cover_photo_y_offset = max(0, min(100, int(request.form.get("cover_photo_y_offset", 50) or 50)))
                 sp.banner_x_offset = max(0, min(100, int(request.form.get("banner_x_offset", 50) or 50)))
+                sp.vehicle_sort_order = request.form.get("vehicle_sort_order", "newest")
                 sp.bio = bio
                 if profile_photo and profile_photo.filename:
                     from app.utils.cloudinary_upload import upload_profile_photo, upload_cover_photo
@@ -585,7 +586,13 @@ def register_routes(bp):
             flash("Set up your profile first.", "error")
             return redirect(url_for("salesperson.profile_setup"))
         # My Vehicles
-        vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id).order_by(Vehicle.created_at.desc()).all()
+        sort = sp.vehicle_sort_order or 'newest'
+        if sort == 'price_low':
+            vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id).order_by(Vehicle.price.asc()).all()
+        elif sort == 'price_high':
+            vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id).order_by(Vehicle.price.desc()).all()
+        else:
+            vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id).order_by(Vehicle.created_at.desc()).all()
         active_vehicles = [v for v in vehicles if not v.is_expired]
         expired_vehicles = [v for v in vehicles if v.is_expired]
         # My Leads
