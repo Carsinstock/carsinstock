@@ -406,6 +406,124 @@ def register_routes(bp):
 
         return render_template("salesperson/share_vehicle.html", vehicle=vehicle, sp=sp, customers=customers)
 
+
+    @bp.route("/blast/send", methods=["POST"])
+    @login_required
+    def send_bulk_blast():
+        from app.models import db
+        from app.models.vehicle import Vehicle
+        from app.models.customer import Customer
+        from app.models.user import User as _User
+        from app.utils.email import _build_unsubscribe_footer
+        from datetime import datetime, timedelta
+        import sendgrid
+        from sendgrid.helpers.mail import Mail, To
+        import os, re
+
+        sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
+        if not sp:
+            return jsonify({"error": "Profile not found"}), 400
+
+        _u = _User.query.get(session["user_id"])
+        if _u and _u.is_locked:
+            return jsonify({"error": "Subscription required"}), 402
+
+        subject = request.form.get("subject", "").strip()
+        body = request.form.get("body", "").strip()
+        segment = request.form.get("segment", "all")
+
+        if not subject or not body:
+            return jsonify({"error": "Subject and message are required"}), 400
+
+        # Daily limit check — 500/day
+        today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+        try:
+            sent_today = db.session.execute(
+                db.text("SELECT COALESCE(SUM(recipient_count),0) FROM email_blasts WHERE salesperson_id=:sid AND sent_at>=:today AND blast_type='bulk'"),
+                {"sid": sp.salesperson_id, "today": today_start}
+            ).scalar() or 0
+        except:
+            sent_today = 0
+
+        if sent_today >= 500:
+            return jsonify({"error": "Daily send limit reached (500/day). Try again tomorrow."}), 429
+
+        # Get customers
+        q = Customer.query.filter_by(salesperson_id=sp.salesperson_id, unsubscribed=False).filter(Customer.email != None, Customer.email != '')
+        customers = q.all()
+
+        if not customers:
+            return jsonify({"error": "No eligible customers to send to"}), 400
+
+        # Cap at remaining daily allowance
+        remaining = 500 - int(sent_today)
+        customers = customers[:remaining]
+
+        # Get active vehicles for storefront link section
+        from math import ceil
+        vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status='available').all()
+        vehicles = [v for v in vehicles if not v.expires_at or v.expires_at > datetime.utcnow()]
+
+        storefront_url = f"https://carsinstock.com/{sp.profile_url_slug}"
+
+        # Build vehicle HTML block
+        vehicle_html = ""
+        for v in vehicles[:6]:
+            price = f"${v.price:,.0f}" if v.price else ""
+            vehicle_html += f"""
+            <div style="border:1px solid #eee;border-radius:8px;padding:12px;margin-bottom:10px;background:#fafafa;">
+                <strong style="font-size:15px;color:#1E293B;">{v.year} {v.make} {v.model}</strong><br>
+                <span style="color:#00C851;font-weight:700;font-size:16px;">{price}</span>
+                {f'<br><span style="color:#666;font-size:13px;">{v.mileage:,} miles</span>' if v.mileage else ''}
+            </div>"""
+
+        sg = sendgrid.SendGridAPIClient(api_key=os.environ.get('SENDGRID_API_KEY'))
+        sent = 0
+        failed = 0
+
+        for customer in customers:
+            try:
+                first = customer.first_name or customer.email.split('@')[0]
+                footer_html = _build_unsubscribe_footer(customer_id=customer.id)
+                personal_body = body.replace('{{first_name}}', first).replace('{{First_Name}}', first)
+
+                html = f"""
+                <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+                    <div style="background:#1E293B;padding:20px;text-align:center;border-radius:8px 8px 0 0;">
+                        <span style="color:#00C851;font-size:22px;font-weight:700;">Cars IN STOCK</span>
+                    </div>
+                    <div style="padding:24px;background:#fff;">
+                        <p style="font-size:16px;color:#1E293B;line-height:1.6;">{personal_body}</p>
+                        {'<hr style="border:none;border-top:1px solid #eee;margin:20px 0;">' + vehicle_html if vehicle_html else ''}
+                        <div style="text-align:center;margin:24px 0;">
+                            <a href="{storefront_url}" style="background:#00C851;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;">View My Current Inventory →</a>
+                        </div>
+                        <p style="color:#666;font-size:13px;">— {sp.display_name}{f", {sp.dealership_name}" if sp.dealership_name else ""}</p>
+                    </div>
+                    {footer_html}
+                </div>"""
+
+                msg = Mail(
+                    from_email=(os.environ.get('SENDGRID_FROM_EMAIL', 'noreply@carsinstock.com'), sp.display_name + ' via CarsInStock'),
+                    to_emails=customer.email,
+                    subject=subject,
+                    html_content=html
+                )
+                sg.send(msg)
+                sent += 1
+            except Exception as e:
+                failed += 1
+
+        # Log blast
+        if sent > 0:
+            db.session.execute(
+                db.text("INSERT INTO email_blasts (salesperson_id, recipient_count, subject, body, blast_type, sent_at) VALUES (:sid, :count, :subject, :body, 'bulk', :now)"),
+                {"sid": sp.salesperson_id, "count": sent, "subject": subject, "body": body, "now": datetime.utcnow()}
+            )
+            db.session.commit()
+
+        return jsonify({"sent": sent, "failed": failed, "total": len(customers)})
+
     @bp.route("/customers/list", methods=["GET"])
     @login_required
     def my_customers():
@@ -606,7 +724,7 @@ def register_routes(bp):
         today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
         try:
             blast_count = db.session.execute(
-                db.text("SELECT COUNT(*) FROM email_blasts WHERE salesperson_id = :sid AND sent_at >= :today"),
+                db.text("SELECT COALESCE(SUM(recipient_count),0) FROM email_blasts WHERE salesperson_id = :sid AND sent_at >= :today"),
                 {"sid": sp.salesperson_id, "today": today_start}
             ).scalar() or 0
         except:
@@ -622,7 +740,13 @@ def register_routes(bp):
 
         return render_template("salesperson/dashboard.html", sp=sp,
             active_vehicles=active_vehicles, expired_vehicles=expired_vehicles,
-            leads=leads, chats=chats, customers=customers, blast_count=blast_count,
+            from app.models import db as _db2
+            blast_history = list(reversed(_db2.session.execute(
+                _db2.text("SELECT id, subject, recipient_count, sent_at FROM email_blasts WHERE salesperson_id=:sid AND blast_type='bulk' ORDER BY sent_at DESC LIMIT 10"),
+                {"sid": sp.salesperson_id}
+            ).fetchall()))
+            blast_history = list(reversed(blast_history))
+            leads=leads, chats=chats, customers=customers, blast_count=blast_count, blast_history=blast_history,
             trial_days_left=trial_days_left, trial_active=trial_active, is_admin=User.query.get(session.get("user_id")).is_admin)
 
     @bp.route("/customers/import", methods=["GET", "POST"])

@@ -193,26 +193,96 @@
         {% if not customers or customers|length == 0 %}
         <div style="text-align:center;padding:40px 20px;">
             <p style="color:#999;font-size:16px;">You need customers first before you can send emails.</p>
-            <a href="/customers/add" style="color:#00C851;font-weight:600;">+ Add your first customer</a>
-        </div>
-        {% elif not active_vehicles or active_vehicles|length == 0 %}
-        <div style="text-align:center;padding:40px 20px;">
-            <p style="color:#999;font-size:16px;">Post a vehicle first so you have something to share!</p>
-            <a href="/vehicles/add" style="color:#00C851;font-weight:600;">+ Add a vehicle</a>
+            <a href="/customers/import" style="color:#00C851;font-weight:600;">+ Import Customers</a>
         </div>
         {% else %}
-        <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:24px;margin-bottom:20px;">
-            <p style="margin:0 0 8px;font-size:15px;color:#1E293B;"><strong>{{ customers|length }}</strong> customer{{ 's' if customers|length != 1 else '' }} · <strong>{{ active_vehicles|length }}</strong> active vehicle{{ 's' if active_vehicles|length != 1 else '' }}</p>
-            <p style="margin:0;font-size:13px;color:#64748B;">Emails sent today: {{ blast_count }}/50</p>
+        <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:20px;margin-bottom:20px;display:flex;gap:24px;flex-wrap:wrap;">
+            <div><span style="font-size:24px;font-weight:700;color:#1E293B;">{{ customers|length }}</span><br><span style="font-size:13px;color:#64748B;">customers</span></div>
+            <div><span style="font-size:24px;font-weight:700;color:#1E293B;">{{ active_vehicles|length }}</span><br><span style="font-size:13px;color:#64748B;">active vehicles</span></div>
+            <div><span style="font-size:24px;font-weight:700;color:#00C851;">{{ 500 - blast_count }}</span><br><span style="font-size:13px;color:#64748B;">sends remaining today</span></div>
         </div>
-        <p style="color:#555;font-size:14px;margin-bottom:20px;">Share a vehicle with your customers by going to your <strong>My Vehicles</strong> tab and clicking <strong>Share</strong> on any active listing. You can select which customers to email and add a personal message.</p>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <a href="#" onclick="showTab('vehicles', this);return false;" class="dash-btn dash-btn-edit" style="padding:10px 20px;">Go to My Vehicles</a>
-            <a href="/customers/add" class="dash-btn dash-btn-share" style="padding:10px 20px;">+ Add More Customers</a>
+
+        <div style="background:#fff;border:1px solid #E2E8F0;border-radius:10px;padding:24px;margin-bottom:20px;">
+            <h3 style="margin:0 0 16px;font-size:17px;color:#1E293B;">Compose Blast</h3>
+            <div style="margin-bottom:12px;">
+                <label style="font-size:13px;color:#666;display:block;margin-bottom:4px;">Subject Line *</label>
+                <input type="text" id="blastSubject" placeholder="New inventory just posted — check it out" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:15px;box-sizing:border-box;">
+            </div>
+            <div style="margin-bottom:12px;">
+                <label style="font-size:13px;color:#666;display:block;margin-bottom:4px;">Message * <span style="color:#94A3B8;">(use {{first_name}} to personalize)</span></label>
+                <textarea id="blastBody" rows="6" placeholder="Hi {{first_name}}, I just posted some fresh inventory I think you'll love. Come take a look!" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:15px;box-sizing:border-box;font-family:inherit;resize:vertical;"></textarea>
+            </div>
+            <div style="margin-bottom:16px;">
+                <label style="font-size:13px;color:#666;display:block;margin-bottom:4px;">Send To</label>
+                <select id="blastSegment" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:15px;box-sizing:border-box;">
+                    <option value="all">All Customers ({{ customers|length }})</option>
+                </select>
+            </div>
+            <div id="blastProgress" style="display:none;margin-bottom:12px;padding:12px;background:#F0FDF4;border:1px solid #00C851;border-radius:8px;color:#1E293B;font-size:14px;">
+                Sending...
+            </div>
+            <button onclick="sendBlast()" id="blastBtn" style="width:100%;padding:14px;background:#00C851;color:white;border:none;border-radius:10px;font-size:16px;font-weight:700;cursor:pointer;">
+                🚀 Send Blast to {{ customers|length }} Customers
+            </button>
+            <p style="color:#94A3B8;font-size:12px;margin-top:10px;text-align:center;">Your storefront link and active vehicles are included automatically. All emails include an unsubscribe link.</p>
         </div>
-        <p style="color:#94A3B8;font-size:12px;margin-top:16px;">Daily limit: 50 emails per day. Customers can unsubscribe at any time.</p>
+
+        {% if blast_history %}
+        <div style="background:#fff;border:1px solid #E2E8F0;border-radius:10px;padding:20px;">
+            <h3 style="margin:0 0 14px;font-size:16px;color:#1E293B;">Blast History</h3>
+            {% for b in blast_history %}
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9;">
+                <div>
+                    <p style="margin:0;font-size:14px;font-weight:600;color:#1E293B;">{{ b.subject or 'Blast' }}</p>
+                    <p style="margin:0;font-size:12px;color:#94A3B8;">{{ b.sent_at.strftime('%b %d, %Y %I:%M %p') if b.sent_at else '' }}</p>
+                </div>
+                <span style="background:#F0FDF4;color:#00C851;font-weight:700;font-size:13px;padding:4px 10px;border-radius:20px;">{{ b.recipient_count }} sent</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
         {% endif %}
     </div>
+
+    <script>
+    function sendBlast() {
+        const subject = document.getElementById('blastSubject').value.trim();
+        const body = document.getElementById('blastBody').value.trim();
+        const segment = document.getElementById('blastSegment').value;
+        if (!subject || !body) { alert('Please enter a subject and message.'); return; }
+        const btn = document.getElementById('blastBtn');
+        const progress = document.getElementById('blastProgress');
+        btn.disabled = true;
+        btn.textContent = 'Sending...';
+        progress.style.display = 'block';
+        progress.textContent = 'Sending to your customers...';
+        const fd = new FormData();
+        fd.append('subject', subject);
+        fd.append('body', body);
+        fd.append('segment', segment);
+        fetch('/blast/send', { method: 'POST', body: fd })
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) {
+                    progress.style.background = '#FEF2F2';
+                    progress.style.borderColor = '#EF4444';
+                    progress.style.color = '#DC2626';
+                    progress.textContent = data.error;
+                    btn.disabled = false;
+                    btn.textContent = '🚀 Send Blast';
+                } else {
+                    progress.textContent = '✅ Blast sent to ' + data.sent + ' customers!' + (data.failed > 0 ? ' (' + data.failed + ' failed)' : '');
+                    btn.textContent = '✅ Sent!';
+                    setTimeout(() => location.reload(), 2500);
+                }
+            })
+            .catch(() => {
+                progress.textContent = 'Network error. Please try again.';
+                btn.disabled = false;
+                btn.textContent = '🚀 Send Blast';
+            });
+    }
+    </script>
 </div>
 
 <style>
