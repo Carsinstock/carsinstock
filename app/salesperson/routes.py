@@ -472,6 +472,7 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         import sendgrid, os
         from sendgrid.helpers.mail import Mail
 
+        from app.models.salesperson import Salesperson
         sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
         if not sp:
             return jsonify({"error": "Profile not found"}), 400
@@ -552,6 +553,7 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         from sendgrid.helpers.mail import Mail, To
         import os, re
 
+        from app.models.salesperson import Salesperson
         sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
         if not sp:
             return jsonify({"error": "Profile not found"}), 400
