@@ -438,7 +438,7 @@ Tone: {tone_desc}
 
 Write a short, punchy email blast. Rules:
 - Subject line: max 8 words, no quotes
-- Message body: 2-4 sentences max, use {{{{first_name}}}} to personalize the opening
+- Message body: 2-4 sentences max, ALWAYS start with {{{{first_name}}}} as the literal text - never substitute a real name
 - Do NOT mention specific prices or vehicle details — those are shown automatically below the message
 - Sound like a real salesperson, not a robot
 - No emojis in the body
