@@ -322,10 +322,16 @@ function generateBlastCopy() {
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({ template: template, tone: tone, template_name: templateNames[template] })
     })
-    .then(r => r.json())
+    .then(r => {
+        if (!r.ok) {
+            return r.text().then(t => { throw new Error('HTTP ' + r.status + ': ' + t.substring(0,100)); });
+        }
+        return r.json();
+    })
     .then(data => {
         if (data.error) {
             status.textContent = 'Error: ' + data.error;
+            status.style.color = '#DC2626';
         } else {
             document.getElementById('blastSubject').value = data.subject;
             document.getElementById('blastBody').value = data.body;
@@ -335,8 +341,9 @@ function generateBlastCopy() {
         btn.disabled = false;
         btn.textContent = '✨ Generate';
     })
-    .catch(() => {
-        status.textContent = 'Error generating copy. Try again.';
+    .catch(err => {
+        status.textContent = 'Error: ' + err.message;
+        status.style.color = '#DC2626';
         btn.disabled = false;
         btn.textContent = '✨ Generate';
     });
