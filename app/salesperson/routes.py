@@ -415,6 +415,7 @@ def register_routes(bp):
         import anthropic, os, json
         from flask import request, jsonify
 
+        from app.models.salesperson import Salesperson
         data = request.get_json(force=True, silent=True) or {}
         template = data.get("template", "")
         tone = data.get("tone", "professional")
