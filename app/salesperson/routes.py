@@ -540,7 +540,7 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
             <div style="padding:0 16px 8px;">
                 <p style="font-size:15px;color:#334155;line-height:1.7;">{personal_body}</p>
                 {v_cards}
-                <div style="text-align:center;margin:24px 0;"><a href="{storefront_url}" style="background:#00C851;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;">{cta_label}</a></div>
+                <div style="text-align:center;margin:24px 0;"><a href="{storefront_url}" style="background:#00C851;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;white-space:nowrap;display:inline-block;">{cta_label}</a></div>
             </div>
             <div style="background:#f8fafc;padding:16px;text-align:center;border-top:1px solid #e2e8f0;font-size:13px;color:#64748B;">
                 {phone_line}
@@ -693,7 +693,7 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
                 "5": "View This Week's Specials →",
             }
             label = ctas.get(template_id, "View My Inventory →")
-            return f'<div style="text-align:center;margin:24px 0;"><a href="{storefront_url}" style="background:#00C851;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;">{label}</a></div>'
+            return f'<div style="text-align:center;margin:24px 0;"><a href="{storefront_url}" style="background:#00C851;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;white-space:nowrap;display:inline-block;">{label}</a></div>'
 
         sg = sendgrid.SendGridAPIClient(api_key=os.environ.get('SENDGRID_API_KEY'))
         sent = 0
