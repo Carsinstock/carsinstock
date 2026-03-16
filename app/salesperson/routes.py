@@ -450,7 +450,7 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
             load_dotenv('/home/eddie/carsinstock/.env')
             client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
             msg = client.messages.create(
-                model="claude-3-5-sonnet-20241022",
+                model="claude-3-haiku-20240307",
                 max_tokens=300,
                 messages=[{"role": "user", "content": prompt}]
             )
@@ -1062,7 +1062,7 @@ Always guide the conversation toward signing up. Be helpful but always be closin
             messages = [{"role": m["role"], "content": m["content"]} for m in history]
             messages.append({"role": "user", "content": message})
             resp = client.messages.create(
-                model="claude-3-5-sonnet-20241022",
+                model="claude-3-haiku-20240307",
                 max_tokens=300,
                 system=system_prompt,
                 messages=messages
