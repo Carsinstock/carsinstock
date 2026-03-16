@@ -446,6 +446,8 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
 {{"subject": "your subject line here", "body": "your message body here"}}"""
 
         try:
+            from dotenv import load_dotenv
+            load_dotenv('/home/eddie/carsinstock/.env')
             client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
             msg = client.messages.create(
                 model="claude-sonnet-4-20250514",
