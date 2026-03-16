@@ -505,24 +505,50 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         personal_body = body.replace("{{first_name}}", first)
         footer_html = _build_unsubscribe_footer()
 
-        html = f"""
-        <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
-            <div style="background:#1E293B;padding:20px;text-align:center;border-radius:8px 8px 0 0;">
-                <span style="color:#00C851;font-size:22px;font-weight:700;">Cars IN STOCK</span>
+        template_id = request.form.get("template_id", "1")
+
+        def build_vehicle_cards_test(vehicles, template_id, storefront_url):
+            cards = ""
+            for v in vehicles[:6]:
+                price = f"${v.price:,.0f}" if v.price else ""
+                miles = f"{v.mileage:,} miles" if v.mileage else ""
+                img = f'<img src="{v.image_url}" style="width:100%;height:160px;object-fit:cover;border-radius:6px 6px 0 0;display:block;" />' if v.image_url else ""
+                days = v.days_remaining if hasattr(v, 'days_remaining') else 0
+                days_badge = f'<div style="background:#EF4444;color:white;font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px;display:inline-block;margin-bottom:6px;">{days} Days Left</div>' if template_id == "3" and days <= 7 else ""
+                cards += f'''<div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:12px;overflow:hidden;">{img}<div style="padding:12px;">{days_badge}<div style="font-size:15px;font-weight:700;color:#1E293B;">{v.year} {v.make} {v.model}</div><div style="font-size:18px;font-weight:800;color:#00C851;margin:4px 0;">{price}</div><div style="font-size:12px;color:#64748B;">{miles}</div><a href="{storefront_url}" style="display:inline-block;margin-top:8px;padding:6px 14px;background:#00C851;color:white;border-radius:6px;text-decoration:none;font-size:12px;font-weight:700;">I'm Interested</a></div></div>'''
+            return cards
+
+        def build_hero_test(template_id):
+            heroes = {"1":("#1E293B","#00C851","This Week's Top Picks"),"2":("#0f172a","#00C851","Fresh. In Stock. Right Now."),"3":("#7f1d1d","#f97316","These Won't Last Long"),"4":("#1E293B","#00C851","I Found Some Cars You Might Love"),"5":("#1E293B","#00C851","Before These Are Gone")}
+            bg,accent,headline = heroes.get(template_id,heroes["1"])
+            return f'<div style="background:{bg};padding:28px 20px;text-align:center;border-radius:8px 8px 0 0;"><span style="color:{accent};font-size:22px;font-weight:800;">{headline}</span></div>'
+
+        def build_profile_test(sp):
+            photo = f'<img src="{sp.profile_photo}" style="width:70px;height:70px;border-radius:50%;object-fit:cover;border:3px solid #00C851;" />' if sp.profile_photo else ""
+            return f'<div style="text-align:center;padding:16px 0;">{photo}<div style="font-size:16px;font-weight:700;color:#1E293B;margin-top:8px;">{sp.display_name or ""}</div><div style="font-size:13px;color:#64748B;">{sp.dealership_name or ""}</div></div>'
+
+        ctas = {"1":"View All My Inventory →","2":"See What's New →","3":"Claim Your Deal →","4":"Let's Talk →","5":"View This Week's Specials →"}
+        cta_label = ctas.get(template_id,"View My Inventory →")
+        v_cards = build_vehicle_cards_test(vehicles, template_id, storefront_url)
+        phone_line = f'<div><a href="tel:{sp.phone}" style="color:#00C851;">{sp.phone}</a></div>' if sp.phone else ""
+
+        html = f"""<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f1f5f9;padding:16px;">
+        <div style="background:#fffbea;border:2px dashed #f59e0b;padding:8px;text-align:center;font-size:12px;color:#92400e;border-radius:6px;margin-bottom:8px;">⚠️ TEST EMAIL — Template {template_id} — Not sent to customers</div>
+        <div style="background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+            {build_hero_test(template_id)}
+            {build_profile_test(sp)}
+            <div style="padding:0 16px 8px;">
+                <p style="font-size:15px;color:#334155;line-height:1.7;">{personal_body}</p>
+                {v_cards}
+                <div style="text-align:center;margin:24px 0;"><a href="{storefront_url}" style="background:#00C851;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;">{cta_label}</a></div>
             </div>
-            <div style="background:#fffbea;border:2px dashed #f59e0b;padding:10px;text-align:center;font-size:13px;color:#92400e;">
-                ⚠️ TEST EMAIL — Sent to {test_email} only. Not sent to customers.
+            <div style="background:#f8fafc;padding:16px;text-align:center;border-top:1px solid #e2e8f0;font-size:13px;color:#64748B;">
+                {phone_line}
+                <div style="font-weight:600;color:#1E293B;">Fresh Cars. Real People.</div>
+                <a href="https://carsinstock.com" style="color:#00C851;">CarsInStock.com</a>
+                {footer_html}
             </div>
-            <div style="padding:24px;background:#fff;">
-                <p style="font-size:16px;color:#1E293B;line-height:1.6;">{personal_body}</p>
-                {'<hr style="border:none;border-top:1px solid #eee;margin:20px 0;">' + vehicle_html if vehicle_html else ''}
-                <div style="text-align:center;margin:24px 0;">
-                    <a href="{storefront_url}" style="background:#00C851;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;">View My Current Inventory →</a>
-                </div>
-                <p style="color:#666;font-size:13px;">— {sp.display_name}{f", {sp.dealership_name}" if sp.dealership_name else ""}</p>
-            </div>
-            {footer_html}
-        </div>"""
+        </div></div>"""
 
         try:
             sg = sendgrid.SendGridAPIClient(api_key=os.environ.get('SENDGRID_API_KEY'))
@@ -600,16 +626,76 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
 
         storefront_url = f"https://carsinstock.com/{sp.profile_url_slug}"
 
-        # Build vehicle HTML block
-        vehicle_html = ""
-        for v in vehicles[:6]:
-            price = f"${v.price:,.0f}" if v.price else ""
-            vehicle_html += f"""
-            <div style="border:1px solid #eee;border-radius:8px;padding:12px;margin-bottom:10px;background:#fafafa;">
-                <strong style="font-size:15px;color:#1E293B;">{v.year} {v.make} {v.model}</strong><br>
-                <span style="color:#00C851;font-weight:700;font-size:16px;">{price}</span>
-                {f'<br><span style="color:#666;font-size:13px;">{v.mileage:,} miles</span>' if v.mileage else ''}
-            </div>"""
+        # Build vehicle cards HTML
+        template_id = request.form.get("template_id", "1")
+
+        def build_vehicle_cards(vehicles, template_id):
+            cards = ""
+            for v in vehicles[:6]:
+                price = f"${v.price:,.0f}" if v.price else ""
+                miles = f"{v.mileage:,} miles" if v.mileage else ""
+                img = f'<img src="{v.image_url}" style="width:100%;height:160px;object-fit:cover;border-radius:6px 6px 0 0;display:block;" />' if v.image_url else ""
+                days = v.days_remaining if hasattr(v, 'days_remaining') else 0
+                days_badge = f'<div style="background:#EF4444;color:white;font-size:11px;font-weight:700;padding:3px 8px;border-radius:10px;display:inline-block;margin-bottom:6px;">{days} Days Left</div>' if template_id == "3" and days <= 7 else ""
+                cards += f"""
+                <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:12px;overflow:hidden;">
+                    {img}
+                    <div style="padding:12px;">
+                        {days_badge}
+                        <div style="font-size:15px;font-weight:700;color:#1E293B;">{v.year} {v.make} {v.model}</div>
+                        <div style="font-size:18px;font-weight:800;color:#00C851;margin:4px 0;">{price}</div>
+                        <div style="font-size:12px;color:#64748B;">{miles}</div>
+                        <a href="{storefront_url}" style="display:inline-block;margin-top:8px;padding:6px 14px;background:#00C851;color:white;border-radius:6px;text-decoration:none;font-size:12px;font-weight:700;">I'm Interested</a>
+                    </div>
+                </div>"""
+            return cards
+
+        vehicle_html = build_vehicle_cards(vehicles, template_id)
+
+        def build_profile_header(sp, template_id):
+            photo = f'<img src="{sp.profile_photo}" style="width:70px;height:70px;border-radius:50%;object-fit:cover;border:3px solid #00C851;" />' if sp.profile_photo else f'<div style="width:70px;height:70px;border-radius:50%;background:#00C851;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:white;">{sp.display_name[0] if sp.display_name else "?"}</div>'
+            name = sp.display_name or ""
+            dealer = sp.dealership_name or ""
+            if template_id == "4":
+                return f'''<div style="text-align:center;padding:16px 0;">
+                    <div style="display:inline-block;">{photo}</div>
+                    <div style="font-size:18px;font-weight:700;color:#1E293B;margin-top:8px;">{name}</div>
+                    <div style="font-size:13px;color:#64748B;">{dealer}</div>
+                </div>'''
+            elif template_id == "2":
+                return f'''<div style="padding:16px;display:flex;align-items:center;gap:14px;background:#f8fafc;">
+                    {photo}
+                    <div><div style="font-size:16px;font-weight:700;color:#1E293B;">{name}</div>
+                    <div style="font-size:13px;color:#64748B;">{dealer}</div></div>
+                </div>'''
+            else:
+                return f'''<div style="text-align:center;padding:16px 0;">
+                    <div style="display:inline-block;">{photo}</div>
+                    <div style="font-size:16px;font-weight:700;color:#1E293B;margin-top:8px;">{name}</div>
+                    <div style="font-size:13px;color:#64748B;">{dealer}</div>
+                </div>'''
+
+        def build_hero(template_id):
+            heroes = {
+                "1": ('#1E293B', '#00C851', "This Week's Top Picks"),
+                "2": ('#0f172a', '#00C851', "Fresh. In Stock. Right Now."),
+                "3": ('#7f1d1d', '#f97316', "These Won't Last Long"),
+                "4": ('#1E293B', '#00C851', "I Found Some Cars You Might Love"),
+                "5": ('#1E293B', '#00C851', "Before These Are Gone"),
+            }
+            bg, accent, headline = heroes.get(template_id, heroes["1"])
+            return f'<div style="background:{bg};padding:28px 20px;text-align:center;border-radius:8px 8px 0 0;"><span style="color:{accent};font-size:22px;font-weight:800;letter-spacing:-0.5px;">{headline}</span></div>'
+
+        def build_cta(template_id, storefront_url):
+            ctas = {
+                "1": "View All My Inventory →",
+                "2": "See What's New →",
+                "3": "Claim Your Deal →",
+                "4": "Let's Talk →",
+                "5": "View This Week's Specials →",
+            }
+            label = ctas.get(template_id, "View My Inventory →")
+            return f'<div style="text-align:center;margin:24px 0;"><a href="{storefront_url}" style="background:#00C851;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;">{label}</a></div>'
 
         sg = sendgrid.SendGridAPIClient(api_key=os.environ.get('SENDGRID_API_KEY'))
         sent = 0
@@ -621,21 +707,27 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
                 footer_html = _build_unsubscribe_footer(customer_id=customer.id)
                 personal_body = body.replace('{{first_name}}', first).replace('{{First_Name}}', first)
 
-                html = f"""
-                <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
-                    <div style="background:#1E293B;padding:20px;text-align:center;border-radius:8px 8px 0 0;">
-                        <span style="color:#00C851;font-size:22px;font-weight:700;">Cars IN STOCK</span>
+                phone_line = f'<div><a href="tel:{sp.phone}" style="color:#00C851;text-decoration:none;">{sp.phone}</a></div>' if sp.phone else ""
+                email_line = f'<div><a href="mailto:{sp.email if hasattr(sp, "email") else ""}" style="color:#00C851;text-decoration:none;">{user.email}</a></div>'
+
+                html = f"""<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f1f5f9;padding:16px;">
+                <div style="background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+                    {build_hero(template_id)}
+                    {build_profile_header(sp, template_id)}
+                    <div style="padding:0 16px 8px;">
+                        <p style="font-size:15px;color:#334155;line-height:1.7;margin:0 0 16px;">{personal_body}</p>
+                        {vehicle_html}
+                        {build_cta(template_id, storefront_url)}
                     </div>
-                    <div style="padding:24px;background:#fff;">
-                        <p style="font-size:16px;color:#1E293B;line-height:1.6;">{personal_body}</p>
-                        {'<hr style="border:none;border-top:1px solid #eee;margin:20px 0;">' + vehicle_html if vehicle_html else ''}
-                        <div style="text-align:center;margin:24px 0;">
-                            <a href="{storefront_url}" style="background:#00C851;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;">View My Current Inventory →</a>
+                    <div style="background:#f8fafc;padding:16px;text-align:center;border-top:1px solid #e2e8f0;">
+                        <div style="font-size:13px;color:#64748B;margin-bottom:6px;">
+                            {phone_line}
+                            <div style="margin-top:4px;font-weight:600;color:#1E293B;">Fresh Cars. Real People.</div>
+                            <a href="https://carsinstock.com" style="color:#00C851;text-decoration:none;">CarsInStock.com</a>
                         </div>
-                        <p style="color:#666;font-size:13px;">— {sp.display_name}{f", {sp.dealership_name}" if sp.dealership_name else ""}</p>
+                        {footer_html}
                     </div>
-                    {footer_html}
-                </div>"""
+                </div></div>"""
 
                 msg = Mail(
                     from_email=(os.environ.get('SENDGRID_FROM_EMAIL', 'noreply@carsinstock.com'), sp.display_name + ' via CarsInStock'),
