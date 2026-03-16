@@ -503,7 +503,7 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
 
         first = sp.display_name.split()[0] if sp.display_name else "there"
         personal_body = body.replace("{{first_name}}", first)
-        footer_html = _build_unsubscribe_footer()
+        footer_html = '<div style="border-top:1px solid #eee;padding:16px 0;text-align:center;"><p style="color:#999;font-size:12px;margin:0;">Fresh Cars. Real People. | CarsInStock.com</p><p style="color:#999;font-size:11px;margin:6px 0 0 0;">This is a test email. Live blasts include a personal unsubscribe link.</p></div>'
 
         template_id = request.form.get("template_id", "1")
 
@@ -544,8 +544,6 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
             </div>
             <div style="background:#f8fafc;padding:16px;text-align:center;border-top:1px solid #e2e8f0;font-size:13px;color:#64748B;">
                 {phone_line}
-                <div style="font-weight:600;color:#1E293B;">Fresh Cars. Real People.</div>
-                <a href="https://carsinstock.com" style="color:#00C851;">CarsInStock.com</a>
                 {footer_html}
             </div>
         </div></div>"""
@@ -722,8 +720,6 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
                     <div style="background:#f8fafc;padding:16px;text-align:center;border-top:1px solid #e2e8f0;">
                         <div style="font-size:13px;color:#64748B;margin-bottom:6px;">
                             {phone_line}
-                            <div style="margin-top:4px;font-weight:600;color:#1E293B;">Fresh Cars. Real People.</div>
-                            <a href="https://carsinstock.com" style="color:#00C851;text-decoration:none;">CarsInStock.com</a>
                         </div>
                         {footer_html}
                     </div>
