@@ -408,6 +408,56 @@ def register_routes(bp):
 
 
 
+
+    @bp.route("/blast/ai-copy", methods=["POST"])
+    @login_required
+    def blast_ai_copy():
+        import anthropic, os, json
+        from flask import request, jsonify
+
+        data = request.get_json()
+        template = data.get("template", "")
+        tone = data.get("tone", "professional")
+        template_name = data.get("template_name", template)
+
+        sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
+        if not sp:
+            return jsonify({"error": "Profile not found"}), 400
+
+        tone_desc = {
+            "professional": "professional and polished — trustworthy and clear",
+            "casual": "casual and friendly — like a text from a friend who sells cars",
+            "urgent": "urgent and sales-driven — create FOMO, drive action now"
+        }.get(tone, "professional")
+
+        prompt = f"""You are writing a bulk email blast for {sp.display_name}, a car salesperson at {sp.dealership_name or 'a dealership'}.
+
+Template: {template_name}
+Tone: {tone_desc}
+
+Write a short, punchy email blast. Rules:
+- Subject line: max 8 words, no quotes
+- Message body: 2-4 sentences max, use {{{{first_name}}}} to personalize the opening
+- Do NOT mention specific prices or vehicle details — those are shown automatically below the message
+- Sound like a real salesperson, not a robot
+- No emojis in the body
+
+Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
+{{"subject": "your subject line here", "body": "your message body here"}}"""
+
+        try:
+            client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+            msg = client.messages.create(
+                model="claude-sonnet-4-20250514",
+                max_tokens=300,
+                messages=[{"role": "user", "content": prompt}]
+            )
+            raw = msg.content[0].text.strip()
+            parsed = json.loads(raw)
+            return jsonify({"subject": parsed["subject"], "body": parsed["body"]})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
     @bp.route("/blast/test", methods=["POST"])
     @login_required
     def send_test_blast():

@@ -202,6 +202,40 @@
             <div><span style="font-size:24px;font-weight:700;color:#00C851;">{{ 1000 - blast_count }}</span><br><span style="font-size:13px;color:#64748B;">sends remaining today</span></div>
         </div>
 
+
+        <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:20px;margin-bottom:16px;">
+            <h3 style="margin:0 0 12px;font-size:15px;color:#1E293B;">✨ AI Message Helper</h3>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+                <div style="flex:2;min-width:180px;">
+                    <label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">Template</label>
+                    <select id="aiTemplate" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;box-sizing:border-box;">
+                        <option value="">— Pick a template —</option>
+                        <option value="new_inventory">🚗 New Inventory Just Posted</option>
+                        <option value="price_drop">💰 Price Drop Alert</option>
+                        <option value="weekend_special">📅 Weekend Special</option>
+                        <option value="low_miles">✅ Low Mileage Finds</option>
+                        <option value="follow_up">👋 Follow-Up / Check In</option>
+                        <option value="holiday">🎉 Holiday Promotion</option>
+                        <option value="end_of_month">⏰ End of Month Push</option>
+                        <option value="suv_special">🚙 SUV & Truck Special</option>
+                        <option value="budget_friendly">💵 Budget-Friendly Options</option>
+                        <option value="vip">⭐ VIP Customer Exclusive</option>
+                    </select>
+                </div>
+                <div style="flex:1;min-width:130px;">
+                    <label style="font-size:12px;color:#666;display:block;margin-bottom:4px;">Tone</label>
+                    <select id="aiTone" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:14px;box-sizing:border-box;">
+                        <option value="professional">Professional</option>
+                        <option value="casual">Casual & Friendly</option>
+                        <option value="urgent">Urgent & Sales-Driven</option>
+                    </select>
+                </div>
+                <div style="flex:0 0 auto;display:flex;align-items:flex-end;">
+                    <button onclick="generateBlastCopy()" id="aiGenBtn" style="padding:10px 18px;background:#1E293B;color:#00C851;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap;">✨ Generate</button>
+                </div>
+            </div>
+            <div id="aiStatus" style="display:none;font-size:13px;color:#64748B;padding:6px 0;"></div>
+        </div>
         <div style="background:#fff;border:1px solid #E2E8F0;border-radius:10px;padding:24px;margin-bottom:20px;">
             <h3 style="margin:0 0 16px;font-size:17px;color:#1E293B;">Compose Blast</h3>
             <div style="margin-bottom:12px;">
@@ -255,7 +289,58 @@
     </div>
 
     <script>
-    function sendTestBlast() {
+    
+function generateBlastCopy() {
+    const template = document.getElementById('aiTemplate').value;
+    const tone = document.getElementById('aiTone').value;
+    if (!template) { alert('Please select a template first.'); return; }
+    const btn = document.getElementById('aiGenBtn');
+    const status = document.getElementById('aiStatus');
+    btn.disabled = true;
+    btn.textContent = '⏳ Writing...';
+    status.style.display = 'block';
+    status.textContent = 'AI is writing your email...';
+
+    const templateNames = {
+        new_inventory: 'New Inventory Just Posted',
+        price_drop: 'Price Drop Alert',
+        weekend_special: 'Weekend Special',
+        low_miles: 'Low Mileage Finds',
+        follow_up: 'Follow-Up / Check In',
+        holiday: 'Holiday Promotion',
+        end_of_month: 'End of Month Push',
+        suv_special: 'SUV & Truck Special',
+        budget_friendly: 'Budget-Friendly Options',
+        vip: 'VIP Customer Exclusive'
+    };
+
+    fetch('/blast/ai-copy', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ template: template, tone: tone, template_name: templateNames[template] })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.error) {
+            status.textContent = 'Error: ' + data.error;
+        } else {
+            document.getElementById('blastSubject').value = data.subject;
+            document.getElementById('blastBody').value = data.body;
+            status.textContent = '✅ Done! Review and edit before sending.';
+            status.style.color = '#00C851';
+        }
+        btn.disabled = false;
+        btn.textContent = '✨ Generate';
+    })
+    .catch(() => {
+        status.textContent = 'Error generating copy. Try again.';
+        btn.disabled = false;
+        btn.textContent = '✨ Generate';
+    });
+}
+
+function sendTestBlast() {
     const subject = document.getElementById('blastSubject').value.trim();
     const body = document.getElementById('blastBody').value.trim();
     if (!subject || !body) { alert('Please enter a subject and message first.'); return; }
