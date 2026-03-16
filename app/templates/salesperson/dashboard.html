@@ -274,7 +274,7 @@
     fd.append('subject', subject);
     fd.append('body', body);
     fd.append('test_email', testEmail);
-    fetch('/blast/test', { method: 'POST', body: fd })
+    fetch('/blast/test', { method: 'POST', body: fd, credentials: 'same-origin' })
         .then(r => r.json())
         .then(data => {
             if (data.error) {
@@ -309,7 +309,7 @@ function sendBlast() {
         fd.append('subject', subject);
         fd.append('body', body);
         fd.append('segment', segment);
-        fetch('/blast/send', { method: 'POST', body: fd })
+        fetch('/blast/send', { method: 'POST', body: fd, credentials: 'same-origin' })
             .then(r => r.json())
             .then(data => {
                 if (data.error) {
