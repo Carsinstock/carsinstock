@@ -552,7 +552,7 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
                 msg = Mail(
                     from_email=(os.environ.get('SENDGRID_FROM_EMAIL', 'noreply@carsinstock.com'), sp.display_name + ' via CarsInStock'),
                     to_emails=te,
-                    subject=f"[TEST] {subject}",
+                    subject="Ed Castillo at Pine Belt Used Cars — I've got something worth your time this week.",
                     html_content=html
                 )
                 sg.send(msg)
