@@ -90,10 +90,27 @@
         {% if sp.email %}
         <p class="profile-contact"><strong>Email:</strong> {% if is_demo %}{{ sp.email }}{% else %}<a href="mailto:{{ sp.email }}" style="color:#00C851; text-decoration:none;">{{ sp.email }}</a>{% endif %}</p>
         {% endif %}
-        <div style="margin-top:14px;display:inline-block;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:8px 18px;">
+        <div style="margin-top:14px;display:inline-flex;align-items:center;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:8px 18px;gap:10px;">
             <span style="font-size:14px;color:#64748B;">🌐</span>
             <span style="font-size:15px;font-weight:600;color:#1E293B;">CarsInStock.com/{{ sp.profile_url_slug }}</span>
+            <button onclick="copyStorefrontLink()" id="copyLinkBtn" style="background:none;border:none;cursor:pointer;font-size:16px;padding:0;line-height:1;" title="Copy link">📋</button>
+            <span id="copyConfirm" style="font-size:12px;color:#00C851;display:none;font-weight:600;">Copied!</span>
         </div>
+        <script>
+        function copyStorefrontLink() {
+            var url = 'https://carsinstock.com/{{ sp.profile_url_slug }}';
+            navigator.clipboard.writeText(url).then(function() {
+                var btn = document.getElementById('copyLinkBtn');
+                var confirm = document.getElementById('copyConfirm');
+                btn.textContent = '✅';
+                confirm.style.display = 'inline';
+                setTimeout(function() {
+                    btn.textContent = '📋';
+                    confirm.style.display = 'none';
+                }, 2000);
+            });
+        }
+        </script>
 
     </div>
 
@@ -106,8 +123,8 @@
     {% endwith %}
 
     <div class="profile-inventory">
-    <p style="text-align:center;color:#94A3B8;font-size:12px;margin-bottom:16px;">You're receiving this because you opted in to receive updates from the salesperson or dealership.</p>
-        <div style="background:#f0fdf4;border:1.5px solid #00C851;border-radius:12px;padding:16px 20px;margin-bottom:20px;text-align:center;">
+    <p style="text-align:center;color:#94A3B8;font-size:12px;margin-bottom:8px;">You're receiving this because you opted in to receive updates from the salesperson or dealership.</p>
+        <div style="background:#f0fdf4;border:1.5px solid #00C851;border-radius:12px;padding:16px 20px;margin-bottom:12px;text-align:center;">
     <p style="font-size:15px;font-weight:600;color:#1E293B;margin:0 0 12px;">🤝 Know someone looking for a car? Text them my link — if they buy, I'll send you $100 as a thank you.</p>
     <button onclick="document.getElementById('referralModal').style.display='flex'" style="background:#00C851;color:white;border:none;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">Send a Referral →</button>
 </div>
