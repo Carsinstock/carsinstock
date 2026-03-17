@@ -275,7 +275,13 @@ document.getElementById('leadModal').addEventListener('click', function(e) {
     </div>
     <div id="chatMessages" style="padding:14px;height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;">
         <div style="background:#f0f0f0;padding:10px 14px;border-radius:12px;border-bottom-left-radius:4px;font-size:14px;max-width:85%;color:#333;">
-            Hey there! Don't see what you're looking for? Just because it's not listed doesn't mean I can't get it. Tell me what you need!
+            Hey there! Don't see what you're looking for?<br>I can help you:
+        </div>
+        <div id="quickReplies" style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+            <button onclick="sendChatQuick('I am looking for a specific car. Can you help me check if it is available?')" style="background:white;border:1.5px solid #00C851;color:#1E293B;padding:9px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">🔍 Check if a specific car is available</button>
+            <button onclick="sendChatQuick('I would like to schedule a test drive.')" style="background:white;border:1.5px solid #00C851;color:#1E293B;padding:9px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">📅 Schedule a test drive</button>
+            {% if sp.phone %}<a href="sms:{{ sp.phone }}" style="background:white;border:1.5px solid #1E293B;color:#1E293B;padding:9px 14px;border-radius:20px;font-size:13px;font-weight:600;text-decoration:none;display:block;text-align:left;">📱 Text {{ sp.display_name.split()[0] }} directly</a>{% endif %}
+            <button onclick="sendChatQuick('I have a question about pricing.')" style="background:white;border:1.5px solid #00C851;color:#1E293B;padding:9px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">💰 Ask about pricing</button>
         </div>
     </div>
     <div style="padding:10px;border-top:1px solid #eee;display:flex;gap:8px;">
@@ -302,6 +308,13 @@ window.addEventListener('beforeunload', function() {
 function toggleChat() {
     var box = document.getElementById('chatBox');
     box.style.display = box.style.display === 'none' ? 'flex' : 'none';
+}
+function sendChatQuick(msg) {
+    var qr = document.getElementById('quickReplies');
+    if (qr) qr.remove();
+    var input = document.getElementById('chatInput');
+    input.value = msg;
+    sendChat();
 }
 function sendChat() {
     var input = document.getElementById('chatInput');
