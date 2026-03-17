@@ -23,16 +23,13 @@ def login_required(f):
 
 def generate_slug(display_name):
     from app.models.salesperson import Salesperson
-    slug = display_name.lower().strip()
-    slug = re.sub(r'[^a-z0-9\s-]', '', slug)
-    slug = re.sub(r'[\s]+', '-', slug)
-    slug = re.sub(r'-+', '-', slug).strip('-')
+    slug = re.sub(r'[^a-z0-9]', '', display_name.lower().strip())
     if slug in RESERVED_SLUGS:
-        slug = f"{slug}-sp"
+        slug = f"{slug}sp"
     base_slug = slug
     counter = 1
     while Salesperson.query.filter_by(profile_url_slug=slug).first():
-        slug = f"{base_slug}-{counter}"
+        slug = f"{base_slug}{counter}"
         counter += 1
     return slug
 

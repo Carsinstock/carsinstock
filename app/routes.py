@@ -64,6 +64,12 @@ def demo_page():
 
 @main.route('/<slug>')
 def public_profile(slug):
+    import re
+    from flask import redirect
+    # Redirect old hyphenated slugs to clean version
+    clean_slug = re.sub(r'[^a-z0-9]', '', slug.lower())
+    if slug != clean_slug:
+        return redirect(f'/{clean_slug}', 301)
     from app.models.salesperson import Salesperson
     sp = Salesperson.query.filter_by(profile_url_slug=slug).first()
     if not sp:
