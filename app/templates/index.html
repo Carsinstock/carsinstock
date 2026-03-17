@@ -174,7 +174,13 @@
     </div>
     <div id="chatMessages" style="padding:14px;height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:10px;">
         <div style="background:#f0f0f0;padding:10px 14px;border-radius:12px;border-bottom-left-radius:4px;font-size:14px;max-width:85%;color:#333;">
-            Hey! You sell cars? I might be able to help you make more money. What's your situation?
+            Hey! Are you a car salesperson? I can show you how to get more leads this week — no BDC, no ups battle.
+        </div>
+        <div id="hpQuickReplies" style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+            <button onclick="sendChatQuick('I am tired of waiting for customers not showing up.')" style="background:white;border:1.5px solid #00C851;color:#1E293B;padding:9px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">😤 I'm tired of waiting for customers not showing up</button>
+            <button onclick="sendChatQuick('Show me how CarsInStock works.')" style="background:white;border:1.5px solid #00C851;color:#1E293B;padding:9px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">👀 Show me how it works</button>
+            <button onclick="sendChatQuick('What does CarsInStock cost?')" style="background:white;border:1.5px solid #00C851;color:#1E293B;padding:9px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">💰 What does it cost?</button>
+            <button onclick="window.location.href='/register'" style="background:#00C851;border:none;color:white;padding:9px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">🆓 Start my free trial — 14 days</button>
         </div>
     </div>
     <div style="padding:10px;border-top:1px solid #eee;display:flex;gap:8px;">
@@ -187,6 +193,13 @@ var hpChatHistory = [];
 function toggleChat() {
     var box = document.getElementById('chatBox');
     box.style.display = box.style.display === 'none' ? 'flex' : 'none';
+}
+function sendChatQuick(msg) {
+    var qr = document.getElementById('hpQuickReplies');
+    if (qr) qr.remove();
+    var input = document.getElementById('chatInput');
+    input.value = msg;
+    sendChat();
 }
 function sendChat() {
     var input = document.getElementById('chatInput');
