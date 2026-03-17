@@ -927,6 +927,107 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         buf.seek(0)
         return send_file(buf, mimetype="image/png", as_attachment=True, download_name=f"carsinstock-qr-{sp.profile_url_slug}.png")
 
+
+    @bp.route("/referral/submit/<slug>", methods=["POST"])
+    def submit_referral(slug):
+        import sqlite3, os
+        from datetime import datetime
+        from sendgrid import SendGridAPIClient
+        from sendgrid.helpers.mail import Mail
+        from app.models.salesperson import Salesperson
+        sp = Salesperson.query.filter_by(profile_url_slug=slug).first()
+        if not sp:
+            return jsonify({"error": "not found"}), 404
+        data = request.get_json() or request.form
+        referrer_name = data.get("referrer_name", "").strip()
+        referrer_phone = data.get("referrer_phone", "").strip()
+        referrer_email = data.get("referrer_email", "").strip()
+        friend_name = data.get("friend_name", "").strip()
+        friend_phone = data.get("friend_phone", "").strip()
+        message = data.get("message", "").strip()
+        if not all([referrer_name, referrer_phone, referrer_email, friend_name, friend_phone]):
+            return jsonify({"error": "Missing required fields"}), 400
+        conn = sqlite3.connect('instance/carsinstock.db')
+        cur = conn.cursor()
+        cur.execute("""INSERT INTO referrals (salesperson_id, referrer_name, referrer_phone, referrer_email, friend_name, friend_phone, message, submitted_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+            (sp.salesperson_id, referrer_name, referrer_phone, referrer_email, friend_name, friend_phone, message, datetime.utcnow()))
+        conn.commit()
+        conn.close()
+        sp_first = sp.display_name.split()[0] if sp.display_name else sp.display_name
+        # Email confirmation to referrer
+        try:
+            sg = SendGridAPIClient(api_key=os.environ.get('SENDGRID_API_KEY'))
+            msg = Mail(
+                from_email=(os.environ.get('SENDGRID_FROM_EMAIL', 'sales@carsinstock.com'), sp.display_name + ' via CarsInStock'),
+                to_emails=referrer_email,
+                subject=f"Got your referral — thanks, {referrer_name.split()[0]}!",
+                html_content=f"""<div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:24px;">
+                    <p style="font-size:16px;color:#1E293B;">Hey {referrer_name.split()[0]},</p>
+                    <p style="font-size:15px;color:#334155;">Got it! If {friend_name} buys a car from {sp_first}, we'll make sure you get your $100. I'll reach out personally.</p>
+                    <p style="font-size:15px;color:#334155;">— {sp.display_name}<br>{sp.dealership_name or ''}</p>
+                    <p style="font-size:12px;color:#94A3B8;margin-top:24px;">Powered by CarsInStock.com</p>
+                </div>"""
+            )
+            sg.send(msg)
+        except Exception as e:
+            print(f"Referral confirmation email error: {e}")
+        # Notify salesperson
+        try:
+            from app.models.user import User as _User
+            sp_user = _User.query.get(sp.user_id)
+            if sp_user:
+                sg2 = SendGridAPIClient(api_key=os.environ.get('SENDGRID_API_KEY'))
+                msg2 = Mail(
+                    from_email=(os.environ.get('SENDGRID_FROM_EMAIL', 'sales@carsinstock.com'), 'CarsInStock'),
+                    to_emails=sp_user.email,
+                    subject=f"New Referral — {referrer_name} referred {friend_name}",
+                    html_content=f"""<div style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;padding:24px;">
+                        <h2 style="color:#1E293B;">New Referral Submitted</h2>
+                        <p><strong>Referrer:</strong> {referrer_name} — {referrer_phone} — {referrer_email}</p>
+                        <p><strong>Friend:</strong> {friend_name} — {friend_phone}</p>
+                        <p><strong>Message:</strong> {message or 'None'}</p>
+                        <p style="margin-top:16px;"><a href="https://carsinstock.com/dashboard" style="background:#00C851;color:white;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600;">View in Dashboard</a></p>
+                    </div>"""
+                )
+                sg2.send(msg2)
+        except Exception as e:
+            print(f"Referral notify email error: {e}")
+        return jsonify({"success": True})
+
+    @bp.route("/referrals", methods=["GET"])
+    @login_required
+    def get_referrals():
+        import sqlite3
+        from app.models.salesperson import Salesperson
+        sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
+        if not sp:
+            return jsonify([])
+        conn = sqlite3.connect('instance/carsinstock.db')
+        cur = conn.cursor()
+        cur.execute("SELECT id, referrer_name, referrer_phone, referrer_email, friend_name, friend_phone, message, status, submitted_at FROM referrals WHERE salesperson_id=? ORDER BY submitted_at DESC", (sp.salesperson_id,))
+        rows = cur.fetchall()
+        conn.close()
+        return jsonify([{"id":r[0],"referrer_name":r[1],"referrer_phone":r[2],"referrer_email":r[3],"friend_name":r[4],"friend_phone":r[5],"message":r[6],"status":r[7],"submitted_at":r[8]} for r in rows])
+
+    @bp.route("/referrals/update/<int:referral_id>", methods=["POST"])
+    @login_required
+    def update_referral_status(referral_id):
+        import sqlite3
+        from app.models.salesperson import Salesperson
+        sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
+        if not sp:
+            return jsonify({"error": "not found"}), 404
+        status = request.get_json().get("status")
+        if status not in ["pending", "sold", "paid"]:
+            return jsonify({"error": "invalid status"}), 400
+        conn = sqlite3.connect('instance/carsinstock.db')
+        cur = conn.cursor()
+        cur.execute("UPDATE referrals SET status=? WHERE id=? AND salesperson_id=?", (status, referral_id, sp.salesperson_id))
+        conn.commit()
+        conn.close()
+        return jsonify({"success": True})
+
     @bp.route("/dashboard")
     @login_required
     def dashboard():

@@ -107,6 +107,59 @@
 
     <div class="profile-inventory">
     <p style="text-align:center;color:#94A3B8;font-size:12px;margin-bottom:16px;">You're receiving this because you opted in to receive updates from the salesperson or dealership.</p>
+        <div style="background:#f0fdf4;border:1.5px solid #00C851;border-radius:12px;padding:16px 20px;margin-bottom:20px;text-align:center;">
+    <p style="font-size:15px;font-weight:600;color:#1E293B;margin:0 0 12px;">🤝 Know someone looking for a car? Text them my link — if they buy, I'll send you $100 as a thank you.</p>
+    <button onclick="document.getElementById('referralModal').style.display='flex'" style="background:#00C851;color:white;border:none;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">Send a Referral →</button>
+</div>
+
+<div id="referralModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:16px;padding:28px;max-width:420px;width:90%;position:relative;max-height:90vh;overflow-y:auto;">
+        <span onclick="document.getElementById('referralModal').style.display='none'" style="position:absolute;top:12px;right:16px;font-size:24px;cursor:pointer;color:#999;">&times;</span>
+        <h2 style="color:#1E293B;font-size:20px;margin-bottom:4px;">Send a Referral</h2>
+        <p style="color:#64748B;font-size:13px;margin-bottom:20px;">Fill this out and if your friend buys, you get $100.</p>
+        <div id="referralForm">
+            <input id="ref_your_name" placeholder="Your Name *" style="width:100%;padding:10px;border:1px solid #E2E8F0;border-radius:8px;margin-bottom:10px;font-size:14px;box-sizing:border-box;">
+            <input id="ref_your_phone" placeholder="Your Phone Number *" style="width:100%;padding:10px;border:1px solid #E2E8F0;border-radius:8px;margin-bottom:10px;font-size:14px;box-sizing:border-box;">
+            <input id="ref_your_email" placeholder="Your Email *" style="width:100%;padding:10px;border:1px solid #E2E8F0;border-radius:8px;margin-bottom:10px;font-size:14px;box-sizing:border-box;">
+            <input id="ref_friend_name" placeholder="Friend's Name *" style="width:100%;padding:10px;border:1px solid #E2E8F0;border-radius:8px;margin-bottom:10px;font-size:14px;box-sizing:border-box;">
+            <input id="ref_friend_phone" placeholder="Friend's Phone Number *" style="width:100%;padding:10px;border:1px solid #E2E8F0;border-radius:8px;margin-bottom:10px;font-size:14px;box-sizing:border-box;">
+            <textarea id="ref_message" placeholder="Anything I should know about what they're looking for? (optional)" style="width:100%;padding:10px;border:1px solid #E2E8F0;border-radius:8px;margin-bottom:16px;font-size:14px;box-sizing:border-box;height:80px;resize:none;"></textarea>
+            <button onclick="submitReferral()" style="width:100%;background:#00C851;color:white;border:none;padding:12px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;">Send My Referral</button>
+            <p id="referralMsg" style="text-align:center;font-size:13px;margin-top:10px;color:#00C851;display:none;"></p>
+        </div>
+    </div>
+</div>
+<script>
+function submitReferral() {
+    var slug = "{{ sp.profile_url_slug }}";
+    var data = {
+        referrer_name: document.getElementById('ref_your_name').value.trim(),
+        referrer_phone: document.getElementById('ref_your_phone').value.trim(),
+        referrer_email: document.getElementById('ref_your_email').value.trim(),
+        friend_name: document.getElementById('ref_friend_name').value.trim(),
+        friend_phone: document.getElementById('ref_friend_phone').value.trim(),
+        message: document.getElementById('ref_message').value.trim()
+    };
+    if (!data.referrer_name || !data.referrer_phone || !data.referrer_email || !data.friend_name || !data.friend_phone) {
+        alert('Please fill in all required fields.');
+        return;
+    }
+    fetch('/referral/submit/' + slug, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+        if (d.success) {
+            document.getElementById('referralForm').innerHTML = '<p style="text-align:center;font-size:16px;color:#00C851;font-weight:600;padding:20px 0;">✅ Referral sent! We\'ll be in touch if they buy.</p>';
+        } else {
+            alert('Something went wrong. Please try again.');
+        }
+    });
+}
+</script>
+
         <p style="font-size:18px;font-weight:700;color:#1E293B;margin-bottom:4px;text-align:center;">🚗 These are what I believe are the best deals this week.</p>
         <p style="font-size:14px;font-weight:400;color:#64748B;margin-top:0;margin-bottom:20px;text-align:center;">Every listing auto&#8209;expires in 7 days to keep this page as accurate as possible.</p>
         {% if vehicles %}
