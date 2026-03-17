@@ -90,30 +90,37 @@
         {% if sp.email %}
         <p class="profile-contact"><strong>Email:</strong> {% if is_demo %}{{ sp.email }}{% else %}<a href="mailto:{{ sp.email }}" style="color:#00C851; text-decoration:none;">{{ sp.email }}</a>{% endif %}</p>
         {% endif %}
-        <div style="margin-top:14px;display:inline-flex;align-items:center;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:8px 18px;gap:10px;">
+        <div style="margin-top:14px;display:flex;align-items:center;justify-content:center;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:10px 18px;gap:10px;max-width:100%;">
             <span style="font-size:14px;color:#64748B;">🌐</span>
-            <span style="font-size:15px;font-weight:600;color:#1E293B;">CarsInStock.com/{{ sp.profile_url_slug }}</span>
-            <button onclick="copyStorefrontLink()" id="copyLinkBtn" style="background:none;border:none;cursor:pointer;font-size:16px;padding:0;line-height:1;" title="Copy link">📋</button>
-            <span id="copyConfirm" style="font-size:12px;color:#00C851;display:none;font-weight:600;">Copied!</span>
+            <span style="font-size:15px;font-weight:600;color:#1E293B;flex:1;">CarsInStock.com/{{ sp.profile_url_slug }}</span>
+            <button onclick="copyStorefrontLink()" id="copyLinkBtn" style="background:#00C851;color:white;border:none;cursor:pointer;font-size:12px;font-weight:700;padding:6px 12px;border-radius:6px;white-space:nowrap;min-width:60px;">Copy</button>
+            <span id="copyConfirm" style="font-size:12px;color:#00C851;display:none;font-weight:600;white-space:nowrap;">Copied!</span>
         </div>
         <script>
         function copyStorefrontLink() {
             var url = 'https://carsinstock.com/{{ sp.profile_url_slug }}';
-            navigator.clipboard.writeText(url).then(function() {
-                var btn = document.getElementById('copyLinkBtn');
-                var confirm = document.getElementById('copyConfirm');
-                btn.textContent = '✅';
+            var btn = document.getElementById('copyLinkBtn');
+            var confirm = document.getElementById('copyConfirm');
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(url).then(function() {
+                    btn.textContent = '✓ Done';
+                    confirm.style.display = 'inline';
+                    setTimeout(function() { btn.textContent = 'Copy'; confirm.style.display = 'none'; }, 2000);
+                });
+            } else {
+                var ta = document.createElement('textarea');
+                ta.value = url;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                btn.textContent = '✓ Done';
                 confirm.style.display = 'inline';
-                setTimeout(function() {
-                    btn.textContent = '📋';
-                    confirm.style.display = 'none';
-                }, 2000);
-            });
+                setTimeout(function() { btn.textContent = 'Copy'; confirm.style.display = 'none'; }, 2000);
+            }
         }
         </script>
-
     </div>
-
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
         {% for category, message in messages %}
@@ -121,8 +128,7 @@
         {% endfor %}
     {% endif %}
     {% endwith %}
-
-    <div class="profile-inventory">
+    <div class="profile-inventory" style="margin-top:0;">
     <p style="text-align:center;color:#94A3B8;font-size:12px;margin-bottom:8px;">You're receiving this because you opted in to receive updates from the salesperson or dealership.</p>
         <div style="background:#f0fdf4;border:1.5px solid #00C851;border-radius:12px;padding:16px 20px;margin-bottom:12px;text-align:center;">
     <p style="font-size:15px;font-weight:600;color:#1E293B;margin:0 0 12px;">🤝 Know someone looking for a car? Text them my link — if they buy, I'll send you $100 as a thank you.</p>
