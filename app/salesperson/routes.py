@@ -907,6 +907,26 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         flash(f"{vehicle.year} {vehicle.make} {vehicle.model} renewed for 7 days!", "success")
         return redirect(url_for("salesperson.dashboard"))
 
+    @bp.route("/qr-code")
+    @login_required
+    def qr_code():
+        import qrcode
+        import io
+        from flask import send_file
+        from app.models.salesperson import Salesperson
+        sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
+        if not sp:
+            return "Profile not found", 404
+        url = f"https://carsinstock.com/{sp.profile_url_slug}"
+        qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_H, box_size=10, border=4)
+        qr.add_data(url)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="#1E293B", back_color="white")
+        buf = io.BytesIO()
+        img.save(buf, format="PNG")
+        buf.seek(0)
+        return send_file(buf, mimetype="image/png", as_attachment=True, download_name=f"carsinstock-qr-{sp.profile_url_slug}.png")
+
     @bp.route("/dashboard")
     @login_required
     def dashboard():

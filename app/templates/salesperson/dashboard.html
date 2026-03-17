@@ -22,6 +22,7 @@
     <div style="margin-bottom:20px;padding:12px 20px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
         <span style="font-size:15px;color:#1E293B;">🌐 Your storefront: <a href="/{{ session.get('slug') }}" style="color:#00C851;font-weight:600;">CarsInStock.com/{{ session.get('slug') }}</a></span>
         <a href="/{{ session.get('slug') }}" target="_blank" style="background:#00C851;color:white;padding:8px 18px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;">View My Page →</a>
+        <a href="/qr-code" download style="background:#1E293B;color:white;padding:8px 18px;border-radius:6px;text-decoration:none;font-size:13px;font-weight:600;">⬇ Download QR Code</a>
     </div>
     {% endif %}
     <div class="dash-tabs">
