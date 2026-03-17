@@ -62,6 +62,33 @@ def demo_page():
     vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status="available").all()
     return render_template("salesperson/public_profile.html", sp=sp, vehicles=vehicles, is_owner=False, is_demo=True, hide_nav_auth=True)
 
+
+@main.route('/manifest/<slug>.json')
+def dynamic_manifest(slug):
+    from flask import jsonify
+    from app.models.salesperson import Salesperson
+    sp = Salesperson.query.filter_by(profile_url_slug=slug).first()
+    if not sp:
+        return jsonify({"error": "not found"}), 404
+    name = sp.display_name or "CarsInStock"
+    manifest = {
+        "name": name,
+        "short_name": "CarsInStock",
+        "description": "Fresh Cars. Real People.",
+        "start_url": f"/{slug}",
+        "display": "standalone",
+        "background_color": "#1E293B",
+        "theme_color": "#1E293B",
+        "icons": [
+            {"src": "/static/apple-touch-icon.png", "sizes": "180x180", "type": "image/png"},
+            {"src": "/static/icon-192.png", "sizes": "192x192", "type": "image/png"},
+            {"src": "/static/icon-512.png", "sizes": "512x512", "type": "image/png"}
+        ]
+    }
+    from flask import Response
+    import json
+    return Response(json.dumps(manifest), mimetype='application/manifest+json')
+
 @main.route('/<slug>')
 def public_profile(slug):
     import re

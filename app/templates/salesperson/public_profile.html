@@ -1,5 +1,10 @@
 {% extends "base.html" %}
 {% block meta %}
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="{{ sp.display_name }}">
+<link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+<link rel="manifest" href="/manifest/{{ sp.profile_url_slug }}.json">
 <meta property="og:title" content="{{ sp.display_name }} — Cars In Stock">
 <meta property="og:description" content="Check out {{ sp.display_name }}'s latest inventory. Fresh cars, updated weekly.">
 <meta property="og:image" content="{{ sp.cover_photo or sp.profile_photo or 'https://res.cloudinary.com/dbpa9qqtb/image/upload/v1772163049/demo/demo_cover_photo.jpg' }}">
