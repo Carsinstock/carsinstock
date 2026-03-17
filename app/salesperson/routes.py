@@ -947,7 +947,7 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         message = data.get("message", "").strip()
         if not all([referrer_name, referrer_phone, referrer_email, friend_name, friend_phone]):
             return jsonify({"error": "Missing required fields"}), 400
-        conn = sqlite3.connect('instance/carsinstock.db')
+        conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
         cur = conn.cursor()
         cur.execute("""INSERT INTO referrals (salesperson_id, referrer_name, referrer_phone, referrer_email, friend_name, friend_phone, message, submitted_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
@@ -1003,7 +1003,7 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
         if not sp:
             return jsonify([])
-        conn = sqlite3.connect('instance/carsinstock.db')
+        conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
         cur = conn.cursor()
         cur.execute("SELECT id, referrer_name, referrer_phone, referrer_email, friend_name, friend_phone, message, status, submitted_at FROM referrals WHERE salesperson_id=? ORDER BY submitted_at DESC", (sp.salesperson_id,))
         rows = cur.fetchall()
@@ -1021,7 +1021,7 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         status = request.get_json().get("status")
         if status not in ["pending", "sold", "paid"]:
             return jsonify({"error": "invalid status"}), 400
-        conn = sqlite3.connect('instance/carsinstock.db')
+        conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
         cur = conn.cursor()
         cur.execute("UPDATE referrals SET status=? WHERE id=? AND salesperson_id=?", (status, referral_id, sp.salesperson_id))
         conn.commit()
