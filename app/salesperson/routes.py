@@ -1163,7 +1163,7 @@ Key selling points you should weave into conversation naturally:
 - Every listing auto-expires in 7 days - your page always looks fresh
 - Takes 2 minutes to set up
 
-Always guide the conversation toward signing up. Be helpful but always be closing. Never be pushy - be like a friend who is already making money doing this and wants to help you get in. Keep responses short - 2-3 sentences max. End every response with a soft CTA."""
+Always guide the conversation toward signing up. Never be pushy - be like a friend who is already making money doing this and wants to help you get in. KEEP RESPONSES TO 1-2 SHORT SENTENCES MAXIMUM. No long paragraphs. No lists. One punch, one CTA. That is it."""
         try:
             import anthropic, os
             client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
