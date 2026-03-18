@@ -27,6 +27,14 @@ def register():
             errors.append("Password must be at least 8 characters.")
         if password != confirm_password:
             errors.append("Passwords do not match.")
+        # Command 3 — Block personal email domains
+        blocked_domains = ['gmail.com','yahoo.com','hotmail.com','aol.com','icloud.com',
+                          'outlook.com','live.com','msn.com','yahoo.co.uk','ymail.com',
+                          'googlemail.com','me.com','mac.com']
+        if not errors:
+            email_domain = email.split('@')[-1].lower() if '@' in email else ''
+            if email_domain in blocked_domains:
+                errors.append("Please use your dealership email address to register. This helps us verify you're an active automotive professional.")
         if not errors:
             existing_user = User.query.filter_by(email=email).first()
             if existing_user:
@@ -103,6 +111,25 @@ def register():
             return render_template("auth/register.html", email=email, turnstile_site_key=os.environ.get("TURNSTILE_SITE_KEY", ""))
     return render_template("auth/register.html", turnstile_site_key=os.environ.get("TURNSTILE_SITE_KEY", ""))
 
+
+
+@auth.route("/api/check-slug", methods=["POST"])
+def check_slug():
+    import re
+    from app.models.salesperson import Salesperson
+    data = request.get_json()
+    name = data.get("name", "").strip()
+    slug = re.sub(r'[^a-z0-9]', '', name.lower())
+    if not slug:
+        return jsonify({"available": None, "slug": ""})
+    reserved = ["admin","login","register","dashboard","logout","demo","how-to","search-cars","about","privacy","terms","contact","billing","verify","unsubscribe","manifest","qr-code","referral","recruit","leads","customers","vehicles","blast","chats","profile","storefront","api","static","salespeople"]
+    if slug in reserved:
+        return jsonify({"available": False, "slug": slug, "suggestions": [f"{slug}cars", f"{slug}auto", f"{slug}1"]})
+    existing = Salesperson.query.filter_by(profile_url_slug=slug).first()
+    if existing:
+        suggestions = [f"{slug}cars", f"{slug}auto", f"{slug}2"]
+        return jsonify({"available": False, "slug": slug, "suggestions": suggestions})
+    return jsonify({"available": True, "slug": slug})
 
 @auth.route("/login", methods=["GET", "POST"])
 def login():

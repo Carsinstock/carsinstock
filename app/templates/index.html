@@ -10,6 +10,65 @@
 <meta name="twitter:title" content="CarsInStock — Fresh Cars. Real People.">
 <meta name="twitter:description" content="Your own storefront. Your cars. Your leads. 14-day free trial.">
 <meta name="twitter:image" content="https://res.cloudinary.com/dbpa9qqtb/image/upload/v1772163049/demo/demo_cover_photo.jpg">
+
+<div id="pricingModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;padding:16px;box-sizing:border-box;">
+    <div style="background:white;border-radius:16px;max-width:900px;width:100%;max-height:90vh;overflow-y:auto;position:relative;">
+        <span onclick="document.getElementById('pricingModal').style.display='none'" style="position:absolute;top:16px;right:20px;font-size:28px;cursor:pointer;color:#999;z-index:1;">&times;</span>
+        <div style="background:#1E293B;padding:28px;border-radius:16px 16px 0 0;text-align:center;">
+            <h2 style="color:white;margin:0;font-size:24px;">Simple, Transparent Pricing</h2>
+            <p style="color:#94A3B8;margin:8px 0 0;font-size:14px;">Start free. No credit card required.</p>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:16px;padding:24px;">
+            <!-- Individual -->
+            <div style="flex:1;min-width:240px;border:2px solid #E2E8F0;border-radius:12px;padding:24px;">
+                <p style="color:#64748B;font-size:13px;font-weight:600;margin:0 0 8px;text-transform:uppercase;letter-spacing:1px;">Individual Salesperson</p>
+                <p style="font-size:32px;font-weight:800;color:#1E293B;margin:0;">$39<span style="font-size:16px;font-weight:400;color:#64748B;">/month</span></p>
+                <p style="color:#00C851;font-size:13px;font-weight:600;margin:4px 0 16px;">14-day free trial — no card required</p>
+                <ul style="list-style:none;padding:0;margin:0 0 24px;font-size:14px;color:#334155;line-height:2;">
+                    <li>✅ Unlimited vehicles</li>
+                    <li>✅ Personal storefront at carsinstock.com/yourname</li>
+                    <li>✅ Email blast to your customers</li>
+                    <li>✅ QR code included</li>
+                    <li>✅ AI chatbot on your page</li>
+                    <li>✅ Built-in CRM</li>
+                </ul>
+                <a href="/register" style="display:block;text-align:center;background:#1E293B;color:white;padding:12px;border-radius:8px;font-weight:700;text-decoration:none;font-size:15px;">Start Free Trial →</a>
+            </div>
+            <!-- Founding Member -->
+            <div style="flex:1;min-width:240px;border:2px solid #00C851;border-radius:12px;padding:24px;position:relative;">
+                <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#00C851;color:white;padding:4px 16px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap;">⚡ LIMITED SPOTS</div>
+                <p style="color:#00C851;font-size:13px;font-weight:600;margin:0 0 8px;text-transform:uppercase;letter-spacing:1px;">Founding Member</p>
+                <p style="font-size:32px;font-weight:800;color:#1E293B;margin:0;">$29<span style="font-size:16px;font-weight:400;color:#64748B;">/month for life</span></p>
+                <p style="color:#00C851;font-size:13px;font-weight:600;margin:4px 0 16px;">Rate locked forever</p>
+                <ul style="list-style:none;padding:0;margin:0 0 24px;font-size:14px;color:#334155;line-height:2;">
+                    <li>✅ Everything in Individual</li>
+                    <li>✅ Price never increases</li>
+                    <li>✅ Founding member badge</li>
+                    <li>✅ Priority support</li>
+                    <li>&nbsp;</li>
+                    <li>&nbsp;</li>
+                </ul>
+                <a href="/register" style="display:block;text-align:center;background:#00C851;color:white;padding:12px;border-radius:8px;font-weight:700;text-decoration:none;font-size:15px;">Claim Founding Rate →</a>
+            </div>
+            <!-- Dealership -->
+            <div style="flex:1;min-width:240px;border:2px solid #E2E8F0;border-radius:12px;padding:24px;background:#f8fafc;">
+                <p style="color:#64748B;font-size:13px;font-weight:600;margin:0 0 8px;text-transform:uppercase;letter-spacing:1px;">Dealership / Rooftop</p>
+                <p style="font-size:32px;font-weight:800;color:#1E293B;margin:0;">$1,000<span style="font-size:16px;font-weight:400;color:#64748B;">/month</span></p>
+                <p style="color:#64748B;font-size:13px;font-weight:600;margin:4px 0 16px;">Starting price — contact for custom</p>
+                <ul style="list-style:none;padding:0;margin:0 0 24px;font-size:14px;color:#334155;line-height:2;">
+                    <li>✅ Every rep gets their own storefront</li>
+                    <li>✅ Admin dashboard</li>
+                    <li>✅ Full team management</li>
+                    <li>✅ Centralized leads</li>
+                    <li>&nbsp;</li>
+                    <li>&nbsp;</li>
+                </ul>
+                <a href="mailto:edward@carsinstock.com" style="display:block;text-align:center;background:#1E293B;color:white;padding:12px;border-radius:8px;font-weight:700;text-decoration:none;font-size:15px;">Contact Us →</a>
+            </div>
+        </div>
+        <p style="text-align:center;color:#94A3B8;font-size:12px;padding:0 24px 20px;">Cancel anytime. No contracts. Questions? Email edward@carsinstock.com</p>
+    </div>
+</div>
 {% endblock %}
 {% block content %}
 <style>
@@ -84,7 +143,7 @@
         <h2 style="color:#1E293B;font-size:28px;font-weight:700;margin-bottom:12px;">Sell More Cars.</h2>
         <div class="hp-btns">
             <a href="/demo" class="btn-green">Demo Page</a>
-            <a href="/register" class="btn-coral">Get Your Storefront</a>
+            <a href="#" onclick="document.getElementById('pricingModal').style.display='flex';return false;" class="btn-coral">Get Your Storefront</a>
         </div>
         <div class="hp-below-btns">
             <strong>Your solution:</strong> CarsInStock.com/yourname<br>
@@ -152,7 +211,7 @@
             <h2>Stop waiting for ups. Start creating them.</h2>
             <p>Your page. Your cars. Your customers. CarsInStock gives you a storefront you actually own — share it everywhere, build your book, grow your business.</p>
             <div class="pricing">14-day free trial. $39/month — unlimited cars, cancel anytime.</div>
-            <a href="/register" class="btn-green">Start Your Free Trial</a>
+            <a href="#" onclick="document.getElementById('pricingModal').style.display='flex';return false;" class="btn-green">Start Your Free Trial</a>
         </div>
     </div>
 
@@ -184,7 +243,7 @@
             <button onclick="sendChatQuick('I am tired of waiting for customers not showing up.')" style="background:white;border:1.5px solid #00C851;color:#1E293B;padding:9px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">😤 I'm tired of waiting for customers not showing up</button>
             <button onclick="sendChatQuick('Show me how CarsInStock works.')" style="background:white;border:1.5px solid #00C851;color:#1E293B;padding:9px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">👀 Show me how it works</button>
             <button onclick="sendChatQuick('What does CarsInStock cost?')" style="background:white;border:1.5px solid #00C851;color:#1E293B;padding:9px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">💰 What does it cost?</button>
-            <button onclick="window.location.href='/register'" style="background:#00C851;border:none;color:white;padding:9px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;text-align:left;">🆓 Start my free trial — 14 days</button>
+            <button onclick="window.location.href='/register'" style="background:#00C851;border:none;color:white;padding:9px 14px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;text-align:left;" onclick="document.getElementById('pricingModal').style.display='flex'">🆓 Start my free trial — 14 days</button>
         </div>
     </div>
     <div style="padding:10px;border-top:1px solid #eee;display:flex;gap:8px;">

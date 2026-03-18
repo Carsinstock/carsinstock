@@ -309,9 +309,9 @@ def register_admin_routes(bp):
                 test_subject = replace_merge_vars(subject, dummy)
                 test_body = replace_merge_vars(body, dummy)
                 html = build_recruitment_email(test_body, "test-preview")
-                success = send_recruitment_email("ecastillo@pinebeltauto.com", test_subject, html)
+                success = send_recruitment_email("edward@carsinstock.com", test_subject, html)
                 if success:
-                    flash("Test email sent to ecastillo@pinebeltauto.com", "success")
+                    flash("Test email sent to edward@carsinstock.com", "success")
                 else:
                     flash("Failed to send test email.", "error")
 

@@ -16,8 +16,14 @@
     {% endwith %}
     <form method="POST" action="{{ url_for('auth.register') }}">
         <div class="form-group">
-            <label for="email">Email Address</label>
-            <input type="email" id="email" name="email" value="{{ email if email else '' }}" placeholder="you@example.com" required>
+            <label for="full_name">Your Full Name</label>
+            <input type="text" id="full_name" name="full_name" placeholder="e.g. John Smith" oninput="checkSlug(this.value)" autocomplete="off">
+            <div id="slugCheck" style="margin-top:6px;font-size:13px;display:none;"></div>
+            <input type="hidden" id="slug_available" name="slug_available" value="0">
+        </div>
+        <div class="form-group">
+            <label for="email">Dealership Email Address</label>
+            <input type="email" id="email" name="email" value="{{ email if email else '' }}" placeholder="you@yourdealership.com" required>
         </div>
         <div class="form-group">
             <label for="password">Password</label>
@@ -34,7 +40,7 @@
             </div>
         </div>
         <div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}" style="margin-bottom:15px;"></div>
-        <button type="submit" class="btn-primary">Create Account</button>
+        <button type="submit" class="btn-primary" onclick="return checkSubmit()">Create Account →</button>
     </form>
     <p style="text-align:center;font-size:12px;color:#9ca3af;margin-top:8px;">Your 14-day free trial starts immediately. No payment required.</p>
     <p class="auth-footer">Already have an account? <a href="{{ url_for('auth.login') }}">Log in here</a></p>
@@ -60,10 +66,45 @@
     .alert-success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
 </style>
 <script>
+var slugTimer = null;
+function checkSlug(name) {
+    clearTimeout(slugTimer);
+    var el = document.getElementById('slugCheck');
+    var avail = document.getElementById('slug_available');
+    if (!name || name.length < 2) { el.style.display='none'; avail.value='0'; return; }
+    slugTimer = setTimeout(function() {
+        fetch('/api/check-slug', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({name: name})
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            el.style.display = 'block';
+            if (d.available === true) {
+                el.innerHTML = '<span style="color:#16a34a;font-weight:600;">✅ carsinstock.com/' + d.slug + ' is available</span>';
+                avail.value = '1';
+            } else if (d.available === false) {
+                var sugg = d.suggestions ? ' Try: ' + d.suggestions.map(function(s){ return '<a href="#" onclick="document.getElementById('full_name').value=''+s+'';checkSlug(''+s+'');return false;" style="color:#00C851;">'+s+'</a>'; }).join(', ') : '';
+                el.innerHTML = '<span style="color:#dc2626;font-weight:600;">❌ carsinstock.com/' + d.slug + ' is taken.</span>' + sugg;
+                avail.value = '0';
+            }
+        });
+    }, 400);
+}
 function togglePW(fieldId, btn) {
     var f = document.getElementById(fieldId);
     if (f.type === 'password') { f.type = 'text'; btn.textContent = 'Hide'; }
     else { f.type = 'password'; btn.textContent = 'Show'; }
+}
+function checkSubmit() {
+    var name = document.getElementById('full_name').value.trim();
+    var avail = document.getElementById('slug_available').value;
+    if (name && avail === '0') {
+        alert('That storefront URL is taken. Please choose a different name.');
+        return false;
+    }
+    return true;
 }
 </script>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
