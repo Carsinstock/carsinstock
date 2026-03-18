@@ -613,7 +613,8 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
 
         # Cap at remaining daily allowance
         remaining = 1000 - int(sent_today)
-        customers = customers[:remaining]
+        blast_limit = min(int(request.form.get("blast_limit", 200) or 200), remaining, 1000)
+        customers = customers[:blast_limit]
 
         # Get active vehicles for storefront link section
         from math import ceil

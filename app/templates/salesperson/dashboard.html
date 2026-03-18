@@ -260,6 +260,11 @@
                 </select>
             </div>
             <div style="margin-bottom:16px;">
+                <label style="font-size:13px;color:#666;display:block;margin-bottom:4px;">How many to send <span style="color:#94A3B8;font-weight:400;">(max 1,000/day)</span></label>
+                <input type="number" id="blastLimit" min="1" max="1000" value="200" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:15px;box-sizing:border-box;">
+                <p style="font-size:12px;color:#94A3B8;margin:4px 0 0;">💡 Start with 200/day to warm up your sender reputation.</p>
+            </div>
+            <div style="margin-bottom:16px;">
                 <label style="font-size:13px;color:#666;display:block;margin-bottom:4px;">Email Template</label>
                 <select id="blastTemplate" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:15px;box-sizing:border-box;">
                     <option value="1">🏆 Picks of the Week</option>
@@ -418,7 +423,9 @@ function sendBlast() {
         const fd = new FormData();
         fd.append('subject', subject);
         fd.append('body', body);
+        const limit = parseInt(document.getElementById('blastLimit').value) || 200;
         fd.append('segment', segment);
+        fd.append('blast_limit', limit);
         fetch('/blast/send', { method: 'POST', body: fd, credentials: 'same-origin' })
             .then(r => r.json())
             .then(data => {
