@@ -500,7 +500,7 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
 
         first = sp.display_name.split()[0] if sp.display_name else "there"
         personal_body = body.replace("{{first_name}}", first)
-        footer_html = '<div style="border-top:1px solid #eee;padding:16px 0;text-align:center;"><p style="color:#999;font-size:12px;margin:0;">Fresh Cars. Real People. | CarsInStock.com</p><p style="color:#999;font-size:11px;margin:6px 0 0 0;">This is a test email. Live blasts include a personal unsubscribe link.</p></div>'
+        footer_html = '<div style="border-top:1px solid #eee;padding:16px 0;text-align:center;"><p style="color:#999;font-size:12px;margin:0;">Fresh Cars. Real People. | CarsInStock.com</p><p style="color:#999;font-size:11px;margin:6px 0 0 0;"></p></div>'
 
         template_id = request.form.get("template_id", "1")
 
@@ -530,7 +530,6 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         phone_line = f'<div><a href="tel:{sp.phone}" style="color:#00C851;">{sp.phone}</a></div>' if sp.phone else ""
 
         html = f"""<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f1f5f9;padding:16px;">
-        <div style="background:#fffbea;border:2px dashed #f59e0b;padding:8px;text-align:center;font-size:12px;color:#92400e;border-radius:6px;margin-bottom:8px;">⚠️ TEST EMAIL — Template {template_id} — Not sent to customers</div>
         <div style="background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
             {build_hero_test(template_id)}
             {build_profile_test(sp)}
