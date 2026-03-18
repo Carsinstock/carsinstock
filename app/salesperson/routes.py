@@ -712,6 +712,14 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
                         <p style="font-size:15px;color:#334155;line-height:1.7;margin:0 0 16px;">{personal_body}</p>
                         {vehicle_html}
                         {build_cta(template_id, storefront_url)}
+                        <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:8px 14px;margin:0 0 8px;display:table;width:100%;box-sizing:border-box;">
+                            <span style="font-size:13px;color:#64748B;">🌐</span>
+                            <a href="{storefront_url}" style="font-size:13px;font-weight:600;color:#1E293B;text-decoration:none;margin-left:6px;">{storefront_url.replace("https://","")}</a>
+                        </div>
+                        <div style="background:#f0fdf4;border:1px solid #00C851;border-radius:8px;padding:8px 14px;margin:0 0 12px;display:table;width:100%;box-sizing:border-box;">
+                            <span style="font-size:12px;font-weight:600;color:#1E293B;">🤝 Know someone? If they buy, they get a deal — and you get $100.</span>
+                            <a href="{storefront_url}" style="display:inline-block;background:#00C851;color:white;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:700;text-decoration:none;margin-left:8px;white-space:nowrap;">Share →</a>
+                        </div>
                     </div>
                     <div style="background:#f8fafc;padding:16px;text-align:center;border-top:1px solid #e2e8f0;">
                         <div style="font-size:13px;color:#64748B;margin-bottom:6px;">
