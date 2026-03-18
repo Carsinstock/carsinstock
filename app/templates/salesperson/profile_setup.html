@@ -105,6 +105,9 @@
         <div class="form-group">
             <label for="dealership_address">Dealership Address</label>
             <input type="text" id="dealership_address" name="dealership_address" value="{{ sp.dealership_address if sp and sp.dealership_address else '' }}" placeholder="e.g. 1234 Main St, Anytown, NJ 08753">
+
+            <label for="financing_url" style="margin-top:12px;display:block;">Financing URL <span style="color:#94A3B8;font-size:12px;font-weight:400;">(optional — shows a "Need Financing?" button on your storefront)</span></label>
+            <input type="url" id="financing_url" name="financing_url" value="{{ sp.financing_url if sp and sp.financing_url else '' }}" placeholder="e.g. https://www.pinebeltauto.com/finance">
         </div>
             <label for="phone">Phone Number</label>
             <input type="tel" id="phone" name="phone" value="{{ phone }}" placeholder="(555) 123-4567">

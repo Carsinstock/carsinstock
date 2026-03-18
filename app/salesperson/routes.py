@@ -76,6 +76,7 @@ def register_routes(bp):
                 sp.banner_x_offset = max(0, min(100, int(request.form.get("banner_x_offset", 50) or 50)))
                 sp.vehicle_sort_order = request.form.get("vehicle_sort_order", "newest")
                 sp.bio = bio
+                sp.financing_url = request.form.get("financing_url", "").strip()
                 if profile_photo and profile_photo.filename:
                     from app.utils.cloudinary_upload import upload_profile_photo, upload_cover_photo
                     photo_url = upload_profile_photo(profile_photo, sp.salesperson_id)
@@ -99,6 +100,7 @@ def register_routes(bp):
                     bio=bio,
                     dealership_name=request.form.get("dealership_name", "").strip(),
                     dealership_address=request.form.get("dealership_address", "").strip(),
+                    financing_url=request.form.get("financing_url", "").strip(),
                     profile_url_slug=slug,
                     status="active",
                     hired_at=datetime.utcnow()
