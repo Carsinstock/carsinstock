@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width:800px;margin:30px auto;padding:0 20px;">
+    <h1 style="color:#1E293B;margin-bottom:4px;">🚀 Autopilot Blast</h1>
+    <p style="color:#64748B;margin-bottom:24px;">Set it once. Runs every Sunday at 9AM EST automatically.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}{% for category, message in messages %}
+    <div class="alert alert-{{ category }}">{{ message }}</div>
+    {% endfor %}{% endif %}{% endwith %}
+
+    <!-- Stats Bar -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px;">
+        <div style="background:#fff;border-radius:10px;padding:16px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+            <div style="font-size:26px;font-weight:800;color:#1E293B;">{{ total_active }}</div>
+            <div style="font-size:12px;color:#64748B;">Active Subscribers</div>
+        </div>
+        <div style="background:#fff;border-radius:10px;padding:16px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+            <div style="font-size:26px;font-weight:800;color:#00C851;">{{ new_week }}</div>
+            <div style="font-size:12px;color:#64748B;">New This Week</div>
+        </div>
+        <div style="background:#fff;border-radius:10px;padding:16px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+            <div style="font-size:26px;font-weight:800;color:#1E293B;">{{ sent_week }}</div>
+            <div style="font-size:12px;color:#64748B;">Sent This Week</div>
+        </div>
+        <div style="background:#fff;border-radius:10px;padding:16px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+            <div style="font-size:26px;font-weight:800;color:#ef4444;">{{ unsub_week }}</div>
+            <div style="font-size:12px;color:#64748B;">Unsubscribes</div>
+        </div>
+        <div style="background:#fff;border-radius:10px;padding:16px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+            <div style="font-size:13px;font-weight:700;color:#00C851;">{{ next_blast }}</div>
+            <div style="font-size:12px;color:#64748B;">Next Blast</div>
+        </div>
+    </div>
+
+    <!-- Onboarding Progress -->
+    <div style="background:#fff;border-radius:10px;padding:16px;margin-bottom:24px;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:14px;font-weight:600;color:#1E293B;">Onboarding Progress</span>
+            <span style="font-size:13px;color:#64748B;">{{ onboard_pos }} / {{ total_customers }} customers reached</span>
+        </div>
+        <div style="background:#f1f5f9;border-radius:20px;height:8px;">
+            <div style="background:#00C851;height:8px;border-radius:20px;width:{{ ((onboard_pos / total_customers * 100) if total_customers else 0)|int }}%;"></div>
+        </div>
+    </div>
+
+    <!-- On/Off Toggle -->
+    <div style="background:#fff;border-radius:10px;padding:16px;margin-bottom:24px;box-shadow:0 1px 4px rgba(0,0,0,0.08);display:flex;justify-content:space-between;align-items:center;">
+        <div>
+            <div style="font-size:15px;font-weight:700;color:#1E293B;">Autopilot Status</div>
+            <div style="font-size:13px;color:#64748B;" id="statusLabel">{% if sched and sched['is_active'] %}🟢 Running — blasts fire automatically{% else %}🔴 Paused{% endif %}</div>
+        </div>
+        <button id="toggleBtn" onclick="toggleAutopilot()" style="background:{% if sched and sched['is_active'] %}#ef4444{% else %}#00C851{% endif %};color:white;border:none;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">
+            {% if sched and sched['is_active'] %}Pause{% else %}Resume{% endif %}
+        </button>
+    </div>
+
+    <!-- Saturday Picks Editor -->
+    <div style="background:#fff;border-radius:10px;padding:24px;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+        <h2 style="color:#1E293B;font-size:18px;margin-bottom:4px;">📝 Saturday Picks Editor</h2>
+        <p style="color:#64748B;font-size:13px;margin-bottom:20px;">Update your weekly message and template. Save by Saturday night — blast fires Sunday 9AM.</p>
+        <form method="POST">
+            <input type="hidden" name="action" value="save_picks">
+            <div style="margin-bottom:16px;">
+                <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:6px;">Weekly Message</label>
+                <textarea name="weekly_message" rows="5" style="width:100%;padding:12px;border:1px solid #E2E8F0;border-radius:8px;font-size:14px;box-sizing:border-box;resize:vertical;" placeholder="Hey {{first_name}}, check out what I handpicked for you this week...">{{ sched['weekly_message'] if sched and sched['weekly_message'] else '' }}</textarea>
+                <p style="font-size:12px;color:#94A3B8;margin-top:4px;">Use {{first_name}} to personalize each email.</p>
+            </div>
+            <div style="margin-bottom:16px;">
+                <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:6px;">Email Template</label>
+                <select name="template_id" style="width:100%;padding:12px;border:1px solid #E2E8F0;border-radius:8px;font-size:14px;box-sizing:border-box;">
+                    <option value="1" {% if sched and sched['template_id']=='1' %}selected{% endif %}>🏆 This Week's Top Picks</option>
+                    <option value="2" {% if sched and sched['template_id']=='2' %}selected{% endif %}>🚗 Fresh. In Stock. Right Now.</option>
+                    <option value="3" {% if sched and sched['template_id']=='3' %}selected{% endif %}>⏰ These Won't Last Long</option>
+                    <option value="4" {% if sched and sched['template_id']=='4' %}selected{% endif %}>👤 I Found Some Cars You Might Love</option>
+                    <option value="5" {% if sched and sched['template_id']=='5' %}selected{% endif %}>📅 Before These Are Gone</option>
+                </select>
+            </div>
+            <div style="margin-bottom:20px;">
+                <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:6px;">New customers per day <span style="color:#94A3B8;font-weight:400;">(onboarding)</span></label>
+                <input type="number" name="onboarding_per_day" min="50" max="1000" value="{{ sched['onboarding_per_day'] if sched else 200 }}" style="width:100%;padding:12px;border:1px solid #E2E8F0;border-radius:8px;font-size:14px;box-sizing:border-box;">
+            </div>
+            <button type="submit" style="width:100%;background:#00C851;color:white;border:none;padding:14px;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;">💾 Save Weekly Picks</button>
+        </form>
+    </div>
+</div>
+<script>
+function toggleAutopilot() {
+    var btn = document.getElementById('toggleBtn');
+    var label = document.getElementById('statusLabel');
+    var isActive = btn.textContent.trim() === 'Pause' ? 0 : 1;
+    var fd = new FormData();
+    fd.append('action', 'toggle');
+    fd.append('is_active', isActive);
+    fetch('/autopilot', {method:'POST', body:fd, credentials:'same-origin'})
+    .then(function(r){return r.json();})
+    .then(function(d){
+        if(d.success){
+            if(isActive){
+                btn.textContent='Pause'; btn.style.background='#ef4444';
+                label.textContent='🟢 Running — blasts fire automatically';
+            } else {
+                btn.textContent='Resume'; btn.style.background='#00C851';
+                label.textContent='🔴 Paused';
+            }
+        }
+    });
+}
+</script>
+{% endblock %}

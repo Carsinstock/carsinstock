@@ -48,4 +48,17 @@ def create_app():
         from flask import render_template
         return render_template("500.html"), 500
 
+    # Start background scheduler
+    try:
+        from app.cron import init_scheduler
+        init_scheduler(app)
+    except Exception as e:
+        app.logger.error(f"Scheduler failed to start: {e}")
+
     return app
+
+def start_scheduler(app):
+    import os
+    if os.environ.get('WERKZEUG_RUN_MAIN') == 'true' or not app.debug:
+        from app.cron import init_scheduler
+        init_scheduler(app)

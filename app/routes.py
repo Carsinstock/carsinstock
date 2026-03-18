@@ -89,6 +89,22 @@ def dynamic_manifest(slug):
     import json
     return Response(json.dumps(manifest), mimetype='application/manifest+json')
 
+
+@main.route('/webhook/sendgrid', methods=['POST'])
+def sendgrid_webhook():
+    import sqlite3, json
+    events = request.get_json() or []
+    conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    cur = conn.cursor()
+    for event in events:
+        if event.get('event') == 'bounce' and event.get('type') == 'bounce':
+            email = event.get('email', '').lower()
+            if email:
+                cur.execute("UPDATE customers SET unsubscribed=1 WHERE LOWER(email)=?", (email,))
+    conn.commit()
+    conn.close()
+    return '', 200
+
 @main.route('/<slug>')
 def public_profile(slug):
     import re

@@ -1038,6 +1038,66 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         conn.close()
         return jsonify({"success": True})
 
+
+    @bp.route("/autopilot", methods=["GET", "POST"])
+    @login_required
+    def autopilot():
+        import sqlite3
+        from app.models.salesperson import Salesperson
+        sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
+        if not sp:
+            return redirect(url_for("salesperson.profile_setup"))
+        conn = sqlite3.connect("/home/eddie/carsinstock/instance/carsinstock.db")
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        if request.method == "POST":
+            action = request.form.get("action")
+            if action == "save_picks":
+                message = request.form.get("weekly_message", "").strip()
+                template_id = request.form.get("template_id", "1")
+                is_active = int(request.form.get("is_active", 1))
+                onboarding_per_day = min(int(request.form.get("onboarding_per_day", 200) or 200), 1000)
+                cur.execute("SELECT id FROM blast_schedule WHERE salesperson_id=?", (sp.salesperson_id,))
+                existing = cur.fetchone()
+                if existing:
+                    cur.execute("UPDATE blast_schedule SET weekly_message=?, template_id=?, is_active=?, onboarding_per_day=?, last_updated=? WHERE salesperson_id=?",
+                        (message, template_id, is_active, onboarding_per_day, datetime.utcnow(), sp.salesperson_id))
+                else:
+                    cur.execute("INSERT INTO blast_schedule (salesperson_id, weekly_message, template_id, is_active, onboarding_per_day, last_updated) VALUES (?,?,?,?,?,?)",
+                        (sp.salesperson_id, message, template_id, is_active, onboarding_per_day, datetime.utcnow()))
+                conn.commit()
+                flash("Weekly picks saved! Blast fires Sunday 9AM EST.", "success")
+            elif action == "toggle":
+                is_active = int(request.form.get("is_active", 1))
+                cur.execute("UPDATE blast_schedule SET is_active=? WHERE salesperson_id=?", (is_active, sp.salesperson_id))
+                conn.commit()
+                return jsonify({"success": True, "is_active": is_active})
+        # Get current schedule
+        sched = cur.execute("SELECT * FROM blast_schedule WHERE salesperson_id=?", (sp.salesperson_id,)).fetchone()
+        # Get stats
+        total_active = cur.execute("SELECT COUNT(DISTINCT customer_id) FROM blast_log WHERE salesperson_id=?", (sp.salesperson_id,)).fetchone()[0]
+        week_ago = datetime.utcnow() - timedelta(days=7)
+        sent_week = cur.execute("SELECT COUNT(*) FROM blast_log WHERE salesperson_id=? AND sent_at>=?", (sp.salesperson_id, week_ago)).fetchone()[0]
+        new_week = cur.execute("SELECT COUNT(*) FROM blast_log WHERE salesperson_id=? AND blast_type='onboarding' AND sent_at>=?", (sp.salesperson_id, week_ago)).fetchone()[0]
+        unsub_week = cur.execute("SELECT COUNT(*) FROM customers WHERE salesperson_id=? AND unsubscribed=1", (sp.salesperson_id,)).fetchone()[0]
+        onboard_pos = cur.execute("SELECT last_customer_id FROM blast_onboard_position WHERE salesperson_id=?", (sp.salesperson_id,)).fetchone()
+        total_customers = cur.execute("SELECT COUNT(*) FROM customers WHERE salesperson_id=?", (sp.salesperson_id,)).fetchone()[0]
+        conn.close()
+        from datetime import timezone as tz
+        import pytz
+        est = pytz.timezone("US/Eastern")
+        now_est = datetime.now(est)
+        days_until_sunday = (6 - now_est.weekday()) % 7 or 7
+        next_sunday = now_est + timedelta(days=days_until_sunday)
+        next_blast = next_sunday.replace(hour=9, minute=0, second=0, microsecond=0)
+        return render_template("salesperson/autopilot.html",
+            sp=sp, sched=sched,
+            total_active=total_active, sent_week=sent_week,
+            new_week=new_week, unsub_week=unsub_week,
+            next_blast=next_blast.strftime("%A, %B %d at 9:00 AM EST"),
+            onboard_pos=onboard_pos["last_customer_id"] if onboard_pos else 0,
+            total_customers=total_customers)
+
     @bp.route("/dashboard")
     @login_required
     def dashboard():
