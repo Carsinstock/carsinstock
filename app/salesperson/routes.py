@@ -508,7 +508,7 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
 
         first = sp.display_name.split()[0] if sp.display_name else "there"
         personal_body = body.replace("{{first_name}}", first)
-        footer_html = '<div style="border-top:1px solid #eee;padding:16px 0;text-align:center;"><p style="color:#999;font-size:12px;margin:0;">Fresh Cars. Real People. | CarsInStock.com</p><p style="color:#999;font-size:11px;margin:6px 0 0 0;"></p></div>'
+        footer_html = f'<div style="border-top:1px solid #eee;padding:16px 0;text-align:center;"><p style="color:#999;font-size:12px;margin:0;">Fresh Cars. Real People. | CarsInStock.com</p><p style="margin:8px 0 0;"><a href="https://carsinstock.com/storefront/unsubscribe/{sp.profile_url_slug}" style="color:#94A3B8;font-size:13px;text-decoration:underline;">Unsubscribe from this salesperson\'s updates</a></p></div>'
 
         template_id = request.form.get("template_id", "1")
 
