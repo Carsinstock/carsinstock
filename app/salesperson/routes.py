@@ -1049,6 +1049,7 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
     @login_required
     def autopilot():
         import sqlite3
+        from datetime import timedelta
         from app.models.salesperson import Salesperson
         sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
         if not sp:
