@@ -486,7 +486,13 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         test_emails = [e.strip() for e in test_email_raw.split(",") if e.strip() and "@" in e]
         test_email = test_emails[0] if test_emails else user.email
 
-        vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status='available').all()
+        sort = sp.vehicle_sort_order or 'newest'
+        if sort == 'price_low':
+            vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status='available').order_by(Vehicle.price.asc()).all()
+        elif sort == 'price_high':
+            vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status='available').order_by(Vehicle.price.desc()).all()
+        else:
+            vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status='available').order_by(Vehicle.created_at.desc()).all()
         vehicles = [v for v in vehicles if not v.expires_at or v.expires_at > datetime.utcnow()]
 
         storefront_url = f"https://carsinstock.com/{sp.profile_url_slug}"

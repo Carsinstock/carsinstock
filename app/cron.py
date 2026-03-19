@@ -106,7 +106,11 @@ def run_onboarding_blast(app):
 
                 storefront_url = f"https://carsinstock.com/{sp['profile_url_slug']}"
                 vehicles = conn.execute(
-                    'SELECT * FROM vehicles WHERE salesperson_id=? AND status="available" ORDER BY created_at DESC LIMIT 6',
+                    'SELECT * FROM vehicles WHERE salesperson_id=? AND status="available" ORDER BY ' + (
+                        'price ASC' if sp['vehicle_sort_order'] == 'price_low' else
+                        'price DESC' if sp['vehicle_sort_order'] == 'price_high' else
+                        'created_at DESC'
+                    ) + ' LIMIT 6',
                     (sp_id,)
                 ).fetchall()
 
@@ -168,7 +172,11 @@ def run_weekly_blast(app):
 
                 storefront_url = f"https://carsinstock.com/{sp['profile_url_slug']}"
                 vehicles = conn.execute(
-                    'SELECT * FROM vehicles WHERE salesperson_id=? AND status="available" ORDER BY created_at DESC LIMIT 6',
+                    'SELECT * FROM vehicles WHERE salesperson_id=? AND status="available" ORDER BY ' + (
+                        'price ASC' if sp['vehicle_sort_order'] == 'price_low' else
+                        'price DESC' if sp['vehicle_sort_order'] == 'price_high' else
+                        'created_at DESC'
+                    ) + ' LIMIT 6',
                     (sp_id,)
                 ).fetchall()
 
