@@ -431,7 +431,7 @@ def terms():
 
 @main.route('/dealership', methods=['GET', 'POST'])
 def dealership():
-    import sqlite3
+    import sqlite3, os
     from app.utils.email import send_email
     turnstile_site_key = os.environ.get('TURNSTILE_SITE_KEY', '')
     plan = request.args.get('plan', '')
