@@ -508,7 +508,9 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
 
         first = sp.display_name.split()[0] if sp.display_name else "there"
         personal_body = body.replace("{{first_name}}", first)
-        footer_html = f'<div style="border-top:1px solid #eee;padding:16px 0;text-align:center;"><p style="color:#999;font-size:12px;margin:0;">Fresh Cars. Real People. | CarsInStock.com</p><p style="margin:8px 0 0;"><a href="https://carsinstock.com/storefront/unsubscribe/{sp.profile_url_slug}" style="color:#94A3B8;font-size:13px;text-decoration:underline;">Unsubscribe from this salesperson\'s updates</a></p></div>'
+        _sp_name = sp.display_name or 'your salesperson'
+        _dl_name = sp.dealership_name or 'your dealership'
+        footer_html = f'<div style="border-top:1px solid #e2e8f0;padding:16px 0;text-align:center;"><p style="color:#94A3B8;font-size:11px;margin:0 0 4px;line-height:1.5;">You are receiving this email because you are a customer of {_sp_name} at {_dl_name}.</p><p style="color:#94A3B8;font-size:11px;margin:0;"><a href="https://carsinstock.com/storefront/unsubscribe/{sp.profile_url_slug}" style="color:#94A3B8;text-decoration:underline;">Unsubscribe</a> &middot; CarsInStock LLC &middot; <a href="https://carsinstock.com" style="color:#94A3B8;text-decoration:none;">CarsInStock.com</a></p></div>'
 
         template_id = request.form.get("template_id", "1")
 
@@ -704,10 +706,22 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         sent = 0
         failed = 0
 
+        # Insert blast record BEFORE send loop so we have blast_id for tracking
+        import sqlite3 as _sqlite3
+        _conn = _sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        _cur = _conn.cursor()
+        _cur.execute(
+            "INSERT INTO email_blasts (salesperson_id, recipient_count, subject, body, blast_type, sent_at) VALUES (?,?,?,?,'bulk',datetime('now'))",
+            (sp.salesperson_id, len(customers), subject, body)
+        )
+        _conn.commit()
+        current_blast_id = _cur.lastrowid
+        _conn.close()
+
         for customer in customers:
             try:
                 first = customer.first_name or customer.email.split('@')[0]
-                footer_html = _build_unsubscribe_footer(customer_id=customer.id)
+                footer_html = _build_unsubscribe_footer(customer_id=customer.id, salesperson_name=sp.display_name, dealership_name=sp.dealership_name)
                 personal_body = body.replace('{{first_name}}', first).replace('{{First_Name}}', first)
 
                 phone_line = f'<div><a href="tel:{sp.phone}" style="color:#00C851;text-decoration:none;">{sp.phone}</a></div>' if sp.phone else ""
@@ -744,18 +758,25 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
                     subject=subject,
                     html_content=html
                 )
+                # inject blast_id and customer_id so webhook can track events
+                # blast_id resolved after insert below — use email_blasts rowid placeholder
+                # We pass salesperson_id+customer_id now; blast_id patched after log insert
+                from sendgrid.helpers.mail import CustomArg
+                msg.custom_arg = [
+                    CustomArg(key='blast_id', value=str(current_blast_id)),
+                    CustomArg(key='customer_id', value=str(customer.id)),
+                ]
                 sg.send(msg)
                 sent += 1
             except Exception as e:
                 failed += 1
 
-        # Log blast
-        if sent > 0:
-            db.session.execute(
-                db.text("INSERT INTO email_blasts (salesperson_id, recipient_count, subject, body, blast_type, sent_at) VALUES (:sid, :count, :subject, :body, 'bulk', :now)"),
-                {"sid": sp.salesperson_id, "count": sent, "subject": subject, "body": body, "now": datetime.utcnow()}
-            )
-            db.session.commit()
+        # Update blast record with actual sent count
+        import sqlite3 as _sqlite3
+        _conn = _sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        _conn.execute("UPDATE email_blasts SET recipient_count=? WHERE id=?", (sent, current_blast_id))
+        _conn.commit()
+        _conn.close()
 
         return jsonify({"sent": sent, "failed": failed, "total": len(customers)})
 
@@ -831,7 +852,19 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
             flash(f"{customer.name} updated!", "success")
             return redirect(url_for("salesperson.my_customers"))
 
-        return render_template("salesperson/add_customer.html", customer=customer, sp=sp)
+        # Load email history for this contact
+        import sqlite3 as _sc
+        _ch = _sc.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        _ch.row_factory = _sc.Row
+        email_history = _ch.execute("""
+            SELECT be.event_type, be.url_clicked, be.created_at, eb.subject
+            FROM blast_events be
+            LEFT JOIN email_blasts eb ON eb.id = be.blast_id
+            WHERE be.customer_id = ?
+            ORDER BY be.created_at DESC LIMIT 50
+        """, (customer.id,)).fetchall()
+        _ch.close()
+        return render_template("salesperson/add_customer.html", customer=customer, sp=sp, email_history=email_history)
 
     @bp.route("/customers/delete/<int:customer_id>", methods=["POST"])
     @login_required
@@ -1083,6 +1116,7 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         sched = cur.execute("SELECT * FROM blast_schedule WHERE salesperson_id=?", (sp.salesperson_id,)).fetchone()
         # Get stats
         total_active = cur.execute("SELECT COUNT(DISTINCT customer_id) FROM blast_log WHERE salesperson_id=?", (sp.salesperson_id,)).fetchone()[0]
+        from datetime import timedelta
         week_ago = datetime.utcnow() - timedelta(days=7)
         sent_week = cur.execute("SELECT COUNT(*) FROM blast_log WHERE salesperson_id=? AND sent_at>=?", (sp.salesperson_id, week_ago)).fetchone()[0]
         new_week = cur.execute("SELECT COUNT(*) FROM blast_log WHERE salesperson_id=? AND blast_type='onboarding' AND sent_at>=?", (sp.salesperson_id, week_ago)).fetchone()[0]

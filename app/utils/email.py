@@ -97,23 +97,23 @@ def send_welcome_email(to_email):
     return send_email(to_email, subject, html_content)
 
 
-def _build_unsubscribe_footer(customer_id=None):
-    """Build email footer with optional unsubscribe link"""
+def _build_unsubscribe_footer(customer_id=None, salesperson_name=None, dealership_name=None):
+    """Build email footer with unsubscribe link and legal disclaimer"""
     unsub_html = ""
     if customer_id:
         token = generate_unsubscribe_token(customer_id)
         unsub_url = f"https://carsinstock.com/unsubscribe/{token}"
-        unsub_html = f'<p style="color: #999; font-size: 11px; margin: 10px 0 0 0;"><a href="{unsub_url}" style="color: #999;">Unsubscribe from these emails</a></p>'
-
+        unsub_html = f'<a href="{unsub_url}" style="color:#94A3B8;text-decoration:underline;">Unsubscribe</a>'
+    sp_name = salesperson_name or "your salesperson"
+    dl_name = dealership_name or "your dealership"
+    disclaimer = f"You are receiving this email because you are a customer of {sp_name} at {dl_name}."
+    unsub_line = (unsub_html + " &middot; ") if unsub_html else ""
     return f"""
-        <div style="border-top: 1px solid #eee; padding: 20px 0; text-align: center;">
-            <p style="color: #999; font-size: 12px; margin: 0;">
-                Fresh Cars. Real People. | CarsInStock.com
-            </p>
-            {unsub_html}
+        <div style="border-top:1px solid #e2e8f0;padding:16px 0;text-align:center;">
+            <p style="color:#94A3B8;font-size:11px;margin:0 0 4px;line-height:1.5;">{disclaimer}</p>
+            <p style="color:#94A3B8;font-size:11px;margin:0;">{unsub_line}CarsInStock LLC &middot; <a href="https://carsinstock.com" style="color:#94A3B8;text-decoration:none;">CarsInStock.com</a></p>
         </div>
     """
-
 
 def send_vehicle_email(to_emails, vehicle, salesperson, personal_message="", customer_map=None):
     """Send vehicle listing to multiple email addresses.
@@ -153,7 +153,7 @@ def send_vehicle_email(to_emails, vehicle, salesperson, personal_message="", cus
 
         # Build per-recipient footer with their unsubscribe link
         cust_id = customer_map.get(email_addr)
-        footer_html = _build_unsubscribe_footer(customer_id=cust_id)
+        footer_html = _build_unsubscribe_footer(customer_id=cust_id, salesperson_name=salesperson.display_name, dealership_name=getattr(salesperson, "dealership_name", None))
         # Personalize {{first_name}} if we have a customer record
         from app.models.customer import Customer
         cust = Customer.query.filter_by(id=cust_id).first() if cust_id else None
