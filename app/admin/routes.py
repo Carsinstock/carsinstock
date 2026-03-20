@@ -23,6 +23,17 @@ def admin_required(f):
 
 
 def register_admin_routes(bp):
+    @bp.route("/dealership-leads")
+    @admin_required
+    def dealership_leads():
+        import sqlite3
+        conn = sqlite3.connect("/home/eddie/carsinstock/instance/carsinstock.db")
+        conn.row_factory = sqlite3.Row
+        leads = conn.execute("SELECT * FROM dealership_leads ORDER BY submitted_at DESC").fetchall()
+        conn.close()
+        return render_template("admin/dealership_leads.html", leads=leads)
+
+
 
     @bp.route("/")
     @admin_required
@@ -772,3 +783,48 @@ def register_admin_routes(bp):
             pass
         return render_template("admin/recruitment_unsub.html")
 
+    @bp.route("/blast-analytics")
+    @admin_required
+    def blast_analytics():
+        import sqlite3
+        conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+
+        blasts = cur.execute("""
+            SELECT id, subject, blast_type, sent_at, recipient_count
+            FROM email_blasts
+            ORDER BY sent_at DESC
+        """).fetchall()
+
+        analytics = []
+        for b in blasts:
+            bid = b['id']
+            total = b['recipient_count'] or 0
+            opens  = cur.execute("SELECT COUNT(*) FROM blast_events WHERE blast_id=? AND event_type='open'", (bid,)).fetchone()[0]
+            clicks = cur.execute("SELECT COUNT(*) FROM blast_events WHERE blast_id=? AND event_type='click'", (bid,)).fetchone()[0]
+            unsubs = cur.execute("SELECT COUNT(*) FROM blast_events WHERE blast_id=? AND event_type='unsubscribe'", (bid,)).fetchone()[0]
+            spams  = cur.execute("SELECT COUNT(*) FROM blast_events WHERE blast_id=? AND event_type='spam'", (bid,)).fetchone()[0]
+            top_link = cur.execute("""
+                SELECT url_clicked FROM blast_events
+                WHERE blast_id=? AND event_type='click' AND url_clicked IS NOT NULL
+                GROUP BY url_clicked ORDER BY COUNT(*) DESC LIMIT 1
+            """, (bid,)).fetchone()
+            analytics.append({
+                'id':         bid,
+                'subject':    b['subject'] or '(no subject)',
+                'blast_type': b['blast_type'],
+                'sent_at':    b['sent_at'],
+                'total':      total,
+                'opens':      opens,
+                'clicks':     clicks,
+                'unsubs':     unsubs,
+                'spams':      spams,
+                'open_rate':  round(opens  / total * 100, 1) if total else 0,
+                'click_rate': round(clicks / total * 100, 1) if total else 0,
+                'unsub_rate': round(unsubs / total * 100, 1) if total else 0,
+                'top_link':   top_link[0] if top_link else None,
+            })
+
+        conn.close()
+        return render_template('admin/blast_analytics.html', analytics=analytics)

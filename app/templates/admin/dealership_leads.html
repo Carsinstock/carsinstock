@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width:1100px;margin:30px auto;padding:0 20px;">
+    <h1 style="color:#1E293B;margin-bottom:4px;">🏢 Dealership Leads</h1>
+    <p style="color:#64748B;margin-bottom:24px;">{{ leads|length }} total submissions</p>
+    {% if leads %}
+    <div style="overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;background:white;border-radius:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+        <thead>
+            <tr style="background:#1E293B;color:white;font-size:13px;">
+                <th style="padding:12px 16px;text-align:left;">Date</th>
+                <th style="padding:12px 16px;text-align:left;">Name</th>
+                <th style="padding:12px 16px;text-align:left;">Dealership</th>
+                <th style="padding:12px 16px;text-align:left;">Phone</th>
+                <th style="padding:12px 16px;text-align:left;">Email</th>
+                <th style="padding:12px 16px;text-align:left;">Team Size</th>
+                <th style="padding:12px 16px;text-align:left;">Plan</th>
+                <th style="padding:12px 16px;text-align:left;">Message</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for lead in leads %}
+        <tr style="border-bottom:1px solid #F1F5F9;font-size:14px;{% if loop.even %}background:#F8FAFC;{% endif %}">
+            <td style="padding:12px 16px;color:#64748B;white-space:nowrap;">{{ lead.submitted_at[:10] if lead.submitted_at else '—' }}</td>
+            <td style="padding:12px 16px;font-weight:600;color:#1E293B;">{{ lead.first_name }} {{ lead.last_name }}</td>
+            <td style="padding:12px 16px;color:#1E293B;">{{ lead.dealership_name }}</td>
+            <td style="padding:12px 16px;"><a href="tel:{{ lead.phone }}" style="color:#00C851;text-decoration:none;">{{ lead.phone }}</a></td>
+            <td style="padding:12px 16px;"><a href="mailto:{{ lead.email }}" style="color:#00C851;text-decoration:none;">{{ lead.email }}</a></td>
+            <td style="padding:12px 16px;">{{ lead.num_salespeople }}</td>
+            <td style="padding:12px 16px;"><span style="background:#F0FDF4;color:#00C851;font-weight:700;font-size:12px;padding:3px 10px;border-radius:20px;">{{ lead.plan_interest }}</span></td>
+            <td style="padding:12px 16px;color:#64748B;max-width:200px;">{{ lead.message or '—' }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+    {% else %}
+    <div style="text-align:center;padding:60px;color:#94A3B8;">No dealership leads yet.</div>
+    {% endif %}
+</div>
+{% endblock %}

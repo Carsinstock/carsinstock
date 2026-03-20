@@ -93,14 +93,56 @@ def dynamic_manifest(slug):
 @main.route('/webhook/sendgrid', methods=['POST'])
 def sendgrid_webhook():
     import sqlite3, json
+    from datetime import datetime
     events = request.get_json() or []
     conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
     cur = conn.cursor()
+
+    type_map = {
+        'open':        'open',
+        'click':       'click',
+        'unsubscribe': 'unsubscribe',
+        'spamreport':  'spam',
+        'bounce':      'bounce',
+    }
+
     for event in events:
-        if event.get('event') == 'bounce' and event.get('type') == 'bounce':
-            email = event.get('email', '').lower()
-            if email:
-                cur.execute("UPDATE customers SET unsubscribed=1 WHERE LOWER(email)=?", (email,))
+        event_type = event.get('event')
+        email      = event.get('email', '').lower().strip()
+        our_type   = type_map.get(event_type)
+        if not our_type:
+            continue
+
+        blast_id    = event.get('blast_id')
+        customer_id = event.get('customer_id')
+        url_clicked = event.get('url') if our_type == 'click' else None
+        ts          = event.get('timestamp', 0)
+        try:
+            created_at = datetime.utcfromtimestamp(int(ts)).strftime('%Y-%m-%d %H:%M:%S')
+        except:
+            created_at = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+
+        # suppress email on bounce, unsubscribe, spam
+        if our_type in ('bounce', 'unsubscribe', 'spam') and email:
+            cur.execute("UPDATE customers SET unsubscribed=1 WHERE LOWER(email)=?", (email,))
+
+        # write event row — deduplicate opens
+        if blast_id and customer_id:
+            try:
+                if our_type == 'open':
+                    exists = cur.execute(
+                        "SELECT id FROM blast_events WHERE blast_id=? AND customer_id=? AND event_type='open'",
+                        (int(blast_id), int(customer_id))
+                    ).fetchone()
+                    if exists:
+                        continue
+                cur.execute(
+                    "INSERT INTO blast_events (blast_id, customer_id, event_type, url_clicked, created_at) VALUES (?,?,?,?,?)",
+                    (int(blast_id), int(customer_id), our_type, url_clicked, created_at)
+                )
+            except Exception as e:
+                pass
+
     conn.commit()
     conn.close()
     return '', 200
@@ -386,3 +428,62 @@ def privacy():
 @main.route('/terms')
 def terms():
     return render_template('terms.html')
+
+@main.route('/dealership', methods=['GET', 'POST'])
+def dealership():
+    import sqlite3
+    from app.utils.email import send_email
+    turnstile_site_key = os.environ.get('TURNSTILE_SITE_KEY', '')
+    plan = request.args.get('plan', '')
+    if request.method == 'POST':
+        first_name = request.form.get('first_name', '').strip()
+        last_name = request.form.get('last_name', '').strip()
+        dealership_name = request.form.get('dealership_name', '').strip()
+        phone = request.form.get('phone', '').strip()
+        email = request.form.get('email', '').strip()
+        num_salespeople = request.form.get('num_salespeople', '').strip()
+        plan_interest = request.form.get('plan_interest', '').strip()
+        message = request.form.get('message', '').strip()
+        # Turnstile
+        import requests as http_requests
+        turnstile_response = request.form.get('cf-turnstile-response', '')
+        if turnstile_response:
+            try:
+                verify = http_requests.post('https://challenges.cloudflare.com/turnstile/v0/siteverify', data={
+                    'secret': os.environ.get('TURNSTILE_SECRET_KEY', ''),
+                    'response': turnstile_response,
+                    'remoteip': request.remote_addr
+                }, timeout=5).json()
+                if not verify.get('success'):
+                    return render_template('dealership.html', error='CAPTCHA failed. Please try again.', plan=plan, turnstile_site_key=turnstile_site_key)
+            except:
+                pass
+        # Save to DB
+        conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        conn.execute('INSERT INTO dealership_leads (first_name, last_name, dealership_name, phone, email, num_salespeople, plan_interest, message) VALUES (?,?,?,?,?,?,?,?)',
+            (first_name, last_name, dealership_name, phone, email, num_salespeople, plan_interest, message))
+        conn.commit()
+        conn.close()
+        # Email notification
+        html = f"""<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">
+            <div style="background:#1E293B;padding:20px;text-align:center;">
+                <h1 style="color:#00C851;margin:0;font-size:24px;">New Dealership Lead</h1>
+            </div>
+            <div style="padding:24px;background:#f8fafc;">
+                <table style="width:100%;border-collapse:collapse;">
+                    <tr><td style="padding:8px;font-weight:700;color:#1E293B;width:40%;">Name</td><td style="padding:8px;">{first_name} {last_name}</td></tr>
+                    <tr style="background:#fff;"><td style="padding:8px;font-weight:700;color:#1E293B;">Dealership</td><td style="padding:8px;">{dealership_name}</td></tr>
+                    <tr><td style="padding:8px;font-weight:700;color:#1E293B;">Phone</td><td style="padding:8px;">{phone}</td></tr>
+                    <tr style="background:#fff;"><td style="padding:8px;font-weight:700;color:#1E293B;">Email</td><td style="padding:8px;">{email}</td></tr>
+                    <tr><td style="padding:8px;font-weight:700;color:#1E293B;">Salespeople</td><td style="padding:8px;">{num_salespeople}</td></tr>
+                    <tr style="background:#fff;"><td style="padding:8px;font-weight:700;color:#1E293B;">Plan Interest</td><td style="padding:8px;color:#00C851;font-weight:700;">{plan_interest}</td></tr>
+                    <tr><td style="padding:8px;font-weight:700;color:#1E293B;">Message</td><td style="padding:8px;">{message or "—"}</td></tr>
+                </table>
+            </div>
+        </div>"""
+        try:
+            send_email('sales@carsinstock.com', f'New Dealership Lead — {dealership_name}', html)
+        except:
+            pass
+        return render_template('dealership.html', success=True, plan=plan, turnstile_site_key=turnstile_site_key)
+    return render_template('dealership.html', plan=plan, turnstile_site_key=turnstile_site_key)
