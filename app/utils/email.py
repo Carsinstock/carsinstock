@@ -104,9 +104,7 @@ def _build_unsubscribe_footer(customer_id=None, salesperson_name=None, dealershi
         token = generate_unsubscribe_token(customer_id)
         unsub_url = f"https://carsinstock.com/unsubscribe/{token}"
         unsub_html = f'<a href="{unsub_url}" style="color:#94A3B8;text-decoration:underline;">Unsubscribe</a>'
-    sp_name = salesperson_name or "your salesperson"
-    dl_name = dealership_name or "your dealership"
-    disclaimer = f"You are receiving this email because you are a customer of {sp_name} at {dl_name}."
+    disclaimer = "You are receiving this email because you opted in to receive updates from this salesperson or dealership."
     unsub_line = (unsub_html + " &middot; ") if unsub_html else ""
     return f"""
         <div style="border-top:1px solid #e2e8f0;padding:16px 0;text-align:center;">
