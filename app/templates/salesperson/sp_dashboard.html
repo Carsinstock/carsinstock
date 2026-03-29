@@ -73,26 +73,30 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
                 <div>
                     <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Year *</label>
-                    <input type="text" name="year" placeholder="2022" maxlength="4" required style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+                    <input type="text" id="spYear" name="year" placeholder="2022" maxlength="4" required style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
                 </div>
                 <div>
                     <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Make *</label>
-                    <input type="text" name="make" placeholder="Toyota" required style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+                    <input type="text" id="spMake" name="make" placeholder="Toyota" required style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
                 </div>
                 <div>
                     <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Model *</label>
-                    <input type="text" name="model" placeholder="Camry" required style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+                    <input type="text" id="spModel" name="model" placeholder="Camry" required style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
                 </div>
             </div>
             <!-- Trim / VIN row -->
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
                 <div>
                     <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Trim</label>
-                    <input type="text" name="trim" placeholder="LE, SE, XLE..." style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+                    <input type="text" id="spTrim" name="trim" placeholder="LE, SE, XLE..." style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
                 </div>
                 <div>
-                    <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">VIN * <span style="color:#94A3B8;font-weight:400;">(17 chars)</span></label>
-                    <input type="text" name="vin" maxlength="17" placeholder="1HGBH41JXMN109186" required style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;font-family:monospace;">
+                    <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">VIN * <span style="color:#94A3B8;font-weight:400;">(17 chars — auto-fills details)</span></label>
+                    <div style="display:flex;gap:6px;">
+                        <input type="text" id="spVin" name="vin" maxlength="17" placeholder="1HGBH41JXMN109186" required style="flex:1;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:13px;font-family:monospace;text-transform:uppercase;">
+                        <button type="button" id="spVinBtn" onclick="decodeSpVIN()" style="background:#1E293B;color:#00C851;border:none;padding:10px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">🔍 Decode</button>
+                    </div>
+                    <div id="spVinResult" style="display:none;font-size:12px;margin-top:4px;"></div>
                 </div>
             </div>
             <!-- Price / Mileage row -->
@@ -114,7 +118,7 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
                 </div>
                 <div>
                     <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Transmission</label>
-                    <select name="transmission" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+                    <select id="spTransmission" name="transmission" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
                         <option value="">Select...</option>
                         <option>Automatic</option>
                         <option>Manual</option>
@@ -125,7 +129,7 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
             <!-- Fuel Type -->
             <div style="margin-bottom:14px;">
                 <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Fuel Type</label>
-                <select name="fuel_type" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+                <select id="spFuelType" name="fuel_type" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
                     <option value="">Select...</option>
                     <option>Gasoline</option>
                     <option>Hybrid</option>
@@ -273,6 +277,50 @@ async function generateWeeklyPost() {
         document.getElementById('weeklyPostSpinner').textContent = 'Something went wrong. Try again.';
     }
 }
+function decodeSpVIN() {
+    const vin = document.getElementById('spVin').value.trim().toUpperCase();
+    document.getElementById('spVin').value = vin;
+    if (vin.length !== 17) {
+        document.getElementById('spVinResult').innerHTML = '<span style="color:#DC2626;">VIN must be 17 characters</span>';
+        document.getElementById('spVinResult').style.display = 'block';
+        return;
+    }
+    document.getElementById('spVinBtn').textContent = '⏳';
+    document.getElementById('spVinBtn').disabled = true;
+    fetch('/api/vin-decode/' + vin)
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('spVinResult').innerHTML = '<span style="color:#DC2626;">' + data.error + '</span>';
+            } else {
+                if (data.year) document.getElementById('spYear').value = data.year;
+                if (data.make) document.getElementById('spMake').value = data.make;
+                if (data.model) document.getElementById('spModel').value = data.model;
+                if (data.trim) document.getElementById('spTrim').value = data.trim;
+                if (data.transmission) document.getElementById('spTransmission').value = data.transmission;
+                if (data.fuel_type) document.getElementById('spFuelType').value = data.fuel_type;
+                let info = (data.year||'') + ' ' + (data.make||'') + ' ' + (data.model||'');
+                if (data.trim) info += ' ' + data.trim;
+                document.getElementById('spVinResult').innerHTML = '<span style="color:#00C851;font-weight:600;">✅ ' + info.trim() + '</span>';
+            }
+            document.getElementById('spVinResult').style.display = 'block';
+            document.getElementById('spVinBtn').textContent = '🔍 Decode';
+            document.getElementById('spVinBtn').disabled = false;
+        })
+        .catch(() => {
+            document.getElementById('spVinResult').innerHTML = '<span style="color:#DC2626;">Network error. Try again.</span>';
+            document.getElementById('spVinResult').style.display = 'block';
+            document.getElementById('spVinBtn').textContent = '🔍 Decode';
+            document.getElementById('spVinBtn').disabled = false;
+        });
+}
+// Auto-decode when VIN hits 17 chars
+document.addEventListener('DOMContentLoaded', function() {
+    var vinEl = document.getElementById('spVin');
+    if (vinEl) vinEl.addEventListener('input', function() {
+        if (this.value.length === 17) decodeSpVIN();
+    });
+});
 async function generateSpBlurb() {
     var year = document.querySelector('[name="year"]').value;
     var make = document.querySelector('[name="make"]').value;
