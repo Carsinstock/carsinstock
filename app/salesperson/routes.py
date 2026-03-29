@@ -283,7 +283,6 @@ def register_routes(bp):
                         download_name=f"{sp.profile_url_slug}-qr-code.png")
 
     @bp.route("/api/vin-decode/<vin>")
-    @login_required
     def vin_decode(vin):
         from flask import jsonify
         from app.models import db
