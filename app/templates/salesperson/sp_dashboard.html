@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+* { box-sizing: border-box; }
+body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
+.sp-page { max-width: 900px; margin: 0 auto; padding: 16px 16px 80px; }
+.sp-header { background: #1E293B; border-radius: 12px; padding: 20px 24px; display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
+.sp-header img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; border: 3px solid #00C851; }
+.sp-header .info h2 { color: white; font-size: 18px; font-weight: 700; margin: 0 0 2px; }
+.sp-header .info p { color: #94A3B8; font-size: 13px; margin: 0; }
+.sp-header .logout { margin-left: auto; color: #94A3B8; font-size: 13px; text-decoration: none; }
+.sp-header .logout:hover { color: white; }
+.card { background: white; border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.card h3 { color: #1E293B; font-size: 15px; font-weight: 700; margin: 0 0 14px; }
+.social-btns { display: flex; flex-wrap: wrap; gap: 10px; }
+.social-btn { background: #1E293B; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; }
+.social-btn.green { background: #00C851; }
+.vehicle-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #F1F5F9; }
+.vehicle-row img { width: 60px; height: 45px; border-radius: 6px; object-fit: cover; }
+.vehicle-row .vinfo { flex: 1; }
+.vehicle-row .vname { font-size: 13px; font-weight: 700; color: #1E293B; }
+.vehicle-row .vprice { font-size: 13px; color: #00C851; font-weight: 700; }
+.vehicle-row .vdays { font-size: 11px; color: #64748B; }
+.lead-row { padding: 10px 0; border-bottom: 1px solid #F1F5F9; }
+.lead-row .lname { font-size: 13px; font-weight: 700; color: #1E293B; }
+.lead-row .ldetail { font-size: 12px; color: #64748B; margin-top: 2px; }
+.copied { display: none; color: #00C851; font-size: 12px; font-weight: 600; margin-top: 8px; }
+</style>
+
+<div class="sp-page">
+    <!-- Header -->
+    <div class="sp-header">
+        {% if member.profile_photo %}
+        <img src="{{ member.profile_photo }}" alt="{{ member.name }}">
+        {% else %}
+        <div style="width:60px;height:60px;border-radius:50%;background:#00C851;color:#1E293B;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;">{{ member.name[0] }}</div>
+        {% endif %}
+        <div class="info">
+            <h2>{{ member.name }}</h2>
+            <p>{{ member.email }}</p>
+        </div>
+        <a href="/sp-logout" class="logout">Sign Out</a>
+    </div>
+
+    <!-- Share My Store -->
+    <div class="card">
+        <h3>📣 Share My Store</h3>
+        <div class="social-btns">
+            <button class="social-btn" onclick="copyLink()">🔗 Copy My Store Link</button>
+            <a href="/qr-code" class="social-btn" download>📲 Download QR Code</a>
+            <button class="social-btn" onclick="copyText()">💬 Copy Text Template</button>
+            <button class="social-btn green" onclick="generateWeeklyPost()">✨ Create My Weekly Post</button>
+        </div>
+        <div id="copiedMsg" class="copied">✅ Copied!</div>
+    </div>
+
+    <!-- My Assigned Vehicles -->
+    <div class="card">
+        <h3>🚗 My Team Picks ({{ my_vehicles|length }})</h3>
+        {% if my_vehicles %}
+        {% for v in my_vehicles %}
+        <div class="vehicle-row">
+            {% if v.image_url %}<img src="{{ v.image_url }}" alt="{{ v.year }} {{ v.make }} {{ v.model }}">{% endif %}
+            <div class="vinfo">
+                <div class="vname">{{ v.year }} {{ v.make }} {{ v.model }}</div>
+                <div class="vprice">${{ '{:,.0f}'.format(v.price) }}</div>
+                {% if v.days_remaining %}<div class="vdays" style="color:{{ '#DC2626' if v.days_remaining <= 2 else '#64748B' }};">{{ v.days_remaining }} days left</div>{% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p style="color:#94A3B8;font-size:13px;margin:0;">No vehicles assigned to you yet. Ask your manager to set Team Picks with your name.</p>
+        {% endif %}
+    </div>
+
+    <!-- My Leads -->
+    <div class="card">
+        <h3>📋 My Leads ({{ my_leads|length }})</h3>
+        {% if my_leads %}
+        {% for lead in my_leads %}
+        <div class="lead-row">
+            <div class="lname">{{ lead.customer_name }}</div>
+            <div class="ldetail">{{ lead.customer_phone or '' }}{% if lead.customer_email %} · {{ lead.customer_email }}{% endif %}</div>
+            <div class="ldetail" style="color:#475569;margin-top:2px;">{{ lead.vehicle_name or '' }} · {{ lead.created_at.strftime('%b %d') if lead.created_at else '' }}</div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p style="color:#94A3B8;font-size:13px;margin:0;">No leads yet. Share your store link to start getting inquiries.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Weekly Post Modal -->
+<div id="weeklyPostModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:12px;padding:28px;max-width:540px;width:90%;margin:20px auto;max-height:90vh;overflow-y:auto;">
+        <h3 style="margin:0 0 6px;color:#1E293B;font-size:18px;font-weight:700;">✨ Your Weekly Post</h3>
+        <p style="margin:0 0 20px;color:#64748B;font-size:13px;">Copy and paste to Facebook, Instagram, or WhatsApp.</p>
+        <div id="weeklyPostSpinner" style="text-align:center;padding:30px;color:#64748B;">✨ Writing your post...</div>
+        <div id="weeklyPostContent" style="display:none;">
+            <div style="margin-bottom:16px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                    <label style="font-size:12px;font-weight:700;color:#1E293B;text-transform:uppercase;letter-spacing:1px;">📘 Facebook</label>
+                    <button onclick="copyPost('fbPost')" style="font-size:12px;background:#1E293B;color:#00C851;border:none;padding:4px 10px;border-radius:4px;cursor:pointer;font-weight:600;">Copy</button>
+                </div>
+                <textarea id="fbPost" rows="5" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:13px;box-sizing:border-box;resize:none;"></textarea>
+            </div>
+            <div style="margin-bottom:16px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                    <label style="font-size:12px;font-weight:700;color:#1E293B;text-transform:uppercase;letter-spacing:1px;">📸 Instagram</label>
+                    <button onclick="copyPost('igPost')" style="font-size:12px;background:#1E293B;color:#00C851;border:none;padding:4px 10px;border-radius:4px;cursor:pointer;font-weight:600;">Copy</button>
+                </div>
+                <textarea id="igPost" rows="3" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:13px;box-sizing:border-box;resize:none;"></textarea>
+            </div>
+            <div style="margin-bottom:20px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                    <label style="font-size:12px;font-weight:700;color:#1E293B;text-transform:uppercase;letter-spacing:1px;">💬 WhatsApp</label>
+                    <button onclick="copyPost('waPost')" style="font-size:12px;background:#1E293B;color:#00C851;border:none;padding:4px 10px;border-radius:4px;cursor:pointer;font-weight:600;">Copy</button>
+                </div>
+                <textarea id="waPost" rows="3" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:13px;box-sizing:border-box;resize:none;"></textarea>
+            </div>
+            <div id="postCopied" style="display:none;color:#00C851;font-size:13px;font-weight:600;margin-bottom:10px;">✅ Copied!</div>
+        </div>
+        <button onclick="document.getElementById('weeklyPostModal').style.display='none'" style="width:100%;background:#f1f5f9;color:#1E293B;border:1px solid #CBD5E1;padding:12px;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;">Close</button>
+    </div>
+</div>
+
+<script>
+var storefrontUrl = "{{ storefront_url }}";
+var dealershipSpId = {{ dealership_sp.salesperson_id if dealership_sp else 0 }};
+
+function copyLink() {
+    navigator.clipboard.writeText(storefrontUrl).then(function() {
+        document.getElementById('copiedMsg').textContent = '✅ Store link copied!';
+        document.getElementById('copiedMsg').style.display = 'block';
+        setTimeout(function(){ document.getElementById('copiedMsg').style.display='none'; }, 3000);
+    });
+}
+function copyText() {
+    var txt = "Hey, check out what I have this week — " + storefrontUrl + ". Let me know if anything catches your eye!";
+    navigator.clipboard.writeText(txt).then(function() {
+        document.getElementById('copiedMsg').textContent = '✅ Text template copied!';
+        document.getElementById('copiedMsg').style.display = 'block';
+        setTimeout(function(){ document.getElementById('copiedMsg').style.display='none'; }, 3000);
+    });
+}
+async function generateWeeklyPost() {
+    document.getElementById('weeklyPostModal').style.display = 'flex';
+    document.getElementById('weeklyPostSpinner').style.display = 'block';
+    document.getElementById('weeklyPostContent').style.display = 'none';
+    try {
+        var resp = await fetch('/api/weekly_post', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({salesperson_id: dealershipSpId})
+        });
+        var data = await resp.json();
+        document.getElementById('fbPost').value = data.facebook_post || '';
+        document.getElementById('igPost').value = data.instagram_caption || '';
+        document.getElementById('waPost').value = data.whatsapp_message || '';
+        document.getElementById('weeklyPostSpinner').style.display = 'none';
+        document.getElementById('weeklyPostContent').style.display = 'block';
+    } catch(e) {
+        document.getElementById('weeklyPostSpinner').textContent = 'Something went wrong. Try again.';
+    }
+}
+function copyPost(id) {
+    navigator.clipboard.writeText(document.getElementById(id).value).then(function() {
+        document.getElementById('postCopied').style.display = 'block';
+        setTimeout(function(){ document.getElementById('postCopied').style.display='none'; }, 2500);
+    });
+}
+</script>
+{% endblock %}

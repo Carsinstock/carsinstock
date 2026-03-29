@@ -139,6 +139,23 @@ def login():
         if not email or not password:
             flash("Email and password are required.", "error")
             return render_template("auth/login.html", email=email)
+        # Check dealership team member first
+        import sqlite3 as _sqL
+        _cL = _sqL.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        _cL.row_factory = _sqL.Row
+        _member = _cL.execute("SELECT * FROM dealership_team WHERE LOWER(email)=LOWER(?) AND is_active=1 AND password_hash IS NOT NULL", (email,)).fetchone()
+        _cL.close()
+        if _member:
+            from werkzeug.security import check_password_hash as _cph
+            if _cph(_member['password_hash'], password):
+                session['team_member_id'] = _member['id']
+                session['team_member_name'] = _member['name']
+                session['team_member_email'] = _member['email']
+                session['dealership_id'] = _member['dealership_id']
+                return redirect('/sp-dashboard')
+            else:
+                flash("Invalid email or password.", "error")
+                return render_template("auth/login.html", email=email)
         user = User.query.filter_by(email=email).first()
         if user and check_password_hash(user.password_hash, password):
             if not user.email_verified:

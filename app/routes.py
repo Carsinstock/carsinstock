@@ -4,6 +4,52 @@ from app.models import db
 
 main = Blueprint('main', __name__)
 
+
+@main.route('/sp-dashboard')
+def sp_dashboard():
+    from flask import session, redirect
+    if 'team_member_id' not in session:
+        return redirect('/login')
+    import sqlite3
+    conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    conn.row_factory = sqlite3.Row
+    member = conn.execute("SELECT * FROM dealership_team WHERE id=?", (session['team_member_id'],)).fetchone()
+    if not member:
+        session.clear()
+        return redirect('/login')
+    # Get dealership salesperson record for vehicle access
+    from app.models.salesperson import Salesperson
+    from app.models.vehicle import Vehicle
+    from app.models.lead import Lead
+    dealership_sp = Salesperson.query.filter_by(salesperson_id=member['dealership_id']).first()
+    # Get vehicles assigned to this team member (pick_user_id = member id)
+    my_vehicles = Vehicle.query.filter_by(
+        salesperson_id=member['dealership_id'],
+        pick_user_id=member['id'],
+        status='available'
+    ).order_by(Vehicle.created_at.desc()).all()
+    # Get all leads on their assigned vehicles
+    my_vehicle_ids = [v.id for v in my_vehicles]
+    my_leads = Lead.query.filter(
+        Lead.vehicle_id.in_(my_vehicle_ids)
+    ).order_by(Lead.created_at.desc()).limit(50).all() if my_vehicle_ids else []
+    storefront_url = f"https://carsinstock.com/{dealership_sp.profile_url_slug}" if dealership_sp else ""
+    conn.close()
+    return render_template('salesperson/sp_dashboard.html',
+        member=dict(member),
+        my_vehicles=my_vehicles,
+        my_leads=my_leads,
+        storefront_url=storefront_url,
+        dealership_sp=dealership_sp)
+
+@main.route('/sp-logout')
+def sp_logout():
+    session.pop('team_member_id', None)
+    session.pop('team_member_name', None)
+    session.pop('team_member_email', None)
+    session.pop('dealership_id', None)
+    return redirect('/login')
+
 @main.route('/')
 def home():
     return render_template('index.html')
