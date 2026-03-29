@@ -15,6 +15,24 @@
 <meta name="twitter:title" content="{{ sp.display_name }} — Cars In Stock">
 <meta name="twitter:description" content="Check out my inventory this week at CarsInStock — carsinstock.com/{{ sp.profile_url_slug }}">
 <meta name="twitter:image" content="{{ sp.profile_photo or 'https://res.cloudinary.com/dbpa9qqtb/image/upload/v1772163049/demo/demo_cover_photo.jpg' }}">
+
+<!-- Floating Share Bar -->
+{% if not is_demo %}
+<div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:999;background:#1E293B;border-radius:50px;padding:10px 20px;display:flex;gap:12px;align-items:center;box-shadow:0 8px 30px rgba(0,0,0,0.3);">
+    <span style="color:#94A3B8;font-size:12px;font-weight:600;white-space:nowrap;">Share:</span>
+    <a href="https://www.facebook.com/sharer/sharer.php?u=https://carsinstock.com/{{ sp.profile_url_slug }}" target="_blank" style="background:#1877F2;color:white;padding:7px 14px;border-radius:50px;font-size:12px;font-weight:700;text-decoration:none;">📘 Facebook</a>
+    <button onclick="shareToInstagram()" style="background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:white;padding:7px 14px;border-radius:50px;font-size:12px;font-weight:700;border:none;cursor:pointer;">📸 Instagram</button>
+    <a href="https://wa.me/?text=Check+out+my+inventory+this+week+at+CarsInStock+—+https://carsinstock.com/{{ sp.profile_url_slug }}" target="_blank" style="background:#25D366;color:white;padding:7px 14px;border-radius:50px;font-size:12px;font-weight:700;text-decoration:none;">💬 WhatsApp</a>
+</div>
+<script>
+function shareToInstagram() {
+    navigator.clipboard.writeText('https://carsinstock.com/{{ sp.profile_url_slug }}').then(function() {
+        alert('Link copied! Open Instagram and paste it in your bio or story.');
+    });
+}
+</script>
+{% endif %}
+
 {% endblock %}
 {% block content %}
 {% if is_demo %}
@@ -73,22 +91,36 @@
         {% endif %}
     {% endif %}
         <div class="profile-header" style="{% if sp.cover_photo or sp.banner_template %}position:relative;{% endif %}">
-        {% if sp.profile_photo %}
-                <img src="{{ sp.profile_photo }}" alt="{{ sp.display_name }}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;">
+        <!-- Profile photo with verified checkmark -->
+        <div style="position:relative;display:inline-block;margin-bottom:12px;">
+            {% if sp.profile_photo %}
+            <img src="{{ sp.profile_photo }}" alt="{{ sp.display_name }}" style="width:110px;height:110px;border-radius:50%;object-fit:cover;border:4px solid #00C851;box-shadow:0 4px 16px rgba(0,0,0,0.15);">
             {% else %}
-                <div class="profile-avatar">{{ sp.display_name[0] if sp.display_name else '?' }}</div>
+            <div class="profile-avatar" style="width:110px;height:110px;font-size:42px;line-height:110px;">{{ sp.display_name[0] if sp.display_name else '?' }}</div>
             {% endif %}
-        <h1>{{ sp.display_name }}</h1>
-        {% if sp.dealership_name %}<p style="color:#64748B;font-size:16px;margin-bottom:8px;">{{ sp.dealership_name }}</p>{% endif %}
-        {% if sp.dealership_address %}<p style="color:#64748B;font-size:14px;margin-bottom:8px;">📍 {{ sp.dealership_address }}</p>{% endif %}
-        {% if sp.bio %}
-        <p class="profile-bio">{{ sp.bio }}</p>
-        {% endif %}
-        {% if sp.phone %}
-        <p class="profile-contact"><strong>Phone:</strong> {% if is_demo %}{{ sp.phone }}{% else %}<a href="tel:{{ sp.phone }}" style="color:#00C851; text-decoration:none;">{{ sp.phone }}</a>{% endif %}</p>
+            <div style="position:absolute;bottom:4px;right:4px;background:#00C851;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.2);">
+                <span style="color:white;font-size:13px;font-weight:900;">✓</span>
+            </div>
+        </div>
+        <h1 style="font-size:28px;font-weight:800;margin:0 0 4px;">{{ sp.display_name }}</h1>
+        {% if sp.dealership_name %}<p style="color:#64748B;font-size:15px;margin:0 0 2px;font-weight:500;">{{ sp.dealership_name }}</p>{% endif %}
+        {% if sp.dealership_address %}<p style="color:#94A3B8;font-size:13px;margin:0 0 12px;">📍 {{ sp.dealership_address }}</p>{% endif %}
+        {% if sp.bio %}<p class="profile-bio" style="font-size:14px;color:#475569;max-width:480px;margin:0 auto 16px;">{{ sp.bio }}</p>{% endif %}
+
+
+
+        <!-- Call Directly button -->
+        {% if sp.phone and not is_demo %}
+        <a href="tel:{{ sp.phone }}" style="display:inline-flex;align-items:center;gap:8px;background:#00C851;color:white;padding:12px 28px;border-radius:50px;font-size:15px;font-weight:700;text-decoration:none;margin-bottom:16px;box-shadow:0 4px 12px rgba(0,200,81,0.3);">
+            📞 Call Me Directly
+        </a>
+        {% elif sp.phone and is_demo %}
+        <div style="display:inline-flex;align-items:center;gap:8px;background:#00C851;color:white;padding:12px 28px;border-radius:50px;font-size:15px;font-weight:700;margin-bottom:16px;">
+            📞 Call Me Directly
+        </div>
         {% endif %}
         {% if sp.email %}
-        <p class="profile-contact"><strong>Email:</strong> {% if is_demo %}{{ sp.email }}{% else %}<a href="mailto:{{ sp.email }}" style="color:#00C851; text-decoration:none;">{{ sp.email }}</a>{% endif %}</p>
+        <p class="profile-contact" style="display:none;"><strong>Email:</strong> {% if is_demo %}{{ sp.email }}{% else %}<a href="mailto:{{ sp.email }}" style="color:#00C851; text-decoration:none;">{{ sp.email }}</a>{% endif %}</p>
         {% endif %}
         <div style="margin-top:14px;display:flex;align-items:center;justify-content:center;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:10px 18px;gap:10px;max-width:100%;">
             <span style="font-size:14px;color:#64748B;">🌐</span>
@@ -182,9 +214,72 @@ function submitReferral() {
 }
 </script>
 
-        <p style="font-size:18px;font-weight:700;color:#1E293B;margin-bottom:4px;text-align:center;">🚗 These are what I believe are the best deals this week.</p>
+        <p style="font-size:18px;font-weight:700;color:#1E293B;margin-bottom:4px;text-align:center;">🚗 These are what We believe are the best deals this week.</p>
         <p style="font-size:14px;font-weight:400;color:#64748B;margin-top:0;margin-bottom:20px;text-align:center;">Every listing auto&#8209;expires in 7 days to keep this page as accurate as possible.</p>
         {% if vehicles %}
+        <!-- Meet the Team (dealership only) -->
+        {% if team_members %}
+        <div style="background:#fff;border-radius:12px;padding:20px 24px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+            <h3 style="color:#1E293B;font-size:16px;font-weight:700;margin:0 0 16px;">🤝 Meet the Team</h3>
+            <div style="display:flex;gap:14px;flex-wrap:wrap;">
+                {% for member in team_members %}
+                <div style="text-align:center;min-width:100px;">
+                    {% if member['profile_photo'] %}
+                    <img src="{{ member['profile_photo'] }}" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:3px solid #00C851;margin-bottom:6px;">
+                    {% else %}
+                    <div style="width:64px;height:64px;border-radius:50%;background:#1E293B;color:#00C851;font-size:22px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 6px;">{{ member['name'][0] }}</div>
+                    {% endif %}
+                    <div style="font-size:13px;font-weight:700;color:#1E293B;">{{ member['name'].split()[0] }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Featured Team Pick Hero -->
+        {% set featured = namespace(vehicle=None) %}
+        {% for v in vehicles %}
+            {% if v.is_team_pick and sp.subscription_tier == 'dealership' and v.pick_user_id and team_lookup.get(v.pick_user_id) and not featured.vehicle %}
+                {% set featured.vehicle = v %}
+            {% endif %}
+        {% endfor %}
+        {% if featured.vehicle %}
+        {% set fv = featured.vehicle %}
+        <div style="background:#fff;border:2px solid #00C851;border-radius:16px;overflow:hidden;margin-bottom:24px;box-shadow:0 4px 20px rgba(0,200,81,0.15);">
+            <div style="background:#00C851;padding:8px 20px;display:flex;align-items:center;gap:8px;">
+                <span style="color:white;font-size:13px;font-weight:800;letter-spacing:0.5px;">⭐ TOP PICK THIS WEEK</span>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;">
+                <div style="flex:1;min-width:240px;max-height:280px;overflow:hidden;">
+                    {% if fv.image_url %}
+                    <img src="{{ fv.image_url }}" alt="{{ fv.year }} {{ fv.make }} {{ fv.model }}" style="width:100%;height:280px;object-fit:cover;">
+                    {% endif %}
+                </div>
+                <div style="flex:1;min-width:240px;padding:24px;display:flex;flex-direction:column;justify-content:center;">
+                    <div style="font-size:22px;font-weight:800;color:#1E293B;margin-bottom:4px;">{{ fv.year }} {{ fv.make }} {{ fv.model }}</div>
+                    <div style="font-size:28px;font-weight:900;color:#00C851;margin-bottom:8px;">${{ "{:,.0f}".format(fv.price) }}</div>
+                    {% if fv.mileage %}<div style="font-size:14px;color:#64748B;margin-bottom:12px;">{{ "{:,}".format(fv.mileage) }} miles</div>{% endif %}
+                    {% if fv.pick_blurb %}
+                    <div style="background:#F0FDF4;border-left:3px solid #00C851;padding:10px 14px;border-radius:0 8px 8px 0;margin-bottom:16px;">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                            {% if team_lookup.get(fv.pick_user_id) %}
+                            <img src="{{ team_lookup[fv.pick_user_id]['photo'] }}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:2px solid #00C851;">
+                            <span style="font-size:13px;font-weight:700;color:#1E293B;">{{ team_lookup[fv.pick_user_id]['name'] }}</span>
+                            {% endif %}
+                        </div>
+                        <p style="font-size:13px;color:#475569;margin:0;font-style:italic;">"{{ fv.pick_blurb }}"</p>
+                    </div>
+                    {% endif %}
+                    {% if not is_demo %}
+                    <button class="interested-btn" onclick="showLeadForm({{ fv.id }}, '{{ fv.year }} {{ fv.make }} {{ fv.model }}', true, '{{ team_lookup[fv.pick_user_id]['photo'] if team_lookup.get(fv.pick_user_id) else '' }}', '{{ team_lookup[fv.pick_user_id]['name'] if team_lookup.get(fv.pick_user_id) else '' }}', '{{ fv.pick_blurb|replace("'", "\'") if fv.pick_blurb else '' }}')" style="width:100%;">I'm Interested</button>
+                    {% else %}
+                    <button class="interested-btn" onclick="showDemoModal()" style="width:100%;">I'm Interested</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         <div class="vehicle-grid" id="vehicleGrid">
             {% for v in vehicles %}
             <div class="vehicle-card" data-price="{{ v.price }}" {% if is_owner and v.is_expired %}style="opacity:0.6;border:2px solid #e53e3e;"{% endif %}>
@@ -195,7 +290,7 @@ function submitReferral() {
                 {% endif %}
                 <div style="position:relative;">
                 {% if not (is_owner and v.is_expired) and v.days_remaining and v.days_remaining > 0 %}
-                <div style="position:absolute;top:10px;right:10px;background:#FF6B35;color:white;padding:4px 10px;border-radius:5px;font-size:12px;font-weight:700;z-index:2;letter-spacing:0.3px;">{{ v.days_remaining }} Days Left</div>
+                <div style="position:absolute;top:10px;right:10px;background:{% if v.days_remaining <= 2 %}#DC2626{% else %}#FF6B35{% endif %};color:white;padding:4px 10px;border-radius:5px;font-size:12px;font-weight:700;z-index:2;letter-spacing:0.3px;">{{ v.days_remaining }} Day{{ 's' if v.days_remaining != 1 else '' }} Left</div>
                 {% endif %}
                 {% if v.image_url %}
                 <img src="{{ v.image_url }}" alt="{{ v.year }} {{ v.make }} {{ v.model }}" class="vehicle-img">

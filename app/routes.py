@@ -197,7 +197,19 @@ def public_profile(slug):
     _conn.close()
     team_lookup = {r['id']: {'name': r['name'], 'photo': r['profile_photo']} for r in _team_rows}
 
-    return render_template('salesperson/public_profile.html', sp=sp, vehicles=vehicles, is_owner=is_owner, is_demo=False, hide_nav_auth=not is_owner, team_lookup=team_lookup)
+    # Dealership accounts — use personal storefront template + pass team members for Meet the Team
+    if sp.subscription_tier == 'dealership':
+        import sqlite3 as _sqd
+        _cd = _sqd.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        _cd.row_factory = _sqd.Row
+        _team_members = _cd.execute("SELECT * FROM dealership_team WHERE dealership_id=? AND is_active=1 ORDER BY name", (sp.salesperson_id,)).fetchall()
+        _team_members = [dict(r) for r in _team_members]
+        _cd.close()
+        return render_template('salesperson/public_profile.html', sp=sp, vehicles=vehicles,
+            is_owner=is_owner, is_demo=False, hide_nav_auth=not is_owner,
+            team_lookup=team_lookup, team_members=_team_members)
+
+    return render_template('salesperson/public_profile.html', sp=sp, vehicles=vehicles, is_owner=is_owner, is_demo=False, hide_nav_auth=not is_owner, team_lookup=team_lookup, team_members=[])
 
 
 @main.route("/lead/submit", methods=["POST"])

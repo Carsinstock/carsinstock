@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+{% block meta %}
+<meta property="og:title" content="{{ sp.display_name }} — Browse This Week's Inventory">
+<meta property="og:description" content="{{ vehicles|length }} cars available · From ${{ '{:,.0f}'.format(vehicles|map(attribute='price')|min) if vehicles else '0' }} · {{ sp.dealership_address or 'Toms River, NJ' }} · Updated daily">
+<meta property="og:image" content="{{ sp.profile_photo or 'https://res.cloudinary.com/dbpa9qqtb/image/upload/v1772163049/demo/demo_cover_photo.jpg' }}">
+<meta property="og:url" content="https://carsinstock.com/{{ sp.profile_url_slug }}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="CarsInStock">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ sp.display_name }} — Browse This Week's Inventory">
+<meta name="twitter:description" content="{{ vehicles|length }} cars available · {{ sp.dealership_address or 'Toms River, NJ' }} · Updated daily">
+<meta name="twitter:image" content="{{ sp.profile_photo or 'https://res.cloudinary.com/dbpa9qqtb/image/upload/v1772163049/demo/demo_cover_photo.jpg' }}">
+{% endblock %}
+{% block content %}
+<style>
+* { box-sizing: border-box; }
+body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
+.dealer-page { max-width: 1100px; margin: 0 auto; padding: 0 16px 120px; }
+
+/* Header */
+.dealer-header { background: #1E293B; border-radius: 0 0 16px 16px; padding: 32px 24px 28px; text-align: center; margin-bottom: 24px; }
+.dealer-header h1 { color: white; font-size: 28px; font-weight: 800; margin: 0 0 4px; }
+.dealer-header .sub { color: #94A3B8; font-size: 14px; margin: 0 0 16px; }
+.dealer-stats { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 16px; }
+.dealer-stat { background: rgba(255,255,255,0.08); border-radius: 10px; padding: 10px 20px; text-align: center; }
+.dealer-stat .num { color: #00C851; font-size: 22px; font-weight: 800; }
+.dealer-stat .label { color: #94A3B8; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* Meet the Team */
+.team-section { background: white; border-radius: 12px; padding: 24px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.team-section h2 { color: #1E293B; font-size: 18px; font-weight: 700; margin: 0 0 16px; }
+.team-grid { display: flex; gap: 16px; flex-wrap: wrap; }
+.team-card { flex: 1; min-width: 140px; max-width: 180px; text-align: center; padding: 16px 12px; border: 1px solid #E2E8F0; border-radius: 10px; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+.team-card:hover { border-color: #00C851; box-shadow: 0 4px 12px rgba(0,200,81,0.15); transform: translateY(-2px); }
+.team-card img { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 3px solid #00C851; margin-bottom: 8px; }
+.team-card .name { font-size: 13px; font-weight: 700; color: #1E293B; margin-bottom: 2px; }
+.team-card .view { font-size: 11px; color: #00C851; font-weight: 600; }
+
+/* Filters */
+.filters { background: white; border-radius: 12px; padding: 16px 20px; margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.filters select { padding: 8px 12px; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 13px; color: #1E293B; background: white; cursor: pointer; }
+.filters .clear-btn { padding: 8px 14px; background: #F1F5F9; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 13px; color: #64748B; cursor: pointer; font-weight: 600; }
+
+/* Featured pick */
+.featured-pick { background: white; border: 2px solid #00C851; border-radius: 16px; overflow: hidden; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,200,81,0.15); }
+.featured-banner { background: #00C851; padding: 8px 20px; }
+.featured-banner span { color: white; font-size: 13px; font-weight: 800; letter-spacing: 0.5px; }
+.featured-body { display: flex; flex-wrap: wrap; }
+.featured-img { flex: 1; min-width: 240px; }
+.featured-img img { width: 100%; height: 280px; object-fit: cover; }
+.featured-info { flex: 1; min-width: 240px; padding: 24px; display: flex; flex-direction: column; justify-content: center; }
+.featured-info .ftitle { font-size: 22px; font-weight: 800; color: #1E293B; margin-bottom: 4px; }
+.featured-info .fprice { font-size: 28px; font-weight: 900; color: #00C851; margin-bottom: 8px; }
+.featured-info .fmiles { font-size: 14px; color: #64748B; margin-bottom: 12px; }
+.featured-blurb { background: #F0FDF4; border-left: 3px solid #00C851; padding: 10px 14px; border-radius: 0 8px 8px 0; margin-bottom: 16px; }
+.featured-blurb .bperson { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.featured-blurb .bperson img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid #00C851; }
+.featured-blurb .bname { font-size: 13px; font-weight: 700; color: #1E293B; }
+.featured-blurb .btext { font-size: 13px; color: #475569; font-style: italic; margin: 0; }
+
+/* Vehicle grid */
+.section-title { font-size: 16px; font-weight: 700; color: #1E293B; margin: 0 0 16px; }
+.vehicle-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+.vehicle-card { background: white; border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden; transition: box-shadow 0.2s; }
+.vehicle-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+.vehicle-card img { width: 100%; height: 180px; object-fit: cover; }
+.card-body { padding: 14px; }
+.card-title { font-size: 15px; font-weight: 700; color: #1E293B; margin-bottom: 4px; }
+.card-price { font-size: 20px; font-weight: 800; color: #00C851; margin-bottom: 6px; }
+.card-meta { font-size: 12px; color: #64748B; margin-bottom: 10px; }
+.card-sp { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+.card-sp img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; border: 1px solid #00C851; }
+.card-sp span { font-size: 12px; color: #475569; font-weight: 500; }
+.interested-btn { width: 100%; padding: 10px; background: #00C851; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; }
+.interested-btn:hover { background: #00b348; }
+.days-badge { position: absolute; top: 10px; right: 10px; color: white; padding: 4px 10px; border-radius: 5px; font-size: 12px; font-weight: 700; z-index: 2; }
+
+@media (max-width: 600px) {
+    .vehicle-grid { grid-template-columns: 1fr; }
+    .featured-body { flex-direction: column; }
+    .dealer-header h1 { font-size: 22px; }
+    .team-card { min-width: 120px; }
+}
+</style>
+
+<div class="dealer-page">
+    <!-- Header -->
+    <div class="dealer-header">
+        {% if sp.cover_photo %}
+        <div style="width:100%;height:240px;overflow:hidden;margin:-32px -24px 20px;border-radius:0;">
+            <img src="{{ sp.cover_photo }}" style="width:100%;height:100%;object-fit:cover;object-position:center;">
+        </div>
+        {% endif %}
+        {% if sp.profile_photo %}
+        <img src="{{ sp.profile_photo }}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:3px solid #00C851;margin-bottom:12px;">
+        {% endif %}
+        <h1>{{ sp.display_name }}</h1>
+        <p class="sub">📍 {{ sp.dealership_address or 'Toms River, NJ' }} {% if sp.phone %}· 📞 {{ sp.phone }}{% endif %}</p>
+
+    </div>
+
+    <!-- Meet the Team -->
+    {% if team_members %}
+    <div class="team-section">
+        <h2>🤝 Meet the Team</h2>
+        <div class="team-grid">
+            {% for member in team_members %}
+            {% set member_sp = member_storefronts.get(member['id']) %}
+            <a href="{{ member_sp or '#' }}" class="team-card">
+                {% if member['profile_photo'] %}
+                <img src="{{ member['profile_photo'] }}" alt="{{ member['name'] }}">
+                {% else %}
+                <div style="width:64px;height:64px;border-radius:50%;background:#1E293B;color:#00C851;font-size:24px;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 8px;">{{ member['name'][0] }}</div>
+                {% endif %}
+                <div class="name">{{ member['name'] }}</div>
+                <div class="view">View Inventory →</div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+
+
+    <!-- Featured Team Pick -->
+    {% set featured = namespace(vehicle=None, pick_member=None) %}
+    {% for v in vehicles %}
+        {% if v.is_team_pick and v.pick_user_id and team_lookup.get(v.pick_user_id) and not featured.vehicle %}
+            {% set featured.vehicle = v %}
+            {% set featured.pick_member = team_lookup[v.pick_user_id] %}
+        {% endif %}
+    {% endfor %}
+    {% if featured.vehicle %}
+    {% set fv = featured.vehicle %}
+    <div class="featured-pick" id="featuredPick">
+        <div class="featured-banner"><span>⭐ TOP PICK THIS WEEK</span></div>
+        <div class="featured-body">
+            <div class="featured-img">
+                {% if fv.image_url %}<img src="{{ fv.image_url }}" alt="{{ fv.year }} {{ fv.make }} {{ fv.model }}">{% endif %}
+            </div>
+            <div class="featured-info">
+                <div class="ftitle">{{ fv.year }} {{ fv.make }} {{ fv.model }}</div>
+                <div class="fprice">${{ '{:,.0f}'.format(fv.price) }}</div>
+                {% if fv.mileage %}<div class="fmiles">{{ '{:,}'.format(fv.mileage) }} miles</div>{% endif %}
+                {% if fv.pick_blurb and featured.pick_member %}
+                <div class="featured-blurb">
+                    <div class="bperson">
+                        <img src="{{ featured.pick_member['photo'] }}" alt="{{ featured.pick_member['name'] }}">
+                        <span class="bname">{{ featured.pick_member['name'] }}</span>
+                    </div>
+                    <p class="btext">"{{ fv.pick_blurb }}"</p>
+                </div>
+                {% endif %}
+                <button class="interested-btn" onclick="showLeadForm({{ fv.id }}, '{{ fv.year }} {{ fv.make }} {{ fv.model }}', true, '{{ featured.pick_member['photo'] if featured.pick_member else '' }}', '{{ featured.pick_member['name'] if featured.pick_member else '' }}', '{{ fv.pick_blurb|replace("'","\\'")|default("") }}')">I'm Interested</button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Inventory Grid -->
+    <p class="section-title">🚗 All Inventory — <span id="inventoryCount">{{ vehicles|length }}</span> cars available</p>
+    <div class="vehicle-grid" id="vehicleGrid">
+        {% for v in vehicles %}
+        <div class="vehicle-card" data-price="{{ v.price }}" data-make="{{ v.make }}" data-pick-user="{{ v.pick_user_id or '' }}">
+            <div style="position:relative;">
+                {% if v.image_url %}
+                <img src="{{ v.image_url }}" alt="{{ v.year }} {{ v.make }} {{ v.model }}">
+                {% else %}
+                <div style="height:180px;background:#F1F5F9;display:flex;align-items:center;justify-content:center;color:#94A3B8;font-size:14px;">No Photo</div>
+                {% endif %}
+                {% if v.days_remaining and v.days_remaining > 0 %}
+                <div class="days-badge" style="background:{{ '#DC2626' if v.days_remaining <= 2 else '#FF6B35' }};">{{ v.days_remaining }} Day{{ 's' if v.days_remaining != 1 else '' }} Left</div>
+                {% endif %}
+                {% if v.is_team_pick and v.pick_user_id and team_lookup.get(v.pick_user_id) %}
+                <div style="position:absolute;bottom:8px;right:8px;">
+                    <img src="{{ team_lookup[v.pick_user_id]['photo'] }}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #00C851;box-shadow:0 2px 8px rgba(0,0,0,0.25);">
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="card-title">{{ v.year }} {{ v.make }} {{ v.model }}{% if v.trim %} {{ v.trim }}{% endif %}</div>
+                <div class="card-price">${{ '{:,.0f}'.format(v.price) }}</div>
+                <div class="card-meta">{% if v.mileage %}{{ '{:,}'.format(v.mileage) }} miles{% endif %}{% if v.exterior_color %} · {{ v.exterior_color }}{% endif %}</div>
+                {% if v.pick_user_id and team_lookup.get(v.pick_user_id) %}
+                <div class="card-sp">
+                    <img src="{{ team_lookup[v.pick_user_id]['photo'] }}" alt="{{ team_lookup[v.pick_user_id]['name'] }}">
+                    <span>{{ team_lookup[v.pick_user_id]['name'] }}'s Pick</span>
+                </div>
+                {% endif %}
+                <button class="interested-btn" onclick="showLeadForm({{ v.id }}, '{{ v.year }} {{ v.make }} {{ v.model }}', {{ 'true' if (v.is_team_pick and v.pick_user_id and team_lookup.get(v.pick_user_id)) else 'false' }}, '{{ team_lookup[v.pick_user_id]['photo'] if (v.pick_user_id and team_lookup.get(v.pick_user_id)) else '' }}', '{{ team_lookup[v.pick_user_id]['name'] if (v.pick_user_id and team_lookup.get(v.pick_user_id)) else '' }}', '{{ v.pick_blurb|replace("'","\\'")|default("") }}')">I'm Interested</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- I'm Interested Modal -->
+<div id="leadModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:12px;padding:28px;max-width:420px;width:90%;max-height:90vh;overflow-y:auto;">
+        <div id="tpSection" style="display:none;margin-bottom:16px;background:#F0FDF4;border-radius:8px;padding:12px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                <img id="tpModalPhoto" src="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:2px solid #00C851;">
+                <span id="tpModalName" style="font-weight:700;color:#1E293B;font-size:14px;"></span>
+            </div>
+            <p id="tpModalBlurb" style="font-size:13px;color:#475569;font-style:italic;margin:0;"></p>
+        </div>
+        <h2 style="margin:0 0 6px;color:#1E293B;font-size:20px;">I'm Interested!</h2>
+        <p id="leadVehicleName" style="color:#64748B;font-size:14px;margin:0 0 16px;"></p>
+        <form id="leadForm">
+            <input type="hidden" id="leadVehicleId" name="vehicle_id">
+            <input type="text" name="customer_name" placeholder="Your Name *" required style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;margin-bottom:10px;">
+            <input type="email" name="customer_email" placeholder="Email *" required style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;margin-bottom:10px;">
+            <input type="tel" name="customer_phone" placeholder="Phone" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;margin-bottom:10px;">
+            <textarea name="message" placeholder="Any questions or comments?" rows="3" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;margin-bottom:14px;resize:none;"></textarea>
+            <button type="submit" style="width:100%;padding:13px;background:#00C851;color:white;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;">Send My Interest</button>
+        </form>
+        <button onclick="document.getElementById('leadModal').style.display='none'" style="width:100%;margin-top:10px;padding:10px;background:#f1f5f9;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;cursor:pointer;">Cancel</button>
+    </div>
+</div>
+
+<!-- Floating Share Bar -->
+<div style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:999;background:#1E293B;border-radius:50px;padding:10px 20px;display:flex;gap:12px;align-items:center;box-shadow:0 8px 30px rgba(0,0,0,0.3);">
+    <span style="color:#94A3B8;font-size:12px;font-weight:600;white-space:nowrap;">Share:</span>
+    <a href="https://www.facebook.com/sharer/sharer.php?u=https://carsinstock.com/{{ sp.profile_url_slug }}" target="_blank" style="background:#1877F2;color:white;padding:7px 14px;border-radius:50px;font-size:12px;font-weight:700;text-decoration:none;">📘 Facebook</a>
+    <button onclick="navigator.clipboard.writeText('https://carsinstock.com/{{ sp.profile_url_slug }}').then(()=>alert('Link copied! Paste in Instagram.'))" style="background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:white;padding:7px 14px;border-radius:50px;font-size:12px;font-weight:700;border:none;cursor:pointer;">📸 Instagram</button>
+    <a href="https://wa.me/?text=Check+out+Pine+Belt+Used+Cars+inventory+this+week+—+https://carsinstock.com/{{ sp.profile_url_slug }}" target="_blank" style="background:#25D366;color:white;padding:7px 14px;border-radius:50px;font-size:12px;font-weight:700;text-decoration:none;">💬 WhatsApp</a>
+</div>
+
+<script>
+function showLeadForm(vehicleId, vehicleName, isTeamPick, pickPhoto, pickName, pickBlurb) {
+    document.getElementById('leadVehicleId').value = vehicleId;
+    document.getElementById('leadVehicleName').textContent = vehicleName;
+    var tpSection = document.getElementById('tpSection');
+    if (isTeamPick && pickPhoto && pickName) {
+        document.getElementById('tpModalPhoto').src = pickPhoto;
+        document.getElementById('tpModalName').textContent = pickName;
+        document.getElementById('tpModalBlurb').textContent = '\u201c' + pickBlurb + '\u201d';
+        tpSection.style.display = 'block';
+    } else {
+        tpSection.style.display = 'none';
+    }
+    document.getElementById('leadModal').style.display = 'flex';
+}
+
+document.getElementById('leadForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var form = e.target;
+    var data = {
+        vehicle_id: form.vehicle_id.value,
+        customer_name: form.customer_name.value,
+        customer_email: form.customer_email.value,
+        customer_phone: form.customer_phone.value,
+        message: form.message.value
+    };
+    var btn = form.querySelector('button[type=submit]');
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+    try {
+        var resp = await fetch('/lead', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)});
+        if (resp.ok) {
+            document.getElementById('leadModal').style.display = 'none';
+            alert('Thanks! ' + data.customer_name + ' — we\'ll be in touch soon.');
+            form.reset();
+        } else {
+            btn.textContent = 'Send My Interest';
+            btn.disabled = false;
+        }
+    } catch(err) {
+        btn.textContent = 'Send My Interest';
+        btn.disabled = false;
+    }
+});
+
+// Filter logic
+function applyFilters() {
+    var spFilter = document.getElementById('filterSalesperson').value;
+    var makeFilter = document.getElementById('filterMake').value;
+    var priceFilter = document.getElementById('filterPrice').value;
+    var cards = document.querySelectorAll('#vehicleGrid .vehicle-card');
+    var visible = 0;
+    cards.forEach(function(card) {
+        var price = parseFloat(card.dataset.price);
+        var make = card.dataset.make;
+        var pickUser = card.dataset.pickUser;
+        var show = true;
+        if (spFilter && pickUser !== spFilter) show = false;
+        if (makeFilter && make !== makeFilter) show = false;
+        if (priceFilter) {
+            var parts = priceFilter.split('-');
+            var min = parseFloat(parts[0]), max = parseFloat(parts[1]);
+            if (price < min || price > max) show = false;
+        }
+        card.style.display = show ? '' : 'none';
+        if (show) visible++;
+    });
+    document.getElementById('inventoryCount').textContent = visible;
+    document.getElementById('filterCount').textContent = visible + ' of {{ vehicles|length }} shown';
+}
+function clearFilters() {
+    document.getElementById('filterSalesperson').value = '';
+    document.getElementById('filterMake').value = '';
+    document.getElementById('filterPrice').value = '';
+    applyFilters();
+    document.getElementById('filterCount').textContent = '';
+}
+</script>
+{% endblock %}
