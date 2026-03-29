@@ -54,22 +54,38 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
         <div id="copiedMsg" class="copied">✅ Copied!</div>
     </div>
 
-    <!-- My Assigned Vehicles -->
+    <!-- Notification Banners -->
+    {% for notif in notifications %}
+    <div id="notif-{{ notif.id }}" style="border-radius:10px;padding:14px 18px;margin-bottom:12px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;{% if notif.type == 'approved' %}background:#D1FAE5;border:1px solid #6EE7B7;{% else %}background:#FEE2E2;border:1px solid #FCA5A5;{% endif %}">
+        <div style="font-size:14px;font-weight:600;color:{% if notif.type == 'approved' %}#065F46{% else %}#991B1B{% endif %};">
+            {% if notif.type == 'approved' %}✅{% else %}❌{% endif %} {{ notif.message }}
+        </div>
+        <button onclick="dismissNotif({{ notif.id }})" style="background:none;border:none;cursor:pointer;font-size:18px;color:#94A3B8;flex-shrink:0;line-height:1;">×</button>
+    </div>
+    {% endfor %}
+
+    <!-- My Vehicles -->
     <div class="card">
-        <h3>🚗 My Team Picks ({{ my_vehicles|length }})</h3>
-        {% if my_vehicles %}
-        {% for v in my_vehicles %}
+        <h3>🚗 My Vehicles ({{ all_my_vehicles|length }})</h3>
+        {% if all_my_vehicles %}
+        {% for v in all_my_vehicles %}
         <div class="vehicle-row">
             {% if v.image_url %}<img src="{{ v.image_url }}" alt="{{ v.year }} {{ v.make }} {{ v.model }}">{% endif %}
             <div class="vinfo">
                 <div class="vname">{{ v.year }} {{ v.make }} {{ v.model }}</div>
                 <div class="vprice">${{ '{:,.0f}'.format(v.price) }}</div>
+                {% if v.approval_status == 'pending' %}
+                <div class="vdays" style="color:#D97706;font-weight:600;">🟡 Pending approval</div>
+                {% elif v.approval_status == 'rejected' %}
+                <div class="vdays" style="color:#DC2626;font-weight:600;">🔴 Not approved{% if v.rejection_reason %} — {{ v.rejection_reason }}{% endif %}</div>
+                {% else %}
                 {% if v.days_remaining %}<div class="vdays" style="color:{{ '#DC2626' if v.days_remaining <= 2 else '#64748B' }};">{{ v.days_remaining }} days left</div>{% endif %}
+                {% endif %}
             </div>
         </div>
         {% endfor %}
         {% else %}
-        <p style="color:#94A3B8;font-size:13px;margin:0;">No vehicles assigned to you yet. Ask your manager to set Team Picks with your name.</p>
+        <p style="color:#94A3B8;font-size:13px;margin:0;">No vehicles submitted yet.</p>
         {% endif %}
     </div>
 
@@ -162,6 +178,11 @@ async function generateWeeklyPost() {
     } catch(e) {
         document.getElementById('weeklyPostSpinner').textContent = 'Something went wrong. Try again.';
     }
+}
+function dismissNotif(id) {
+    fetch('/sp-notification/' + id + '/dismiss', {method:'POST'});
+    var el = document.getElementById('notif-' + id);
+    if (el) el.style.display = 'none';
 }
 function copyPost(id) {
     navigator.clipboard.writeText(document.getElementById(id).value).then(function() {

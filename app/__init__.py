@@ -38,6 +38,18 @@ def create_app():
     from app.billing.routes import billing_bp
     app.register_blueprint(billing_bp)
 
+    @app.context_processor
+    def inject_pending_count():
+        try:
+            from app.models.vehicle import Vehicle
+            from flask import request as _req
+            if _req.endpoint and _req.endpoint.startswith('admin.'):
+                count = Vehicle.query.filter_by(approval_status='pending').count()
+                return {'pending_count': count}
+        except Exception:
+            pass
+        return {'pending_count': 0}
+
     @app.errorhandler(404)
     def not_found(e):
         from flask import render_template

@@ -155,13 +155,128 @@ def register_admin_routes(bp):
     @bp.route("/vehicles")
     @admin_required
     def vehicles():
-        all_vehicles = Vehicle.query.order_by(Vehicle.created_at.desc()).all()
+        pending_vehicles = Vehicle.query.filter_by(approval_status='pending').order_by(Vehicle.created_at.desc()).all()
+        all_vehicles = Vehicle.query.filter(Vehicle.approval_status != 'pending').order_by(Vehicle.created_at.desc()).all()
         import sqlite3 as _sq3
         _conn = _sq3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
         _conn.row_factory = _sq3.Row
         all_salespeople = _conn.execute("SELECT * FROM dealership_team WHERE is_active=1 ORDER BY name").fetchall()
         _conn.close()
-        return render_template("admin/vehicles.html", vehicles=all_vehicles, all_salespeople=all_salespeople)
+        return render_template("admin/vehicles.html",
+            vehicles=all_vehicles,
+            pending_vehicles=pending_vehicles,
+            pending_count=len(pending_vehicles),
+            all_salespeople=all_salespeople)
+
+    @bp.route("/vehicles/<int:vehicle_id>/approve", methods=["POST"])
+    @admin_required
+    def approve_vehicle(vehicle_id):
+        from app.models.vehicle import Vehicle
+        from app.models import db
+        import os
+        vehicle = Vehicle.query.get_or_404(vehicle_id)
+        vehicle.approval_status = 'approved'
+        vehicle.rejection_reason = None
+        db.session.commit()
+        # Write in-app notification + send email
+        try:
+            import sqlite3 as _sq3
+            _conn = _sq3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+            _conn.row_factory = _sq3.Row
+            if vehicle.pick_user_id:
+                _conn.execute(
+                    "INSERT INTO team_notifications (team_member_id, vehicle_id, type, message) VALUES (?,?,?,?)",
+                    (vehicle.pick_user_id, vehicle.id, 'approved',
+                     f"Your {vehicle.year} {vehicle.make} {vehicle.model} was approved and is now live!")
+                )
+                _conn.commit()
+            member = _conn.execute("SELECT * FROM dealership_team WHERE id=? AND is_active=1", (vehicle.pick_user_id,)).fetchone() if vehicle.pick_user_id else None
+            _conn.close()
+            if member and member['email']:
+                from sendgrid import SendGridAPIClient
+                from sendgrid.helpers.mail import Mail, Email, To
+                sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+                html = f"""
+                <div style="font-family:Inter,sans-serif;max-width:520px;margin:0 auto;padding:24px;">
+                  <div style="background:#1E293B;padding:16px 24px;border-radius:10px 10px 0 0;">
+                    <span style="color:white;font-weight:400;">Cars</span><span style="color:#00C851;font-weight:700;"> IN STOCK</span>
+                  </div>
+                  <div style="background:#fff;border:1px solid #E2E8F0;border-top:none;border-radius:0 0 10px 10px;padding:28px;">
+                    <h2 style="color:#1E293B;font-size:20px;margin:0 0 8px;">✅ Your vehicle was approved!</h2>
+                    <p style="color:#475569;font-size:15px;margin:0 0 20px;">Your <strong>{vehicle.year} {vehicle.make} {vehicle.model}</strong> is now live on the store and visible to customers.</p>
+                    <a href="https://carsinstock.com/pinebeltusedcars" style="background:#00C851;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;display:inline-block;">View My Store →</a>
+                    <p style="color:#94A3B8;font-size:12px;margin:24px 0 0;">— The CarsInStock Team</p>
+                  </div>
+                </div>"""
+                msg = Mail(from_email=Email('sales@carsinstock.com', 'CarsInStock'), to_emails=To(member['email']), subject=f"✅ Approved: {vehicle.year} {vehicle.make} {vehicle.model}", html_content=html)
+                sg.send(msg)
+        except Exception as e:
+            print(f"Approval email error: {e}")
+        flash(f"{vehicle.year} {vehicle.make} {vehicle.model} approved and now live.", "success")
+        return redirect(url_for("admin.vehicles"))
+
+    @bp.route("/vehicles/<int:vehicle_id>/reject", methods=["POST"])
+    @admin_required
+    def reject_vehicle(vehicle_id):
+        from app.models.vehicle import Vehicle
+        from app.models import db
+        import os
+        vehicle = Vehicle.query.get_or_404(vehicle_id)
+        reason = request.form.get("rejection_reason", "").strip()
+        vehicle.approval_status = 'rejected'
+        vehicle.rejection_reason = reason if reason else None
+        db.session.commit()
+        # Write in-app notification + send email
+        try:
+            import sqlite3 as _sq3
+            _conn = _sq3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+            _conn.row_factory = _sq3.Row
+            if vehicle.pick_user_id:
+                msg_text = f"Your {vehicle.year} {vehicle.make} {vehicle.model} wasn't approved."
+                if reason:
+                    msg_text += f" Reason: {reason}"
+                _conn.execute(
+                    "INSERT INTO team_notifications (team_member_id, vehicle_id, type, message) VALUES (?,?,?,?)",
+                    (vehicle.pick_user_id, vehicle.id, 'rejected', msg_text)
+                )
+                _conn.commit()
+            member = _conn.execute("SELECT * FROM dealership_team WHERE id=? AND is_active=1", (vehicle.pick_user_id,)).fetchone() if vehicle.pick_user_id else None
+            _conn.close()
+            if member and member['email']:
+                from sendgrid import SendGridAPIClient
+                from sendgrid.helpers.mail import Mail, Email, To
+                sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+                reason_block = f'<p style="background:#FEF2F2;border-left:3px solid #EF4444;padding:12px 16px;border-radius:0 6px 6px 0;color:#7F1D1D;font-size:14px;margin:0 0 20px;"><strong>Reason:</strong> {reason}</p>' if reason else ''
+                html = f"""
+                <div style="font-family:Inter,sans-serif;max-width:520px;margin:0 auto;padding:24px;">
+                  <div style="background:#1E293B;padding:16px 24px;border-radius:10px 10px 0 0;">
+                    <span style="color:white;font-weight:400;">Cars</span><span style="color:#00C851;font-weight:700;"> IN STOCK</span>
+                  </div>
+                  <div style="background:#fff;border:1px solid #E2E8F0;border-top:none;border-radius:0 0 10px 10px;padding:28px;">
+                    <h2 style="color:#1E293B;font-size:20px;margin:0 0 8px;">❌ Vehicle needs a change</h2>
+                    <p style="color:#475569;font-size:15px;margin:0 0 16px;">Your <strong>{vehicle.year} {vehicle.make} {vehicle.model}</strong> wasn't approved this time.</p>
+                    {reason_block}
+                    <p style="color:#475569;font-size:14px;margin:0 0 20px;">You can resubmit after making the necessary changes.</p>
+                    <a href="https://carsinstock.com/vehicles/add" style="background:#1E293B;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;display:inline-block;">Submit Another Vehicle →</a>
+                    <p style="color:#94A3B8;font-size:12px;margin:24px 0 0;">— The CarsInStock Team</p>
+                  </div>
+                </div>"""
+                msg = Mail(from_email=Email('sales@carsinstock.com', 'CarsInStock'), to_emails=To(member['email']), subject=f"❌ Not approved: {vehicle.year} {vehicle.make} {vehicle.model}", html_content=html)
+                sg.send(msg)
+        except Exception as e:
+            print(f"Rejection email error: {e}")
+        flash(f"{vehicle.year} {vehicle.make} {vehicle.model} rejected.", "success")
+        return redirect(url_for("admin.vehicles"))
+
+    @bp.route("/vehicles/<int:vehicle_id>/dismiss-notification", methods=["POST"])
+    def dismiss_vehicle_notification(vehicle_id):
+        from app.models.vehicle import Vehicle
+        from app.models import db
+        vehicle = Vehicle.query.get(vehicle_id)
+        if vehicle:
+            vehicle.approval_notified = True
+            db.session.commit()
+        return ("", 204)
 
     @bp.route("/vehicles/<int:vehicle_id>/team-pick", methods=["POST"])
     def set_team_pick(vehicle_id):

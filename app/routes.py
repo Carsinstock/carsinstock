@@ -22,25 +22,43 @@ def sp_dashboard():
     from app.models.vehicle import Vehicle
     from app.models.lead import Lead
     dealership_sp = Salesperson.query.filter_by(salesperson_id=member['dealership_id']).first()
-    # Get vehicles assigned to this team member (pick_user_id = member id)
-    my_vehicles = Vehicle.query.filter_by(
+    # Get ALL vehicles for this team member: approved, pending, rejected
+    all_my_vehicles = Vehicle.query.filter_by(
         salesperson_id=member['dealership_id'],
-        pick_user_id=member['id'],
-        status='available'
+        pick_user_id=member['id']
     ).order_by(Vehicle.created_at.desc()).all()
-    # Get all leads on their assigned vehicles
+    # Only approved+available ones shown as active picks
+    my_vehicles = [v for v in all_my_vehicles if v.approval_status in ('approved', None) and v.status == 'available']
+    # Get all leads on their approved vehicles
     my_vehicle_ids = [v.id for v in my_vehicles]
     my_leads = Lead.query.filter(
         Lead.vehicle_id.in_(my_vehicle_ids)
     ).order_by(Lead.created_at.desc()).limit(50).all() if my_vehicle_ids else []
     storefront_url = f"https://carsinstock.com/{dealership_sp.profile_url_slug}" if dealership_sp else ""
+    # Load undismissed notifications
+    notifications = conn.execute(
+        "SELECT * FROM team_notifications WHERE team_member_id=? AND is_dismissed=0 ORDER BY created_at DESC",
+        (member['id'],)
+    ).fetchall()
+    notifications = [dict(n) for n in notifications]
     conn.close()
     return render_template('salesperson/sp_dashboard.html',
         member=dict(member),
         my_vehicles=my_vehicles,
+        all_my_vehicles=all_my_vehicles,
         my_leads=my_leads,
         storefront_url=storefront_url,
-        dealership_sp=dealership_sp)
+        dealership_sp=dealership_sp,
+        notifications=notifications)
+
+@main.route('/sp-notification/<int:notif_id>/dismiss', methods=['POST'])
+def dismiss_notification(notif_id):
+    import sqlite3
+    conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    conn.execute("UPDATE team_notifications SET is_dismissed=1 WHERE id=?", (notif_id,))
+    conn.commit()
+    conn.close()
+    return ('', 204)
 
 @main.route('/sp-logout')
 def sp_logout():
@@ -221,14 +239,20 @@ def public_profile(slug):
         else:
             vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id).order_by(Vehicle.created_at.desc()).all()
     else:
-        # Public only sees active, non-expired vehicles
+        # Public only sees active, non-expired, approved vehicles
+        from sqlalchemy import or_ as _or
         sort = sp.vehicle_sort_order or 'newest'
+        base_q = Vehicle.query.filter(
+            Vehicle.salesperson_id == sp.salesperson_id,
+            Vehicle.status == 'available',
+            _or(Vehicle.approval_status == 'approved', Vehicle.approval_status == None)
+        )
         if sort == 'price_low':
-            vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status='available').order_by(Vehicle.price.asc()).all()
+            vehicles = base_q.order_by(Vehicle.price.asc()).all()
         elif sort == 'price_high':
-            vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status='available').order_by(Vehicle.price.desc()).all()
+            vehicles = base_q.order_by(Vehicle.price.desc()).all()
         else:
-            vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status='available').order_by(Vehicle.created_at.desc()).all()
+            vehicles = base_q.order_by(Vehicle.created_at.desc()).all()
         vehicles = [v for v in vehicles if not v.expires_at or v.expires_at > datetime.utcnow()]
     # Gate storefront if owner's subscription is locked
     from app.models.user import User as _User

@@ -34,6 +34,17 @@ class Vehicle(db.Model):
 
     expiration_warning_sent = db.Column(db.Boolean, default=False)
 
+    # Approval workflow (dealership tier)
+    approval_status = db.Column(db.String(20), default='approved')  # 'approved' | 'pending' | 'rejected'
+    rejection_reason = db.Column(db.Text, nullable=True)
+
+    # Notifications (dismissible banners on sp-dashboard)
+    approval_notified = db.Column(db.Boolean, default=False)   # True = banner dismissed
+
+    # Approval (dealership tier only)
+    approval_status = db.Column(db.String(20), default='approved')  # 'approved' | 'pending' | 'rejected'
+    rejection_reason = db.Column(db.Text)
+
     # Team Pick (dealership tier only)
     is_team_pick = db.Column(db.Boolean, default=False)
     pick_user_id = db.Column(db.Integer, db.ForeignKey('salespeople.salesperson_id'), nullable=True)

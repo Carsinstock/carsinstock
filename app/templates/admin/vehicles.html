@@ -1,27 +1,67 @@
 {% extends "admin/base_admin.html" %}
 {% block content %}
+
+{% if pending_vehicles %}
+<!-- ===== PENDING APPROVAL QUEUE ===== -->
+<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:20px 24px;margin-bottom:28px;">
+    <h2 style="font-size:18px;font-weight:700;color:#92400E;margin:0 0 16px;">
+        🟡 Pending Approval ({{ pending_vehicles|length }})
+    </h2>
+    {% for v in pending_vehicles %}
+    <div style="background:white;border:1px solid #FDE68A;border-radius:10px;padding:16px 20px;margin-bottom:12px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        {% if v.image_url %}
+        <img src="{{ v.image_url }}" style="width:90px;height:64px;object-fit:cover;border-radius:8px;flex-shrink:0;">
+        {% else %}
+        <div style="width:90px;height:64px;border-radius:8px;background:#F1F5F9;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#94A3B8;font-size:22px;">🚗</div>
+        {% endif %}
+        <div style="flex:1;min-width:180px;">
+            <div style="font-size:15px;font-weight:700;color:#1E293B;">{{ v.year }} {{ v.make }} {{ v.model }}{% if v.trim %} {{ v.trim }}{% endif %}</div>
+            <div style="font-size:13px;color:#64748B;margin-top:2px;">${{ "{:,.0f}".format(v.price) if v.price else 'N/A' }} &middot; {{ "{:,}".format(v.mileage) if v.mileage else '&mdash;' }} mi</div>
+            {% if v.pick_salesperson %}
+            <div style="font-size:12px;color:#475569;margin-top:4px;">Submitted by <strong>{{ v.pick_salesperson.display_name }}</strong></div>
+            {% endif %}
+            <div style="font-size:12px;color:#94A3B8;margin-top:2px;">{{ v.created_at.strftime('%b %d, %Y at %I:%M %p') if v.created_at else '' }}</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-shrink:0;">
+            <form method="POST" action="/admin/vehicles/{{ v.id }}/approve">
+                <button class="btn btn-success" type="submit">Approve</button>
+            </form>
+            <button class="btn btn-danger" onclick="openRejectModal({{ v.id }}, '{{ v.year }} {{ v.make }} {{ v.model }}')">Reject</button>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- ===== ALL VEHICLES TABLE ===== -->
 <h2 class="section-title">All Vehicles ({{ vehicles|length }})</h2>
 <table>
-    <tr><th>Photo</th><th>Vehicle</th><th>Price</th><th>Salesperson</th><th>Status</th><th>Days Left</th><th>Listed</th><th>Team Pick</th><th>Actions</th></tr>
+    <tr>
+        <th>Photo</th><th>Vehicle</th><th>Price</th><th>Salesperson</th>
+        <th>Status</th><th>Days Left</th><th>Listed</th><th>Team Pick</th><th>Actions</th>
+    </tr>
     {% for v in vehicles %}
     <tr>
         <td>{% if v.image_url %}<img src="{{ v.image_url }}" style="width:60px;height:40px;object-fit:cover;border-radius:4px;">{% else %}-{% endif %}</td>
         <td>{{ v.year }} {{ v.make }} {{ v.model }}</td>
         <td>${{ "{:,.0f}".format(v.price) if v.price else 'N/A' }}</td>
         <td>{{ v.salesperson.display_name if v.salesperson else 'Unknown' }}</td>
-        <td>{% if v.days_remaining > 0 %}<span class="badge badge-green">Active</span>{% else %}<span class="badge badge-red">Expired</span>{% endif %}</td>
-        <td>{% if v.days_remaining > 0 %}{{ v.days_remaining }}{% else %}-{% endif %}</td>
-        <td>{{ v.created_at.strftime('%b %d') }}</td>
         <td>
-            <form method="POST" action="/admin/vehicles/{{ v.id }}/delete" style="display:inline;" onsubmit="return confirm('Delete this vehicle?')">
-                <button class="btn btn-danger" type="submit">Delete</button>
-            </form>
+            {% if v.approval_status == 'rejected' %}
+            <span class="badge" style="background:#FEE2E2;color:#991B1B;">Rejected</span>
+            {% elif v.days_remaining > 0 %}
+            <span class="badge badge-green">Active</span>
+            {% else %}
+            <span class="badge badge-red">Expired</span>
+            {% endif %}
         </td>
+        <td>{% if v.days_remaining > 0 %}{{ v.days_remaining }}{% else %}-{% endif %}</td>
+        <td>{{ v.created_at.strftime('%b %d') if v.created_at else '' }}</td>
         <td>
             {% if v.is_team_pick %}
-            <span style="color:#00C851;font-weight:700;">⭐ Active</span><br>
+            <span style="color:#00C851;font-weight:700;">Active</span><br>
             <small style="color:#64748B;">{{ v.pick_salesperson.display_name if v.pick_salesperson else '' }}</small><br>
-            <button onclick="openPickModal({{ v.id }}, true, {{ v.pick_user_id or 0 }}, '{{ v.pick_blurb or '' }}')" style="margin-top:4px;padding:3px 10px;font-size:11px;background:#1E293B;color:white;border:none;border-radius:4px;cursor:pointer;">Edit</button>
+            <button onclick="openPickModal({{ v.id }}, true, {{ v.pick_user_id or 0 }}, '{{ (v.pick_blurb or '')|replace("'", "\\'") }}')" style="margin-top:4px;padding:3px 10px;font-size:11px;background:#1E293B;color:white;border:none;border-radius:4px;cursor:pointer;">Edit</button>
             <form method="POST" action="/admin/vehicles/{{ v.id }}/team-pick/remove" style="display:inline;">
                 <button type="submit" style="margin-top:4px;padding:3px 10px;font-size:11px;background:#EF4444;color:white;border:none;border-radius:4px;cursor:pointer;">Remove</button>
             </form>
@@ -29,14 +69,37 @@
             <button onclick="openPickModal({{ v.id }}, false, 0, '')" style="padding:4px 12px;font-size:12px;background:#f1f5f9;border:1px solid #CBD5E1;border-radius:4px;cursor:pointer;">+ Set Pick</button>
             {% endif %}
         </td>
+        <td>
+            <form method="POST" action="/admin/vehicles/{{ v.id }}/delete" style="display:inline;" onsubmit="return confirm('Delete this vehicle?')">
+                <button class="btn btn-danger" type="submit">Delete</button>
+            </form>
+        </td>
     </tr>
     {% endfor %}
 </table>
 
-<!-- Team Pick Modal -->
+<!-- ===== REJECT MODAL ===== -->
+<div id="rejectModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:12px;padding:28px;max-width:440px;width:90%;position:relative;">
+        <h3 style="margin:0 0 6px;color:#1E293B;">Reject Vehicle</h3>
+        <p id="rejectVehicleName" style="margin:0 0 18px;color:#64748B;font-size:14px;"></p>
+        <form method="POST" id="rejectForm">
+            <div style="margin-bottom:18px;">
+                <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:6px;">Reason <span style="color:#94A3B8;font-weight:400;">(optional &mdash; sent to the rep)</span></label>
+                <textarea name="rejection_reason" rows="3" maxlength="300" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;box-sizing:border-box;resize:none;" placeholder="e.g. Photo quality too low, please resubmit with better images..."></textarea>
+            </div>
+            <div style="display:flex;gap:10px;">
+                <button type="submit" style="flex:1;background:#EF4444;color:white;border:none;padding:12px;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;">Reject</button>
+                <button type="button" onclick="closeRejectModal()" style="flex:1;background:#f1f5f9;color:#1E293B;border:1px solid #CBD5E1;padding:12px;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===== TEAM PICK MODAL ===== -->
 <div id="teamPickModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
     <div style="background:#fff;border-radius:12px;padding:28px;max-width:440px;width:90%;position:relative;">
-        <h3 style="margin:0 0 16px;color:#1E293B;">⭐ Set Team Pick</h3>
+        <h3 style="margin:0 0 16px;color:#1E293B;">Set Team Pick</h3>
         <form method="POST" id="teamPickForm">
             <input type="hidden" id="tpVehicleId" name="vehicle_id">
             <div style="margin-bottom:14px;">
@@ -61,6 +124,14 @@
 </div>
 
 <script>
+function openRejectModal(vehicleId, vehicleName) {
+    document.getElementById('rejectVehicleName').textContent = vehicleName;
+    document.getElementById('rejectForm').action = '/admin/vehicles/' + vehicleId + '/reject';
+    document.getElementById('rejectModal').style.display = 'flex';
+}
+function closeRejectModal() {
+    document.getElementById('rejectModal').style.display = 'none';
+}
 function openPickModal(vehicleId, isActive, currentUserId, currentBlurb) {
     document.getElementById('tpVehicleId').value = vehicleId;
     document.getElementById('teamPickForm').action = '/admin/vehicles/' + vehicleId + '/team-pick';

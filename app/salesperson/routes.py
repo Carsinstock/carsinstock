@@ -235,10 +235,19 @@ def register_routes(bp):
                 except Exception:
                     pass
 
+            # Dealership tier: goes into approval queue
+            if sp.subscription_tier == 'dealership':
+                vehicle.approval_status = 'pending'
+            else:
+                vehicle.approval_status = 'approved'
+
             try:
                 db.session.add(vehicle)
                 db.session.commit()
-                flash(f"{year} {make} {model} added successfully!", "success")
+                if sp.subscription_tier == 'dealership':
+                    flash(f"{year} {make} {model} submitted for approval! Your manager will review it shortly.", "success")
+                else:
+                    flash(f"{year} {make} {model} added successfully!", "success")
                 return redirect(f"/{sp.profile_url_slug}")
             except Exception as e:
                 db.session.rollback()
