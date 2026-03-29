@@ -281,7 +281,10 @@ function submitReferral() {
         {% endif %}
 
         <div class="vehicle-grid" id="vehicleGrid">
+            {% set ns = namespace(count=0) %}
             {% for v in vehicles %}
+            {% if not (sp.subscription_tier == 'dealership' and not is_owner and ns.count >= 10) %}
+            {% set ns.count = ns.count + 1 %}
             <div class="vehicle-card" data-price="{{ v.price }}" {% if is_owner and v.is_expired %}style="opacity:0.6;border:2px solid #e53e3e;"{% endif %}>
                 {% if is_owner and v.is_expired %}
                 <div style="background:#EF4444;color:white;text-align:center;padding:6px;font-weight:bold;font-size:13px;">EXPIRED</div>
@@ -335,8 +338,14 @@ function submitReferral() {
                 {% endif %}
             </div>
             {% endif %}
+            {% endif %}
             {% endfor %}
         </div>
+        {% if sp.subscription_tier == 'dealership' and not is_owner and vehicles|length > 10 %}
+        <div style="text-align:center;margin-top:24px;">
+            <a href="/{{ sp.profile_url_slug }}/inventory" style="display:inline-block;background:#1E293B;color:white;padding:14px 36px;border-radius:10px;font-size:15px;font-weight:700;text-decoration:none;letter-spacing:0.3px;">View Full Inventory →</a>
+        </div>
+        {% endif %}
         {% else %}
         <p class="coming-soon">No vehicles yet. Check back soon!</p>
         {% endif %}

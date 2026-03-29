@@ -54,6 +54,100 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
         <div id="copiedMsg" class="copied">✅ Copied!</div>
     </div>
 
+    <!-- Add a Vehicle Button -->
+    <div style="margin-bottom:16px;">
+        <button onclick="document.getElementById('addVehicleSection').style.display=document.getElementById('addVehicleSection').style.display==='none'?'block':'none'" style="width:100%;background:#00C851;color:white;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer;letter-spacing:0.3px;">+ Add a Vehicle</button>
+    </div>
+
+    <!-- Add Vehicle Form -->
+    <div id="addVehicleSection" style="display:none;background:white;border-radius:12px;padding:24px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+        <h3 style="color:#1E293B;font-size:16px;font-weight:700;margin:0 0 6px;">🚗 Submit a Vehicle</h3>
+        <p style="color:#64748B;font-size:13px;margin:0 0 20px;">Your manager will review and approve before it goes live.</p>
+        <form id="addVehicleForm" method="POST" action="/sp/vehicles/add" enctype="multipart/form-data">
+            <!-- Photo -->
+            <div style="margin-bottom:14px;">
+                <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:6px;">Photo *</label>
+                <input type="file" name="photo" accept="image/*" required style="font-size:13px;width:100%;">
+            </div>
+            <!-- Year / Make / Model row -->
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
+                <div>
+                    <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Year *</label>
+                    <input type="text" name="year" placeholder="2022" maxlength="4" required style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+                </div>
+                <div>
+                    <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Make *</label>
+                    <input type="text" name="make" placeholder="Toyota" required style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+                </div>
+                <div>
+                    <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Model *</label>
+                    <input type="text" name="model" placeholder="Camry" required style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+                </div>
+            </div>
+            <!-- Trim / VIN row -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+                <div>
+                    <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Trim</label>
+                    <input type="text" name="trim" placeholder="LE, SE, XLE..." style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+                </div>
+                <div>
+                    <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">VIN * <span style="color:#94A3B8;font-weight:400;">(17 chars)</span></label>
+                    <input type="text" name="vin" maxlength="17" placeholder="1HGBH41JXMN109186" required style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;font-family:monospace;">
+                </div>
+            </div>
+            <!-- Price / Mileage row -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+                <div>
+                    <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Price *</label>
+                    <input type="text" name="price" placeholder="24995" required style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+                </div>
+                <div>
+                    <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Mileage</label>
+                    <input type="text" name="mileage" placeholder="34000" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+                </div>
+            </div>
+            <!-- Color / Transmission row -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+                <div>
+                    <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Exterior Color</label>
+                    <input type="text" name="exterior_color" placeholder="Pearl White" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+                </div>
+                <div>
+                    <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Transmission</label>
+                    <select name="transmission" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+                        <option value="">Select...</option>
+                        <option>Automatic</option>
+                        <option>Manual</option>
+                        <option>CVT</option>
+                    </select>
+                </div>
+            </div>
+            <!-- Fuel Type -->
+            <div style="margin-bottom:14px;">
+                <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Fuel Type</label>
+                <select name="fuel_type" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+                    <option value="">Select...</option>
+                    <option>Gasoline</option>
+                    <option>Hybrid</option>
+                    <option>Electric</option>
+                    <option>Diesel</option>
+                </select>
+            </div>
+            <!-- Pick Blurb -->
+            <div style="margin-bottom:20px;">
+                <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Why are you picking this car? <span style="color:#94A3B8;font-weight:400;">(shows on storefront)</span></label>
+                <div style="display:flex;gap:8px;margin-bottom:6px;">
+                    <textarea name="pick_blurb" id="spPickBlurb" maxlength="150" rows="2" style="flex:1;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:13px;resize:none;" placeholder="This Tahoe is spotless, one owner, priced right — my favorite on the lot right now..."></textarea>
+                </div>
+                <button type="button" onclick="generateSpBlurb()" style="background:#1E293B;color:#00C851;border:none;padding:8px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">✨ AI Write</button>
+                <span id="spBlurbSpinner" style="display:none;font-size:12px;color:#64748B;margin-left:8px;">Writing...</span>
+            </div>
+            <!-- Hidden: auto-assign this rep as team pick -->
+            <input type="hidden" name="assigned_team_member_id" value="{{ member.id }}">
+            <button type="submit" style="width:100%;background:#1E293B;color:white;border:none;padding:13px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">Submit for Approval →</button>
+        </form>
+    </div>
+
     <!-- Notification Banners -->
     {% for notif in notifications %}
     <div id="notif-{{ notif.id }}" style="border-radius:10px;padding:14px 18px;margin-bottom:12px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;{% if notif.type == 'approved' %}background:#D1FAE5;border:1px solid #6EE7B7;{% else %}background:#FEE2E2;border:1px solid #FCA5A5;{% endif %}">
@@ -178,6 +272,29 @@ async function generateWeeklyPost() {
     } catch(e) {
         document.getElementById('weeklyPostSpinner').textContent = 'Something went wrong. Try again.';
     }
+}
+async function generateSpBlurb() {
+    var year = document.querySelector('[name="year"]').value;
+    var make = document.querySelector('[name="make"]').value;
+    var model = document.querySelector('[name="model"]').value;
+    var trim = document.querySelector('[name="trim"]').value;
+    if (!year || !make || !model) {
+        alert('Enter Year, Make, and Model first.');
+        return;
+    }
+    document.getElementById('spBlurbSpinner').style.display = 'inline';
+    try {
+        var resp = await fetch('/api/generate-pick-blurb', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({year: year, make: make, model: model, trim: trim})
+        });
+        var data = await resp.json();
+        document.getElementById('spPickBlurb').value = data.blurb || '';
+    } catch(e) {
+        alert('Could not generate blurb. Try again.');
+    }
+    document.getElementById('spBlurbSpinner').style.display = 'none';
 }
 function dismissNotif(id) {
     fetch('/sp-notification/' + id + '/dismiss', {method:'POST'});

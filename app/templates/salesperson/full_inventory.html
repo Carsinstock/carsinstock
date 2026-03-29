@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block meta %}
+<meta property="og:title" content="{{ sp.display_name }} — Full Inventory">
+<meta property="og:description" content="Browse all available vehicles from {{ sp.display_name }} on CarsInStock.">
+<meta property="og:url" content="https://carsinstock.com/{{ sp.profile_url_slug }}/inventory">
+{% endblock %}
+{% block content %}
+<style>
+* { box-sizing: border-box; }
+.inv-page { max-width: 1100px; margin: 0 auto; padding: 24px 16px 60px; }
+.inv-header { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+.inv-header img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; border: 3px solid #00C851; }
+.inv-header .info h1 { font-size: 20px; font-weight: 800; color: #1E293B; margin: 0 0 2px; }
+.inv-header .info p { font-size: 13px; color: #64748B; margin: 0; }
+.inv-header .back { margin-left: auto; color: #64748B; font-size: 13px; text-decoration: none; font-weight: 600; }
+.inv-header .back:hover { color: #1E293B; }
+.vehicle-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+.vehicle-card { border: 1px solid #E2E8F0; border-radius: 12px; overflow: hidden; background: #fff; transition: box-shadow 0.2s; }
+.vehicle-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.10); }
+.vehicle-img { width: 100%; height: 190px; object-fit: cover; display: block; }
+.vehicle-info { padding: 14px 16px; }
+.vehicle-info h3 { font-size: 15px; font-weight: 700; color: #1E293B; margin: 0 0 4px; }
+.vehicle-price { font-size: 18px; font-weight: 800; color: #00C851; margin: 0 0 4px; }
+.vehicle-detail { font-size: 13px; color: #64748B; margin: 0 0 2px; }
+.interested-btn { width: 100%; margin-top: 12px; padding: 10px; background: #00C851; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; }
+.interested-btn:hover { background: #00b348; }
+.days-badge { position: absolute; top: 10px; right: 10px; background: #FF6B35; color: white; padding: 4px 10px; border-radius: 5px; font-size: 12px; font-weight: 700; }
+</style>
+
+<div class="inv-page">
+    <div class="inv-header">
+        {% if sp.profile_photo %}
+        <img src="{{ sp.profile_photo }}" alt="{{ sp.display_name }}">
+        {% else %}
+        <div style="width:56px;height:56px;border-radius:50%;background:#1E293B;color:#00C851;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;">{{ sp.display_name[0] }}</div>
+        {% endif %}
+        <div class="info">
+            <h1>{{ sp.display_name }} — Full Inventory</h1>
+            <p>{{ vehicles|length }} vehicle{{ 's' if vehicles|length != 1 else '' }} available</p>
+        </div>
+        <a href="/{{ sp.profile_url_slug }}" class="back">← Back to Store</a>
+    </div>
+
+    {% if vehicles %}
+    <div class="vehicle-grid">
+        {% for v in vehicles %}
+        <div class="vehicle-card">
+            <div style="position:relative;">
+                {% if v.days_remaining and v.days_remaining > 0 %}
+                <div class="days-badge" style="background:{% if v.days_remaining <= 2 %}#DC2626{% else %}#FF6B35{% endif %};">{{ v.days_remaining }} Day{{ 's' if v.days_remaining != 1 else '' }} Left</div>
+                {% endif %}
+                {% if v.image_url %}
+                <img src="{{ v.image_url }}" alt="{{ v.year }} {{ v.make }} {{ v.model }}" class="vehicle-img">
+                {% else %}
+                <div class="vehicle-img" style="background:#F1F5F9;display:flex;align-items:center;justify-content:center;color:#94A3B8;font-size:32px;">🚗</div>
+                {% endif %}
+                {% if v.is_team_pick and v.pick_user_id and team_lookup.get(v.pick_user_id) %}
+                <div style="position:absolute;bottom:10px;right:10px;">
+                    <img src="{{ team_lookup[v.pick_user_id]['photo'] }}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #00C851;box-shadow:0 2px 8px rgba(0,0,0,0.25);">
+                </div>
+                {% endif %}
+            </div>
+            <div class="vehicle-info">
+                <h3>{{ v.year }} {{ v.make }} {{ v.model }}{% if v.trim %} {{ v.trim }}{% endif %}</h3>
+                <p class="vehicle-price">${{ "{:,.0f}".format(v.price) }}</p>
+                {% if v.mileage %}<p class="vehicle-detail">{{ "{:,}".format(v.mileage) }} miles</p>{% endif %}
+                {% if v.exterior_color %}<p class="vehicle-detail">{{ v.exterior_color }}</p>{% endif %}
+                {% if v.transmission %}<p class="vehicle-detail">{{ v.transmission|replace("Continuously Variable Transmission (CVT)", "CVT")|replace("Continuously Variable Transmission", "CVT") }}</p>{% endif %}
+                <button class="interested-btn" onclick="showLeadForm({{ v.id }}, '{{ v.year }} {{ v.make }} {{ v.model }}', {{ 'true' if (v.is_team_pick and v.pick_user_id and team_lookup.get(v.pick_user_id)) else 'false' }}, '{{ team_lookup[v.pick_user_id]['photo'] if (v.is_team_pick and v.pick_user_id and team_lookup.get(v.pick_user_id)) else '' }}', '{{ team_lookup[v.pick_user_id]['name'] if (v.is_team_pick and v.pick_user_id and team_lookup.get(v.pick_user_id)) else '' }}', '{{ v.pick_blurb|replace("'", "\\'") if v.pick_blurb else '' }}')">I'm Interested</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:#94A3B8;text-align:center;padding:60px 0;font-size:16px;">No vehicles available right now. Check back soon!</p>
+    {% endif %}
+</div>
+
+<!-- Lead Modal (reuse from public_profile) -->
+<div id="leadModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:16px;padding:28px;max-width:440px;width:90%;max-height:90vh;overflow-y:auto;">
+        <h3 style="margin:0 0 4px;color:#1E293B;font-size:18px;font-weight:800;" id="leadModalTitle">I'm Interested</h3>
+        <p id="leadModalVehicle" style="color:#64748B;font-size:14px;margin:0 0 16px;"></p>
+        <div id="leadPickInfo" style="display:none;background:#F0FDF4;border-radius:10px;padding:12px 14px;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+                <img id="leadPickPhoto" src="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #00C851;">
+                <span id="leadPickName" style="font-size:14px;font-weight:700;color:#1E293B;"></span>
+            </div>
+            <p id="leadPickBlurb" style="font-size:13px;color:#475569;margin:0;font-style:italic;"></p>
+        </div>
+        <form id="leadForm" method="POST" action="/submit-lead">
+            <input type="hidden" name="vehicle_id" id="leadVehicleId">
+            <input type="hidden" name="salesperson_id" value="{{ sp.salesperson_id }}">
+            <div style="margin-bottom:12px;">
+                <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Your Name *</label>
+                <input type="text" name="customer_name" required style="width:100%;padding:10px 12px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+            </div>
+            <div style="margin-bottom:12px;">
+                <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Phone</label>
+                <input type="tel" name="customer_phone" style="width:100%;padding:10px 12px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+            </div>
+            <div style="margin-bottom:16px;">
+                <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Email</label>
+                <input type="email" name="customer_email" style="width:100%;padding:10px 12px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+            </div>
+            <button type="submit" style="width:100%;background:#00C851;color:white;border:none;padding:13px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;">Send My Info →</button>
+        </form>
+        <button onclick="document.getElementById('leadModal').style.display='none'" style="width:100%;margin-top:10px;background:none;border:1px solid #CBD5E1;padding:10px;border-radius:8px;font-size:14px;color:#64748B;cursor:pointer;">Cancel</button>
+    </div>
+</div>
+
+<script>
+function showLeadForm(vehicleId, vehicleName, hasPick, pickPhoto, pickName, pickBlurb) {
+    document.getElementById('leadVehicleId').value = vehicleId;
+    document.getElementById('leadModalVehicle').textContent = vehicleName;
+    if (hasPick && pickName) {
+        document.getElementById('leadPickPhoto').src = pickPhoto;
+        document.getElementById('leadPickName').textContent = pickName;
+        document.getElementById('leadPickBlurb').textContent = pickBlurb ? '"' + pickBlurb + '"' : '';
+        document.getElementById('leadPickInfo').style.display = 'block';
+    } else {
+        document.getElementById('leadPickInfo').style.display = 'none';
+    }
+    document.getElementById('leadModal').style.display = 'flex';
+}
+</script>
+{% endblock %}

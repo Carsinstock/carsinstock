@@ -68,6 +68,124 @@ def sp_logout():
     session.pop('dealership_id', None)
     return redirect('/login')
 
+@main.route('/sp/vehicles/add', methods=['POST'])
+def sp_add_vehicle():
+    """Team member vehicle submission — goes straight to pending."""
+    if 'team_member_id' not in session:
+        return redirect('/login')
+    import sqlite3 as _sq
+    _conn = _sq.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    _conn.row_factory = _sq.Row
+    member = _conn.execute("SELECT * FROM dealership_team WHERE id=? AND is_active=1", (session['team_member_id'],)).fetchone()
+    _conn.close()
+    if not member:
+        return redirect('/login')
+
+    from app.models.salesperson import Salesperson
+    from app.models.vehicle import Vehicle
+    from app.models import db
+    from app.utils.cloudinary_upload import upload_vehicle_image
+    from datetime import datetime
+
+    dealership_sp = Salesperson.query.filter_by(salesperson_id=member['dealership_id']).first()
+    if not dealership_sp:
+        flash("Store not found.", "error")
+        return redirect('/sp-dashboard')
+
+    year = request.form.get('year', '').strip()
+    make = request.form.get('make', '').strip()
+    model = request.form.get('model', '').strip()
+    trim = request.form.get('trim', '').strip()
+    vin = request.form.get('vin', '').strip().upper()
+    mileage = request.form.get('mileage', '').strip().replace(',', '').replace(' ', '')
+    price = request.form.get('price', '').strip()
+    exterior_color = request.form.get('exterior_color', '').strip()
+    transmission = request.form.get('transmission', '').strip()
+    fuel_type = request.form.get('fuel_type', '').strip()
+    pick_blurb = request.form.get('pick_blurb', '').strip()[:150]
+    photo = request.files.get('photo')
+
+    errors = []
+    if not year or not year.isdigit(): errors.append("Valid year required.")
+    if not make: errors.append("Make required.")
+    if not model: errors.append("Model required.")
+    if not vin or len(vin) != 17: errors.append("Valid 17-character VIN required.")
+    if not price: errors.append("Price required.")
+    if not photo or photo.filename == '': errors.append("Photo required.")
+
+    if errors:
+        for e in errors:
+            flash(e, 'error')
+        return redirect('/sp-dashboard')
+
+    try:
+        price_val = float(price.replace(',', '').replace('$', ''))
+    except ValueError:
+        flash("Invalid price.", "error")
+        return redirect('/sp-dashboard')
+
+    image_url = None
+    try:
+        image_url = upload_vehicle_image(photo, dealership_sp.salesperson_id)
+    except Exception as e:
+        flash("Photo upload failed. Try again.", "error")
+        return redirect('/sp-dashboard')
+
+    vehicle = Vehicle(
+        salesperson_id=dealership_sp.salesperson_id,
+        dealer_id=dealership_sp.dealer_id,
+        year=int(year),
+        make=make,
+        model=model,
+        trim=trim,
+        vin=vin,
+        mileage=int(mileage) if mileage and mileage.isdigit() else None,
+        price=price_val,
+        exterior_color=exterior_color,
+        transmission=transmission,
+        fuel_type=fuel_type,
+        image_url=image_url,
+        is_team_pick=True,
+        pick_user_id=member['id'],
+        pick_blurb=pick_blurb if pick_blurb else None,
+        approval_status='pending'
+    )
+    try:
+        db.session.add(vehicle)
+        db.session.commit()
+        flash(f"{year} {make} {model} submitted! Your manager will review it shortly.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash("Something went wrong. Please try again.", "error")
+        print(f"sp_add_vehicle error: {e}")
+
+    return redirect('/sp-dashboard')
+
+
+@main.route('/<slug>/inventory')
+def full_inventory(slug):
+    from app.models.salesperson import Salesperson
+    from app.models.vehicle import Vehicle
+    from sqlalchemy import or_
+    from datetime import datetime
+    sp = Salesperson.query.filter_by(profile_url_slug=slug).first()
+    if not sp or sp.subscription_tier != 'dealership':
+        return redirect(f'/{slug}')
+    vehicles = Vehicle.query.filter(
+        Vehicle.salesperson_id == sp.salesperson_id,
+        Vehicle.status == 'available',
+        or_(Vehicle.approval_status == 'approved', Vehicle.approval_status == None)
+    ).order_by(Vehicle.created_at.desc()).all()
+    vehicles = [v for v in vehicles if not v.expires_at or v.expires_at > datetime.utcnow()]
+    import sqlite3 as _sq
+    _conn = _sq.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    _conn.row_factory = _sq.Row
+    _team_rows = _conn.execute("SELECT id, name, profile_photo FROM dealership_team WHERE is_active=1").fetchall()
+    _conn.close()
+    team_lookup = {r['id']: {'name': r['name'], 'photo': r['profile_photo']} for r in _team_rows}
+    return render_template('salesperson/full_inventory.html', sp=sp, vehicles=vehicles, team_lookup=team_lookup)
+
+
 @main.route('/')
 def home():
     return render_template('index.html')
