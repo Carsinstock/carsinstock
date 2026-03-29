@@ -68,6 +68,20 @@ def sp_logout():
     session.pop('dealership_id', None)
     return redirect('/login')
 
+@main.route('/sp/api/vin-decode/<vin>')
+def vin_decode_public(vin):
+    from flask import jsonify
+    if 'team_member_id' not in session and 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    if len(vin) != 17:
+        return jsonify({'error': 'VIN must be 17 characters'}), 400
+    from app.utils.vin_decoder import decode_vin
+    result = decode_vin(vin.upper())
+    if result:
+        return jsonify(result)
+    return jsonify({'error': 'Could not decode VIN'}), 404
+
+
 @main.route('/sp/vehicles/add', methods=['POST'])
 def sp_add_vehicle():
     """Team member vehicle submission — goes straight to pending."""
