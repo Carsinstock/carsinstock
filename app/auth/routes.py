@@ -148,6 +148,7 @@ def login():
         if _member:
             from werkzeug.security import check_password_hash as _cph
             if _cph(_member['password_hash'], password):
+                session.permanent = True
                 session['team_member_id'] = _member['id']
                 session['team_member_name'] = _member['name']
                 session['team_member_email'] = _member['email']
