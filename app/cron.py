@@ -7,7 +7,9 @@ DB_PATH = '/home/eddie/carsinstock/instance/carsinstock.db'
 EST = timezone('US/Eastern')
 
 def get_db():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=30)
+    conn.execute('PRAGMA journal_mode=WAL')
+    conn.execute('PRAGMA busy_timeout=30000')
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -47,10 +49,20 @@ def build_blast_html(sp_data, customer, message, template_id, storefront_url, ve
     profile_html = f'<div style="text-align:center;padding:16px 0;">{profile_photo}<div style="font-size:16px;font-weight:700;color:#1E293B;margin-top:8px;">{sp_data["display_name"]}</div><div style="font-size:13px;color:#64748B;">{sp_data.get("dealership_name","")}</div></div>'
 
     vehicle_html = ''
-    for v in vehicles[:6]:
-        price = f'${v["price"]:,.0f}' if v['price'] else ''
-        mileage = f'<br><span style="color:#666;font-size:13px;">{v["mileage"]:,} miles</span>' if v.get('mileage') else ''
-        vehicle_html += f'<div style="border:1px solid #eee;border-radius:8px;padding:12px;margin-bottom:10px;background:#fafafa;"><strong style="font-size:15px;color:#1E293B;">{v["year"]} {v["make"]} {v["model"]}</strong><br><span style="color:#00C851;font-weight:700;font-size:16px;">{price}</span>{mileage}</div>'
+    for v in vehicles:
+        price = f'${v["price"]:,.0f}' if v['price'] else 'Contact for price'
+        mileage = f'{v["mileage"]:,} miles' if v.get('mileage') else ''
+        img_tag = f'<img src="{v["image_url"]}" style="width:100%;height:200px;object-fit:cover;display:block;border-radius:8px 8px 0 0;">' if v.get('image_url') else ''
+        vehicle_html += (
+            f'<div style="background:#ffffff;border:1px solid #E2E8F0;border-radius:10px;overflow:hidden;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,0.06);">'
+            f'{img_tag}'
+            f'<div style="padding:16px;">'
+            f'<div style="font-size:17px;font-weight:700;color:#1E293B;margin-bottom:6px;line-height:1.3;">{v["year"]} {v["make"]} {v["model"]}</div>'
+            f'<div style="font-size:20px;font-weight:800;color:#00C851;margin-bottom:4px;">{price}</div>'
+            f'<div style="font-size:13px;color:#64748B;margin-bottom:16px;">{mileage}</div>'
+            f'<a href="{storefront_url}" style="display:block;width:100%;box-sizing:border-box;text-align:center;background:#1E293B;color:#ffffff;padding:13px 0;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;letter-spacing:0.3px;">I\'m Interested</a>'
+            f'</div></div>'
+        )
 
     ctas = {'1':'View All My Inventory →','2':'See What\'s New →','3':'Claim Your Deal →','4':'Let\'s Talk →','5':'View This Week\'s Specials →'}
     cta_label = ctas.get(str(template_id), 'View My Inventory →')
@@ -110,8 +122,8 @@ def run_onboarding_blast(app):
                         'price ASC' if sp['vehicle_sort_order'] == 'price_low' else
                         'price DESC' if sp['vehicle_sort_order'] == 'price_high' else
                         'created_at DESC'
-                    ) + ' LIMIT 6',
-                    (sp_id,)
+                    ) + ''
+                    , (sp_id,)
                 ).fetchall()
 
                 sent = 0
@@ -155,7 +167,7 @@ def run_weekly_blast(app):
 
                 # Get all active subscribers (ever received onboarding blast)
                 onboarded = conn.execute(
-                    'SELECT DISTINCT customer_id FROM blast_log WHERE salesperson_id=? AND blast_type="onboarding"',
+                    'SELECT DISTINCT customer_id FROM blast_log WHERE salesperson_id=? AND blast_type="onboarding" AND DATE(sent_at) < DATE("now")',
                     (sp_id,)
                 ).fetchall()
                 onboarded_ids = [r['customer_id'] for r in onboarded]
@@ -176,8 +188,8 @@ def run_weekly_blast(app):
                         'price ASC' if sp['vehicle_sort_order'] == 'price_low' else
                         'price DESC' if sp['vehicle_sort_order'] == 'price_high' else
                         'created_at DESC'
-                    ) + ' LIMIT 6',
-                    (sp_id,)
+                    ) + ''
+                    , (sp_id,)
                 ).fetchall()
 
                 total = len(customers)

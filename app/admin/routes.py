@@ -23,6 +23,67 @@ def admin_required(f):
 
 
 def register_admin_routes(bp):
+    if len(bp.deferred_functions) > 0:
+        return  # Already registered
+    @bp.route("/team")
+    def team():
+        import sqlite3
+        conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        cur = conn.cursor()
+        members = cur.execute("SELECT * FROM dealership_team WHERE is_active=1 ORDER BY name").fetchall()
+        conn.close()
+        return render_template("admin/team.html", team=members)
+
+    @bp.route("/team/add", methods=["POST"])
+    def add_team_member():
+        import sqlite3, cloudinary.uploader
+        name = request.form.get("name", "").strip()
+        phone = request.form.get("phone", "").strip()
+        email = request.form.get("email", "").strip()
+        slug = request.form.get("slug", "").strip().lower().replace(" ", "")
+        photo_url = None
+        photo = request.files.get("photo")
+        if photo and photo.filename:
+            result = cloudinary.uploader.upload(photo, folder="carsinstock/team")
+            photo_url = result["secure_url"]
+        conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        conn.execute(
+            "INSERT INTO dealership_team (name, phone, email, profile_photo, slug) VALUES (?,?,?,?,?)",
+            (name, phone, email, photo_url, slug)
+        )
+        conn.commit()
+        conn.close()
+        return redirect(url_for("admin.team"))
+
+    @bp.route("/team/<int:member_id>/edit", methods=["POST"])
+    def edit_team_member(member_id):
+        import sqlite3, cloudinary.uploader
+        name = request.form.get("name", "").strip()
+        phone = request.form.get("phone", "").strip()
+        email = request.form.get("email", "").strip()
+        conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        photo = request.files.get("photo")
+        if photo and photo.filename:
+            result = cloudinary.uploader.upload(photo, folder="carsinstock/team")
+            photo_url = result["secure_url"]
+            conn.execute("UPDATE dealership_team SET name=?, phone=?, email=?, profile_photo=? WHERE id=?",
+                (name, phone, email, photo_url, member_id))
+        else:
+            conn.execute("UPDATE dealership_team SET name=?, phone=?, email=? WHERE id=?",
+                (name, phone, email, member_id))
+        conn.commit()
+        conn.close()
+        return redirect(url_for("admin.team"))
+
+    @bp.route("/team/<int:member_id>/delete", methods=["POST"])
+    def delete_team_member(member_id):
+        import sqlite3
+        conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        conn.execute("DELETE FROM dealership_team WHERE id=?", (member_id,))
+        conn.commit()
+        conn.close()
+        return redirect(url_for("admin.team"))
+
     @bp.route("/dealership-leads")
     @admin_required
     def dealership_leads():
@@ -95,7 +156,36 @@ def register_admin_routes(bp):
     @admin_required
     def vehicles():
         all_vehicles = Vehicle.query.order_by(Vehicle.created_at.desc()).all()
-        return render_template("admin/vehicles.html", vehicles=all_vehicles)
+        import sqlite3 as _sq3
+        _conn = _sq3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        _conn.row_factory = _sq3.Row
+        all_salespeople = _conn.execute("SELECT * FROM dealership_team WHERE is_active=1 ORDER BY name").fetchall()
+        _conn.close()
+        return render_template("admin/vehicles.html", vehicles=all_vehicles, all_salespeople=all_salespeople)
+
+    @bp.route("/vehicles/<int:vehicle_id>/team-pick", methods=["POST"])
+    def set_team_pick(vehicle_id):
+        from app.models.vehicle import Vehicle
+        from app.models import db
+        vehicle = Vehicle.query.get_or_404(vehicle_id)
+        pick_user_id = request.form.get("pick_user_id", type=int)
+        pick_blurb = request.form.get("pick_blurb", "").strip()[:150]
+        vehicle.is_team_pick = True
+        vehicle.pick_user_id = pick_user_id
+        vehicle.pick_blurb = pick_blurb
+        db.session.commit()
+        return redirect(url_for("admin.vehicles"))
+
+    @bp.route("/vehicles/<int:vehicle_id>/team-pick/remove", methods=["POST"])
+    def remove_team_pick(vehicle_id):
+        from app.models.vehicle import Vehicle
+        from app.models import db
+        vehicle = Vehicle.query.get_or_404(vehicle_id)
+        vehicle.is_team_pick = False
+        vehicle.pick_user_id = None
+        vehicle.pick_blurb = None
+        db.session.commit()
+        return redirect(url_for("admin.vehicles"))
 
     @bp.route("/vehicles/<int:vehicle_id>/delete", methods=["POST"])
     @admin_required

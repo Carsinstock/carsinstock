@@ -35,6 +35,9 @@ def generate_slug(display_name):
 
 
 def register_routes(bp):
+    if getattr(bp, '_routes_registered', False):
+        return
+    bp._routes_registered = True
     @bp.route("/profile/setup", methods=["GET", "POST"])
     @login_required
     def profile_setup():
@@ -180,7 +183,13 @@ def register_routes(bp):
             if errors:
                 for error in errors:
                     flash(error, "error")
-                return render_template("salesperson/add_vehicle.html", sp=sp)
+
+
+                import sqlite3 as _sq3
+                _conn3 = _sq3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+                _team3 = _conn3.execute("SELECT * FROM dealership_team WHERE is_active=1 ORDER BY name").fetchall()
+                _conn3.close()
+                return render_template("salesperson/add_vehicle.html", sp=sp, team_members=_team3)
 
             # Upload image to Cloudinary
             image_url = None
@@ -191,7 +200,12 @@ def register_routes(bp):
                 price_val = float(price.replace(",", "").replace("$", ""))
             except ValueError:
                 flash("Invalid price format.", "error")
-                return render_template("salesperson/add_vehicle.html", sp=sp)
+
+                import sqlite3 as _sq3
+                _conn3 = _sq3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+                _team3 = _conn3.execute("SELECT * FROM dealership_team WHERE is_active=1 ORDER BY name").fetchall()
+                _conn3.close()
+                return render_template("salesperson/add_vehicle.html", sp=sp, team_members=_team3)
 
             vehicle = Vehicle(
                 salesperson_id=sp.salesperson_id,
@@ -210,6 +224,17 @@ def register_routes(bp):
                 image_url=image_url
             )
 
+            # Handle team pick assignment
+            assigned_team_member_id = request.form.get("assigned_team_member_id", "").strip()
+            pick_blurb = request.form.get("pick_blurb", "").strip()[:150]
+            if assigned_team_member_id:
+                try:
+                    vehicle.is_team_pick = True
+                    vehicle.pick_user_id = int(assigned_team_member_id)
+                    vehicle.pick_blurb = pick_blurb if pick_blurb else None
+                except Exception:
+                    pass
+
             try:
                 db.session.add(vehicle)
                 db.session.commit()
@@ -220,12 +245,39 @@ def register_routes(bp):
                 flash("Something went wrong. Please try again.", "error")
                 print(f"Vehicle add error: {e}")
 
-        return render_template("salesperson/add_vehicle.html", sp=sp)
+
+        import sqlite3 as _sq3
+        _conn3 = _sq3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        _team3 = _conn3.execute("SELECT * FROM dealership_team WHERE is_active=1 ORDER BY name").fetchall()
+        _conn3.close()
+        return render_template("salesperson/add_vehicle.html", sp=sp, team_members=_team3)
+
+
+    @bp.route("/qr-code")
+    @login_required
+    def qr_code():
+        import qrcode, io, base64
+        from flask import send_file
+        from app.models.salesperson import Salesperson
+        sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
+        if not sp:
+            return "Not found", 404
+        url = f"https://carsinstock.com/{sp.profile_url_slug}"
+        qr = qrcode.QRCode(version=1, box_size=10, border=4)
+        qr.add_data(url)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="#1E293B", back_color="white")
+        buf = io.BytesIO()
+        img.save(buf, format='PNG')
+        buf.seek(0)
+        return send_file(buf, mimetype='image/png', as_attachment=True,
+                        download_name=f"{sp.profile_url_slug}-qr-code.png")
 
     @bp.route("/api/vin-decode/<vin>")
     @login_required
     def vin_decode(vin):
         from flask import jsonify
+        from app.models import db
         from app.utils.vin_decoder import decode_vin
         if len(vin) != 17:
             return jsonify({"error": "VIN must be 17 characters"}), 400
@@ -278,6 +330,18 @@ def register_routes(bp):
                 result = cloudinary.uploader.upload(photo)
                 vehicle.image_url = result["secure_url"]
 
+            # Team pick assignment
+            assigned_team_member_id = request.form.get("assigned_team_member_id", "").strip()
+            pick_blurb = request.form.get("pick_blurb", "").strip()[:150]
+            if assigned_team_member_id:
+                vehicle.is_team_pick = True
+                vehicle.pick_user_id = int(assigned_team_member_id)
+                vehicle.pick_blurb = pick_blurb if pick_blurb else None
+            else:
+                vehicle.is_team_pick = False
+                vehicle.pick_user_id = None
+                vehicle.pick_blurb = None
+
             # Renew expired listing
             if vehicle.is_expired:
                 from datetime import datetime, timedelta
@@ -293,7 +357,11 @@ def register_routes(bp):
                 flash("Error updating vehicle.", "error")
                 print(f"Vehicle edit error: {e}")
 
-        return render_template("salesperson/edit_vehicle.html", vehicle=vehicle, sp=sp)
+        import sqlite3 as _sq3e
+        _ce = _sq3e.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        _team_e = _ce.execute("SELECT * FROM dealership_team WHERE is_active=1 ORDER BY name").fetchall()
+        _ce.close()
+        return render_template("salesperson/edit_vehicle.html", vehicle=vehicle, sp=sp, team_members=_team_e)
 
 
     @bp.route("/vehicles/delete/<int:vehicle_id>", methods=["POST"])
@@ -510,7 +578,15 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         personal_body = body.replace("{{first_name}}", first)
         _sp_name = sp.display_name or 'your salesperson'
         _dl_name = sp.dealership_name or 'your dealership'
-        footer_html = f'<div style="border-top:1px solid #e2e8f0;padding:16px 0;text-align:center;"><p style="color:#94A3B8;font-size:11px;margin:0 0 4px;line-height:1.5;">You are receiving this email because you are a customer of {_sp_name} at {_dl_name}.</p><p style="color:#94A3B8;font-size:11px;margin:0;"><a href="https://carsinstock.com/storefront/unsubscribe/{sp.profile_url_slug}" style="color:#94A3B8;text-decoration:underline;">Unsubscribe</a> &middot; CarsInStock LLC &middot; <a href="https://carsinstock.com" style="color:#94A3B8;text-decoration:none;">CarsInStock.com</a></p></div>'
+        unsub_url = f"https://carsinstock.com/storefront/unsubscribe/{sp.profile_url_slug}"
+        footer_html = (
+            f'<div style="border-top:1px solid #e2e8f0;padding:12px 0;text-align:center;">'
+            f'<p style="color:#94A3B8;font-size:11px;margin:0 0 6px;line-height:1.5;">You are receiving this because you opted in to receive updates from the salesperson or dealership.</p>'
+            f'<a href="{unsub_url}" style="color:#94A3B8;font-size:11px;text-decoration:underline;">Unsubscribe</a>'
+            f' &middot; '
+            f'<a href="https://carsinstock.com/disclaimer" style="color:#94A3B8;font-size:11px;text-decoration:underline;">Legal Disclaimer</a>'
+            f'</div>'
+        )
 
         template_id = request.form.get("template_id", "1")
 
@@ -702,83 +778,36 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
             label = ctas.get(template_id, "View My Inventory →")
             return f'<div style="text-align:center;margin:24px 0;"><a href="{storefront_url}" style="background:#00C851;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;white-space:nowrap;display:inline-block;">{label}</a></div>'
 
-        sg = sendgrid.SendGridAPIClient(api_key=os.environ.get('SENDGRID_API_KEY'))
-        sent = 0
-        failed = 0
-
-        # Insert blast record BEFORE send loop so we have blast_id for tracking
-        import sqlite3 as _sqlite3
+        # Queue the blast — batch_sender cron processes it
+        import sqlite3 as _sqlite3, json as _json
+        from datetime import datetime as _dt
+        customer_ids = [c.id for c in customers]
+        blast_meta = _json.dumps({
+            "salesperson_id": sp.salesperson_id,
+            "template_id": template_id,
+            "storefront_url": storefront_url,
+            "vehicle_ids": [v.id for v in vehicles],
+            "sp_phone": sp.phone or "",
+            "sp_display_name": sp.display_name or "",
+            "sp_dealership": sp.dealership_name or "",
+            "sp_slug": sp.profile_url_slug or "",
+            "sp_photo_url": getattr(sp, "photo_url", "") or "",
+        })
         _conn = _sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
         _cur = _conn.cursor()
         _cur.execute(
-            "INSERT INTO email_blasts (salesperson_id, recipient_count, subject, body, blast_type, sent_at) VALUES (?,?,?,?,'bulk',datetime('now'))",
-            (sp.salesperson_id, len(customers), subject, body)
+            "INSERT INTO batch_queue (template_key, subject, body, recipient_filter, selected_ids, batch_size, total_contacts, batches_sent, total_batches, status, next_send_at) VALUES (?,?,?,?,?,?,?,0,?,'active',datetime('now'))",
+            (f"salesperson_blast_{template_id}", subject, blast_meta, "selected", _json.dumps(customer_ids), blast_limit, len(customer_ids), 1)
         )
         _conn.commit()
-        current_blast_id = _cur.lastrowid
-        _conn.close()
-
-        for customer in customers:
-            try:
-                first = customer.first_name or customer.email.split('@')[0]
-                footer_html = _build_unsubscribe_footer(customer_id=customer.id, salesperson_name=sp.display_name, dealership_name=sp.dealership_name)
-                personal_body = body.replace('{{first_name}}', first).replace('{{First_Name}}', first)
-
-                phone_line = f'<div><a href="tel:{sp.phone}" style="color:#00C851;text-decoration:none;">{sp.phone}</a></div>' if sp.phone else ""
-                email_line = f'<div><a href="mailto:{sp.email if hasattr(sp, "email") else ""}" style="color:#00C851;text-decoration:none;">{user.email}</a></div>'
-
-                html = f"""<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f1f5f9;padding:16px;">
-                <div style="background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
-                    {build_hero(template_id)}
-                    {build_profile_header(sp, template_id)}
-                    <div style="padding:0 16px 8px;">
-                        <p style="font-size:15px;color:#334155;line-height:1.7;margin:0 0 16px;">{personal_body}</p>
-                        {vehicle_html}
-                        {build_cta(template_id, storefront_url)}
-                        <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:8px 14px;margin:0 0 8px;display:table;width:100%;box-sizing:border-box;">
-                            <span style="font-size:13px;color:#64748B;">🌐</span>
-                            <a href="{storefront_url}" style="font-size:13px;font-weight:600;color:#1E293B;text-decoration:none;margin-left:6px;">{storefront_url.replace("https://","")}</a>
-                        </div>
-                        <div style="background:#f0fdf4;border:1px solid #00C851;border-radius:8px;padding:8px 14px;margin:0 0 12px;display:table;width:100%;box-sizing:border-box;">
-                            <span style="font-size:12px;font-weight:600;color:#1E293B;">🤝 Know someone? If they buy, they get a deal — and you get $100.</span>
-                            <a href="{storefront_url}" style="display:inline-block;background:#00C851;color:white;padding:4px 12px;border-radius:6px;font-size:12px;font-weight:700;text-decoration:none;margin-left:8px;white-space:nowrap;">Share →</a>
-                        </div>
-                    </div>
-                    <div style="background:#f8fafc;padding:16px;text-align:center;border-top:1px solid #e2e8f0;">
-                        <div style="font-size:13px;color:#64748B;margin-bottom:6px;">
-                            {phone_line}
-                        </div>
-                        {footer_html}
-                    </div>
-                </div></div>"""
-
-                msg = Mail(
-                    from_email=(os.environ.get('SENDGRID_FROM_EMAIL', 'noreply@carsinstock.com'), sp.display_name + ' via CarsInStock'),
-                    to_emails=customer.email,
-                    subject=subject,
-                    html_content=html
-                )
-                # inject blast_id and customer_id so webhook can track events
-                # blast_id resolved after insert below — use email_blasts rowid placeholder
-                # We pass salesperson_id+customer_id now; blast_id patched after log insert
-                from sendgrid.helpers.mail import CustomArg
-                msg.custom_arg = [
-                    CustomArg(key='blast_id', value=str(current_blast_id)),
-                    CustomArg(key='customer_id', value=str(customer.id)),
-                ]
-                sg.send(msg)
-                sent += 1
-            except Exception as e:
-                failed += 1
-
-        # Update blast record with actual sent count
-        import sqlite3 as _sqlite3
-        _conn = _sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
-        _conn.execute("UPDATE email_blasts SET recipient_count=? WHERE id=?", (sent, current_blast_id))
+        queue_id = _cur.lastrowid
+        _cur.execute(
+            "INSERT INTO email_blasts (salesperson_id, recipient_count, subject, body, blast_type, sent_at) VALUES (?,?,?,?,'bulk',datetime('now'))",
+            (sp.salesperson_id, len(customer_ids), subject, body)
+        )
         _conn.commit()
         _conn.close()
-
-        return jsonify({"sent": sent, "failed": failed, "total": len(customers)})
+        return jsonify({"queued": len(customer_ids), "queue_id": queue_id, "message": f"Blast queued for {len(customer_ids)} customers. Emails will send shortly."})
 
     @bp.route("/customers/list", methods=["GET"])
     @login_required
@@ -955,28 +984,6 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         db.session.commit()
         flash(f"{vehicle.year} {vehicle.make} {vehicle.model} renewed for 7 days!", "success")
         return redirect(url_for("salesperson.dashboard"))
-
-    @bp.route("/qr-code")
-    @login_required
-    def qr_code():
-        import qrcode
-        import io
-        from flask import send_file
-        from app.models.salesperson import Salesperson
-        sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
-        if not sp:
-            return "Profile not found", 404
-        url = f"https://carsinstock.com/{sp.profile_url_slug}"
-        qr = qrcode.QRCode(version=1, error_correction=qrcode.constants.ERROR_CORRECT_H, box_size=10, border=4)
-        qr.add_data(url)
-        qr.make(fit=True)
-        img = qr.make_image(fill_color="#1E293B", back_color="white")
-        buf = io.BytesIO()
-        img.save(buf, format="PNG")
-        buf.seek(0)
-        return send_file(buf, mimetype="image/png", as_attachment=True, download_name=f"carsinstock-qr-{sp.profile_url_slug}.png")
-
-
     @bp.route("/referral/submit/<slug>", methods=["POST"])
     def submit_referral(slug):
         import sqlite3, os
@@ -1138,6 +1145,20 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
             next_blast=next_blast.strftime("%A, %B %d at 9:00 AM EST"),
             onboard_pos=onboard_pos["last_customer_id"] if onboard_pos else 0,
             total_customers=total_customers)
+
+    @bp.route("/save-sort", methods=["POST"])
+    @login_required
+    def save_sort():
+        from app.models.salesperson import Salesperson
+        from flask import jsonify
+        from app.models import db
+        sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
+        if sp:
+            data = request.get_json(force=True, silent=True) or {}
+            order = data.get("order", "newest")
+            sp.vehicle_sort_order = "price_low" if order == "low" else "price_high" if order == "high" else "newest"
+            db.session.commit()
+        return jsonify({"ok": True})
 
     @bp.route("/dashboard")
     @login_required

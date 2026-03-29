@@ -1,3 +1,4 @@
+import os
 from flask import Blueprint, render_template, request, redirect, flash, session
 from app.models import db
 
@@ -95,7 +96,9 @@ def sendgrid_webhook():
     import sqlite3, json
     from datetime import datetime
     events = request.get_json() or []
-    conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db', timeout=30)
+    conn.execute('PRAGMA journal_mode=WAL')
+    conn.execute('PRAGMA busy_timeout=30000')
     cur = conn.cursor()
 
     type_map = {
@@ -186,7 +189,15 @@ def public_profile(slug):
     sp_user = _User.query.get(sp.user_id)
     if sp_user and sp_user.is_locked:
         return render_template('billing/storefront_locked.html', sp=sp), 402
-    return render_template('salesperson/public_profile.html', sp=sp, vehicles=vehicles, is_owner=is_owner, is_demo=False, hide_nav_auth=not is_owner)
+    # Build team picks lookup from dealership_team
+    import sqlite3 as _sq
+    _conn = _sq.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    _conn.row_factory = _sq.Row
+    _team_rows = _conn.execute("SELECT id, name, profile_photo FROM dealership_team WHERE is_active=1").fetchall()
+    _conn.close()
+    team_lookup = {r['id']: {'name': r['name'], 'photo': r['profile_photo']} for r in _team_rows}
+
+    return render_template('salesperson/public_profile.html', sp=sp, vehicles=vehicles, is_owner=is_owner, is_demo=False, hide_nav_auth=not is_owner, team_lookup=team_lookup)
 
 
 @main.route("/lead/submit", methods=["POST"])
@@ -248,6 +259,19 @@ def submit_lead():
             except Exception as e:
                 print(f"Lead email error: {e}")
 
+
+            # Also notify assigned team member if this is a Team Pick
+            try:
+                if vehicle.is_team_pick and vehicle.pick_user_id:
+                    import sqlite3 as _sq
+                    _conn = _sq.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+                    _member = _conn.execute("SELECT name, email FROM dealership_team WHERE id=? AND is_active=1", (vehicle.pick_user_id,)).fetchone()
+                    _conn.close()
+                    if _member and _member[1]:
+                        team_html = f"""<h2>New Lead on Your Team Pick!</h2><p>A customer is interested in the <strong>{vehicle.year} {vehicle.make} {vehicle.model}</strong> — a vehicle you endorsed.</p><p><strong>Customer:</strong> {customer_name}</p><p><strong>Email:</strong> {customer_email}</p><p><strong>Phone:</strong> {customer_phone or 'Not provided'}</p><p><strong>Message:</strong> {message or 'No message'}</p><p style='color:#64748B;font-size:13px;'>This lead was routed to you because you endorsed this vehicle on CarsInStock.</p>"""
+                        send_email(_member[1], f"New Lead on Your Pick: {vehicle.year} {vehicle.make} {vehicle.model}", team_html)
+            except Exception as e:
+                print(f"Team member lead email error: {e}")
         # Send confirmation to customer with unsubscribe link
         try:
             from app.models.customer import Customer
@@ -417,6 +441,105 @@ def contact():
     return render_template('contact.html', turnstile_site_key=turnstile_site_key)
 
 
+@main.route('/subscribe', methods=['POST'])
+def subscribe():
+    from flask import request, jsonify
+    import sqlite3, os, re
+    from datetime import datetime
+
+    first_name = request.form.get('first_name', '').strip()
+    last_name = request.form.get('last_name', '').strip()
+    email = request.form.get('email', '').strip().lower()
+    turnstile_token = request.form.get('cf-turnstile-response', '')
+    salesperson_id = int(request.form.get('salesperson_id', 1) or 1)
+
+    if not first_name or not email:
+        return jsonify({'success': False, 'message': 'Name and email are required.'}), 400
+
+    if not re.match(r'^[^@]+@[^@]+\.[^@]+$', email):
+        return jsonify({'success': False, 'message': 'Invalid email address.'}), 400
+
+    # Verify Turnstile
+    import urllib.request, json as _json
+    try:
+        ts_data = urllib.request.urlencode({
+            'secret': os.environ.get('TURNSTILE_SECRET_KEY', ''),
+            'response': turnstile_token
+        }).encode()
+        ts_req = urllib.request.Request('https://challenges.cloudflare.com/turnstile/v0/siteverify', data=ts_data)
+        ts_resp = _json.loads(urllib.request.urlopen(ts_req).read())
+        if not ts_resp.get('success'):
+            return jsonify({'success': False, 'message': 'Captcha verification failed.'}), 400
+    except:
+        pass  # Don't block on captcha errors
+
+    db_path = '/home/eddie/carsinstock/instance/carsinstock.db'
+    conn = sqlite3.connect(db_path, timeout=30)
+    conn.execute('PRAGMA journal_mode=WAL')
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+
+    # Check if already subscribed (salesperson_id=1 is Pine Belt)
+    existing = cur.execute('SELECT id, unsubscribed FROM customers WHERE email=? AND salesperson_id=1', (email,)).fetchone()
+    if existing:
+        if existing['unsubscribed']:
+            cur.execute('UPDATE customers SET unsubscribed=0, first_name=?, last_name=? WHERE id=?',
+                (first_name, last_name, existing['id']))
+            conn.commit()
+        conn.close()
+        # Send confirmation anyway
+        _send_subscribe_confirmation(first_name, email)
+        return jsonify({'success': True, 'message': 'You\'re on the list!'})
+
+    cur.execute('''INSERT INTO customers
+        (salesperson_id, first_name, last_name, email, source, unsubscribed, created_at)
+        VALUES (?, ?, ?, ?, 'web_signup', 0, ?)''',
+        (salesperson_id, first_name, last_name, email, datetime.utcnow()))
+    conn.commit()
+    conn.close()
+
+    _send_subscribe_confirmation(first_name, email)
+    return jsonify({'success': True, 'message': 'You\'re on the list!'})
+
+def _send_subscribe_confirmation(first_name, email):
+    import os
+    from sendgrid import SendGridAPIClient
+    from sendgrid.helpers.mail import Mail
+    try:
+        html = f'''<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f1f5f9;padding:16px;">
+        <div style="background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);">
+            <div style="background:#1E293B;padding:28px 20px;text-align:center;border-radius:10px 10px 0 0;">
+                <div style="font-size:24px;font-weight:800;"><span style="color:white;">Cars</span><span style="color:#00C851;">InStock</span></div>
+            </div>
+            <div style="padding:28px 24px;">
+                <h2 style="color:#1E293B;margin:0 0 12px;">You\'re on the list, {first_name}! 🎉</h2>
+                <p style="color:#334155;font-size:15px;line-height:1.7;">You\'ll receive this week\'s top car deals every week. Fresh inventory, real prices, straight to your inbox.</p>
+                <p style="color:#334155;font-size:15px;line-height:1.7;">Stay tuned.</p>
+            </div>
+            <div style="background:#f8fafc;padding:16px;text-align:center;border-top:1px solid #e2e8f0;">
+                <p style="color:#94A3B8;font-size:11px;margin:0;">
+                    <a href="https://carsinstock.com/unsubscribe" style="color:#94A3B8;text-decoration:underline;">Unsubscribe</a>
+                    &middot;
+                    <a href="https://carsinstock.com/disclaimer" style="color:#94A3B8;text-decoration:underline;">Legal Disclaimer</a>
+                </p>
+            </div>
+        </div></div>'''
+        sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+        msg = Mail(
+            from_email=('noreply@carsinstock.com', 'CarsInStock'),
+            to_emails=email,
+            subject="You\'re on the list — Weekly Specials from CarsInStock",
+            html_content=html
+        )
+        sg.send(msg)
+    except Exception as e:
+        print(f"Subscribe confirmation email failed: {e}")
+
+
+@main.route('/disclaimer')
+def disclaimer():
+    return render_template('disclaimer.html')
+
 @main.route('/about')
 def about():
     return render_template('about.html')
@@ -487,3 +610,75 @@ def dealership():
             pass
         return render_template('dealership.html', success=True, plan=plan, turnstile_site_key=turnstile_site_key)
     return render_template('dealership.html', plan=plan, turnstile_site_key=turnstile_site_key)
+
+@main.route('/api/generate-pick-blurb', methods=['POST'])
+def generate_pick_blurb():
+    from flask import jsonify
+    import anthropic, os
+    data = request.get_json()
+    year = data.get('year', '')
+    make = data.get('make', '')
+    model = data.get('model', '')
+    price = data.get('price', '')
+    mileage = data.get('mileage', '')
+    sp_name = data.get('sp_name', 'the salesperson')
+    prompt = f"Write exactly 1 sentence (under 140 characters, no headers, no labels, no quotes) endorsing this car as {sp_name}: {year} {make} {model}, ${price}, {mileage} miles. Be specific and enthusiastic. Output only the sentence."
+    client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY'))
+    message = client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=100,
+        messages=[{"role": "user", "content": prompt}]
+    )
+    raw = message.content[0].text.strip()
+    if len(raw) > 150:
+        raw = raw[:150].rsplit(' ', 1)[0]
+    blurb = raw
+    return jsonify({'blurb': blurb})
+
+@main.route('/api/weekly_post', methods=['POST'])
+def weekly_post():
+    from flask import jsonify
+    import anthropic, os
+    data = request.get_json()
+    sp_id = data.get('salesperson_id')
+    from app.models.salesperson import Salesperson
+    from app.models.vehicle import Vehicle
+    sp = Salesperson.query.filter_by(salesperson_id=sp_id).first()
+    if not sp:
+        return jsonify({'error': 'Not found'}), 404
+    vehicles = Vehicle.query.filter_by(salesperson_id=sp_id, status='available').order_by(Vehicle.price.asc()).limit(5).all()
+    if not vehicles:
+        return jsonify({'error': 'No active vehicles'}), 400
+    vehicle_lines = "\n".join([f"• {v.year} {v.make} {v.model} — ${v.price:,.0f}" + (f" | {v.mileage:,} miles" if v.mileage else "") for v in vehicles])
+    image_urls = [v.image_url for v in vehicles if v.image_url][:5]
+    storefront_url = f"https://carsinstock.com/{sp.profile_url_slug}"
+    prompt = f"""Write social media posts for a car salesperson named {sp.display_name}. Sound personal, human, not corporate. Use their voice like a real person posting on their own Facebook.
+
+Their current inventory:
+{vehicle_lines}
+
+Their storefront: {storefront_url}
+
+Output ONLY valid JSON with these exact keys:
+{{
+  "facebook_post": "full Facebook post with emoji, vehicle list, and storefront link, 3-5 sentences max",
+  "instagram_caption": "shorter version under 150 chars with storefront link",
+  "whatsapp_message": "personal casual text message version"
+}}"""
+    client = anthropic.Anthropic(api_key=os.environ.get('ANTHROPIC_API_KEY'))
+    message = client.messages.create(
+        model="claude-haiku-4-5-20251001",
+        max_tokens=500,
+        messages=[{"role": "user", "content": prompt}]
+    )
+    import json
+    raw = message.content[0].text.strip()
+    try:
+        posts = json.loads(raw)
+    except Exception:
+        import re
+        match = re.search(r'\{.*\}', raw, re.DOTALL)
+        posts = json.loads(match.group()) if match else {}
+    posts['image_urls'] = image_urls
+    posts['storefront_url'] = storefront_url
+    return jsonify(posts)

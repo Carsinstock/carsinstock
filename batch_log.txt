@@ -40,3 +40,487 @@
 /home/eddie/carsinstock/batch_sender.py:48: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
   batches = db.engine.execute(
 [2026-03-16 13:00:02.668073] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:48: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-17 13:00:02.964764] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:48: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-18 13:00:01.981158] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:48: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-19 13:00:02.684062] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:48: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-20 13:00:03.287808] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-20 22:00:03.119806] Processing batch 3, type=salesperson_blast_1
+[2026-03-20 22:01:40.258808] Batch 3: sent 200, failed 0, remaining 0
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-20 22:30:02.857462] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-20 23:00:02.151131] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-20 23:30:02.779305] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-21 00:00:04.616857] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-21 00:30:02.401183] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-21 01:00:02.848729] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-21 01:30:02.564534] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-21 02:00:03.372994] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-21 02:30:02.998916] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-21 03:00:02.677668] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-21 03:30:02.357141] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-21 04:00:04.748733] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-21 04:30:02.704083] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-21 05:00:03.478379] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-21 05:30:03.119038] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-21 06:00:02.211843] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-21 06:30:02.909632] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-21 07:00:02.327746] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-21 07:30:03.054628] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-21 08:00:03.857036] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-21 08:30:02.771086] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-21 09:00:02.183655] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-21 09:30:02.812449] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-21 10:00:02.356115] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-21 10:30:03.025973] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-21 11:00:02.551342] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:140: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-21 11:30:02.146579] No active batches to process.
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+  File "/home/eddie/carsinstock/batch_sender.py", line 128
+    f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I'm Interested</a>'
+                                                                                                                                                                                                              ^
+SyntaxError: unterminated string literal (detected at line 128)
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-22 12:00:02.804860] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-22 12:30:02.516373] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-22 13:00:03.023669] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-22 13:30:02.589289] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-22 14:00:02.960591] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-22 14:30:03.012745] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-22 15:00:02.401020] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-22 15:30:02.046678] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-22 16:00:02.607459] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-22 16:30:02.088462] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-22 17:00:02.423640] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-22 17:30:03.160874] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-22 18:00:02.766124] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-22 18:30:02.132810] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-22 19:00:02.571630] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-22 19:30:02.076259] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-22 20:00:02.780965] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-22 20:30:02.526733] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-22 21:00:03.011042] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-22 21:30:02.599530] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-22 22:00:03.075919] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-22 22:30:02.964771] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-22 23:00:02.521164] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-22 23:30:03.158999] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 00:00:04.458771] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 00:30:03.026529] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 01:00:02.133540] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 01:30:02.904744] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 02:00:02.292930] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 02:30:02.902719] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 03:00:02.906548] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 03:30:02.559469] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 04:00:03.191927] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 04:30:02.914650] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 05:00:02.101109] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 05:30:02.705737] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 06:00:03.201309] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 06:30:03.028290] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 07:00:02.883708] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 07:30:02.680739] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 08:00:03.209344] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 08:30:03.136831] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 09:00:02.731426] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 09:30:03.240966] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 10:00:02.506164] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 10:30:02.265775] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 11:00:02.715408] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 11:30:02.261324] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 12:00:03.523298] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 12:30:02.181403] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 13:00:02.919819] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 13:30:02.830825] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 14:00:02.361273] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 14:30:03.033914] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 15:00:02.573360] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 15:30:02.133298] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 16:00:02.483382] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 16:30:01.984566] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 17:00:02.951284] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 17:30:02.470826] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 18:00:03.179983] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 18:30:02.608109] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 19:00:03.231214] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 19:30:03.001161] No active batches to process.
+/home/eddie/carsinstock/batch_sender.py:196: RemovedIn20Warning: Deprecated API features detected! These feature(s) are not compatible with SQLAlchemy 2.0. To prevent incompatible upgrades prior to updating applications, ensure requirements files are pinned to "sqlalchemy<2.0". Set environment variable SQLALCHEMY_WARN_20=1 to show all deprecation warnings.  Set environment variable SQLALCHEMY_SILENCE_UBER_WARNING=1 to silence this message. (Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
+  batches = db.engine.execute(
+[2026-03-23 20:00:02.467918] No active batches to process.

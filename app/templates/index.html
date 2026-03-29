@@ -52,6 +52,22 @@
 
         </div>
         <p style="text-align:center;color:#94A3B8;font-size:12px;padding:0 24px 20px;">Cancel anytime. No contracts. Questions? Email sales@carsinstock.com</p>
+        <!-- Salesperson Read More -->
+        <div style="padding:0 24px 24px;">
+            <div style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;">
+                <button onclick="toggleReadMore('spReadMore','spChevron')" style="width:100%;background:#F8FAFC;border:none;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-family:inherit;">
+                    <span style="font-size:14px;font-weight:700;color:#1E293B;">Is this for you? Read more →</span>
+                    <span id="spChevron" style="font-size:18px;color:#00C851;transition:transform 0.3s;">﹢</span>
+                </button>
+                <div id="spReadMore" style="display:none;padding:20px 24px;font-size:14px;color:#334155;line-height:1.8;border-top:1px solid #E2E8F0;">
+                    <p style="margin:0 0 14px;">If you know you have talent, drive, and the desire to grow, but you feel stuck, you&rsquo;re not alone. Maybe your manager tells you to &ldquo;go sell cars,&rdquo; but in the same breath expects you to sit and wait for the BDC to bring you customers. Maybe you&rsquo;re told to call people who applied a month ago&mdash;or longer&mdash;and somehow you&rsquo;re still blamed when the deals don&rsquo;t happen. Over time, that doesn&rsquo;t just slow you down; it wears you down. You start to feel defeated, not because you&rsquo;re lazy, but because the system is working against you, not with you.</p>
+                    <p style="margin:0 0 14px;font-weight:700;color:#1E293B;">If that sounds like you, CarsInStock was built for you.</p>
+                    <p style="margin:0 0 14px;">CarsInStock is not &ldquo;just another platform.&rdquo; It&rsquo;s a tool that lets you take back control of your business. Instead of waiting for someone else to hand you opportunities, you get a personal storefront where you can represent yourself, showcase the best of your inventory, and attract buyers directly. You&rsquo;re no longer just an order taker hoping the next lead is decent. You become what you were meant to be: a business person, building a real book of business, with your name on it.</p>
+                    <p style="margin:0;color:#00C851;font-weight:700;">That&rsquo;s why we&rsquo;re giving you a 14-day free trial &mdash; to prove what CarsInStock can do for you and your career. Try it. Build your page. Watch buyers reach out to you directly. See the difference for yourself.</p>
+                </div>
+            </div>
+        </div>
+
 
         <!-- Dealer Tiers -->
         <div style="background:#1E293B;padding:24px 24px 8px;margin:0;">
@@ -102,9 +118,47 @@
                     <a href="/dealership?plan=elite" style="display:block;text-align:center;background:#1E293B;border:1px solid #334155;color:white;padding:10px;border-radius:8px;font-weight:700;text-decoration:none;font-size:13px;margin-top:auto;">Get Started →</a>
                 </div>
             </div>
-            <p style="text-align:center;color:#64748B;font-size:12px;padding-bottom:16px;">Questions? Email <a href="mailto:sales@carsinstock.com" style="color:#00C851;">sales@carsinstock.com</a></p>
+            
+            <!-- Dealer Read More -->
+            <div style="margin:0 0 20px;">
+                <div style="border:1px solid #334155;border-radius:12px;overflow:hidden;">
+                    <button onclick="toggleReadMore('dlReadMore','dlChevron')" style="width:100%;background:#0f172a;border:none;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;font-family:inherit;">
+                        <span style="font-size:14px;font-weight:700;color:white;">Is this right for your store? Read more →</span>
+                        <span id="dlChevron" style="font-size:18px;color:#00C851;transition:transform 0.3s;">﹢</span>
+                    </button>
+                    <div id="dlReadMore" style="display:none;padding:20px 24px;font-size:14px;color:#CBD5E1;line-height:1.8;border-top:1px solid #334155;background:#0f172a;">
+                        <p style="margin:0 0 14px;font-weight:700;color:white;font-size:15px;">Dealership Owners &amp; Managers &mdash; This is your competitive advantage.</p>
+                        <p style="margin:0 0 14px;">You know the frustration: you hire top salespeople with real talent and drive, but they end up handcuffed&mdash;stuck waiting for BDC appts, chasing month-old leads, and competing internally instead of closing deals. They get frustrated, you get frustrated, and the whole store suffers. Good salespeople don&rsquo;t get lazy &mdash; they get defeated by systems that handcuff them.</p>
+                        <p style="margin:0 0 14px;font-weight:700;color:#00C851;">CarsInStock changes that.</p>
+                        <p style="margin:0 0 14px;">When your best salespeople use CarsInStock, they get their own personal storefront (carsinstock.com/their-name). They handpick their top 5&ndash;10 cars &mdash; lets them use their brain &mdash; and share their link everywhere. Buyers contact them directly. And when buyers do come in, your BDC and sales team work as one coordinated force &mdash; not against each other.</p>
+                        <p style="margin:0 0 10px;font-weight:700;color:white;">Here&rsquo;s what you gain:</p>
+                        <ul style="margin:0 0 14px;padding-left:20px;line-height:2;">
+                            <li><strong style="color:white;">An army of marketers.</strong> Your top talent becomes a sales force and marketing machine, generating their own leads while representing your inventory.</li>
+                            <li><strong style="color:white;">Higher close rates.</strong> Buyers connect with the salesperson who knows the cars, builds trust faster, and closes harder &mdash; no lead handoff friction.</li>
+                            <li><strong style="color:white;">Cleaner showroom process.</strong> Serious buyers show up with the right salesperson, the right car already identified &mdash; no fishing expeditions.</li>
+                            <li><strong style="color:white;">Selective self-filtering.</strong> Only your most driven salespeople will use it naturally. The rest? They&rsquo;ll either step up or self-select out.</li>
+                        </ul>
+                        <p style="margin:0 0 14px;">The result? Your dealership gets an elite squad of trained consultants &mdash; each with their own book of business, each building buyer relationships that loop back to your store. They&rsquo;re not just order takers. They are proud business salespeople selling your inventory.</p>
+                        <p style="margin:0;font-weight:700;color:#00C851;">Your top talent deserves tools that match their drive. Your store deserves the results.</p>
+                    </div>
+                </div>
+            </div>
+<p style="text-align:center;color:#64748B;font-size:12px;padding-bottom:16px;">Questions? Email <a href="mailto:sales@carsinstock.com" style="color:#00C851;">sales@carsinstock.com</a></p>
         </div>
     </div>
+<script>
+function toggleReadMore(contentId, chevronId) {
+    var el = document.getElementById(contentId);
+    var ch = document.getElementById(chevronId);
+    if (el.style.display === 'none') {
+        el.style.display = 'block';
+        ch.textContent = '−';
+    } else {
+        el.style.display = 'none';
+        ch.textContent = '﹢';
+    }
+}
+</script>
 </div>
 {% endblock %}
 {% block content %}
@@ -253,10 +307,72 @@
     </div>
 
     <!-- Footer -->
+    <!-- Subscribe Box -->
+    <div style="background:#1E293B;padding:60px 20px;">
+        <div style="max-width:560px;margin:0 auto;text-align:center;">
+            <h2 style="color:white;font-size:28px;font-weight:800;margin:0 0 10px;line-height:1.3;">Get This Week's Top Deals Delivered to Your Inbox</h2>
+            <p style="color:#94A3B8;font-size:15px;margin:0 0 32px;">Fresh inventory every week. No spam. Unsubscribe anytime.</p>
+            <div id="subscribe-form">
+                <div style="display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap;">
+                    <input id="sub-first" type="text" placeholder="First Name" style="flex:1;min-width:140px;padding:14px 16px;border-radius:8px;border:none;font-size:15px;font-family:Inter,sans-serif;outline:none;">
+                    <input id="sub-last" type="text" placeholder="Last Name" style="flex:1;min-width:140px;padding:14px 16px;border-radius:8px;border:none;font-size:15px;font-family:Inter,sans-serif;outline:none;">
+                </div>
+                <input id="sub-email" type="email" placeholder="Email Address" style="width:100%;padding:14px 16px;border-radius:8px;border:none;font-size:15px;font-family:Inter,sans-serif;outline:none;box-sizing:border-box;margin-bottom:12px;">
+                <div class="cf-turnstile" data-sitekey="0x4AAAAAACgqeOAo_1v9EOb3" data-theme="dark" style="margin-bottom:12px;"></div>
+                <button onclick="submitSubscribe()" style="width:100%;background:#00C851;color:white;border:none;padding:16px;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;font-family:Inter,sans-serif;">Send Me the Deals →</button>
+                <div id="sub-msg" style="margin-top:12px;font-size:14px;color:#00C851;display:none;"></div>
+            </div>
+        </div>
+    </div>
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script>
+    function submitSubscribe() {
+        var first = document.getElementById('sub-first').value.trim();
+        var last = document.getElementById('sub-last').value.trim();
+        var email = document.getElementById('sub-email').value.trim();
+        var token = document.querySelector('.cf-turnstile [name=cf-turnstile-response]');
+        var tokenVal = token ? token.value : '';
+        if (!first || !email) {
+            showSubMsg('Please enter your first name and email.', '#ef4444');
+            return;
+        }
+        var btn = document.querySelector('#subscribe-form button');
+        btn.disabled = true;
+        btn.textContent = 'Sending...';
+        var fd = new FormData();
+        fd.append('first_name', first);
+        fd.append('last_name', last);
+        fd.append('email', email);
+        fd.append('cf-turnstile-response', tokenVal);
+        fetch('/subscribe', {method:'POST', body: fd})
+        .then(function(r){return r.json();})
+        .then(function(data){
+            if (data.success) {
+                document.getElementById('subscribe-form').innerHTML = '<div style="color:#00C851;font-size:20px;font-weight:700;padding:20px 0;">✅ You're on the list!</div><p style="color:#94A3B8;font-size:14px;">Check your inbox for a confirmation email.</p>';
+            } else {
+                showSubMsg(data.message || 'Something went wrong.', '#ef4444');
+                btn.disabled = false;
+                btn.textContent = 'Send Me the Deals →';
+            }
+        })
+        .catch(function(){
+            showSubMsg('Something went wrong. Please try again.', '#ef4444');
+            btn.disabled = false;
+            btn.textContent = 'Send Me the Deals →';
+        });
+    }
+    function showSubMsg(msg, color) {
+        var el = document.getElementById('sub-msg');
+        el.textContent = msg;
+        el.style.color = color;
+        el.style.display = 'block';
+    }
+    </script>
+
     <div class="hp-footer">
-        <div class="hp-footer-logo"><span class="cars">Cars</span> <span class="instock">IN STOCK</span></div>
+        <div class="hp-footer-logo"><span class="cars">Cars</span><span class="instock">InStock</span></div>
         <div><a href="/about">About</a> <a href="/contact">Contact</a> <a href="/privacy">Privacy</a> <a href="/terms">Terms</a></div>
-        <div class="tagline">"Stop fighting for ups. Start owning them."</div>
+        <div class="tagline">"Find Cars. Sell Cars. CarsInStock."</div>
         <div class="copy">&copy; 2026 CarsInStock</div>
     </div>
 </div>

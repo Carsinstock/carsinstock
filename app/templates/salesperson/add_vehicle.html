@@ -83,6 +83,35 @@
         </p>
 
         <!-- POST IT -->
+        <!-- Assign to Salesperson (dealership tier only) -->
+        <div style="margin-bottom:18px;padding:16px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;">
+            <label style="font-size:13px;font-weight:700;color:#1E293B;display:block;margin-bottom:8px;">👤 Assign to Salesperson</label>
+            <select name="assigned_team_member_id" id="teamMemberSelect" onchange="toggleBlurb(this)" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;box-sizing:border-box;">
+                <option value="">— Unassigned (Dealership) —</option>
+                {% for member in team_members %}
+                <option value="{{ member[0] }}">{{ member[2] }}</option>
+                {% endfor %}
+            </select>
+            <div id="blurbSection" style="display:none;margin-top:12px;">
+                <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:6px;">Why did they pick this car? <span style="color:#94A3B8;font-weight:400;">(shows on I'm Interested form · 150 chars max)</span></label>
+                <textarea name="pick_blurb" id="pickBlurb" maxlength="150" rows="3" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;box-sizing:border-box;resize:none;" placeholder="This Tahoe is spotless, one owner, priced $3k under market..."></textarea>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+                    <button type="button" onclick="generateBlurb()" style="font-size:12px;background:#1E293B;color:#00C851;border:none;padding:5px 12px;border-radius:6px;cursor:pointer;font-weight:600;">✨ AI Write</button>
+                    <div id="blurbCount" style="font-size:11px;color:#94A3B8;">0/150</div>
+                </div>
+                <div id="aiBlurbSpinner" style="display:none;font-size:12px;color:#64748B;margin-top:4px;">✨ Writing blurb...</div>
+            </div>
+            <p style="font-size:11px;color:#64748B;margin:6px 0 0;">This vehicle will show as endorsed by the selected salesperson.</p>
+<script>
+function toggleBlurb(sel) {
+    var section = document.getElementById('blurbSection');
+    section.style.display = sel.value ? 'block' : 'none';
+}
+document.getElementById('pickBlurb') && document.getElementById('pickBlurb').addEventListener('input', function() {
+    document.getElementById('blurbCount').textContent = this.value.length + '/150';
+});
+</script>
+        </div>
         <button type="submit" class="post-btn">🚀 Post to My Storefront</button>
     </form>
     <p style="text-align:center;margin-top:15px;"><a href="/{{ sp.profile_url_slug }}" class="back-link">← Back to my storefront</a></p>
@@ -344,6 +373,35 @@ function stopVINScan() {
     document.getElementById("scanModal").style.display = "none";
     var captureBtn = document.getElementById("captureBtn");
     if (captureBtn) captureBtn.style.display = "none";
+}
+</script>
+
+
+<script>
+async function generateBlurb() {
+    var year = document.getElementById('year') ? document.getElementById('year').value : document.querySelector('input[name=year]') ? document.querySelector('input[name=year]').value : '';
+    var make = document.querySelector('input[name=make]') ? document.querySelector('input[name=make]').value : '';
+    var model = document.querySelector('input[name=model]') ? document.querySelector('input[name=model]').value : '';
+    var price = document.querySelector('input[name=price]') ? document.querySelector('input[name=price]').value : '';
+    var mileage = document.querySelector('input[name=mileage]') ? document.querySelector('input[name=mileage]').value : '';
+    var spName = document.getElementById('teamMemberSelect') ? document.getElementById('teamMemberSelect').options[document.getElementById('teamMemberSelect').selectedIndex].text : '';
+    if (!make && !model) { alert('Please fill in the vehicle details first.'); return; }
+    document.getElementById('aiBlurbSpinner').style.display = 'block';
+    document.getElementById('pickBlurb').disabled = true;
+    try {
+        var response = await fetch('/api/generate-pick-blurb', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({year: year, make: make, model: model, price: price, mileage: mileage, sp_name: spName})
+        });
+        var data = await response.json();
+        if (data.blurb) {
+            document.getElementById('pickBlurb').value = data.blurb;
+            document.getElementById('blurbCount').textContent = data.blurb.length + '/150';
+        }
+    } catch(e) { alert('Could not generate blurb. Try again.'); }
+    document.getElementById('aiBlurbSpinner').style.display = 'none';
+    document.getElementById('pickBlurb').disabled = false;
 }
 </script>
 

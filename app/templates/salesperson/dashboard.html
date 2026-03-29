@@ -47,11 +47,14 @@
         {% if active_vehicles %}
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
             <h3 style="color:#38a169;font-size:16px;margin:0;">Active Listings</h3>
-            <select id="dashSort" onchange="sortDash(this.value)" style="padding:6px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;color:#1E293B;background:#fff;cursor:pointer;">
-                <option value="default">Sort by Price</option>
-                <option value="low">Price: Low to High</option>
-                <option value="high">Price: High to Low</option>
-            </select>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <select id="dashSort" onchange="sortDash(this.value)" style="padding:6px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;color:#1E293B;background:#fff;cursor:pointer;">
+                    <option value="default" {% if not sp.vehicle_sort_order or sp.vehicle_sort_order == 'newest' %}selected{% endif %}>Sort by Price</option>
+                    <option value="low" {% if sp.vehicle_sort_order == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+                    <option value="high" {% if sp.vehicle_sort_order == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+                </select>
+                <button onclick="saveSort()" style="padding:6px 14px;background:#1E293B;color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Save</button>
+            </div>
         </div>
         <div class="dash-vehicle-list" id="dashVehicleList">
             {% for v in active_vehicles %}
@@ -106,6 +109,37 @@
     </div>
 
     <!-- MY LEADS TAB -->
+
+    <!-- SOCIAL SHARING TOOLS -->
+    <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:12px;padding:20px;margin-bottom:24px;">
+        <h3 style="margin:0 0 4px;color:#1E293B;font-size:16px;font-weight:700;">📣 Share My Store</h3>
+        <p style="margin:0 0 16px;color:#64748B;font-size:13px;">Drive your personal network to your storefront every week.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;">
+            <button onclick="copyStoreLink()" style="background:#1E293B;color:white;border:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">🔗 Copy My Store Link</button>
+            <a href="/qr-code" download style="background:#1E293B;color:white;border:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;">📲 Download QR Code</a>
+            <button onclick="copyTextBlast()" style="background:#1E293B;color:white;border:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">💬 Copy Text Template</button>
+            <button onclick="generateWeeklyPost()" style="background:#00C851;color:white;border:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">✨ Create My Weekly Post</button>
+        </div>
+        <div id="shareCopied" style="display:none;margin-top:10px;color:#00C851;font-size:13px;font-weight:600;">✅ Copied to clipboard!</div>
+    </div>
+    <script>
+    function copyStoreLink() {
+        navigator.clipboard.writeText('https://carsinstock.com/{{ sp.profile_url_slug }}').then(function() {
+            document.getElementById('shareCopied').textContent = '✅ Store link copied!';
+            document.getElementById('shareCopied').style.display = 'block';
+            setTimeout(function(){ document.getElementById('shareCopied').style.display='none'; }, 3000);
+        });
+    }
+    function copyTextBlast() {
+        var txt = "Hey, check out what I have this week — https://carsinstock.com/{{ sp.profile_url_slug }}. Let me know if anything catches your eye!";
+        navigator.clipboard.writeText(txt).then(function() {
+            document.getElementById('shareCopied').textContent = '✅ Text template copied! Paste into iMessage or WhatsApp.';
+            document.getElementById('shareCopied').style.display = 'block';
+            setTimeout(function(){ document.getElementById('shareCopied').style.display='none'; }, 4000);
+        });
+    }
+    </script>
+
     <div id="tab-leads" class="tab-content">
         <h2>My Leads ({{ leads|length }})</h2>
         {% if leads %}
@@ -120,6 +154,54 @@
                 <div class="lead-full">
                     {% if lead.message %}<p class="lead-message">{{ lead.message }}</p>{% endif %}
                     <p class="lead-source">Source: {{ lead.source }} | Status: {{ lead.status }}</p>
+                    <button class="print-lead-btn" onclick="event.stopPropagation(); printLead('lead-print-{{ lead.id }}');" title="Print Lead Sheet">&#128438; Print Lead Sheet</button>
+                </div>
+
+                <!-- PRINT SHEET — hidden until print -->
+                <div id="lead-print-{{ lead.id }}" class="lead-print-sheet" style="display:none;">
+                  <div class="lps-header">
+                    <div class="lps-logo">Cars <span>IN STOCK</span></div>
+                    <div class="lps-tagline">Find Cars. Sell Cars. CarsInStock.</div>
+                  </div>
+                  <div class="lps-body">
+                    <div class="lps-section lps-two-col">
+                      <div>
+                        <div class="lps-section-title">Salesperson</div>
+                        <div class="lps-field"><strong>{{ sp.display_name }}</strong></div>
+                        <div class="lps-field">{{ sp.phone or '' }}</div>
+                        <div class="lps-field">carsinstock.com/{{ sp.profile_url_slug }}</div>
+                      </div>
+                      <div>
+                        <div class="lps-section-title">Lead Received</div>
+                        <div class="lps-field"><strong>{{ lead.created_at.strftime('%B %d, %Y') }}</strong></div>
+                        <div class="lps-field">{{ lead.created_at.strftime('%I:%M %p') }}</div>
+                      </div>
+                    </div>
+                    <div class="lps-section">
+                      <div class="lps-section-title">Customer Information</div>
+                      <div class="lps-field"><strong>Name:</strong> {{ lead.customer_name or '—' }}</div>
+                      <div class="lps-field"><strong>Phone:</strong> {{ lead.customer_phone or '—' }}</div>
+                      <div class="lps-field"><strong>Email:</strong> {{ lead.customer_email or '—' }}</div>
+                      {% if lead.vehicle %}<div class="lps-field"><strong>Vehicle Interest:</strong> {{ lead.vehicle.year }} {{ lead.vehicle.make }} {{ lead.vehicle.model }}</div>{% endif %}
+                    </div>
+                    <div class="lps-section">
+                      <div class="lps-section-title">Message / Inquiry</div>
+                      <div class="lps-message-box">{{ lead.message or 'No message provided.' }}</div>
+                    </div>
+                    <div class="lps-section">
+                      <div class="lps-section-title">Follow-Up</div>
+                      <div class="lps-followup-grid">
+                        <div class="lps-followup-row"><span>Called:</span> <span>&#9744; Yes &nbsp;&nbsp; &#9744; No</span></div>
+                        <div class="lps-followup-row"><span>Date called:</span> <span class="lps-line"></span></div>
+                        <div class="lps-followup-row"><span>Spoke with customer:</span> <span>&#9744; Yes &nbsp;&nbsp; &#9744; No</span></div>
+                        <div class="lps-followup-row"><span>Appointment set:</span> <span>&#9744; Yes &nbsp;&nbsp; &#9744; No</span></div>
+                        <div class="lps-followup-row"><span>Appointment date/time:</span> <span class="lps-line"></span></div>
+                      </div>
+                      <div class="lps-notes-label">Notes:</div>
+                      <div class="lps-notes-box"></div>
+                    </div>
+                  </div>
+                  <div class="lps-footer">Powered by CarsInStock.com</div>
                 </div>
             </div>
             {% endfor %}
@@ -300,7 +382,7 @@
             <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9;">
                 <div>
                     <p style="margin:0;font-size:14px;font-weight:600;color:#1E293B;">{{ b.subject or 'Blast' }}</p>
-                    <p style="margin:0;font-size:12px;color:#94A3B8;">{{ b.sent_at.strftime('%b %d, %Y %I:%M %p') if b.sent_at else '' }}</p>
+                    <p style="margin:0;font-size:12px;color:#94A3B8;">{{ b.sent_at if b.sent_at else '' }}</p>
                 </div>
                 <span style="background:#F0FDF4;color:#00C851;font-weight:700;font-size:13px;padding:4px 10px;border-radius:20px;">{{ b.recipient_count }} sent</span>
             </div>
@@ -500,6 +582,90 @@ function sendBlast() {
     .dash-actions { width: 100%; justify-content: flex-start; }
     .lead-date { margin-left: 0; }
 }
+
+/* ===== PRINT LEAD SHEET ===== */
+.print-lead-btn {
+    margin-top: 10px;
+    background: #1E293B;
+    color: #fff;
+    border: none;
+    padding: 7px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.print-lead-btn:hover { background: #00C851; color: #fff; }
+.lead-print-sheet { display: none; }
+@media print {
+    body * { visibility: hidden !important; }
+    .lead-print-sheet.printing, .lead-print-sheet.printing * { visibility: visible !important; }
+    .lead-print-sheet.printing { display: block !important; position: fixed; top: 0; left: 0; width: 100%; z-index: 99999; }
+    .lps-header { background: #1E293B !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; color: white; padding: 20px 28px; display: flex; align-items: center; justify-content: space-between; }
+    .lps-logo { font-size: 22px; font-weight: 900; color: white; letter-spacing: -0.5px; }
+    .lps-logo span { color: #00C851; }
+    .lps-tagline { font-size: 11px; color: #94A3B8; }
+    .lps-body { padding: 20px 28px; }
+    .lps-section { margin-bottom: 18px; border-bottom: 1px solid #E2E8F0; padding-bottom: 14px; }
+    .lps-section:last-child { border-bottom: none; }
+    .lps-section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #00C851; margin-bottom: 8px; }
+    .lps-two-col { display: flex; gap: 40px; }
+    .lps-two-col > div { flex: 1; }
+    .lps-field { font-size: 13px; color: #1E293B; margin-bottom: 3px; }
+    .lps-message-box { font-size: 13px; color: #334155; border: 1px solid #E2E8F0; border-radius: 6px; padding: 10px; min-height: 50px; line-height: 1.6; }
+    .lps-followup-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    .lps-followup-row { display: flex; justify-content: space-between; font-size: 13px; color: #1E293B; border-bottom: 1px dotted #E2E8F0; padding-bottom: 6px; }
+    .lps-line { display: inline-block; width: 160px; border-bottom: 1px solid #1E293B; }
+    .lps-notes-label { font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 6px; }
+    .lps-notes-box { border: 1px solid #CBD5E1; border-radius: 6px; height: 90px; width: 100%; }
+    .lps-footer { text-align: center; font-size: 10px; color: #94A3B8; padding: 10px; border-top: 1px solid #E2E8F0; }
+}
+/* ===== END PRINT LEAD SHEET ===== */
+
+/* ===== PRINT LEAD SHEET ===== */
+.print-lead-btn {
+    margin-top: 10px;
+    background: #1E293B;
+    color: #fff;
+    border: none;
+    padding: 7px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.print-lead-btn:hover { background: #00C851; color: #fff; }
+.lead-print-sheet { display: none; }
+@media print {
+    body * { visibility: hidden !important; }
+    .lead-print-sheet.printing, .lead-print-sheet.printing * { visibility: visible !important; }
+    .lead-print-sheet.printing { display: block !important; position: fixed; top: 0; left: 0; width: 100%; z-index: 99999; }
+    .lps-header { background: #1E293B !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; color: white; padding: 20px 28px; display: flex; align-items: center; justify-content: space-between; }
+    .lps-logo { font-size: 22px; font-weight: 900; color: white; letter-spacing: -0.5px; }
+    .lps-logo span { color: #00C851; }
+    .lps-tagline { font-size: 11px; color: #94A3B8; }
+    .lps-body { padding: 20px 28px; }
+    .lps-section { margin-bottom: 18px; border-bottom: 1px solid #E2E8F0; padding-bottom: 14px; }
+    .lps-section:last-child { border-bottom: none; }
+    .lps-section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #00C851; margin-bottom: 8px; }
+    .lps-two-col { display: flex; gap: 40px; }
+    .lps-two-col > div { flex: 1; }
+    .lps-field { font-size: 13px; color: #1E293B; margin-bottom: 3px; }
+    .lps-message-box { font-size: 13px; color: #334155; border: 1px solid #E2E8F0; border-radius: 6px; padding: 10px; min-height: 50px; line-height: 1.6; }
+    .lps-followup-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    .lps-followup-row { display: flex; justify-content: space-between; font-size: 13px; color: #1E293B; border-bottom: 1px dotted #E2E8F0; padding-bottom: 6px; }
+    .lps-line { display: inline-block; width: 160px; border-bottom: 1px solid #1E293B; }
+    .lps-notes-label { font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 6px; }
+    .lps-notes-box { border: 1px solid #CBD5E1; border-radius: 6px; height: 90px; width: 100%; }
+    .lps-footer { text-align: center; font-size: 10px; color: #94A3B8; padding: 10px; border-top: 1px solid #E2E8F0; }
+}
+/* ===== END PRINT LEAD SHEET ===== */
 </style>
 <script>
 function showTab(name, btn) { try {
@@ -509,7 +675,12 @@ function showTab(name, btn) { try {
     if(btn) btn.classList.add('active');
 } catch(e){ console.log(e); } }
 
-function sortDash(order) {
+function saveSort() {
+    var order = document.getElementById('dashSort').value;
+    fetch('/save-sort', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({order: order})})
+    .then(function() { location.reload(); });
+}
+function sortDash(order, save) {
     if (order === 'default') return;
     const list = document.getElementById('dashVehicleList');
     if (!list) return;
@@ -521,7 +692,14 @@ function sortDash(order) {
         return order === 'low' ? priceA - priceB : priceB - priceA;
     });
     rows.forEach(r => list.appendChild(r));
+    if (save !== false) {
+        fetch('/save-sort', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({order: order})});
+    }
 }
+document.addEventListener('DOMContentLoaded', function() {
+    var sel = document.getElementById('dashSort');
+    if (sel && sel.value && sel.value !== 'default') { sortDash(sel.value, false); }
+});
 </script>
 
     <div id="tab-referrals" class="tab-content">
@@ -566,4 +744,98 @@ function updateReferralStatus(id, status) {
     });
 }
 </script>
+
+<script>
+function printLead(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = 'block';
+    el.classList.add('printing');
+    window.print();
+    setTimeout(function() {
+        el.classList.remove('printing');
+        el.style.display = 'none';
+    }, 1000);
+}
+</script>
+
+
+<script>
+function printLead(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.style.display = 'block';
+    el.classList.add('printing');
+    window.print();
+    setTimeout(function() {
+        el.classList.remove('printing');
+        el.style.display = 'none';
+    }, 1000);
+}
+</script>
+
+
+<!-- Weekly Post Modal -->
+<div id="weeklyPostModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;overflow-y:auto;">
+    <div style="background:#fff;border-radius:12px;padding:28px;max-width:540px;width:90%;margin:20px auto;max-height:90vh;overflow-y:auto;">
+        <h3 style="margin:0 0 6px;color:#1E293B;font-size:18px;font-weight:700;">✨ Your Weekly Post</h3>
+        <p style="margin:0 0 20px;color:#64748B;font-size:13px;">Copy and paste to Facebook, Instagram, or WhatsApp.</p>
+        <div id="weeklyPostSpinner" style="text-align:center;padding:30px;color:#64748B;">✨ Writing your post...</div>
+        <div id="weeklyPostContent" style="display:none;">
+            <div style="margin-bottom:16px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                    <label style="font-size:12px;font-weight:700;color:#1E293B;text-transform:uppercase;letter-spacing:1px;">📘 Facebook Post</label>
+                    <button onclick="copyPost('fbPost')" style="font-size:12px;background:#1E293B;color:#00C851;border:none;padding:4px 10px;border-radius:4px;cursor:pointer;font-weight:600;">Copy</button>
+                </div>
+                <textarea id="fbPost" rows="6" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:13px;box-sizing:border-box;resize:none;"></textarea>
+            </div>
+            <div style="margin-bottom:16px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                    <label style="font-size:12px;font-weight:700;color:#1E293B;text-transform:uppercase;letter-spacing:1px;">📸 Instagram Caption</label>
+                    <button onclick="copyPost('igPost')" style="font-size:12px;background:#1E293B;color:#00C851;border:none;padding:4px 10px;border-radius:4px;cursor:pointer;font-weight:600;">Copy</button>
+                </div>
+                <textarea id="igPost" rows="3" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:13px;box-sizing:border-box;resize:none;"></textarea>
+            </div>
+            <div style="margin-bottom:20px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                    <label style="font-size:12px;font-weight:700;color:#1E293B;text-transform:uppercase;letter-spacing:1px;">💬 WhatsApp Message</label>
+                    <button onclick="copyPost('waPost')" style="font-size:12px;background:#1E293B;color:#00C851;border:none;padding:4px 10px;border-radius:4px;cursor:pointer;font-weight:600;">Copy</button>
+                </div>
+                <textarea id="waPost" rows="3" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:13px;box-sizing:border-box;resize:none;"></textarea>
+            </div>
+            <div id="postCopied" style="display:none;color:#00C851;font-size:13px;font-weight:600;margin-bottom:10px;">✅ Copied!</div>
+        </div>
+        <button onclick="document.getElementById('weeklyPostModal').style.display='none'" style="width:100%;background:#f1f5f9;color:#1E293B;border:1px solid #CBD5E1;padding:12px;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;">Close</button>
+    </div>
+</div>
+<script>
+async function generateWeeklyPost() {
+    document.getElementById('weeklyPostModal').style.display = 'flex';
+    document.getElementById('weeklyPostSpinner').style.display = 'block';
+    document.getElementById('weeklyPostContent').style.display = 'none';
+    try {
+        var resp = await fetch('/api/weekly_post', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({salesperson_id: {{ sp.salesperson_id }}})
+        });
+        var data = await resp.json();
+        document.getElementById('fbPost').value = data.facebook_post || '';
+        document.getElementById('igPost').value = data.instagram_caption || '';
+        document.getElementById('waPost').value = data.whatsapp_message || '';
+        document.getElementById('weeklyPostSpinner').style.display = 'none';
+        document.getElementById('weeklyPostContent').style.display = 'block';
+    } catch(e) {
+        document.getElementById('weeklyPostSpinner').textContent = 'Something went wrong. Try again.';
+    }
+}
+function copyPost(id) {
+    var el = document.getElementById(id);
+    navigator.clipboard.writeText(el.value).then(function() {
+        document.getElementById('postCopied').style.display = 'block';
+        setTimeout(function(){ document.getElementById('postCopied').style.display='none'; }, 2500);
+    });
+}
+</script>
+
 {% endblock %}

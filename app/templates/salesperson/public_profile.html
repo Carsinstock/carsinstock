@@ -6,15 +6,15 @@
 <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
 <link rel="manifest" href="/manifest/{{ sp.profile_url_slug }}.json">
 <meta property="og:title" content="{{ sp.display_name }} — Cars In Stock">
-<meta property="og:description" content="Check out {{ sp.display_name }}'s latest inventory. Fresh cars, updated weekly.">
-<meta property="og:image" content="{{ sp.cover_photo or sp.profile_photo or 'https://res.cloudinary.com/dbpa9qqtb/image/upload/v1772163049/demo/demo_cover_photo.jpg' }}">
+<meta property="og:description" content="Check out my inventory this week at CarsInStock — carsinstock.com/{{ sp.profile_url_slug }}">
+<meta property="og:image" content="{{ sp.profile_photo or 'https://res.cloudinary.com/dbpa9qqtb/image/upload/v1772163049/demo/demo_cover_photo.jpg' }}">
 <meta property="og:url" content="https://carsinstock.com/{{ sp.profile_url_slug }}">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="CarsInStock">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{ sp.display_name }} — Cars In Stock">
-<meta name="twitter:description" content="Check out {{ sp.display_name }}'s latest inventory. Fresh cars, updated weekly.">
-<meta name="twitter:image" content="{{ sp.cover_photo or sp.profile_photo or 'https://res.cloudinary.com/dbpa9qqtb/image/upload/v1772163049/demo/demo_cover_photo.jpg' }}">
+<meta name="twitter:description" content="Check out my inventory this week at CarsInStock — carsinstock.com/{{ sp.profile_url_slug }}">
+<meta name="twitter:image" content="{{ sp.profile_photo or 'https://res.cloudinary.com/dbpa9qqtb/image/upload/v1772163049/demo/demo_cover_photo.jpg' }}">
 {% endblock %}
 {% block content %}
 {% if is_demo %}
@@ -133,7 +133,6 @@
     <p style="font-size:12px;font-weight:600;color:#1E293B;margin:0;flex:1;">🤝 Know someone? If they buy, you get $100.</p>
     <button onclick="document.getElementById('referralModal').style.display='flex'" style="background:#00C851;color:white;border:none;padding:5px 12px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">Refer →</button>
 </div>
-    <p style="text-align:center;color:#94A3B8;font-size:11px;margin-bottom:8px;margin-top:4px;">You're receiving this because you opted in to receive updates from the salesperson or dealership.</p>
 
 <div id="referralModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:2000;align-items:center;justify-content:center;">
     <div style="background:white;border-radius:16px;padding:28px;max-width:420px;width:90%;position:relative;max-height:90vh;overflow-y:auto;">
@@ -203,6 +202,11 @@ function submitReferral() {
                 {% else %}
                 <div class="vehicle-img-placeholder">No Photo</div>
                 {% endif %}
+                {% if v.is_team_pick and sp.subscription_tier == 'dealership' and v.pick_user_id and team_lookup.get(v.pick_user_id) %}
+                <div style="position:absolute;bottom:10px;right:10px;z-index:3;">
+                  <img src="{{ team_lookup[v.pick_user_id]['photo'] }}" alt="{{ team_lookup[v.pick_user_id]['name'] }}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #00C851;box-shadow:0 2px 8px rgba(0,0,0,0.25);">
+                </div>
+                {% endif %}
                 </div>
                 <div class="vehicle-info">
                     <h3>{{ v.year }} {{ v.make }} {{ v.model }}{% if v.trim %} {{ v.trim }}{% endif %}</h3>
@@ -223,12 +227,19 @@ function submitReferral() {
                     {% if is_demo %}
                     <button class="interested-btn" onclick="showDemoModal()">I'm Interested</button>
                     {% elif not v.is_expired %}
-                    <button class="interested-btn" onclick="showLeadForm({{ v.id }}, '{{ v.year }} {{ v.make }} {{ v.model }}')">I'm Interested</button>
+                    <button class="interested-btn" onclick="showLeadForm({{ v.id }}, '{{ v.year }} {{ v.make }} {{ v.model }}', {{ 'true' if (v.is_team_pick and sp.subscription_tier == 'dealership' and v.pick_user_id and team_lookup.get(v.pick_user_id)) else 'false' }}, '{{ team_lookup[v.pick_user_id]['photo'] if (v.is_team_pick and v.pick_user_id and team_lookup.get(v.pick_user_id)) else '' }}', '{{ team_lookup[v.pick_user_id]['name'] if (v.is_team_pick and v.pick_user_id and team_lookup.get(v.pick_user_id)) else '' }}', '{{ v.pick_blurb|replace("'", "\'") if v.pick_blurb else '' }}')">I'm Interested</button>
                     {% elif is_owner %}
                     <form method="POST" action="/vehicles/renew/{{ v.id }}" style="display:inline;"><button type="submit" style="margin-top:8px;padding:8px 20px;background:#00C851;color:white;border:none;border-radius:6px;font-size:13px;font-weight:bold;cursor:pointer;">Renew Listing</button></form>
                     {% endif %}
                 </div>
             </div>
+            {% if loop.index == 4 %}
+            <div style="grid-column:1/-1;text-align:center;padding:16px 0;">
+                {% if sp.financing_url %}
+                <a href="{{ sp.financing_url }}" target="_blank" style="display:inline-block;background:#1E293B;color:white;padding:10px 24px;border-radius:8px;font-size:14px;font-weight:700;text-decoration:none;">💰 Need Financing? Apply Here →</a>
+                {% endif %}
+            </div>
+            {% endif %}
             {% endfor %}
         </div>
         {% else %}
@@ -252,6 +263,13 @@ function submitReferral() {
         <span class="lead-close" onclick="closeLeadForm()">&times;</span>
         <h2>I'm Interested!</h2>
         <p id="leadVehicleName" class="lead-vehicle-name"></p>
+        <div id="teamPickBlock" style="display:none;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:14px;margin-bottom:16px;display:flex;align-items:flex-start;gap:12px;">
+          <img id="tpModalPhoto" src="" alt="" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid #00C851;flex-shrink:0;">
+          <div>
+            <div id="tpModalName" style="font-size:13px;font-weight:700;color:#1E293B;margin-bottom:4px;"></div>
+            <div id="tpModalBlurb" style="font-size:13px;color:#334155;line-height:1.5;font-style:italic;"></div>
+          </div>
+        </div>
         <form method="POST" action="/lead/submit">
             <input type="hidden" id="leadVehicleId" name="vehicle_id">
             <div class="lead-field">
@@ -276,9 +294,18 @@ function submitReferral() {
 </div>
 
 <script>
-function showLeadForm(vehicleId, vehicleName) {
+function showLeadForm(vehicleId, vehicleName, isTeamPick, pickPhoto, pickName, pickBlurb) {
     document.getElementById('leadVehicleId').value = vehicleId;
     document.getElementById('leadVehicleName').textContent = vehicleName;
+    var tpBlock = document.getElementById('teamPickBlock');
+    if (isTeamPick && pickPhoto && pickName) {
+        document.getElementById('tpModalPhoto').src = pickPhoto;
+        document.getElementById('tpModalName').textContent = pickName;
+        document.getElementById('tpModalBlurb').textContent = '\u201c' + pickBlurb + '\u201d';
+        tpBlock.style.display = 'flex';
+    } else {
+        tpBlock.style.display = 'none';
+    }
     document.getElementById('leadModal').style.display = 'flex';
 }
 function closeLeadForm() {
@@ -475,12 +502,61 @@ function sendChat() {
 {% endif %}
 
 <div style="text-align:center;padding:20px 16px 8px;">
-    {% if sp.financing_url %}
-    <a href="{{ sp.financing_url }}" target="_blank" style="display:inline-block;background:#1E293B;color:white;padding:12px 32px;border-radius:8px;font-size:15px;font-weight:700;text-decoration:none;margin-bottom:16px;">💰 Need Financing? Apply Here →</a>
-    {% endif %}
     <p style="color:#94A3B8;font-size:11px;margin-bottom:8px;">Photos are for illustration purposes. Contact dealer for details.</p>
     <p style="margin:0;"><a href="/storefront/unsubscribe/{{ sp.profile_url_slug }}" style="color:#64748B;font-size:13px;text-decoration:underline;">Unsubscribe from this salesperson's updates</a></p>
 </div>
+
+<!-- Subscribe Box -->
+<div style="background:#1E293B;padding:48px 20px;margin-top:24px;border-radius:12px;">
+    <div style="max-width:480px;margin:0 auto;text-align:center;">
+        <h2 style="color:white;font-size:22px;font-weight:800;margin:0 0 8px;line-height:1.3;">Get This Week&#39;s Top Deals Delivered to Your Inbox</h2>
+        <p style="color:#94A3B8;font-size:14px;margin:0 0 24px;">Fresh inventory every week. No spam. Unsubscribe anytime.</p>
+        <div id="subscribe-form">
+            <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
+                <input id="sub-first" type="text" placeholder="First Name" style="flex:1;min-width:120px;padding:12px 14px;border-radius:8px;border:none;font-size:14px;outline:none;">
+                <input id="sub-last" type="text" placeholder="Last Name" style="flex:1;min-width:120px;padding:12px 14px;border-radius:8px;border:none;font-size:14px;outline:none;">
+            </div>
+            <input id="sub-email" type="email" placeholder="Email Address" style="width:100%;padding:12px 14px;border-radius:8px;border:none;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:10px;">
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAACgqeOAo_1v9EOb3" data-theme="dark" style="margin-bottom:10px;"></div>
+            <input type="hidden" id="sub-sp-id" value="{{ sp.salesperson_id }}">
+            <button onclick="submitSubscribe()" style="width:100%;background:#00C851;color:white;border:none;padding:14px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;">Send Me the Deals &#x2192;</button>
+            <div id="sub-msg" style="margin-top:10px;font-size:13px;color:#00C851;display:none;"></div>
+        </div>
+    </div>
+</div>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<script>
+function submitSubscribe() {
+    var first = document.getElementById('sub-first').value.trim();
+    var last = document.getElementById('sub-last').value.trim();
+    var email = document.getElementById('sub-email').value.trim();
+    var spId = document.getElementById('sub-sp-id').value;
+    var token = document.querySelector('.cf-turnstile [name=cf-turnstile-response]');
+    var tokenVal = token ? token.value : '';
+    if (!first || !email) { showSubMsg('Please enter your first name and email.', '#ef4444'); return; }
+    var btn = document.querySelector('#subscribe-form button');
+    btn.disabled = true; btn.textContent = 'Sending...';
+    var fd = new FormData();
+    fd.append('first_name', first); fd.append('last_name', last);
+    fd.append('email', email); fd.append('salesperson_id', spId);
+    fd.append('cf-turnstile-response', tokenVal);
+    fetch('/subscribe', {method:'POST', body: fd})
+    .then(function(r){return r.json();})
+    .then(function(data){
+        if (data.success) {
+            document.getElementById('subscribe-form').innerHTML = '<div style="color:#00C851;font-size:18px;font-weight:700;padding:16px 0;">&#x2705; You\'re on the list!</div><p style="color:#94A3B8;font-size:13px;">Check your inbox for a confirmation email.</p>';
+        } else {
+            showSubMsg(data.message || 'Something went wrong.', '#ef4444');
+            btn.disabled = false; btn.textContent = 'Send Me the Deals →';
+        }
+    })
+    .catch(function(){ showSubMsg('Something went wrong.', '#ef4444'); btn.disabled = false; btn.textContent = 'Send Me the Deals →'; });
+}
+function showSubMsg(msg, color) {
+    var el = document.getElementById('sub-msg');
+    el.textContent = msg; el.style.color = color; el.style.display = 'block';
+}
+</script>
 {% endblock %}
 
 <script>
@@ -495,5 +571,15 @@ function sortGrid(order) {
         return order === 'low' ? priceA - priceB : priceB - priceA;
     });
     cards.forEach(c => grid.appendChild(c));
+    try { localStorage.setItem('cis_sort', order); } catch(e) {}
 }
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        var saved = localStorage.getItem('cis_sort');
+        if (saved && saved !== 'default') {
+            var sel = document.querySelector('select[onchange*="sortGrid"]');
+            if (sel) { sel.value = saved; sortGrid(saved); }
+        }
+    } catch(e) {}
+});
 </script>

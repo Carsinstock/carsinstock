@@ -61,13 +61,72 @@
             <input type="file" name="photo" accept="image/*" capture="environment" style="width:100%; padding:10px; box-sizing:border-box;">
         </div>
 
+        <!-- Team Pick Assignment -->
+        <div style="margin-bottom:18px;padding:16px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;">
+            <label style="font-size:13px;font-weight:700;color:#1E293B;display:block;margin-bottom:8px;">👤 Assign to Salesperson</label>
+            <select name="assigned_team_member_id" id="teamMemberSelect" onchange="toggleBlurb(this)" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;box-sizing:border-box;">
+                <option value="">— Unassigned (Dealership) —</option>
+                {% for member in team_members %}
+                <option value="{{ member[0] }}" {% if vehicle.pick_user_id == member[0] %}selected{% endif %}>{{ member[2] }}</option>
+                {% endfor %}
+            </select>
+            <div id="blurbSection" style="{% if vehicle.pick_user_id %}display:block{% else %}display:none{% endif %};margin-top:12px;">
+                <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:6px;">Why did they pick this car? <span style="color:#94A3B8;font-weight:400;">(150 chars max)</span></label>
+                <textarea name="pick_blurb" id="pickBlurb" maxlength="150" rows="3" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;box-sizing:border-box;resize:none;" placeholder="This Tahoe is spotless, one owner, priced $3k under market...">{{ vehicle.pick_blurb or '' }}</textarea>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+                    <button type="button" onclick="generateBlurb()" style="font-size:12px;background:#1E293B;color:#00C851;border:none;padding:5px 12px;border-radius:6px;cursor:pointer;font-weight:600;">✨ AI Write</button>
+                    <div id="blurbCount" style="font-size:11px;color:#94A3B8;">{{ (vehicle.pick_blurb or '')|length }}/150</div>
+                </div>
+                <div id="aiBlurbSpinner" style="display:none;font-size:12px;color:#64748B;margin-top:4px;">✨ Writing blurb...</div>
+            </div>
+        </div>
+        <script>
+        function toggleBlurb(sel) {
+            document.getElementById('blurbSection').style.display = sel.value ? 'block' : 'none';
+        }
+        document.getElementById('pickBlurb') && document.getElementById('pickBlurb').addEventListener('input', function() {
+            document.getElementById('blurbCount').textContent = this.value.length + '/150';
+        });
+        </script>
         <button type="submit" style="width:100%; padding:14px; background:#4CAF50; color:white; border:none; border-radius:10px; font-size:16px; font-weight:600; cursor:pointer;">Save Changes</button>
     </form>
 
+    <form method="POST" action="/vehicles/renew/{{ vehicle.id }}" style="margin-top:15px;">
+        <button type="submit" style="width:100%; padding:14px; background:#1E293B; color:white; border:none; border-radius:10px; font-size:16px; font-weight:600; cursor:pointer;">🔄 Renew 7 Days</button>
+    </form>
     <form method="POST" action="/vehicles/delete/{{ vehicle.id }}" style="margin-top:15px;" onsubmit="return confirm('Delete this vehicle? This cannot be undone.');">
         <button type="submit" style="width:100%; padding:14px; background:#e74c3c; color:white; border:none; border-radius:10px; font-size:16px; font-weight:600; cursor:pointer;">Delete Vehicle</button>
     </form>
 
     <a href="/{{ sp.profile_url_slug }}" style="display:block; text-align:center; margin-top:15px; color:#666;">← Back to storefront</a>
 </div>
+
+<script>
+async function generateBlurb() {
+    var year = document.querySelector('input[name=year]') ? document.querySelector('input[name=year]').value : '';
+    var make = document.querySelector('input[name=make]') ? document.querySelector('input[name=make]').value : '';
+    var model = document.querySelector('input[name=model]') ? document.querySelector('input[name=model]').value : '';
+    var price = document.querySelector('input[name=price]') ? document.querySelector('input[name=price]').value : '';
+    var mileage = document.querySelector('input[name=mileage]') ? document.querySelector('input[name=mileage]').value : '';
+    var spName = document.getElementById('teamMemberSelect') ? document.getElementById('teamMemberSelect').options[document.getElementById('teamMemberSelect').selectedIndex].text : '';
+    if (!make && !model) { alert('Please fill in the vehicle details first.'); return; }
+    document.getElementById('aiBlurbSpinner').style.display = 'block';
+    document.getElementById('pickBlurb').disabled = true;
+    try {
+        var response = await fetch('/api/generate-pick-blurb', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({year: year, make: make, model: model, price: price, mileage: mileage, sp_name: spName})
+        });
+        var data = await response.json();
+        if (data.blurb) {
+            document.getElementById('pickBlurb').value = data.blurb;
+            document.getElementById('blurbCount').textContent = data.blurb.length + '/150';
+        }
+    } catch(e) { alert('Could not generate blurb. Try again.'); }
+    document.getElementById('aiBlurbSpinner').style.display = 'none';
+    document.getElementById('pickBlurb').disabled = false;
+}
+</script>
+
 {% endblock %}

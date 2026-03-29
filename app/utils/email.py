@@ -103,15 +103,15 @@ def _build_unsubscribe_footer(customer_id=None, salesperson_name=None, dealershi
     if customer_id:
         token = generate_unsubscribe_token(customer_id)
         unsub_url = f"https://carsinstock.com/unsubscribe/{token}"
-        unsub_html = f'<a href="{unsub_url}" style="color:#94A3B8;text-decoration:underline;">Unsubscribe</a>'
-    disclaimer = "You are receiving this email because you opted in to receive updates from this salesperson or dealership."
-    unsub_line = (unsub_html + " &middot; ") if unsub_html else ""
-    return f"""
-        <div style="border-top:1px solid #e2e8f0;padding:16px 0;text-align:center;">
-            <p style="color:#94A3B8;font-size:11px;margin:0 0 4px;line-height:1.5;">{disclaimer}</p>
-            <p style="color:#94A3B8;font-size:11px;margin:0;">{unsub_line}CarsInStock LLC &middot; <a href="https://carsinstock.com" style="color:#94A3B8;text-decoration:none;">CarsInStock.com</a></p>
-        </div>
-    """
+        unsub_html = f'<a href="{unsub_url}" style="color:#94A3B8;font-size:11px;text-decoration:underline;">Unsubscribe</a>'
+    disclaimer_html = '<a href="https://carsinstock.com/disclaimer" style="color:#94A3B8;font-size:11px;text-decoration:underline;">Legal Disclaimer</a>'
+    separator = " &middot; " if unsub_html else ""
+    return (
+        f'<div style="border-top:1px solid #e2e8f0;padding:12px 0;text-align:center;">'
+        f'<p style="color:#94A3B8;font-size:11px;margin:0 0 6px;line-height:1.5;">You are receiving this because you opted in to receive updates from the salesperson or dealership.</p>'
+        f'{unsub_html}{separator}{disclaimer_html}'
+        f'</div>'
+    )
 
 def send_vehicle_email(to_emails, vehicle, salesperson, personal_message="", customer_map=None):
     """Send vehicle listing to multiple email addresses.

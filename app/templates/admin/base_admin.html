@@ -56,9 +56,11 @@
         <nav>
             <a href="/admin" class="{{ 'active' if request.endpoint == 'admin.dashboard' }}">Dashboard</a>
             <a href="/admin/users" class="{{ 'active' if request.endpoint == 'admin.users' }}">Users</a>
+            <a href="/admin/team" class="{{ 'active' if request.endpoint == 'admin.team' }}" style="color:{{ '#00C851' if request.endpoint == 'admin.team' else 'inherit' }}">Team</a>
             <a href="/admin/vehicles" class="{{ 'active' if request.endpoint == 'admin.vehicles' }}">Vehicles</a>
             <a href="/admin/leads" class="{{ 'active' if request.endpoint == 'admin.leads' }}">Leads</a>
             <a href="/admin/email-log" class="{{ 'active' if request.endpoint == 'admin.email_log' }}">Email Log</a>
+            <a href="/admin/blast-analytics" class="{{ 'active' if request.endpoint == 'admin.blast_analytics' }}">📊 Blast Analytics</a>
             <a href="/admin/recruit" class="{{ 'active' if request.endpoint == 'admin.recruit' }}">Recruit</a>
             <a href="/admin/lead-engine" class="{{ 'active' if request.endpoint == 'admin.lead_engine' }}" style="color:#00C851;">Lead Engine</a>
             <a href="/dashboard" style="color:#00C851;">Exit Admin</a>

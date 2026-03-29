@@ -34,8 +34,14 @@ class Vehicle(db.Model):
 
     expiration_warning_sent = db.Column(db.Boolean, default=False)
 
+    # Team Pick (dealership tier only)
+    is_team_pick = db.Column(db.Boolean, default=False)
+    pick_user_id = db.Column(db.Integer, db.ForeignKey('salespeople.salesperson_id'), nullable=True)
+    pick_blurb = db.Column(db.String(150))
+    pick_salesperson = db.relationship('Salesperson', foreign_keys='Vehicle.pick_user_id', primaryjoin='Vehicle.pick_user_id == Salesperson.salesperson_id', uselist=False)
+
     # Relationship
-    salesperson = db.relationship('Salesperson', backref='vehicles')
+    salesperson = db.relationship('Salesperson', foreign_keys='Vehicle.salesperson_id', backref='vehicles')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

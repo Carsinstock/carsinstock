@@ -2,7 +2,7 @@
 {% block content %}
 <h2 class="section-title">All Vehicles ({{ vehicles|length }})</h2>
 <table>
-    <tr><th>Photo</th><th>Vehicle</th><th>Price</th><th>Salesperson</th><th>Status</th><th>Days Left</th><th>Listed</th><th>Actions</th></tr>
+    <tr><th>Photo</th><th>Vehicle</th><th>Price</th><th>Salesperson</th><th>Status</th><th>Days Left</th><th>Listed</th><th>Team Pick</th><th>Actions</th></tr>
     {% for v in vehicles %}
     <tr>
         <td>{% if v.image_url %}<img src="{{ v.image_url }}" style="width:60px;height:40px;object-fit:cover;border-radius:4px;">{% else %}-{% endif %}</td>
@@ -17,7 +17,65 @@
                 <button class="btn btn-danger" type="submit">Delete</button>
             </form>
         </td>
+        <td>
+            {% if v.is_team_pick %}
+            <span style="color:#00C851;font-weight:700;">⭐ Active</span><br>
+            <small style="color:#64748B;">{{ v.pick_salesperson.display_name if v.pick_salesperson else '' }}</small><br>
+            <button onclick="openPickModal({{ v.id }}, true, {{ v.pick_user_id or 0 }}, '{{ v.pick_blurb or '' }}')" style="margin-top:4px;padding:3px 10px;font-size:11px;background:#1E293B;color:white;border:none;border-radius:4px;cursor:pointer;">Edit</button>
+            <form method="POST" action="/admin/vehicles/{{ v.id }}/team-pick/remove" style="display:inline;">
+                <button type="submit" style="margin-top:4px;padding:3px 10px;font-size:11px;background:#EF4444;color:white;border:none;border-radius:4px;cursor:pointer;">Remove</button>
+            </form>
+            {% else %}
+            <button onclick="openPickModal({{ v.id }}, false, 0, '')" style="padding:4px 12px;font-size:12px;background:#f1f5f9;border:1px solid #CBD5E1;border-radius:4px;cursor:pointer;">+ Set Pick</button>
+            {% endif %}
+        </td>
     </tr>
     {% endfor %}
 </table>
+
+<!-- Team Pick Modal -->
+<div id="teamPickModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:12px;padding:28px;max-width:440px;width:90%;position:relative;">
+        <h3 style="margin:0 0 16px;color:#1E293B;">⭐ Set Team Pick</h3>
+        <form method="POST" id="teamPickForm">
+            <input type="hidden" id="tpVehicleId" name="vehicle_id">
+            <div style="margin-bottom:14px;">
+                <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:6px;">Salesperson</label>
+                <select name="pick_user_id" id="tpSalesperson" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+                    {% for sp in all_salespeople %}
+                    <option value="{{ sp[0] }}">{{ sp[2] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="margin-bottom:20px;">
+                <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:6px;">Why did they pick this car? <span style="color:#94A3B8;font-weight:400;">(150 chars max)</span></label>
+                <textarea name="pick_blurb" id="tpBlurb" maxlength="150" rows="3" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;box-sizing:border-box;resize:none;" placeholder="This Tahoe is spotless, one owner, priced $3k under market..."></textarea>
+                <div id="tpCharCount" style="font-size:11px;color:#94A3B8;text-align:right;">0/150</div>
+            </div>
+            <div style="display:flex;gap:10px;">
+                <button type="submit" style="flex:1;background:#00C851;color:white;border:none;padding:12px;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;">Save Team Pick</button>
+                <button type="button" onclick="closePickModal()" style="flex:1;background:#f1f5f9;color:#1E293B;border:1px solid #CBD5E1;padding:12px;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openPickModal(vehicleId, isActive, currentUserId, currentBlurb) {
+    document.getElementById('tpVehicleId').value = vehicleId;
+    document.getElementById('teamPickForm').action = '/admin/vehicles/' + vehicleId + '/team-pick';
+    document.getElementById('tpBlurb').value = currentBlurb;
+    document.getElementById('tpCharCount').textContent = currentBlurb.length + '/150';
+    if (currentUserId) {
+        document.getElementById('tpSalesperson').value = currentUserId;
+    }
+    document.getElementById('teamPickModal').style.display = 'flex';
+}
+function closePickModal() {
+    document.getElementById('teamPickModal').style.display = 'none';
+}
+document.getElementById('tpBlurb').addEventListener('input', function() {
+    document.getElementById('tpCharCount').textContent = this.value.length + '/150';
+});
+</script>
 {% endblock %}
