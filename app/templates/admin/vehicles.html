@@ -17,7 +17,9 @@
         <div style="flex:1;min-width:180px;">
             <div style="font-size:15px;font-weight:700;color:#1E293B;">{{ v.year }} {{ v.make }} {{ v.model }}{% if v.trim %} {{ v.trim }}{% endif %}</div>
             <div style="font-size:13px;color:#64748B;margin-top:2px;">${{ "{:,.0f}".format(v.price) if v.price else 'N/A' }} &middot; {{ "{:,}".format(v.mileage) if v.mileage else '&mdash;' }} mi</div>
-            {% if v.pick_salesperson %}
+            {% if v.pick_user_id and team_member_lookup.get(v.pick_user_id) %}
+            <div style="font-size:12px;color:#475569;margin-top:4px;">Submitted by <strong>{{ team_member_lookup[v.pick_user_id] }}</strong></div>
+            {% elif v.pick_salesperson %}
             <div style="font-size:12px;color:#475569;margin-top:4px;">Submitted by <strong>{{ v.pick_salesperson.display_name }}</strong></div>
             {% endif %}
             <div style="font-size:12px;color:#94A3B8;margin-top:2px;">{{ v.created_at.strftime('%b %d, %Y at %I:%M %p') if v.created_at else '' }}</div>
