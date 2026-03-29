@@ -161,10 +161,9 @@ def register_admin_routes(bp):
         _conn = _sq3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
         _conn.row_factory = _sq3.Row
         all_salespeople = _conn.execute("SELECT * FROM dealership_team WHERE is_active=1 ORDER BY name").fetchall()
-        _conn.close()
-        # Build team member lookup for pending queue names
         _tm_rows = _conn.execute("SELECT id, name FROM dealership_team WHERE is_active=1").fetchall()
         team_member_lookup = {r['id']: r['name'] for r in _tm_rows}
+        _conn.close()
         return render_template("admin/vehicles.html",
             vehicles=all_vehicles,
             pending_vehicles=pending_vehicles,
