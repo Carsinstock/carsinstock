@@ -28,11 +28,7 @@ body { background: #F1F5F9; }
 .rep-call-btn { display: inline-flex; align-items: center; gap: 8px; background: #00C851; color: #1E293B; padding: 11px 24px; border-radius: 50px; font-size: 14px; font-weight: 800; text-decoration: none; transition: background 0.2s; }
 .rep-call-btn:hover { background: #00b348; }
 
-/* Stats */
-.stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-.stat-card { background: white; border-radius: 12px; padding: 16px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-.stat-num { font-size: 28px; font-weight: 800; color: #00C851; line-height: 1; margin-bottom: 4px; }
-.stat-label { font-size: 12px; color: #64748B; font-weight: 600; }
+
 
 /* Featured Pick */
 .featured-card { background: white; border: 2px solid #00C851; border-radius: 16px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,200,81,0.12); }
@@ -71,8 +67,6 @@ body { background: #F1F5F9; }
     .rep-name { font-size: 22px; }
     .featured-body { flex-direction: column; }
     .featured-img img { height: 200px; }
-    .stats-row { gap: 8px; }
-    .stat-num { font-size: 22px; }
 }
 </style>
 
@@ -93,21 +87,7 @@ body { background: #F1F5F9; }
         {% endif %}
     </div>
 
-    <!-- Stats -->
-    <div class="stats-row">
-        <div class="stat-card">
-            <div class="stat-num">{{ live_count }}</div>
-            <div class="stat-label">Cars Live</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-num">{{ avg_days }}</div>
-            <div class="stat-label">Avg Days Left</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-num">{{ leads_this_month }}</div>
-            <div class="stat-label">Leads This Month</div>
-        </div>
-    </div>
+
 
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% for category, message in messages %}
@@ -172,6 +152,22 @@ body { background: #F1F5F9; }
         <p style="color:#94A3B8;font-size:15px;margin:0;">No vehicles listed yet. Check back soon!</p>
     </div>
     {% endif %}
+
+    <!-- View All Inventory CTA -->
+    <div style="text-align:center;margin-top:28px;margin-bottom:8px;">
+        <a href="https://carsinstock.com/{{ dealership_sp.profile_url_slug }}" style="display:inline-block;background:#1E293B;color:white;padding:14px 36px;border-radius:10px;font-size:15px;font-weight:700;text-decoration:none;letter-spacing:0.3px;">View All Inventory at Pine Belt →</a>
+    </div>
+
+    <!-- Legal Footer -->
+    <div style="margin-top:32px;padding:20px 0;border-top:1px solid #E2E8F0;text-align:center;">
+        <p style="color:#94A3B8;font-size:12px;line-height:1.7;margin:0;">
+            All prices exclude tax, title, license, and dealer fees. Vehicle availability subject to prior sale. Mileage shown is approximate. Photos may not reflect exact vehicle.<br>
+            CarsInStock is a technology platform. {{ member.name }} is an independent sales representative at {{ dealership_sp.dealership_name or 'Pine Belt Used Cars' }}.<br>
+            &copy; {{ 2026 }} CarsInStock LLC. All rights reserved. &nbsp;·&nbsp;
+            <a href="/privacy" style="color:#64748B;text-decoration:none;">Privacy Policy</a> &nbsp;·&nbsp;
+            <a href="/terms" style="color:#64748B;text-decoration:none;">Terms of Use</a>
+        </p>
+    </div>
 
 </div>
 
