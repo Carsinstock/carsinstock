@@ -108,9 +108,23 @@ def register_admin_routes(bp):
         except:
             recruit_count = 0
         recent_users = User.query.order_by(User.created_at.desc()).limit(5).all()
+        # Load Pine Belt dealership sp for settings
+        pilot_sp = Salesperson.query.filter_by(salesperson_id=1).first()
         return render_template("admin/dashboard.html",
             user_count=user_count, vehicle_count=vehicle_count,
-            lead_count=lead_count, sp_count=sp_count, recruit_count=recruit_count, recent_users=recent_users)
+            lead_count=lead_count, sp_count=sp_count, recruit_count=recruit_count,
+            recent_users=recent_users, pilot_sp=pilot_sp)
+
+    @bp.route("/settings/financing", methods=["POST"])
+    @admin_required
+    def save_financing_url():
+        financing_url = request.form.get("financing_url", "").strip()
+        pilot_sp = Salesperson.query.filter_by(salesperson_id=1).first()
+        if pilot_sp:
+            pilot_sp.financing_url = financing_url if financing_url else None
+            db.session.commit()
+            flash("Financing URL updated.", "success")
+        return redirect(url_for("admin.dashboard"))
 
     @bp.route("/users")
     @admin_required
