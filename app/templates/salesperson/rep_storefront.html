@@ -121,7 +121,7 @@ body { background: #F1F5F9; }
     <!-- Rest of inventory -->
     {% set rest = vehicles | selectattr('id', '!=', featured.id if featured else 0) | list %}
     {% if rest %}
-    <p class="section-title">More from {{ member.name.split()[0] }} ({{ rest|length }})</p>
+    <p class="section-title">More from {{ member.name.split()[0] }}</p>
     <div class="vehicle-grid">
         {% for v in rest %}
         <div class="vehicle-card">
