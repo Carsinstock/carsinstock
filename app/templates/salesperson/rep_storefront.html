@@ -172,11 +172,13 @@ body { background: #F1F5F9; }
 </div>
 
 <!-- Floating Share Bar -->
+<div id="shareMsg" style="display:none;position:fixed;bottom:62px;left:50%;transform:translateX(-50%);background:#1E293B;color:#00C851;padding:8px 18px;border-radius:20px;font-size:13px;font-weight:700;z-index:1000;white-space:nowrap;"></div>
 <div class="share-bar">
     <span>Share:</span>
-    <a href="https://www.facebook.com/sharer/sharer.php?u=https://carsinstock.com/{{ member.slug }}" target="_blank" class="share-btn" style="background:#1877F2;color:white;">📘 Facebook</a>
-    <button onclick="copyRepLink()" class="share-btn" style="background:#475569;color:white;">📸 Instagram</button>
-    <a href="https://wa.me/?text=Check+out+my+inventory+this+week+—+https://carsinstock.com/{{ member.slug }}" target="_blank" class="share-btn" style="background:#25D366;color:white;">💬 WhatsApp</a>
+    <a href="https://www.facebook.com/sharer/sharer.php?u=https://carsinstock.com/{{ member.slug }}" target="_blank" class="share-btn" style="background:#1877F2;color:white;">📘 FB</a>
+    <button onclick="copyRepLink()" class="share-btn" style="background:#475569;color:white;">📸 IG</button>
+    <a href="https://wa.me/?text=Check+out+my+inventory+this+week+—+https://carsinstock.com/{{ member.slug }}" target="_blank" class="share-btn" style="background:#25D366;color:white;">💬 WA</a>
+    <button onclick="copyReferralLink()" class="share-btn" style="background:#00C851;color:#1E293B;">🔗 Referral Link</button>
 </div>
 
 <!-- Lead Modal -->
@@ -229,6 +231,8 @@ body { background: #F1F5F9; }
 var repSlug = "{{ member.slug }}";
 var repSpId = {{ dealership_sp.salesperson_id if dealership_sp else 0 }};
 var repPageUrl = "https://carsinstock.com/" + repSlug;
+var dealershipSlug = "{{ dealership_sp.profile_url_slug if dealership_sp else '' }}";
+var referralUrl = dealershipSlug ? "https://carsinstock.com/" + dealershipSlug + "?ref=" + repSlug : repPageUrl;
 
 function showLead(vehicleId, vehicleName) {
     document.getElementById('leadVehicleId').value = vehicleId;
@@ -243,8 +247,19 @@ document.getElementById('leadModal').addEventListener('click', function(e) {
 });
 function copyRepLink() {
     navigator.clipboard.writeText(repPageUrl).then(function() {
-        alert('Link copied! Paste in your Instagram bio or story.');
+        showCopied('Link copied! Paste in your Instagram bio or story.');
     });
+}
+function copyReferralLink() {
+    navigator.clipboard.writeText(referralUrl).then(function() {
+        showCopied('Referral link copied!');
+    });
+}
+function showCopied(msg) {
+    var el = document.getElementById('shareMsg');
+    el.textContent = '✅ ' + msg;
+    el.style.display = 'block';
+    setTimeout(function(){ el.style.display = 'none'; }, 3000);
 }
 
 // Chatbot
