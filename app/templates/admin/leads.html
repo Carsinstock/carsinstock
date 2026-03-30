@@ -20,6 +20,7 @@
         <th>Message</th>
         <th>Salesperson</th>
         <th>Vehicle</th>
+        <th>Referred By</th>
         <th>Status</th>
         <th>Date</th>
     </tr>
@@ -41,6 +42,11 @@
             {% else %}
             <span class="badge" style="background:#f1f5f9;color:#64748B;">{{ item.lead.status }}</span>
             {% endif %}
+        </td>
+        <td>
+            {% if item.lead.referred_by %}
+            <span style="background:#D1FAE5;color:#065F46;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;">{{ item.lead.referred_by }}</span>
+            {% else %}-{% endif %}
         </td>
         <td>{{ item.lead.created_at.strftime('%b %d, %Y') }}</td>
     </tr>

@@ -376,6 +376,7 @@ function submitReferral() {
         </div>
         <form method="POST" action="/lead/submit">
             <input type="hidden" id="leadVehicleId" name="vehicle_id">
+            <input type="hidden" name="referred_by" value="{{ ref_slug or '' }}">
             <div class="lead-field">
                 <label>Your Name *</label>
                 <input type="text" name="customer_name" placeholder="John Smith" required>

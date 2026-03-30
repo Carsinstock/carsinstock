@@ -13,4 +13,5 @@ class Lead(db.Model):
     message = db.Column(db.Text)
     source = db.Column(db.String(50), default='organic')
     status = db.Column(db.String(50), default='new')
+    referred_by = db.Column(db.String(100))  # dealership_team slug of referring rep
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

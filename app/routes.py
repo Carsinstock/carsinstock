@@ -29,11 +29,20 @@ def sp_dashboard():
     ).order_by(Vehicle.created_at.desc()).all()
     # Only approved+available ones shown as active picks
     my_vehicles = [v for v in all_my_vehicles if v.approval_status in ('approved', None) and v.status == 'available']
-    # Get all leads on their approved vehicles
+    # Get all leads on their approved vehicles + referral leads
     my_vehicle_ids = [v.id for v in my_vehicles]
-    my_leads = Lead.query.filter(
-        Lead.vehicle_id.in_(my_vehicle_ids)
-    ).order_by(Lead.created_at.desc()).limit(50).all() if my_vehicle_ids else []
+    _rep_slug_for_leads = member.get('slug', '') if isinstance(member, dict) else ''
+    from sqlalchemy import or_ as _or2
+    if my_vehicle_ids and _rep_slug_for_leads:
+        my_leads = Lead.query.filter(
+            _or2(Lead.vehicle_id.in_(my_vehicle_ids), Lead.referred_by == _rep_slug_for_leads)
+        ).order_by(Lead.created_at.desc()).limit(50).all()
+    elif my_vehicle_ids:
+        my_leads = Lead.query.filter(Lead.vehicle_id.in_(my_vehicle_ids)).order_by(Lead.created_at.desc()).limit(50).all()
+    elif _rep_slug_for_leads:
+        my_leads = Lead.query.filter(Lead.referred_by == _rep_slug_for_leads).order_by(Lead.created_at.desc()).limit(50).all()
+    else:
+        my_leads = []
     # Use rep's personal slug if set, otherwise fall back to dealership page
     _rep_slug = member.get('slug') or (member['slug'] if isinstance(member, dict) else '')
     storefront_url = f"https://carsinstock.com/{_rep_slug}" if _rep_slug else (f"https://carsinstock.com/{dealership_sp.profile_url_slug}" if dealership_sp else "")
@@ -378,10 +387,52 @@ def rep_submit_lead(team_slug):
         customer_phone=customer_phone,
         message=message,
         source='rep_storefront',
+        referred_by=team_slug,  # auto-credit the rep whose page it is
     )
     try:
         db.session.add(lead)
         db.session.commit()
+        # Fire emails for rep personal page lead
+        from app.utils.email import send_email as _se
+        vehicle_obj = None
+        if vehicle_id and vehicle_id.isdigit():
+            from app.models.vehicle import Vehicle as _V
+            vehicle_obj = _V.query.get(int(vehicle_id))
+        v_name = f"{vehicle_obj.year} {vehicle_obj.make} {vehicle_obj.model}" if vehicle_obj else "a vehicle"
+        # Email to rep
+        try:
+            _se(member['email'], f"🎯 New Lead from Your Page: {customer_name}",
+                f"""<div style="font-family:Inter,sans-serif;max-width:520px;margin:0 auto;padding:24px;">
+                <div style="background:#1E293B;padding:16px 24px;border-radius:10px 10px 0 0;"><span style="color:white;font-weight:400;">Cars</span><span style="color:#00C851;font-weight:700;"> IN STOCK</span></div>
+                <div style="background:#fff;border:1px solid #E2E8F0;border-top:none;border-radius:0 0 10px 10px;padding:28px;">
+                  <h2 style="color:#1E293B;margin:0 0 8px;">🎯 New lead from your personal page!</h2>
+                  <p style="color:#475569;font-size:15px;margin:0 0 16px;">Someone visited <strong>carsinstock.com/{team_slug}</strong> and is interested in <strong>{v_name}</strong>.</p>
+                  <div style="background:#F0FDF4;border-radius:8px;padding:14px;">
+                    <p style="margin:0 0 6px;font-size:14px;"><strong>Name:</strong> {customer_name}</p>
+                    <p style="margin:0 0 6px;font-size:14px;"><strong>Phone:</strong> {customer_phone or 'Not provided'}</p>
+                    <p style="margin:0;font-size:14px;"><strong>Email:</strong> {customer_email}</p>
+                  </div>
+                </div></div>""")
+        except Exception as e:
+            print(f"Rep page lead email error: {e}")
+        # Email to dealership admin
+        try:
+            if dealership_sp and dealership_sp.email:
+                _se(dealership_sp.email, f"📋 Lead via {member['name']}'s page: {customer_name}",
+                    f"""<div style="font-family:Inter,sans-serif;max-width:520px;margin:0 auto;padding:24px;">
+                    <div style="background:#1E293B;padding:16px 24px;border-radius:10px 10px 0 0;"><span style="color:white;font-weight:400;">Cars</span><span style="color:#00C851;font-weight:700;"> IN STOCK</span></div>
+                    <div style="background:#fff;border:1px solid #E2E8F0;border-top:none;border-radius:0 0 10px 10px;padding:28px;">
+                      <h2 style="color:#1E293B;margin:0 0 8px;">📋 New Lead — Personal Page</h2>
+                      <p style="color:#475569;font-size:14px;margin:0 0 4px;">Came through: <strong style="color:#00C851;">{member['name']}</strong>'s page (carsinstock.com/{team_slug})</p>
+                      <p style="color:#475569;font-size:14px;margin:0 0 16px;">Vehicle: <strong>{v_name}</strong></p>
+                      <div style="background:#F8FAFC;border-radius:8px;padding:14px;">
+                        <p style="margin:0 0 6px;font-size:14px;"><strong>Customer:</strong> {customer_name}</p>
+                        <p style="margin:0 0 6px;font-size:14px;"><strong>Phone:</strong> {customer_phone or 'Not provided'}</p>
+                        <p style="margin:0;font-size:14px;"><strong>Email:</strong> {customer_email}</p>
+                      </div>
+                    </div></div>""")
+        except Exception as e:
+            print(f"Admin rep page lead email error: {e}")
     except Exception as e:
         db.session.rollback()
         print(f"rep lead error: {e}")
@@ -514,6 +565,11 @@ def public_profile(slug):
     _conn.close()
     team_lookup = {r['id']: {'name': r['name'], 'photo': r['profile_photo']} for r in _team_rows}
 
+    # Store referral param in session
+    _ref = request.args.get('ref', '').strip().lower()
+    if _ref:
+        session[f'ref_{slug}'] = _ref
+
     # Build dynamic OG tags
     _fallback_img = 'https://res.cloudinary.com/dbpa9qqtb/image/upload/v1772163049/demo/demo_cover_photo.jpg'
     _live_count = len(vehicles)
@@ -549,15 +605,19 @@ def public_profile(slug):
         _team_members = _cd.execute("SELECT * FROM dealership_team WHERE dealership_id=? AND is_active=1 ORDER BY name", (sp.salesperson_id,)).fetchall()
         _team_members = [dict(r) for r in _team_members]
         _cd.close()
+        _ref_val = session.get(f'ref_{slug}', '')
         return render_template('salesperson/public_profile.html', sp=sp, vehicles=vehicles,
             is_owner=is_owner, is_demo=False, hide_nav_auth=not is_owner,
             team_lookup=team_lookup, team_members=_team_members,
-            og_image=_og_image, og_title=_og_title, og_description=_og_description)
+            og_image=_og_image, og_title=_og_title, og_description=_og_description,
+            ref_slug=_ref_val)
 
+    _ref_val = session.get(f'ref_{slug}', '')
     return render_template('salesperson/public_profile.html', sp=sp, vehicles=vehicles,
         is_owner=is_owner, is_demo=False, hide_nav_auth=not is_owner,
         team_lookup=team_lookup, team_members=[],
-        og_image=_og_image, og_title=_og_title, og_description=_og_description)
+        og_image=_og_image, og_title=_og_title, og_description=_og_description,
+        ref_slug=_ref_val)
 
 
 @main.route("/lead/submit", methods=["POST"])
@@ -573,6 +633,7 @@ def submit_lead():
     customer_email = request.form.get("customer_email", "").strip()
     customer_phone = request.form.get("customer_phone", "").strip()
     message = request.form.get("message", "").strip()
+    referred_by = request.form.get("referred_by", "").strip().lower() or None
 
     if not customer_name or not customer_email:
         flash("Name and email are required.", "error")
@@ -585,6 +646,15 @@ def submit_lead():
 
     sp = Salesperson.query.get(vehicle.salesperson_id)
 
+    # Resolve referring rep from slug
+    _ref_member = None
+    if referred_by:
+        import sqlite3 as _sqr
+        _cr = _sqr.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        _cr.row_factory = _sqr.Row
+        _ref_member = _cr.execute("SELECT * FROM dealership_team WHERE slug=? AND is_active=1", (referred_by,)).fetchone()
+        _cr.close()
+
     lead = Lead(
         vehicle_id=vehicle.id,
         salesperson_id=vehicle.salesperson_id,
@@ -593,7 +663,8 @@ def submit_lead():
         customer_phone=customer_phone,
         message=message,
         source="storefront",
-        status="new"
+        status="new",
+        referred_by=referred_by if _ref_member else None,
     )
 
     try:
@@ -632,6 +703,57 @@ def submit_lead():
                         send_email(_member[1], f"New Lead on Your Pick: {vehicle.year} {vehicle.make} {vehicle.model}", team_html)
             except Exception as e:
                 print(f"Team member lead email error: {e}")
+
+            # Referral notifications — fire if this lead came via a rep's referral link
+            if _ref_member:
+                _ref_name = _ref_member['name']
+                _ref_email = _ref_member['email']
+                _ref_slug = _ref_member['slug']
+                try:
+                    # Email to referring rep
+                    ref_rep_html = f"""
+                    <div style="font-family:Inter,sans-serif;max-width:520px;margin:0 auto;padding:24px;">
+                      <div style="background:#1E293B;padding:16px 24px;border-radius:10px 10px 0 0;">
+                        <span style="color:white;font-weight:400;">Cars</span><span style="color:#00C851;font-weight:700;"> IN STOCK</span>
+                      </div>
+                      <div style="background:#fff;border:1px solid #E2E8F0;border-top:none;border-radius:0 0 10px 10px;padding:28px;">
+                        <h2 style="color:#1E293B;font-size:20px;margin:0 0 8px;">🎯 You got a referral lead!</h2>
+                        <p style="color:#475569;font-size:15px;margin:0 0 16px;">Someone clicked your personal link and expressed interest in the <strong>{vehicle.year} {vehicle.make} {vehicle.model}</strong>.</p>
+                        <div style="background:#F0FDF4;border-radius:8px;padding:14px;margin-bottom:20px;">
+                          <p style="margin:0 0 6px;font-size:14px;"><strong>Customer:</strong> {customer_name}</p>
+                          <p style="margin:0 0 6px;font-size:14px;"><strong>Phone:</strong> {customer_phone or 'Not provided'}</p>
+                          <p style="margin:0 0 6px;font-size:14px;"><strong>Email:</strong> {customer_email}</p>
+                          <p style="margin:0;font-size:14px;"><strong>Message:</strong> {message or 'No message'}</p>
+                        </div>
+                        <p style="color:#94A3B8;font-size:12px;margin:0;">Your referral link: carsinstock.com/{sp.profile_url_slug}?ref={_ref_slug}</p>
+                      </div>
+                    </div>"""
+                    send_email(_ref_email, f"🎯 Referral Lead: {customer_name} is interested in the {vehicle.year} {vehicle.make} {vehicle.model}", ref_rep_html)
+                except Exception as e:
+                    print(f"Referral rep email error: {e}")
+                try:
+                    # Email to dealership admin (sp email) with ref attribution
+                    ref_admin_html = f"""
+                    <div style="font-family:Inter,sans-serif;max-width:520px;margin:0 auto;padding:24px;">
+                      <div style="background:#1E293B;padding:16px 24px;border-radius:10px 10px 0 0;">
+                        <span style="color:white;font-weight:400;">Cars</span><span style="color:#00C851;font-weight:700;"> IN STOCK</span>
+                      </div>
+                      <div style="background:#fff;border:1px solid #E2E8F0;border-top:none;border-radius:0 0 10px 10px;padding:28px;">
+                        <h2 style="color:#1E293B;font-size:20px;margin:0 0 8px;">📋 New Referral Lead</h2>
+                        <p style="color:#475569;font-size:14px;margin:0 0 4px;">Referred by: <strong style="color:#00C851;">{_ref_name}</strong></p>
+                        <p style="color:#475569;font-size:14px;margin:0 0 16px;">Vehicle: <strong>{vehicle.year} {vehicle.make} {vehicle.model}</strong></p>
+                        <div style="background:#F8FAFC;border-radius:8px;padding:14px;margin-bottom:20px;">
+                          <p style="margin:0 0 6px;font-size:14px;"><strong>Customer:</strong> {customer_name}</p>
+                          <p style="margin:0 0 6px;font-size:14px;"><strong>Phone:</strong> {customer_phone or 'Not provided'}</p>
+                          <p style="margin:0 0 6px;font-size:14px;"><strong>Email:</strong> {customer_email}</p>
+                          <p style="margin:0;font-size:14px;"><strong>Message:</strong> {message or 'No message'}</p>
+                        </div>
+                      </div>
+                    </div>"""
+                    if sp and sp.email:
+                        send_email(sp.email, f"📋 Referral Lead via {_ref_name}: {customer_name}", ref_admin_html)
+                except Exception as e:
+                    print(f"Referral admin email error: {e}")
         # Send confirmation to customer with unsubscribe link
         try:
             from app.models.customer import Customer

@@ -50,6 +50,7 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
             <a href="/qr-code" class="social-btn" download>📲 Download QR Code</a>
             <button class="social-btn" onclick="copyText()">💬 Copy Text Template</button>
             <button class="social-btn green" onclick="generateWeeklyPost()">✨ Create My Weekly Post</button>
+            <button class="social-btn" onclick="copyReferralLink()" style="background:#475569;">🔗 Copy Referral Link</button>
         </div>
         <div id="copiedMsg" class="copied">✅ Copied!</div>
     </div>
@@ -194,7 +195,7 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
         {% if my_leads %}
         {% for lead in my_leads %}
         <div class="lead-row">
-            <div class="lname">{{ lead.customer_name }}</div>
+            <div class="lname">{{ lead.customer_name }}{% if lead.referred_by == member.slug %} <span style="background:#D1FAE5;color:#065F46;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:4px;">YOUR REFERRAL</span>{% endif %}</div>
             <div class="ldetail">{{ lead.customer_phone or '' }}{% if lead.customer_email %} · {{ lead.customer_email }}{% endif %}</div>
             <div class="ldetail" style="color:#475569;margin-top:2px;">{{ lead.vehicle_name or '' }} · {{ lead.created_at.strftime('%b %d') if lead.created_at else '' }}</div>
         </div>
@@ -241,6 +242,9 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
 
 <script>
 var storefrontUrl = "{{ storefront_url }}";
+var dealershipSlug = "{{ dealership_sp.profile_url_slug if dealership_sp else '' }}";
+var memberSlug = "{{ member.slug if member.slug else '' }}";
+var referralUrl = dealershipSlug ? "https://carsinstock.com/" + dealershipSlug + "?ref=" + memberSlug : storefrontUrl;
 var dealershipSpId = {{ dealership_sp.salesperson_id if dealership_sp else 0 }};
 
 function copyLink() {
@@ -344,6 +348,13 @@ async function generateSpBlurb() {
         alert('Could not generate blurb. Try again.');
     }
     document.getElementById('spBlurbSpinner').style.display = 'none';
+}
+function copyReferralLink() {
+    navigator.clipboard.writeText(referralUrl).then(function() {
+        document.getElementById('copiedMsg').textContent = '✅ Referral link copied!';
+        document.getElementById('copiedMsg').style.display = 'block';
+        setTimeout(function(){ document.getElementById('copiedMsg').style.display='none'; }, 3000);
+    });
 }
 function dismissNotif(id) {
     fetch('/sp-notification/' + id + '/dismiss', {method:'POST'});
