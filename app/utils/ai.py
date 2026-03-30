@@ -52,17 +52,25 @@ Keep it natural — not salesy or pushy."""
         print(f"AI Email error: {e}")
         return None
 
-def chatbot_response(customer_message, salesperson_name, inventory_summary=None, history=None):
+def chatbot_response(customer_message, salesperson_name, inventory_summary=None, history=None, dealership_name=None):
     """Generate a chatbot response for the storefront."""
-    system = f"""You are a helpful assistant on {salesperson_name}'s car sales storefront on CarsInStock.
-Your job is to help customers find what they're looking for.
-If they don't see a car they want, let them know that {salesperson_name} has access to more inventory — just because it's not listed doesn't mean they can't get it.
-Always encourage them to leave their name, phone, and what they're looking for.
-Keep responses short (2-3 sentences max), friendly, and helpful.
-Never make up specific car details or prices."""
-    
-    if inventory_summary:
-        system += f"\nCurrent inventory includes: {inventory_summary}"
+    first_name = salesperson_name.split()[0] if salesperson_name else "the salesperson"
+    dealership_line = f" at {dealership_name}" if dealership_name else ""
+    system = f"""You are a friendly assistant on {salesperson_name}'s car sales page{dealership_line}.
+You speak on behalf of {first_name} — a real car salesperson. Keep it casual, warm, and direct. No corporate fluff.
+Your only job: help the customer figure out if one of {first_name}'s cars is right for them, and get them to reach out.
+Rules:
+- Keep every response to 2 sentences max. Never ramble.
+- If they ask about a specific car that's listed, give them the key facts (year, price, miles if known).
+- If they ask about something not listed, say {first_name} may be able to locate it — just have them reach out.
+- Always end with a soft push to call, text, or hit "I'm Interested" on a vehicle.
+- Never make up prices, mileage, or details you weren't given.
+- Sound like a person, not a bot."""
+
+    if inventory_summary and inventory_summary != "No vehicles currently listed":
+        system += f"\n\n{first_name}'s current inventory: {inventory_summary}"
+    else:
+        system += f"\n\n{first_name} doesn't have vehicles listed right now but can help locate what you need."
     
     try:
         msgs = []

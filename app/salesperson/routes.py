@@ -1379,8 +1379,8 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         from datetime import datetime
         vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status='available').all()
         vehicles = [v for v in vehicles if not v.expires_at or v.expires_at > datetime.utcnow()]
-        inv_summary = ", ".join([f"{v.year} {v.make} {v.model}" for v in vehicles]) if vehicles else "No vehicles currently listed"
-        response = chatbot_response(message, sp.display_name, inv_summary, history)
+        inv_summary = ", ".join([f"{v.year} {v.make} {v.model} (${v.price:,.0f})" for v in vehicles]) if vehicles else "No vehicles currently listed"
+        response = chatbot_response(message, sp.display_name, inv_summary, history, dealership_name=sp.dealership_name)
         # Save conversation to database
         try:
             from app.models import db
