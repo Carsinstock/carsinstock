@@ -34,7 +34,9 @@ def sp_dashboard():
     my_leads = Lead.query.filter(
         Lead.vehicle_id.in_(my_vehicle_ids)
     ).order_by(Lead.created_at.desc()).limit(50).all() if my_vehicle_ids else []
-    storefront_url = f"https://carsinstock.com/{dealership_sp.profile_url_slug}" if dealership_sp else ""
+    # Use rep's personal slug if set, otherwise fall back to dealership page
+    _rep_slug = member.get('slug') or (member['slug'] if isinstance(member, dict) else '')
+    storefront_url = f"https://carsinstock.com/{_rep_slug}" if _rep_slug else (f"https://carsinstock.com/{dealership_sp.profile_url_slug}" if dealership_sp else "")
     # Load undismissed notifications
     notifications = conn.execute(
         "SELECT * FROM team_notifications WHERE team_member_id=? AND is_dismissed=0 ORDER BY created_at DESC",
@@ -346,6 +348,108 @@ def sendgrid_webhook():
     conn.close()
     return '', 200
 
+@main.route('/<team_slug>/leads', methods=['POST'])
+def rep_submit_lead(team_slug):
+    """Handle lead submission from a rep personal page."""
+    import sqlite3 as _sq
+    from app.models.salesperson import Salesperson
+    from app.models.vehicle import Vehicle
+    from app.models.lead import Lead
+    from app.models import db
+    _conn = _sq.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    _conn.row_factory = _sq.Row
+    member = _conn.execute("SELECT * FROM dealership_team WHERE slug=? AND is_active=1", (team_slug,)).fetchone()
+    _conn.close()
+    if not member:
+        return redirect(f'/{team_slug}')
+    dealership_sp = Salesperson.query.filter_by(salesperson_id=member['dealership_id']).first()
+    vehicle_id = request.form.get('vehicle_id')
+    customer_name = request.form.get('customer_name', '').strip()
+    customer_email = request.form.get('customer_email', '').strip()
+    customer_phone = request.form.get('customer_phone', '').strip()
+    message = request.form.get('message', '').strip()
+    if not customer_name:
+        return redirect(f'/{team_slug}')
+    lead = Lead(
+        salesperson_id=dealership_sp.salesperson_id if dealership_sp else None,
+        vehicle_id=int(vehicle_id) if vehicle_id and vehicle_id.isdigit() else None,
+        customer_name=customer_name,
+        customer_email=customer_email,
+        customer_phone=customer_phone,
+        message=message,
+        source='rep_storefront',
+    )
+    try:
+        db.session.add(lead)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        print(f"rep lead error: {e}")
+    flash("Thanks! We'll be in touch shortly.", "success")
+    return redirect(f'/{team_slug}')
+
+
+def rep_storefront(member):
+    """Render a dealership team member's personal storefront page."""
+    import sqlite3 as _sq
+    from app.models.salesperson import Salesperson
+    from app.models.vehicle import Vehicle
+    from app.models.lead import Lead
+    from sqlalchemy import or_
+    from datetime import datetime, timedelta
+
+    dealership_sp = Salesperson.query.filter_by(salesperson_id=member['dealership_id']).first()
+    if not dealership_sp:
+        return render_template('404.html'), 404
+
+    # Get approved vehicles assigned to this rep
+    all_vehicles = Vehicle.query.filter(
+        Vehicle.salesperson_id == member['dealership_id'],
+        Vehicle.pick_user_id == member['id'],
+        Vehicle.status == 'available',
+        or_(Vehicle.approval_status == 'approved', Vehicle.approval_status == None)
+    ).order_by(Vehicle.is_team_pick.desc(), Vehicle.created_at.desc()).all()
+    vehicles = [v for v in all_vehicles if not v.expires_at or v.expires_at > datetime.utcnow()]
+
+    # Stats
+    live_count = len(vehicles)
+    avg_days = round(sum(v.days_remaining for v in vehicles) / live_count) if live_count else 0
+    now = datetime.utcnow()
+    month_start = now.replace(day=1, hour=0, minute=0, second=0)
+    lead_ids = [v.id for v in vehicles]
+    leads_this_month = Lead.query.filter(
+        Lead.vehicle_id.in_(lead_ids),
+        Lead.created_at >= month_start
+    ).count() if lead_ids else 0
+
+    min_price = min((v.price for v in vehicles if v.price), default=None)
+
+    # Featured pick (first is_team_pick vehicle)
+    featured = next((v for v in vehicles if v.is_team_pick), None)
+
+    # Dynamic OG tags
+    _fallback = 'https://res.cloudinary.com/dbpa9qqtb/image/upload/v1772163049/demo/demo_cover_photo.jpg'
+    og_image = featured.image_url if featured and featured.image_url else (member['profile_photo'] or _fallback)
+    og_title = f"{member['name']} — This Week's Inventory"
+    if live_count and min_price:
+        og_description = f"{live_count} car{'s' if live_count != 1 else ''} available · From ${min_price:,.0f} · Updated daily · Tap to browse"
+    else:
+        og_description = f"Browse {member['name']}'s inventory at CarsInStock — carsinstock.com/{member['slug']}"
+
+    return render_template('salesperson/rep_storefront.html',
+        member=member,
+        dealership_sp=dealership_sp,
+        vehicles=vehicles,
+        featured=featured,
+        live_count=live_count,
+        avg_days=avg_days,
+        leads_this_month=leads_this_month,
+        og_image=og_image,
+        og_title=og_title,
+        og_description=og_description,
+    )
+
+
 @main.route('/<slug>')
 def public_profile(slug):
     import re
@@ -354,6 +458,16 @@ def public_profile(slug):
     clean_slug = re.sub(r'[^a-z0-9]', '', slug.lower())
     if slug != clean_slug:
         return redirect(f'/{clean_slug}', 301)
+
+    # Check if this is a dealership team member personal page
+    import sqlite3 as _sqt
+    _ct = _sqt.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    _ct.row_factory = _sqt.Row
+    _member = _ct.execute("SELECT * FROM dealership_team WHERE slug=? AND is_active=1", (slug,)).fetchone()
+    _ct.close()
+    if _member:
+        return rep_storefront(dict(_member))
+
     from app.models.salesperson import Salesperson
     sp = Salesperson.query.filter_by(profile_url_slug=slug).first()
     if not sp:
