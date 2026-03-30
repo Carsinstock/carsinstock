@@ -5,16 +5,16 @@
 <meta name="apple-mobile-web-app-title" content="{{ sp.display_name }}">
 <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
 <link rel="manifest" href="/manifest/{{ sp.profile_url_slug }}.json">
-<meta property="og:title" content="{{ sp.display_name }} — Cars In Stock">
-<meta property="og:description" content="Check out my inventory this week at CarsInStock — carsinstock.com/{{ sp.profile_url_slug }}">
-<meta property="og:image" content="{{ sp.profile_photo or 'https://res.cloudinary.com/dbpa9qqtb/image/upload/v1772163049/demo/demo_cover_photo.jpg' }}">
+<meta property="og:title" content="{{ og_title or sp.display_name ~ ' — Cars In Stock' }}">
+<meta property="og:description" content="{{ og_description or 'Check out my inventory this week at CarsInStock — carsinstock.com/' ~ sp.profile_url_slug }}">
+<meta property="og:image" content="{{ og_image or sp.profile_photo or 'https://res.cloudinary.com/dbpa9qqtb/image/upload/v1772163049/demo/demo_cover_photo.jpg' }}">
 <meta property="og:url" content="https://carsinstock.com/{{ sp.profile_url_slug }}">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="CarsInStock">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="{{ sp.display_name }} — Cars In Stock">
-<meta name="twitter:description" content="Check out my inventory this week at CarsInStock — carsinstock.com/{{ sp.profile_url_slug }}">
-<meta name="twitter:image" content="{{ sp.profile_photo or 'https://res.cloudinary.com/dbpa9qqtb/image/upload/v1772163049/demo/demo_cover_photo.jpg' }}">
+<meta name="twitter:title" content="{{ og_title or sp.display_name ~ ' — Cars In Stock' }}">
+<meta name="twitter:description" content="{{ og_description or 'Check out my inventory this week at CarsInStock — carsinstock.com/' ~ sp.profile_url_slug }}">
+<meta name="twitter:image" content="{{ og_image or sp.profile_photo or 'https://res.cloudinary.com/dbpa9qqtb/image/upload/v1772163049/demo/demo_cover_photo.jpg' }}">
 
 <!-- Floating Share Bar -->
 {% if not is_demo %}

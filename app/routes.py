@@ -399,6 +399,33 @@ def public_profile(slug):
     _conn.close()
     team_lookup = {r['id']: {'name': r['name'], 'photo': r['profile_photo']} for r in _team_rows}
 
+    # Build dynamic OG tags
+    _fallback_img = 'https://res.cloudinary.com/dbpa9qqtb/image/upload/v1772163049/demo/demo_cover_photo.jpg'
+    _live_count = len(vehicles)
+    _min_price = min((v.price for v in vehicles if v.price), default=None)
+
+    if sp.subscription_tier == 'dealership':
+        # For dealership: use first team pick's photo+name if available, else cover/profile
+        _og_image = sp.cover_photo or sp.profile_photo or _fallback_img
+        _featured_pick = next((v for v in vehicles if v.is_team_pick and v.pick_user_id and team_lookup.get(v.pick_user_id) and team_lookup[v.pick_user_id].get('photo')), None)
+        if _featured_pick:
+            _og_image = _featured_pick.image_url or _og_image
+            _og_title = f"{team_lookup[_featured_pick.pick_user_id]['name']} picked a {_featured_pick.year} {_featured_pick.make} {_featured_pick.model} — {sp.display_name}"
+        else:
+            _og_title = f"{sp.display_name} — {_live_count} Fresh Car{'s' if _live_count != 1 else ''} This Week"
+        if _min_price and _live_count:
+            _og_description = f"{_live_count} vehicle{'s' if _live_count != 1 else ''} available. Starting at ${_min_price:,.0f}. Updated weekly — carsinstock.com/{sp.profile_url_slug}"
+        else:
+            _og_description = f"Browse fresh inventory from {sp.display_name} at CarsInStock — carsinstock.com/{sp.profile_url_slug}"
+    else:
+        # Individual salesperson: their photo + name + car count
+        _og_image = sp.profile_photo or _fallback_img
+        _og_title = f"{sp.display_name} — {_live_count} Fresh Car{'s' if _live_count != 1 else ''} This Week"
+        if _min_price and _live_count:
+            _og_description = f"{_live_count} vehicle{'s' if _live_count != 1 else ''} available. Starting at ${_min_price:,.0f}. carsinstock.com/{sp.profile_url_slug}"
+        else:
+            _og_description = f"Check out {sp.display_name}'s inventory this week at CarsInStock — carsinstock.com/{sp.profile_url_slug}"
+
     # Dealership accounts — use personal storefront template + pass team members for Meet the Team
     if sp.subscription_tier == 'dealership':
         import sqlite3 as _sqd
@@ -409,9 +436,13 @@ def public_profile(slug):
         _cd.close()
         return render_template('salesperson/public_profile.html', sp=sp, vehicles=vehicles,
             is_owner=is_owner, is_demo=False, hide_nav_auth=not is_owner,
-            team_lookup=team_lookup, team_members=_team_members)
+            team_lookup=team_lookup, team_members=_team_members,
+            og_image=_og_image, og_title=_og_title, og_description=_og_description)
 
-    return render_template('salesperson/public_profile.html', sp=sp, vehicles=vehicles, is_owner=is_owner, is_demo=False, hide_nav_auth=not is_owner, team_lookup=team_lookup, team_members=[])
+    return render_template('salesperson/public_profile.html', sp=sp, vehicles=vehicles,
+        is_owner=is_owner, is_demo=False, hide_nav_auth=not is_owner,
+        team_lookup=team_lookup, team_members=[],
+        og_image=_og_image, og_title=_og_title, og_description=_og_description)
 
 
 @main.route("/lead/submit", methods=["POST"])
