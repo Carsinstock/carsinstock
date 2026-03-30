@@ -263,15 +263,33 @@ def register_routes(bp):
 
 
     @bp.route("/qr-code")
-    @login_required
     def qr_code():
-        import qrcode, io, base64
-        from flask import send_file
+        import qrcode, io
+        from flask import send_file, session
         from app.models.salesperson import Salesperson
-        sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
-        if not sp:
-            return "Not found", 404
-        url = f"https://carsinstock.com/{sp.profile_url_slug}"
+
+        # Team member session — generate QR for their personal slug
+        if 'team_member_id' in session and 'user_id' not in session:
+            import sqlite3 as _sq
+            _conn = _sq.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+            _conn.row_factory = _sq.Row
+            member = _conn.execute("SELECT * FROM dealership_team WHERE id=? AND is_active=1", (session['team_member_id'],)).fetchone()
+            _conn.close()
+            if not member or not member['slug']:
+                return "Not found", 404
+            url = f"https://carsinstock.com/{member['slug']}"
+            filename = f"{member['slug']}-qr-code.png"
+        else:
+            # Regular salesperson session
+            if 'user_id' not in session:
+                from flask import redirect
+                return redirect('/login')
+            sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
+            if not sp:
+                return "Not found", 404
+            url = f"https://carsinstock.com/{sp.profile_url_slug}"
+            filename = f"{sp.profile_url_slug}-qr-code.png"
+
         qr = qrcode.QRCode(version=1, box_size=10, border=4)
         qr.add_data(url)
         qr.make(fit=True)
@@ -280,7 +298,7 @@ def register_routes(bp):
         img.save(buf, format='PNG')
         buf.seek(0)
         return send_file(buf, mimetype='image/png', as_attachment=True,
-                        download_name=f"{sp.profile_url_slug}-qr-code.png")
+                        download_name=filename)
 
     @bp.route("/api/vin-decode/<vin>")
     def vin_decode(vin):
