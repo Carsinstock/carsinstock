@@ -447,6 +447,7 @@ def rep_storefront(member):
         og_image=og_image,
         og_title=og_title,
         og_description=og_description,
+        hide_nav_auth=True,
     )
 
 
