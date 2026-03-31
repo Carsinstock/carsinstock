@@ -280,7 +280,7 @@ async function submitRepReferral() {
         });
         var d = await r.json();
         if (d.success) {
-            document.getElementById('referralFormContent').innerHTML = '<p style="text-align:center;font-size:16px;color:#00C851;font-weight:600;padding:20px 0;">✅ Referral sent!<br><span style="font-size:13px;color:#64748B;font-weight:400;">We'll reach out if they buy.</span></p>';
+            document.getElementById('referralFormContent').innerHTML = '<p style="text-align:center;font-size:16px;color:#00C851;font-weight:600;padding:20px 0;">&#x2705; Referral sent!<br><span style="font-size:13px;color:#64748B;font-weight:400;">We\'ll reach out if they buy.</span></p>';
         } else {
             alert('Something went wrong. Please try again.');
         }
