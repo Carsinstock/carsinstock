@@ -31,7 +31,7 @@ def sp_dashboard():
     my_vehicles = [v for v in all_my_vehicles if v.approval_status in ('approved', None) and v.status == 'available']
     # Get all leads on their approved vehicles + referral leads
     my_vehicle_ids = [v.id for v in my_vehicles]
-    _rep_slug_for_leads = member.get('slug', '') if isinstance(member, dict) else ''
+    _rep_slug_for_leads = member['slug'] if member['slug'] else ''
     from sqlalchemy import or_ as _or2
     if my_vehicle_ids and _rep_slug_for_leads:
         my_leads = Lead.query.filter(
@@ -44,7 +44,7 @@ def sp_dashboard():
     else:
         my_leads = []
     # Use rep's personal slug if set, otherwise fall back to dealership page
-    _rep_slug = member.get('slug') or (member['slug'] if isinstance(member, dict) else '')
+    _rep_slug = member['slug'] if member['slug'] else ''
     storefront_url = f"https://carsinstock.com/{_rep_slug}" if _rep_slug else (f"https://carsinstock.com/{dealership_sp.profile_url_slug}" if dealership_sp else "")
     # Load undismissed notifications
     notifications = conn.execute(
