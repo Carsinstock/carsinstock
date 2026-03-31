@@ -187,6 +187,24 @@ body { background: #F1F5F9; }
     <button onclick="document.getElementById('referralModal').style.display='flex'" class="share-btn" style="background:#00C851;color:#1E293B;">🤝 Refer &amp; Earn</button>
 </div>
 
+<!-- Referral Modal -->
+<div id="referralModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:16px;padding:24px;max-width:440px;width:92%;max-height:90vh;overflow-y:auto;position:relative;">
+        <button onclick="document.getElementById('referralModal').style.display='none'" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:24px;color:#94A3B8;cursor:pointer;line-height:1;">×</button>
+        <h3 style="color:#1E293B;font-size:18px;font-weight:800;margin:0 0 4px;">Send a Referral</h3>
+        <p style="color:#64748B;font-size:13px;margin:0 0 18px;">Fill this out — if your friend buys, you get $100.</p>
+        <div id="referralFormContent">
+            <input id="ref_your_name" placeholder="Your Name *" style="width:100%;padding:10px 12px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:14px;margin-bottom:10px;font-family:inherit;box-sizing:border-box;">
+            <input id="ref_your_phone" placeholder="Your Phone *" type="tel" style="width:100%;padding:10px 12px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:14px;margin-bottom:10px;font-family:inherit;box-sizing:border-box;">
+            <input id="ref_your_email" placeholder="Your Email *" type="email" style="width:100%;padding:10px 12px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:14px;margin-bottom:10px;font-family:inherit;box-sizing:border-box;">
+            <input id="ref_friend_name" placeholder="Friend's Name *" style="width:100%;padding:10px 12px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:14px;margin-bottom:10px;font-family:inherit;box-sizing:border-box;">
+            <input id="ref_friend_phone" placeholder="Friend's Phone *" type="tel" style="width:100%;padding:10px 12px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:14px;margin-bottom:10px;font-family:inherit;box-sizing:border-box;">
+            <textarea id="ref_message" placeholder="Anything I should know about what they're looking for? (optional)" style="width:100%;padding:10px 12px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:14px;margin-bottom:14px;font-family:inherit;box-sizing:border-box;height:72px;resize:none;"></textarea>
+            <button onclick="submitRepReferral()" style="width:100%;background:#00C851;color:white;border:none;padding:13px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;">Send My Referral →</button>
+        </div>
+    </div>
+</div>
+
 <!-- Lead Modal -->
 <div id="leadModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
     <div style="background:#fff;border-radius:16px;padding:28px;max-width:440px;width:90%;max-height:90vh;overflow-y:auto;position:relative;">
