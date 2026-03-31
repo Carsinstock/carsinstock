@@ -470,6 +470,65 @@ def rep_submit_lead(team_slug):
     return redirect(f'/{team_slug}')
 
 
+@main.route('/referral/submit/<slug>', methods=['POST'])
+def referral_submit(slug):
+    """Handle referral form submission from any storefront."""
+    import sqlite3 as _sq, os
+    from datetime import datetime
+    from app.models.salesperson import Salesperson
+    from flask import jsonify, request
+    sp = Salesperson.query.filter_by(profile_url_slug=slug).first()
+    if not sp:
+        return jsonify({"error": "not found"}), 404
+    data = request.get_json() or {}
+    referrer_name = data.get("referrer_name", "").strip()
+    referrer_phone = data.get("referrer_phone", "").strip()
+    referrer_email = data.get("referrer_email", "").strip()
+    friend_name = data.get("friend_name", "").strip()
+    friend_phone = data.get("friend_phone", "").strip()
+    message = data.get("message", "").strip()
+    if not all([referrer_name, referrer_phone, referrer_email, friend_name, friend_phone]):
+        return jsonify({"error": "Missing required fields"}), 400
+    _conn = _sq.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    _conn.execute(
+        "INSERT INTO referrals (salesperson_id, referrer_name, referrer_phone, referrer_email, friend_name, friend_phone, message, submitted_at) VALUES (?,?,?,?,?,?,?,?)",
+        (sp.salesperson_id, referrer_name, referrer_phone, referrer_email, friend_name, friend_phone, message, datetime.utcnow())
+    )
+    _conn.commit()
+    _conn.close()
+    # Send confirmation email to referrer
+    try:
+        from app.utils.email import send_email
+        html = f"""<div style="font-family:Inter,sans-serif;max-width:520px;margin:0 auto;padding:24px;">
+          <div style="background:#1E293B;padding:16px 24px;border-radius:10px 10px 0 0;"><span style="color:white;font-weight:400;">Cars</span><span style="color:#00C851;font-weight:700;"> IN STOCK</span></div>
+          <div style="background:#fff;border:1px solid #E2E8F0;border-top:none;border-radius:0 0 10px 10px;padding:28px;">
+            <h2 style="color:#1E293B;margin:0 0 8px;">Got your referral!</h2>
+            <p style="color:#475569;font-size:15px;margin:0 0 16px;">Hey {referrer_name.split()[0]}, we received your referral for {friend_name}. If they buy, you get $100.</p>
+            <p style="color:#94A3B8;font-size:12px;margin:0;">— {sp.display_name} via CarsInStock</p>
+          </div></div>"""
+        send_email(referrer_email, f"Got your referral — thanks, {referrer_name.split()[0]}!", html)
+    except Exception as e:
+        print(f"Referral email error: {e}")
+    # Notify salesperson
+    try:
+        from app.utils.email import send_email
+        from app.models.user import User as _U
+        sp_user = _U.query.get(sp.user_id)
+        if sp_user:
+            admin_html = f"""<div style="font-family:Inter,sans-serif;max-width:520px;margin:0 auto;padding:24px;">
+              <div style="background:#1E293B;padding:16px 24px;border-radius:10px 10px 0 0;"><span style="color:white;font-weight:400;">Cars</span><span style="color:#00C851;font-weight:700;"> IN STOCK</span></div>
+              <div style="background:#fff;border:1px solid #E2E8F0;border-top:none;border-radius:0 0 10px 10px;padding:28px;">
+                <h2 style="color:#1E293B;margin:0 0 8px;">New Referral Submitted</h2>
+                <p style="color:#475569;font-size:14px;"><strong>Referrer:</strong> {referrer_name} — {referrer_phone} — {referrer_email}</p>
+                <p style="color:#475569;font-size:14px;"><strong>Friend:</strong> {friend_name} — {friend_phone}</p>
+                <p style="color:#475569;font-size:14px;"><strong>Notes:</strong> {message or 'None'}</p>
+              </div></div>"""
+            send_email(sp_user.email, f"New Referral: {referrer_name} referred {friend_name}", admin_html)
+    except Exception as e:
+        print(f"Referral admin email error: {e}")
+    return jsonify({"success": True})
+
+
 def rep_storefront(member):
     """Render a dealership team member's personal storefront page."""
     import sqlite3 as _sq
