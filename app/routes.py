@@ -617,11 +617,8 @@ def public_profile(slug):
         _team_members = [dict(r) for r in _team_members]
         _cd.close()
         _ref_val = session.get(f'ref_{slug}', '')
-        # Add slug to each team member dict for personal page links
-        for _tm in _team_members:
-            pass  # slug already in dict from DB
-        return render_template('salesperson/dealership_storefront.html', sp=sp, vehicles=vehicles,
-            is_owner=is_owner, hide_nav_auth=not is_owner,
+        return render_template('salesperson/public_profile.html', sp=sp, vehicles=vehicles,
+            is_owner=is_owner, is_demo=False, hide_nav_auth=not is_owner,
             team_lookup=team_lookup, team_members=_team_members,
             og_image=_og_image, og_title=_og_title, og_description=_og_description,
             ref_slug=_ref_val)
