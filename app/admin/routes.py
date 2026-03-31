@@ -166,6 +166,31 @@ def register_admin_routes(bp):
         flash(f"User {user.email} and all associated data deleted.", "success")
         return redirect(url_for("admin.users"))
 
+
+    @bp.route("/referrals")
+    @admin_required
+    def referrals():
+        import sqlite3 as _sq
+        _conn = _sq.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        _conn.row_factory = _sq.Row
+        refs = _conn.execute("SELECT * FROM referrals ORDER BY submitted_at DESC").fetchall()
+        refs = [dict(r) for r in refs]
+        _conn.close()
+        return render_template("admin/referrals.html", referrals=refs)
+
+    @bp.route("/referrals/<int:ref_id>/toggle-paid", methods=["POST"])
+    @admin_required
+    def toggle_referral_paid(ref_id):
+        import sqlite3 as _sq
+        _conn = _sq.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        current = _conn.execute("SELECT paid FROM referrals WHERE id=?", (ref_id,)).fetchone()
+        if current:
+            new_val = 0 if current[0] else 1
+            _conn.execute("UPDATE referrals SET paid=? WHERE id=?", (new_val, ref_id))
+            _conn.commit()
+        _conn.close()
+        return redirect(url_for("admin.referrals"))
+
     @bp.route("/vehicles")
     @admin_required
     def vehicles():

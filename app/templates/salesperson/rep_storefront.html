@@ -240,6 +240,35 @@ var repPageUrl = "https://carsinstock.com/" + repSlug;
 var dealershipSlug = "{{ dealership_sp.profile_url_slug if dealership_sp else '' }}";
 var referralUrl = dealershipSlug ? "https://carsinstock.com/" + dealershipSlug + "?ref=" + repSlug : repPageUrl;
 
+async function submitRepReferral() {
+    var data = {
+        referrer_name: document.getElementById('ref_your_name').value.trim(),
+        referrer_phone: document.getElementById('ref_your_phone').value.trim(),
+        referrer_email: document.getElementById('ref_your_email').value.trim(),
+        friend_name: document.getElementById('ref_friend_name').value.trim(),
+        friend_phone: document.getElementById('ref_friend_phone').value.trim(),
+        message: document.getElementById('ref_message').value.trim()
+    };
+    if (!data.referrer_name || !data.referrer_phone || !data.referrer_email || !data.friend_name || !data.friend_phone) {
+        alert('Please fill in all required fields.');
+        return;
+    }
+    try {
+        var r = await fetch('/referral/submit/' + repStorefrontSlug, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        });
+        var d = await r.json();
+        if (d.success) {
+            document.getElementById('referralFormContent').innerHTML = '<p style="text-align:center;font-size:16px;color:#00C851;font-weight:600;padding:20px 0;">✅ Referral sent!<br><span style="font-size:13px;color:#64748B;font-weight:400;">We'll reach out if they buy.</span></p>';
+        } else {
+            alert('Something went wrong. Please try again.');
+        }
+    } catch(e) {
+        alert('Connection error. Please try again.');
+    }
+}
 function showLead(vehicleId, vehicleName) {
     document.getElementById('leadVehicleId').value = vehicleId;
     document.getElementById('leadVehicleName').textContent = vehicleName;

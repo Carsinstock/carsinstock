@@ -178,16 +178,23 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
 
     <!-- My Vehicles -->
     <div class="card">
-        <h3>🚗 My Vehicles ({{ all_my_vehicles|length }})</h3>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+            <h3 style="margin:0;">🚗 My Vehicles ({{ all_my_vehicles|length }})</h3>
+            <div style="display:flex;gap:6px;">
+                <button onclick="sortVehicles('low')" id="sortLowBtn" style="padding:5px 10px;font-size:11px;font-weight:700;border:1.5px solid #E2E8F0;border-radius:6px;background:#fff;color:#475569;cursor:pointer;">$ Low→High</button>
+                <button onclick="sortVehicles('high')" id="sortHighBtn" style="padding:5px 10px;font-size:11px;font-weight:700;border:1.5px solid #E2E8F0;border-radius:6px;background:#fff;color:#475569;cursor:pointer;">$ High→Low</button>
+            </div>
+        </div>
         {% if all_my_vehicles %}
+        <div id="vehicleList">
         {% for v in all_my_vehicles %}
-        <div class="vehicle-row">
+        <div class="vehicle-row" data-price="{{ v.price or 0 }}" data-id="{{ v.id }}">
             {% if v.image_url %}<img src="{{ v.image_url }}" alt="{{ v.year }} {{ v.make }} {{ v.model }}">{% endif %}
             <div class="vinfo">
                 <div class="vname">{{ v.year }} {{ v.make }} {{ v.model }}</div>
                 <div class="vprice">${{ '{:,.0f}'.format(v.price) }}</div>
                 {% if v.approval_status == 'pending' %}
-                <div style="display:inline-block;background:#FEF9C3;border:1px solid #FDE047;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700;color:#854D0E;margin-top:4px;">🟡 Awaiting Manager Approval</div>
+                <div style="display:inline-block;background:#FEF9C3;border:1px solid #FDE047;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700;color:#854D0E;margin-top:4px;">🟡 Awaiting Approval</div>
                 {% elif v.approval_status == 'rejected' %}
                 <div style="display:inline-block;background:#FEE2E2;border:1px solid #FCA5A5;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700;color:#991B1B;margin-top:4px;">🔴 Not Approved{% if v.rejection_reason %} — {{ v.rejection_reason }}{% endif %}</div>
                 {% else %}
@@ -195,8 +202,12 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
                 {% if v.days_remaining %}<div class="vdays" style="color:{{ '#DC2626' if v.days_remaining <= 2 else '#64748B' }};margin-top:2px;">{{ v.days_remaining }} days left</div>{% endif %}
                 {% endif %}
             </div>
+            <form method="POST" action="/sp/vehicles/delete/{{ v.id }}" onsubmit="return confirm('Remove this vehicle?')" style="margin-left:auto;flex-shrink:0;">
+                <button type="submit" style="background:none;border:none;cursor:pointer;color:#94A3B8;font-size:18px;padding:4px;" title="Delete">🗑</button>
+            </form>
         </div>
         {% endfor %}
+        </div>
         {% else %}
         <p style="color:#94A3B8;font-size:13px;margin:0;">No vehicles submitted yet.</p>
         {% endif %}
@@ -361,6 +372,21 @@ async function generateSpBlurb() {
         alert('Could not generate blurb. Try again.');
     }
     document.getElementById('spBlurbSpinner').style.display = 'none';
+}
+function sortVehicles(dir) {
+    var list = document.getElementById('vehicleList');
+    if (!list) return;
+    var rows = Array.from(list.querySelectorAll('.vehicle-row'));
+    rows.sort(function(a, b) {
+        var pa = parseFloat(a.dataset.price) || 0;
+        var pb = parseFloat(b.dataset.price) || 0;
+        return dir === 'low' ? pa - pb : pb - pa;
+    });
+    rows.forEach(function(r){ list.appendChild(r); });
+    document.getElementById('sortLowBtn').style.background = dir === 'low' ? '#1E293B' : '#fff';
+    document.getElementById('sortLowBtn').style.color = dir === 'low' ? '#fff' : '#475569';
+    document.getElementById('sortHighBtn').style.background = dir === 'high' ? '#1E293B' : '#fff';
+    document.getElementById('sortHighBtn').style.color = dir === 'high' ? '#fff' : '#475569';
 }
 function copyReferralLink() {
     navigator.clipboard.writeText(referralUrl).then(function() {

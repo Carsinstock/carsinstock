@@ -1,0 +1,44 @@
+{% extends "admin/base_admin.html" %}
+{% block content %}
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+    <h2 class="section-title" style="margin:0;">Referrals ({{ referrals|length }})</h2>
+    <div style="font-size:13px;color:#64748B;">$100 payout per completed sale</div>
+</div>
+
+{% if referrals %}
+<table>
+    <tr>
+        <th>Date</th>
+        <th>Referrer</th>
+        <th>Referrer Contact</th>
+        <th>Friend</th>
+        <th>Friend Phone</th>
+        <th>Notes</th>
+        <th>$100 Payout</th>
+    </tr>
+    {% for r in referrals %}
+    <tr>
+        <td style="white-space:nowrap;font-size:12px;color:#64748B;">{{ r.submitted_at[:10] if r.submitted_at else '—' }}</td>
+        <td style="font-weight:600;">{{ r.referrer_name }}</td>
+        <td style="font-size:13px;">{{ r.referrer_phone }}<br><span style="color:#64748B;">{{ r.referrer_email }}</span></td>
+        <td style="font-weight:600;">{{ r.friend_name }}</td>
+        <td>{{ r.friend_phone }}</td>
+        <td style="max-width:200px;font-size:12px;color:#475569;">{{ r.message or '—' }}</td>
+        <td>
+            <form method="POST" action="/admin/referrals/{{ r.id }}/toggle-paid">
+                {% if r.paid %}
+                <button type="submit" style="background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7;padding:5px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">✅ Paid</button>
+                {% else %}
+                <button type="submit" style="background:#F1F5F9;color:#475569;border:1px solid #CBD5E1;padding:5px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">Unpaid</button>
+                {% endif %}
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% else %}
+<div style="background:white;border-radius:10px;padding:40px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+    <p style="color:#94A3B8;font-size:15px;">No referrals yet. They'll appear here when customers submit the referral form on a salesperson's page.</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -93,6 +93,36 @@ def vin_decode_public(vin):
     return jsonify({'error': 'Could not decode VIN'}), 404
 
 
+@main.route('/sp/vehicles/delete/<int:vehicle_id>', methods=['POST'])
+def sp_delete_vehicle(vehicle_id):
+    """Team member deletes their own vehicle — no approval needed."""
+    if 'team_member_id' not in session:
+        return redirect('/login')
+    from app.models.vehicle import Vehicle
+    from app.models import db
+    import sqlite3 as _sq
+    _conn = _sq.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    _conn.row_factory = _sq.Row
+    member = _conn.execute("SELECT * FROM dealership_team WHERE id=? AND is_active=1", (session['team_member_id'],)).fetchone()
+    _conn.close()
+    if not member:
+        return redirect('/login')
+    vehicle = Vehicle.query.get_or_404(vehicle_id)
+    # Only allow deleting vehicles assigned to this rep
+    if vehicle.pick_user_id != member['id']:
+        flash("You can only delete your own vehicles.", "error")
+        return redirect('/sp-dashboard')
+    try:
+        db.session.delete(vehicle)
+        db.session.commit()
+        flash(f"Vehicle removed.", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash("Something went wrong.", "error")
+        print(f"sp_delete_vehicle error: {e}")
+    return redirect('/sp-dashboard')
+
+
 @main.route('/sp/vehicles/add', methods=['POST'])
 def sp_add_vehicle():
     """Team member vehicle submission — goes straight to pending."""
