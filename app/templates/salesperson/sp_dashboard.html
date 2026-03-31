@@ -63,7 +63,7 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
             <a href="/qr-code" class="social-btn" download>📲 Download QR Code</a>
             <button class="social-btn" onclick="copyText()">💬 Copy Text Template</button>
             <button class="social-btn green" onclick="generateWeeklyPost()">✨ Create My Weekly Post</button>
-            <button class="social-btn" onclick="copyReferralLink()" style="background:#475569;">🔗 Copy Referral Link</button>
+            <a href="{{ '/' + member.slug if member.slug else '/' + (dealership_sp.profile_url_slug if dealership_sp else '') }}" target="_blank" class="social-btn" style="background:#475569;text-decoration:none;">🤝 My Referral Page</a>
         </div>
         <div id="copiedMsg" class="copied">✅ Copied!</div>
     </div>
