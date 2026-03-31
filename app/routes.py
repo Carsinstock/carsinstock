@@ -480,7 +480,11 @@ def rep_storefront(member):
 
     # Dynamic OG tags
     _fallback = 'https://res.cloudinary.com/dbpa9qqtb/image/upload/v1772163049/demo/demo_cover_photo.jpg'
-    og_image = featured.image_url if featured and featured.image_url else (member['profile_photo'] or _fallback)
+    def _cld(url):
+        if url and 'cloudinary.com' in url:
+            return url.replace('/upload/', '/upload/w_1200,h_630,c_fill,g_auto,f_jpg,q_80/')
+        return url
+    og_image = _cld(featured.image_url if featured and featured.image_url else (member['profile_photo'] or _fallback))
     og_title = f"{member['name']} — This Week's Inventory"
     if live_count and min_price:
         og_description = f"{live_count} car{'s' if live_count != 1 else ''} available · From ${min_price:,.0f} · Updated daily · Tap to browse"
@@ -565,6 +569,13 @@ def public_profile(slug):
     _conn.close()
     team_lookup = {r['id']: {'name': r['name'], 'photo': r['profile_photo']} for r in _team_rows}
 
+    def _og_img(url):
+        """Transform Cloudinary URL to OG-friendly 1200x630 crop."""
+        if url and 'cloudinary.com' in url:
+            # Insert transformation before /upload/
+            return url.replace('/upload/', '/upload/w_1200,h_630,c_fill,g_auto,f_jpg,q_80/')
+        return url
+
     # Store referral param in session
     _ref = request.args.get('ref', '').strip().lower()
     if _ref:
@@ -577,10 +588,10 @@ def public_profile(slug):
 
     if sp.subscription_tier == 'dealership':
         # For dealership: use first team pick's photo+name if available, else cover/profile
-        _og_image = sp.cover_photo or sp.profile_photo or _fallback_img
+        _og_image = _og_img(sp.cover_photo or sp.profile_photo or _fallback_img)
         _featured_pick = next((v for v in vehicles if v.is_team_pick and v.pick_user_id and team_lookup.get(v.pick_user_id) and team_lookup[v.pick_user_id].get('photo')), None)
         if _featured_pick:
-            _og_image = _featured_pick.image_url or _og_image
+            _og_image = _og_img(_featured_pick.image_url or _og_image)
             _og_title = f"{team_lookup[_featured_pick.pick_user_id]['name']} picked a {_featured_pick.year} {_featured_pick.make} {_featured_pick.model} — {sp.display_name}"
         else:
             _og_title = f"{sp.display_name} — {_live_count} Fresh Car{'s' if _live_count != 1 else ''} This Week"
@@ -590,7 +601,7 @@ def public_profile(slug):
             _og_description = f"Browse fresh inventory from {sp.display_name} at CarsInStock — carsinstock.com/{sp.profile_url_slug}"
     else:
         # Individual salesperson: their photo + name + car count
-        _og_image = sp.profile_photo or _fallback_img
+        _og_image = _og_img(sp.profile_photo or _fallback_img)
         _og_title = f"{sp.display_name} — {_live_count} Fresh Car{'s' if _live_count != 1 else ''} This Week"
         if _min_price and _live_count:
             _og_description = f"{_live_count} vehicle{'s' if _live_count != 1 else ''} available. Starting at ${_min_price:,.0f}. carsinstock.com/{sp.profile_url_slug}"
