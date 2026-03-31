@@ -273,7 +273,7 @@ async function submitRepReferral() {
         return;
     }
     try {
-        var r = await fetch('/referral/submit/' + repStorefrontSlug, {
+        var r = await fetch('https://carsinstock.com/referral/submit/' + repStorefrontSlug, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(data)

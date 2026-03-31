@@ -201,7 +201,7 @@ function submitReferral() {
         alert('Please fill in all required fields.');
         return;
     }
-    fetch('/referral/submit/' + slug, {
+    fetch('https://carsinstock.com/referral/submit/' + slug, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(data)
