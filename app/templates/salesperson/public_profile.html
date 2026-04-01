@@ -688,7 +688,7 @@ window.filterRep = function(repId) {
     if (!grid) return;
     var cards = Array.from(grid.querySelectorAll('.vehicle-card'));
     cards.forEach(function(c) {
-        c.style.display = (repId === 'all' || c.dataset.repId === repId) ? '' : 'none';
+        c.style.display = (repId === 'all' || String(c.dataset.repId) === String(repId)) ? '' : 'none';
     });
     // Update button states
     document.querySelectorAll('[id^="filter-"]').forEach(function(btn) {
