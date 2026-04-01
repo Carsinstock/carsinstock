@@ -552,7 +552,7 @@ def rep_storefront(member):
         Vehicle.pick_user_id == member['id'],
         Vehicle.status == 'available',
         or_(Vehicle.approval_status == 'approved', Vehicle.approval_status == None)
-    ).order_by(Vehicle.is_team_pick.desc(), Vehicle.created_at.desc()).all()
+    ).order_by(Vehicle.is_team_pick.desc(), Vehicle.price.asc()).all()
     vehicles = [v for v in all_vehicles if not v.expires_at or v.expires_at > datetime.utcnow()]
 
     # Stats
@@ -632,7 +632,7 @@ def public_profile(slug):
         elif sort == 'price_high':
             vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id).order_by(Vehicle.price.desc()).all()
         else:
-            vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id).order_by(Vehicle.created_at.desc()).all()
+            vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id).order_by(Vehicle.price.asc()).all()
     else:
         # Public only sees active, non-expired, approved vehicles
         from sqlalchemy import or_ as _or
@@ -642,12 +642,10 @@ def public_profile(slug):
             Vehicle.status == 'available',
             _or(Vehicle.approval_status == 'approved', Vehicle.approval_status == None)
         )
-        if sort == 'price_low':
-            vehicles = base_q.order_by(Vehicle.price.asc()).all()
-        elif sort == 'price_high':
+        if sort == 'price_high':
             vehicles = base_q.order_by(Vehicle.price.desc()).all()
         else:
-            vehicles = base_q.order_by(Vehicle.created_at.desc()).all()
+            vehicles = base_q.order_by(Vehicle.price.asc()).all()
         vehicles = [v for v in vehicles if not v.expires_at or v.expires_at > datetime.utcnow()]
     # Gate storefront if owner's subscription is locked
     from app.models.user import User as _User
