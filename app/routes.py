@@ -241,10 +241,6 @@ def full_inventory(slug):
     return render_template('salesperson/full_inventory.html', sp=sp, vehicles=vehicles, team_lookup=team_lookup)
 
 
-@main.route('/preview')
-def preview():
-    return render_template('preview.html')
-
 @main.route('/')
 def home():
     return render_template('index.html')
