@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Peter Franco — CarsInStock</title>
+
+<style>
+  :root {
+    --navy: #1E293B;
+    --navy-dark: #0F172A;
+    --green: #00C851;
+    --green-dark: #00a843;
+    --white: #ffffff;
+    --offwhite: #F8FAFC;
+    --gray: #E2E8F0;
+    --text-muted: #94A3B8;
+    --red: #EF4444;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+    background: var(--offwhite);
+    min-height: 100vh;
+    max-width: 430px;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  /* ── HERO HEADER ── */
+  .hero {
+    background: var(--navy-dark);
+    position: relative;
+    overflow: hidden;
+    padding-bottom: 0;
+  }
+
+  .hero-bg-pattern {
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse at 80% 20%, rgba(0,200,81,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse at 20% 80%, rgba(0,200,81,0.06) 0%, transparent 50%);
+  }
+
+  .hero-lines {
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 30px,
+      rgba(255,255,255,0.015) 30px,
+      rgba(255,255,255,0.015) 31px
+    );
+  }
+
+  /* Top bar */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 0;
+    position: relative;
+    z-index: 2;
+  }
+
+  .logo-mark {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .logo-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(0.8); }
+  }
+
+  .logo-text {
+    font-family: 'Arial Black', 'Impact', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .live-badge {
+    background: rgba(0,200,81,0.15);
+    border: 1px solid rgba(0,200,81,0.3);
+    color: var(--green);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+  }
+
+  /* Profile section */
+  .profile-section {
+    position: relative;
+    z-index: 2;
+    padding: 24px 20px 0;
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+  }
+
+  .avatar-wrap {
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--green) 0%, #009940 100%);
+    border: 3px solid var(--green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Arial Black', 'Impact', sans-serif;
+    font-size: 30px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: 1px;
+    box-shadow: 0 0 0 3px rgba(0,200,81,0.2), 0 8px 24px rgba(0,0,0,0.3);
+  }
+
+  .online-dot {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    width: 14px;
+    height: 14px;
+    background: var(--green);
+    border-radius: 50%;
+    border: 2px solid var(--navy-dark);
+  }
+
+  .profile-info {
+    flex: 1;
+    padding-top: 4px;
+  }
+
+  .profile-name {
+    font-family: 'Arial Black', 'Impact', sans-serif;
+    font-size: 34px;
+    font-weight: 900;
+    color: white;
+    line-height: 1;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+
+  .profile-dealership {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--green);
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  .profile-tagline {
+    font-size: 13px;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.4;
+  }
+
+  /* Stats bar */
+  .stats-bar {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    margin: 20px 20px 0;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .stat-item {
+    flex: 1;
+    text-align: center;
+    padding: 12px 8px;
+    position: relative;
+  }
+
+  .stat-item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 20%;
+    height: 60%;
+    width: 1px;
+    background: rgba(255,255,255,0.08);
+  }
+
+  .stat-num {
+    font-family: 'Arial Black', 'Impact', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--green);
+    line-height: 1;
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-top: 2px;
+    display: block;
+  }
+
+  /* CTA button */
+  .cta-wrap {
+    position: relative;
+    z-index: 2;
+    padding: 16px 20px 24px;
+    display: flex;
+    gap: 10px;
+  }
+
+  .cta-call {
+    flex: 1;
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 13px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background 0.2s, transform 0.1s;
+    box-shadow: 0 4px 16px rgba(0,200,81,0.3);
+  }
+
+  .cta-call:active { transform: scale(0.98); }
+  .cta-call:hover { background: var(--green-dark); }
+
+  .cta-referral {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: white;
+    border-radius: 10px;
+    padding: 13px 16px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    transition: background 0.2s;
+  }
+
+  .cta-referral:hover { background: rgba(255,255,255,0.12); }
+
+  /* Wave divider */
+  .wave {
+    display: block;
+    width: 100%;
+    height: 28px;
+    background: var(--offwhite);
+    clip-path: ellipse(55% 100% at 50% 100%);
+    margin-top: -1px;
+  }
+
+  /* ── INVENTORY SECTION ── */
+  .inventory-section {
+    padding: 4px 16px 120px;
+  }
+
+  .inv-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .inv-title {
+    font-family: 'Arial Black', 'Impact', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--navy);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .sort-toggle {
+    display: flex;
+    background: white;
+    border: 1px solid var(--gray);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  .sort-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+    transition: all 0.15s;
+  }
+
+  .sort-btn.active {
+    background: var(--navy);
+    color: white;
+  }
+
+  /* ── FEATURED PICK ── */
+  .featured-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    margin-bottom: 14px;
+    border: 1px solid var(--gray);
+  }
+
+  .featured-banner {
+    background: linear-gradient(90deg, var(--navy) 0%, #1a3a5c 100%);
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .star-icon { font-size: 14px; }
+
+  .featured-label {
+    font-family: 'Arial Black', 'Impact', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--green);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    flex: 1;
+  }
+
+  .featured-img {
+    height: 200px;
+    background: linear-gradient(135deg, #1a2f4a 0%, #0d1f33 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .featured-img::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
+  }
+
+  .days-left-featured {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: var(--red);
+    color: white;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    font-family: 'Arial Black', 'Impact', sans-serif;
+    z-index: 2;
+  }
+
+  .pick-badge {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2px solid var(--green);
+    background: linear-gradient(135deg, var(--green), #009940);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 13px;
+    color: white;
+    font-family: 'Arial Black', 'Impact', sans-serif;
+    box-shadow: 0 2px 12px rgba(0,200,81,0.5);
+    z-index: 2;
+  }
+
+  .featured-body {
+    padding: 14px;
+  }
+
+  .featured-car-name {
+    font-family: 'Arial Black', 'Impact', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--navy);
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+
+  .featured-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    font-weight: 500;
+  }
+
+  .featured-price {
+    font-family: 'Arial Black', 'Impact', sans-serif;
+    font-size: 30px;
+    font-weight: 900;
+    color: var(--green);
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+  }
+
+  .pick-blurb {
+    background: #F0FDF4;
+    border-left: 3px solid var(--green);
+    border-radius: 0 8px 8px 0;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .blurb-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--green), #009940);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 800;
+    font-size: 12px;
+    font-family: 'Arial Black', 'Impact', sans-serif;
+    flex-shrink: 0;
+  }
+
+  .blurb-text {
+    font-size: 12px;
+    color: #166534;
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  .interested-btn-featured {
+    width: 100%;
+    background: var(--navy);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .interested-btn-featured:hover { background: var(--green); }
+  .interested-btn-featured:active { transform: scale(0.98); }
+
+  /* ── GRID CARDS ── */
+  .cars-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .car-card {
+    background: white;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    border: 1px solid var(--gray);
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+  }
+
+  .car-card:active {
+    transform: scale(0.97);
+  }
+
+  .car-img {
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 44px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .car-img-1 { background: linear-gradient(135deg, #1e3a5f, #0d2137); }
+  .car-img-2 { background: linear-gradient(135deg, #2d3748, #1a202c); }
+  .car-img-3 { background: linear-gradient(135deg, #1a3a2a, #0d2118); }
+  .car-img-4 { background: linear-gradient(135deg, #2d1b4e, #1a0f30); }
+  .car-img-5 { background: linear-gradient(135deg, #3d2010, #1f0f05); }
+
+  .days-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-family: 'Arial Black', 'Impact', sans-serif;
+    letter-spacing: 0.5px;
+  }
+
+  .days-badge.urgent { background: var(--red); color: white; }
+  .days-badge.normal { background: var(--navy); color: white; }
+  .days-badge.good { background: rgba(0,200,81,0.9); color: white; }
+
+  .car-body {
+    padding: 10px 10px 0;
+  }
+
+  .car-name {
+    font-family: 'Arial Black', 'Impact', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1.2;
+    margin-bottom: 2px;
+  }
+
+  .car-meta-small {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .car-price {
+    font-family: 'Arial Black', 'Impact', sans-serif;
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--green);
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  .interested-btn-small {
+    width: 100%;
+    background: var(--navy);
+    color: white;
+    border: none;
+    padding: 9px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-radius: 0 0 4px 4px;
+    margin: 0 -0px;
+    width: calc(100% + 0px);
+  }
+
+  .interested-btn-small:hover { background: var(--green); }
+
+  /* ── FLOATING SHARE BAR ── */
+  .share-bar {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 430px;
+    background: var(--navy-dark);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding: 12px 16px 20px;
+    z-index: 100;
+    box-shadow: 0 -8px 30px rgba(0,0,0,0.2);
+  }
+
+  .share-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .share-buttons {
+    display: flex;
+    gap: 8px;
+  }
+
+  .share-btn {
+    flex: 1;
+    padding: 11px 6px;
+    border-radius: 10px;
+    border: none;
+    font-weight: 700;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+
+  .share-btn:active { transform: scale(0.96); opacity: 0.85; }
+
+  .share-btn.fb {
+    background: #1877f2;
+    color: white;
+  }
+
+  .share-btn.wa {
+    background: #25D366;
+    color: white;
+  }
+
+  .share-btn.ig {
+    background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+    color: white;
+  }
+
+  .share-btn.copy {
+    background: rgba(255,255,255,0.08);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.12);
+    flex: 0.7;
+  }
+
+  /* Referral modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 200;
+    align-items: flex-end;
+    justify-content: center;
+  }
+
+  .modal-overlay.open {
+    display: flex;
+  }
+
+  .modal {
+    background: white;
+    border-radius: 20px 20px 0 0;
+    padding: 24px 20px 40px;
+    width: 100%;
+    max-width: 430px;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .modal-handle {
+    width: 40px;
+    height: 4px;
+    background: var(--gray);
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+
+  .modal-title {
+    font-family: 'Arial Black', 'Impact', sans-serif;
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--navy);
+    margin-bottom: 4px;
+  }
+
+  .modal-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  .modal-subtitle strong {
+    color: var(--green);
+  }
+
+  .form-field {
+    margin-bottom: 12px;
+  }
+
+  .form-field input, .form-field textarea {
+    width: 100%;
+    border: 1.5px solid var(--gray);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+    color: var(--navy);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-field input:focus, .form-field textarea:focus {
+    border-color: var(--green);
+  }
+
+  .form-field textarea {
+    height: 80px;
+    resize: none;
+  }
+
+  .modal-submit {
+    width: 100%;
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 15px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 8px;
+    box-shadow: 0 4px 16px rgba(0,200,81,0.3);
+    transition: background 0.2s;
+  }
+
+  .modal-submit:hover { background: var(--green-dark); }
+
+  .modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: var(--gray);
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Section divider */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 16px 0 14px;
+  }
+
+  .divider-line {
+    flex: 1;
+    height: 1px;
+    background: var(--gray);
+  }
+
+  .divider-text {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-bg-pattern"></div>
+  <div class="hero-lines"></div>
+
+  <div class="top-bar">
+    <div class="logo-mark">
+      <div class="logo-dot"></div>
+      <span class="logo-text">CarsInStock</span>
+    </div>
+    <div class="live-badge">● Live Inventory</div>
+  </div>
+
+  <div class="profile-section">
+    <div class="avatar-wrap">
+      <div class="avatar">PF</div>
+      <div class="online-dot"></div>
+    </div>
+    <div class="profile-info">
+      <div class="profile-name">Peter Franco</div>
+      <div class="profile-dealership">📍 Pine Belt Used Cars · Toms River, NJ</div>
+      <div class="profile-tagline">I hand-pick every car I list. Reach out — no pressure, no runaround.</div>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-item">
+      <span class="stat-num">6</span>
+      <span class="stat-label">Cars Live</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">3</span>
+      <span class="stat-label">Days Avg</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">$14,995</span>
+      <span class="stat-label">Starting At</span>
+    </div>
+  </div>
+
+  <div class="cta-wrap">
+    <button class="cta-call">📞 Call Peter Directly</button>
+    <button class="cta-referral" onclick="document.querySelector('.modal-overlay').classList.add('open')">
+      🤝 $100 Referral
+    </button>
+  </div>
+
+  <div class="wave"></div>
+</div>
+
+<!-- INVENTORY -->
+<div class="inventory-section">
+
+  <div class="inv-header">
+    <div class="inv-title">This Week</div>
+    <div class="sort-toggle">
+      <button class="sort-btn active">$ Low</button>
+      <button class="sort-btn">$ High</button>
+    </div>
+  </div>
+
+  <!-- FEATURED TEAM PICK -->
+  <div class="featured-card">
+    <div class="featured-banner">
+      <span class="star-icon">⭐</span>
+      <span class="featured-label">Peter's Top Pick This Week</span>
+    </div>
+    <div class="featured-img">
+      🚙
+      <div class="days-left-featured">🔥 2 Days Left</div>
+      <div class="pick-badge">PF</div>
+    </div>
+    <div class="featured-body">
+      <div class="featured-car-name">2023 Chevrolet Tahoe LT</div>
+      <div class="featured-meta">28,000 mi &nbsp;·&nbsp; One Owner &nbsp;·&nbsp; Clean Carfax</div>
+      <div class="featured-price">$49,995</div>
+      <div class="pick-blurb">
+        <div class="blurb-avatar">PF</div>
+        <div class="blurb-text">"This Tahoe is spotless. One owner, priced $3k under market. Don't sleep on it — it will not last."</div>
+      </div>
+      <button class="interested-btn-featured">I'm Interested →</button>
+    </div>
+  </div>
+
+  <!-- REMAINING INVENTORY -->
+  <div class="section-divider">
+    <div class="divider-line"></div>
+    <div class="divider-text">More from Peter</div>
+    <div class="divider-line"></div>
+  </div>
+
+  <div class="cars-grid">
+
+    <div class="car-card">
+      <div class="car-img car-img-1">
+        🚗
+        <div class="days-badge urgent">2 Days Left</div>
+      </div>
+      <div class="car-body">
+        <div class="car-name">2021 Honda Accord Sport</div>
+        <div class="car-meta-small">34,000 mi</div>
+        <div class="car-price">$24,500</div>
+      </div>
+      <button class="interested-btn-small">I'm Interested →</button>
+    </div>
+
+    <div class="car-card">
+      <div class="car-img car-img-2">
+        🚕
+        <div class="days-badge good">6 Days Left</div>
+      </div>
+      <div class="car-body">
+        <div class="car-name">2022 Toyota Camry SE</div>
+        <div class="car-meta-small">19,000 mi</div>
+        <div class="car-price">$26,900</div>
+      </div>
+      <button class="interested-btn-small">I'm Interested →</button>
+    </div>
+
+    <div class="car-card">
+      <div class="car-img car-img-3">
+        🚙
+        <div class="days-badge normal">4 Days Left</div>
+      </div>
+      <div class="car-body">
+        <div class="car-name">2020 Ford F-150 XLT</div>
+        <div class="car-meta-small">52,000 mi</div>
+        <div class="car-price">$31,500</div>
+      </div>
+      <button class="interested-btn-small">I'm Interested →</button>
+    </div>
+
+    <div class="car-card">
+      <div class="car-img car-img-4">
+        🚗
+        <div class="days-badge good">7 Days Left</div>
+      </div>
+      <div class="car-body">
+        <div class="car-name">2019 BMW 3 Series</div>
+        <div class="car-meta-small">41,000 mi</div>
+        <div class="car-price">$28,995</div>
+      </div>
+      <button class="interested-btn-small">I'm Interested →</button>
+    </div>
+
+    <div class="car-card">
+      <div class="car-img car-img-5">
+        🚐
+        <div class="days-badge normal">5 Days Left</div>
+      </div>
+      <div class="car-body">
+        <div class="car-name">2018 Jeep Grand Cherokee</div>
+        <div class="car-meta-small">67,000 mi</div>
+        <div class="car-price">$21,995</div>
+      </div>
+      <button class="interested-btn-small">I'm Interested →</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- FLOATING SHARE BAR -->
+<div class="share-bar">
+  <div class="share-label">Share Peter's Page</div>
+  <div class="share-buttons">
+    <button class="share-btn fb">📘 Facebook</button>
+    <button class="share-btn wa">💬 WhatsApp</button>
+    <button class="share-btn ig">📸 IG</button>
+    <button class="share-btn copy">🔗 Copy</button>
+  </div>
+</div>
+
+<!-- REFERRAL MODAL -->
+<div class="modal-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" style="position:relative;">
+    <button class="modal-close" onclick="document.querySelector('.modal-overlay').classList.remove('open')">✕</button>
+    <div class="modal-handle"></div>
+    <div class="modal-title">Send a Referral</div>
+    <div class="modal-subtitle">Know someone looking for a car? Send them Peter's way. <strong>If they buy, you get $100.</strong></div>
+    <div class="form-field"><input type="text" placeholder="Your Name *"></div>
+    <div class="form-field"><input type="tel" placeholder="Your Phone Number *"></div>
+    <div class="form-field"><input type="text" placeholder="Friend's Name *"></div>
+    <div class="form-field"><input type="tel" placeholder="Friend's Phone Number *"></div>
+    <div class="form-field"><textarea placeholder="Anything Peter should know about what they're looking for? (optional)"></textarea></div>
+    <button class="modal-submit">Send My Referral 🤝</button>
+  </div>
+</div>
+
+<script>
+  // Sort toggle
+  document.querySelectorAll('.sort-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>
