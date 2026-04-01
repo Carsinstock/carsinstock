@@ -283,12 +283,22 @@ function submitReferral() {
         </div>
         {% endif %}
 
+        {% if team_members and sp.subscription_tier == 'dealership' and not is_owner %}
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center;">
+            <button onclick="filterRep('all')" id="filter-all" style="padding:7px 14px;border-radius:50px;font-size:12px;font-weight:700;border:1.5px solid #1E293B;background:#1E293B;color:white;cursor:pointer;">All Reps</button>
+            {% for m in team_members %}
+            {% if m.slug %}
+            <button onclick="filterRep('{{ m.id }}')" id="filter-{{ m.id }}" style="padding:7px 14px;border-radius:50px;font-size:12px;font-weight:700;border:1.5px solid #E2E8F0;background:white;color:#475569;cursor:pointer;">{{ m.name.split()[0] }}</button>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
         <div class="vehicle-grid" id="vehicleGrid">
             {% set ns = namespace(count=0) %}
             {% for v in vehicles %}
             {% if not (sp.subscription_tier == 'dealership' and not is_owner and ns.count >= 10) %}
             {% set ns.count = ns.count + 1 %}
-            <div class="vehicle-card" data-price="{{ v.price }}" {% if is_owner and v.is_expired %}style="opacity:0.6;border:2px solid #e53e3e;"{% endif %}>
+            <div class="vehicle-card" data-price="{{ v.price }}" data-rep-id="{{ v.pick_user_id or '' }}" {% if is_owner and v.is_expired %}style="opacity:0.6;border:2px solid #e53e3e;"{% endif %}>
                 {% if is_owner and v.is_expired %}
                 <div style="background:#EF4444;color:white;text-align:center;padding:6px;font-weight:bold;font-size:13px;">EXPIRED</div>
                 {% elif is_owner and v.days_remaining <= 1 %}
@@ -672,7 +682,23 @@ function sortGrid(order) {
     if (order === 'default') return;
     const grid = document.getElementById('vehicleGrid');
     if (!grid) return;
-    const cards = Array.from(grid.querySelectorAll('.vehicle-card'));
+    // Rep filter
+window.filterRep = function(repId) {
+    var grid = document.getElementById('vehicleGrid');
+    if (!grid) return;
+    var cards = Array.from(grid.querySelectorAll('.vehicle-card'));
+    cards.forEach(function(c) {
+        c.style.display = (repId === 'all' || c.dataset.repId === repId) ? '' : 'none';
+    });
+    // Update button states
+    document.querySelectorAll('[id^="filter-"]').forEach(function(btn) {
+        var isActive = btn.id === 'filter-' + repId;
+        btn.style.background = isActive ? '#1E293B' : 'white';
+        btn.style.color = isActive ? 'white' : '#475569';
+        btn.style.borderColor = isActive ? '#1E293B' : '#E2E8F0';
+    });
+};
+const cards = Array.from(grid.querySelectorAll('.vehicle-card'));
     cards.sort(function(a, b) {
         const priceA = parseFloat(a.dataset.price) || 0;
         const priceB = parseFloat(b.dataset.price) || 0;
