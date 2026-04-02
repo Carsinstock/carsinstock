@@ -674,16 +674,14 @@ def public_profile(slug):
     _min_price = min((v.price for v in vehicles if v.price), default=None)
 
     if sp.subscription_tier == 'dealership':
-        # For dealership: use first team pick's photo+name if available, else cover/profile
+        # For dealership: use featured pick vehicle photo but always show dealership name in title
         _og_image = _og_img(sp.cover_photo or sp.profile_photo or _fallback_img)
         _featured_pick = next((v for v in vehicles if v.is_team_pick and v.pick_user_id and team_lookup.get(v.pick_user_id) and team_lookup[v.pick_user_id].get('photo')), None)
-        if _featured_pick:
-            _og_image = _og_img(_featured_pick.image_url or _og_image)
-            _og_title = f"{team_lookup[_featured_pick.pick_user_id]['name']} picked a {_featured_pick.year} {_featured_pick.make} {_featured_pick.model} — {sp.display_name}"
-        else:
-            _og_title = f"{sp.display_name} — {_live_count} Fresh Car{'s' if _live_count != 1 else ''} This Week"
+        if _featured_pick and _featured_pick.image_url:
+            _og_image = _og_img(_featured_pick.image_url)
+        _og_title = f"{sp.display_name} — This Week's Inventory"
         if _min_price and _live_count:
-            _og_description = f"{_live_count} vehicle{'s' if _live_count != 1 else ''} available. Starting at ${_min_price:,.0f}. Updated weekly — carsinstock.com/{sp.profile_url_slug}"
+            _og_description = f"{_live_count} car{'s' if _live_count != 1 else ''} available · From ${_min_price:,.0f} · Updated weekly · carsinstock.com/{sp.profile_url_slug}"
         else:
             _og_description = f"Browse fresh inventory from {sp.display_name} at CarsInStock — carsinstock.com/{sp.profile_url_slug}"
     else:
