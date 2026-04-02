@@ -574,7 +574,7 @@ def rep_storefront(member):
             return url.replace('/upload/', '/upload/w_1200,h_630,c_fill,g_auto,f_jpg,q_80/')
         return url
     og_image = _cld(featured.image_url if featured and featured.image_url else (member['profile_photo'] or _fallback))
-    og_title = f"{member['name']} — This Week's Inventory"
+    og_title = f"{member['name']} — This Week's Top Picks"
     if live_count and min_price:
         og_description = f"{live_count} car{'s' if live_count != 1 else ''} available · From ${min_price:,.0f} · Updated daily · Tap to browse"
     else:
@@ -679,7 +679,7 @@ def public_profile(slug):
         _featured_pick = next((v for v in vehicles if v.is_team_pick and v.pick_user_id and team_lookup.get(v.pick_user_id) and team_lookup[v.pick_user_id].get('photo')), None)
         if _featured_pick and _featured_pick.image_url:
             _og_image = _og_img(_featured_pick.image_url)
-        _og_title = f"{sp.display_name} — This Week's Inventory"
+        _og_title = f"{sp.display_name} — This Week's Top Picks"
         if _min_price and _live_count:
             _og_description = f"{_live_count} car{'s' if _live_count != 1 else ''} available · From ${_min_price:,.0f} · Updated weekly · carsinstock.com/{sp.profile_url_slug}"
         else:
