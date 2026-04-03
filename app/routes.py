@@ -93,6 +93,40 @@ def vin_decode_public(vin):
     return jsonify({'error': 'Could not decode VIN'}), 404
 
 
+@main.route('/sp/vehicles/<int:vehicle_id>/set-top-pick', methods=['POST'])
+def sp_set_top_pick(vehicle_id):
+    """Rep sets one of their approved vehicles as their featured Top Pick."""
+    if 'team_member_id' not in session:
+        return redirect('/login')
+    import sqlite3 as _sq
+    from app.models.vehicle import Vehicle
+    from app.models import db
+    _conn = _sq.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    _conn.row_factory = _sq.Row
+    member = _conn.execute("SELECT * FROM dealership_team WHERE id=? AND is_active=1", (session['team_member_id'],)).fetchone()
+    _conn.close()
+    if not member:
+        return redirect('/login')
+    # Clear existing top pick for this rep
+    old_picks = Vehicle.query.filter_by(
+        pick_user_id=member['id'],
+        is_team_pick=True
+    ).all()
+    for v in old_picks:
+        v.is_team_pick = False
+    # Set new top pick
+    vehicle = Vehicle.query.get_or_404(vehicle_id)
+    if vehicle.pick_user_id == member['id'] and vehicle.approval_status in ('approved', None):
+        vehicle.is_team_pick = True
+        flash(f"{vehicle.year} {vehicle.make} {vehicle.model} is now your Top Pick!", "success")
+    try:
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        print(f"set_top_pick error: {e}")
+    return redirect('/sp-dashboard')
+
+
 @main.route('/sp/vehicles/edit/<int:vehicle_id>', methods=['POST'])
 def sp_edit_vehicle(vehicle_id):
     """Team member edits their own approved vehicle — no re-approval needed."""
