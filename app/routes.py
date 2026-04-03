@@ -93,6 +93,67 @@ def vin_decode_public(vin):
     return jsonify({'error': 'Could not decode VIN'}), 404
 
 
+@main.route('/sp/vehicles/edit/<int:vehicle_id>', methods=['POST'])
+def sp_edit_vehicle(vehicle_id):
+    """Team member edits their own approved vehicle — no re-approval needed."""
+    if 'team_member_id' not in session:
+        return redirect('/login')
+    import sqlite3 as _sq
+    from app.models.vehicle import Vehicle
+    from app.models import db
+    from datetime import datetime, timedelta
+    _conn = _sq.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    _conn.row_factory = _sq.Row
+    member = _conn.execute("SELECT * FROM dealership_team WHERE id=? AND is_active=1", (session['team_member_id'],)).fetchone()
+    _conn.close()
+    if not member:
+        return redirect('/login')
+    vehicle = Vehicle.query.get_or_404(vehicle_id)
+    if vehicle.pick_user_id != member['id']:
+        flash("You can only edit your own vehicles.", "error")
+        return redirect('/sp-dashboard')
+    # Only approved vehicles can be edited without re-approval
+    if vehicle.approval_status not in ('approved', None):
+        flash("Only approved vehicles can be edited.", "error")
+        return redirect('/sp-dashboard')
+    # Update price
+    price = request.form.get('price', '').strip().replace(',', '').replace('$', '')
+    if price:
+        try:
+            vehicle.price = float(price)
+        except ValueError:
+            pass
+    # Update mileage
+    mileage = request.form.get('mileage', '').strip().replace(',', '')
+    if mileage and mileage.isdigit():
+        vehicle.mileage = int(mileage)
+    # Update photo if provided
+    photo = request.files.get('photo')
+    if photo and photo.filename:
+        try:
+            from app.utils.cloudinary_upload import upload_vehicle_image
+            from app.models.salesperson import Salesperson
+            dealership_sp = Salesperson.query.filter_by(salesperson_id=member['dealership_id']).first()
+            new_url = upload_vehicle_image(photo, dealership_sp.salesperson_id if dealership_sp else 1)
+            if new_url:
+                vehicle.image_url = new_url
+        except Exception as e:
+            print(f"Photo update error: {e}")
+    # Renew dates if checked
+    if request.form.get('renew_dates'):
+        vehicle.expires_at = datetime.utcnow() + timedelta(days=7)
+        vehicle.expiration_warning_sent = False
+        vehicle.status = 'available'
+    try:
+        db.session.commit()
+        flash("Vehicle updated!", "success")
+    except Exception as e:
+        db.session.rollback()
+        flash("Something went wrong.", "error")
+        print(f"sp_edit_vehicle error: {e}")
+    return redirect('/sp-dashboard')
+
+
 @main.route('/sp/vehicles/delete/<int:vehicle_id>', methods=['POST'])
 def sp_delete_vehicle(vehicle_id):
     """Team member deletes their own vehicle — no approval needed."""

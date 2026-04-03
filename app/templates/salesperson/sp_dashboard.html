@@ -202,9 +202,14 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
                 {% if v.days_remaining %}<div class="vdays" style="color:{{ '#DC2626' if v.days_remaining <= 2 else '#64748B' }};margin-top:2px;">{{ v.days_remaining }} days left</div>{% endif %}
                 {% endif %}
             </div>
-            <form method="POST" action="/sp/vehicles/delete/{{ v.id }}" onsubmit="return confirm('Remove this vehicle?')" style="margin-left:auto;flex-shrink:0;">
-                <button type="submit" style="background:none;border:none;cursor:pointer;color:#94A3B8;font-size:18px;padding:4px;" title="Delete">🗑</button>
-            </form>
+            <div style="margin-left:auto;flex-shrink:0;display:flex;gap:4px;align-items:center;">
+                {% if v.approval_status == 'approved' or v.approval_status == None %}
+                <button onclick="openEditModal({{ v.id }}, '{{ v.year }} {{ v.make }} {{ v.model }}', {{ v.price or 0 }}, {{ v.mileage or 0 }}, '{{ v.image_url or '' }}')" style="background:none;border:none;cursor:pointer;color:#00C851;font-size:18px;padding:4px;" title="Edit">✏️</button>
+                {% endif %}
+                <form method="POST" action="/sp/vehicles/delete/{{ v.id }}" onsubmit="return confirm('Remove this vehicle?')" style="display:inline;">
+                    <button type="submit" style="background:none;border:none;cursor:pointer;color:#94A3B8;font-size:18px;padding:4px;" title="Delete">🗑</button>
+                </form>
+            </div>
         </div>
         {% endfor %}
         </div>
@@ -373,6 +378,20 @@ async function generateSpBlurb() {
     }
     document.getElementById('spBlurbSpinner').style.display = 'none';
 }
+function openEditModal(id, name, price, mileage, imgUrl) {
+    document.getElementById('editVehicleTitle').textContent = name;
+    document.getElementById('editVehicleForm').action = '/sp/vehicles/edit/' + id;
+    document.getElementById('editPrice').value = price;
+    document.getElementById('editMileage').value = mileage || '';
+    document.getElementById('renewDates').checked = false;
+    var photo = document.getElementById('editCurrentPhoto');
+    if (imgUrl) { photo.src = imgUrl; photo.style.display = 'block'; }
+    else { photo.style.display = 'none'; }
+    document.getElementById('editVehicleModal').style.display = 'flex';
+}
+function closeEditModal() {
+    document.getElementById('editVehicleModal').style.display = 'none';
+}
 function sortVehicles(dir) {
     var list = document.getElementById('vehicleList');
     if (!list) return;
@@ -407,4 +426,43 @@ function copyPost(id) {
     });
 }
 </script>
+
+<!-- Edit Vehicle Modal -->
+<div id="editVehicleModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;overflow-y:auto;">
+    <div style="background:#fff;border-radius:16px;padding:24px;max-width:480px;width:92%;margin:20px auto;position:relative;">
+        <button onclick="closeEditModal()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:24px;color:#94A3B8;cursor:pointer;">×</button>
+        <h3 style="color:#1E293B;font-size:17px;font-weight:800;margin:0 0 4px;">✏️ Edit Vehicle</h3>
+        <p id="editVehicleTitle" style="color:#64748B;font-size:13px;margin:0 0 18px;"></p>
+        <form method="POST" id="editVehicleForm" enctype="multipart/form-data">
+            <input type="hidden" name="_method" value="POST">
+            <!-- New Photo -->
+            <div style="margin-bottom:14px;">
+                <label style="font-size:12px;font-weight:700;color:#1E293B;display:block;margin-bottom:4px;">New Photo <span style="color:#94A3B8;font-weight:400;">(leave blank to keep current)</span></label>
+                <img id="editCurrentPhoto" src="" style="width:80px;height:60px;object-fit:cover;border-radius:6px;margin-bottom:8px;display:none;">
+                <input type="file" name="photo" accept="image/*" style="font-size:13px;width:100%;">
+            </div>
+            <!-- Price -->
+            <div style="margin-bottom:14px;">
+                <label style="font-size:12px;font-weight:700;color:#1E293B;display:block;margin-bottom:4px;">Price *</label>
+                <input type="text" id="editPrice" name="price" required style="width:100%;padding:10px 12px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:14px;font-family:inherit;">
+            </div>
+            <!-- Mileage -->
+            <div style="margin-bottom:14px;">
+                <label style="font-size:12px;font-weight:700;color:#1E293B;display:block;margin-bottom:4px;">Mileage</label>
+                <input type="text" id="editMileage" name="mileage" style="width:100%;padding:10px 12px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:14px;font-family:inherit;">
+            </div>
+            <!-- Renew dates -->
+            <div style="margin-bottom:20px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                    <div style="font-size:13px;font-weight:700;color:#1E293B;">Restart 7-day clock</div>
+                    <div style="font-size:12px;color:#64748B;">Reset expiry to 7 days from now</div>
+                </div>
+                <label style="display:flex;align-items:center;cursor:pointer;">
+                    <input type="checkbox" name="renew_dates" id="renewDates" style="width:18px;height:18px;accent-color:#00C851;">
+                </label>
+            </div>
+            <button type="submit" style="width:100%;background:#00C851;color:white;border:none;padding:13px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;">Save Changes →</button>
+        </form>
+    </div>
+</div>
 {% endblock %}
