@@ -69,10 +69,7 @@ def upload_vehicle_video(file, salesperson_id, vehicle_id=None):
             file,
             resource_type="video",
             folder=folder,
-            format="mp4",
-            transformation=[
-                {"quality": "auto", "fetch_format": "mp4"}
-            ]
+            eager_async=True
         )
         print(f"Video uploaded: {result['secure_url']}")
         return result['secure_url'], result.get('width', 0), result.get('height', 0)
