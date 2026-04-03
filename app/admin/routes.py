@@ -202,6 +202,18 @@ def register_admin_routes(bp):
         if vehicle.pending_video_url:
             vehicle.video_url = vehicle.pending_video_url
             vehicle.pending_video_url = None
+            # Generate thumbnail from video for Facebook OG image
+            # Cloudinary: swap video/upload -> image/upload, add so_0 (first frame), change extension to jpg
+            try:
+                vid_url = vehicle.video_url
+                thumb_url = vid_url.replace('/video/upload/', '/video/upload/so_0,w_1200,h_630,c_fill,f_jpg,q_80/')
+                # Change extension to jpg
+                import re as _re
+                thumb_url = _re.sub(r'\.(mov|mp4|webm|avi)$', '.jpg', thumb_url)
+                vehicle.image_url = thumb_url
+                print(f"Video thumbnail set: {thumb_url}")
+            except Exception as e:
+                print(f"Thumbnail generation error: {e}")
             db.session.commit()
         return redirect(url_for('admin.vehicles'))
 
