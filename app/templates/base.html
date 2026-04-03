@@ -98,7 +98,8 @@
                     <span class="nav-user">{{ session.get('email', '') }}</span>
                     <a href="/logout" class="nav-logout">Logout</a>
                 {% elif session.get('team_member_id') %}
-                    {# Team member logged in — show nothing #}
+                    <a href="/sp-dashboard">My Dashboard</a>
+                    <a href="/logout" style="color:#94A3B8;">Logout</a>
                 {% else %}
                     
                     {% if not hide_nav_auth %}
