@@ -191,6 +191,36 @@ def register_admin_routes(bp):
         _conn.close()
         return redirect(url_for("admin.referrals"))
 
+
+    @bp.route("/vehicles/<int:vehicle_id>/upload-video", methods=["POST"])
+    @admin_required
+    def upload_vehicle_video(vehicle_id):
+        from app.models.vehicle import Vehicle
+        from app.models import db
+        from app.utils.cloudinary_upload import upload_vehicle_video
+        vehicle = Vehicle.query.get_or_404(vehicle_id)
+        video = request.files.get('video')
+        if not video or not video.filename:
+            return jsonify({"error": "No video file provided"}), 400
+        video_url, width, height = upload_vehicle_video(video, vehicle.salesperson_id, vehicle_id)
+        if not video_url:
+            return jsonify({"error": "Upload failed — check Cloudinary"}), 500
+        vehicle.video_url = video_url
+        # Warn if vertical (portrait)
+        is_vertical = height > width and width > 0
+        db.session.commit()
+        return jsonify({"success": True, "video_url": video_url, "is_vertical": is_vertical})
+
+    @bp.route("/vehicles/<int:vehicle_id>/remove-video", methods=["POST"])
+    @admin_required
+    def remove_vehicle_video(vehicle_id):
+        from app.models.vehicle import Vehicle
+        from app.models import db
+        vehicle = Vehicle.query.get_or_404(vehicle_id)
+        vehicle.video_url = None
+        db.session.commit()
+        return jsonify({"success": True})
+
     @bp.route("/vehicles")
     @admin_required
     def vehicles():

@@ -64,6 +64,7 @@
             <span style="color:#00C851;font-weight:700;">Active</span><br>
             <small style="color:#64748B;">{{ v.pick_salesperson.display_name if v.pick_salesperson else '' }}</small><br>
             <button onclick="openPickModal({{ v.id }}, true, {{ v.pick_user_id or 0 }}, '{{ (v.pick_blurb or '')|replace("'", "\\'") }}')" style="margin-top:4px;padding:3px 10px;font-size:11px;background:#1E293B;color:white;border:none;border-radius:4px;cursor:pointer;">Edit</button>
+            <button onclick="openVideoModal({{ v.id }}, '{{ v.video_url or '' }}')" style="margin-top:4px;padding:3px 10px;font-size:11px;background:#7C3AED;color:white;border:none;border-radius:4px;cursor:pointer;">{% if v.video_url %}📹 Edit Video{% else %}📹 Add Video{% endif %}</button>
             <form method="POST" action="/admin/vehicles/{{ v.id }}/team-pick/remove" style="display:inline;">
                 <button type="submit" style="margin-top:4px;padding:3px 10px;font-size:11px;background:#EF4444;color:white;border:none;border-radius:4px;cursor:pointer;">Remove</button>
             </form>
@@ -150,5 +151,76 @@ function closePickModal() {
 document.getElementById('tpBlurb').addEventListener('input', function() {
     document.getElementById('tpCharCount').textContent = this.value.length + '/150';
 });
+
+function openVideoModal(vehicleId, currentUrl) {
+    document.getElementById('videoVehicleId').value = vehicleId;
+    var preview = document.getElementById('currentVideoPreview');
+    if (currentUrl) {
+        preview.style.display = 'block';
+        preview.src = currentUrl;
+    } else {
+        preview.style.display = 'none';
+        preview.src = '';
+    }
+    document.getElementById('videoModal').style.display = 'flex';
+}
+function closeVideoModal() {
+    document.getElementById('videoModal').style.display = 'none';
+}
+</script>
+
+<!-- Video Upload Modal -->
+<div id="videoModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:#fff;border-radius:16px;padding:28px;max-width:480px;width:92%;position:relative;">
+        <button onclick="closeVideoModal()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:24px;color:#94A3B8;cursor:pointer;">×</button>
+        <h3 style="color:#1E293B;font-size:17px;font-weight:800;margin:0 0 4px;">📹 Team Pick Walk-Around Video</h3>
+        <p style="color:#64748B;font-size:13px;margin:0 0 16px;">MP4 only · Max 60 seconds · Record in landscape mode for best results</p>
+        <video id="currentVideoPreview" controls style="display:none;width:100%;border-radius:8px;margin-bottom:14px;max-height:200px;" src=""></video>
+        <form method="POST" id="videoUploadForm" enctype="multipart/form-data">
+            <input type="hidden" id="videoVehicleId" name="vehicle_id">
+            <div style="margin-bottom:16px;">
+                <label style="font-size:12px;font-weight:700;color:#1E293B;display:block;margin-bottom:6px;">Upload Video (MP4)</label>
+                <input type="file" name="video" accept="video/mp4,video/*" required style="font-size:13px;width:100%;">
+                <div style="font-size:11px;color:#94A3B8;margin-top:4px;">iPhone videos work great. Record horizontal for best display.</div>
+            </div>
+            <button type="submit" style="width:100%;background:#7C3AED;color:white;border:none;padding:13px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;">Upload Video →</button>
+        </form>
+        <form id="removeVideoForm" style="margin-top:8px;">
+            <input type="hidden" name="vehicle_id" id="removeVideoVehicleId">
+            <button type="button" onclick="removeVideo()" style="width:100%;background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5;padding:10px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">Remove Video</button>
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById('videoUploadForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    var id = document.getElementById('videoVehicleId').value;
+    var formData = new FormData(this);
+    var btn = this.querySelector('button[type="submit"]');
+    btn.textContent = 'Uploading...';
+    btn.disabled = true;
+    try {
+        var r = await fetch('/admin/vehicles/' + id + '/upload-video', {method:'POST', body: formData});
+        var d = await r.json();
+        if (d.success) {
+            btn.textContent = '✅ Uploaded!';
+            setTimeout(function(){ location.reload(); }, 1000);
+        } else {
+            btn.textContent = 'Error: ' + (d.error || 'Try again');
+            btn.disabled = false;
+        }
+    } catch(e) {
+        btn.textContent = 'Connection error';
+        btn.disabled = false;
+    }
+});
+async function removeVideo() {
+    var id = document.getElementById('videoVehicleId').value;
+    if (!confirm('Remove this video?')) return;
+    var r = await fetch('/admin/vehicles/' + id + '/remove-video', {method:'POST'});
+    var d = await r.json();
+    if (d.success) location.reload();
+}
 </script>
 {% endblock %}

@@ -228,7 +228,15 @@ textarea.f-input{height:80px;resize:none}
   <div class="featured-card" data-price="{{ featured.price }}">
     <div class="feat-banner"><span>⭐</span><span class="feat-label">{{ member.name.split()[0] }}'s Top Pick This Week</span></div>
     <div class="feat-img-wrap">
-      {% if featured.image_url %}<img src="{{ featured.image_url }}" class="feat-img" alt="">
+      {% if featured.video_url %}
+      <video class="feat-img" autoplay muted playsinline loop poster="{{ featured.image_url or '' }}" id="featVideo"
+        style="width:100%;height:200px;object-fit:cover;display:block;cursor:pointer;"
+        onclick="this.muted=!this.muted;document.getElementById('muteIcon').textContent=this.muted?'🔇':'🔊'">
+        <source src="{{ featured.video_url }}" type="video/mp4">
+      </video>
+      <div id="muteIcon" style="position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.5);color:white;border-radius:20px;padding:4px 10px;font-size:12px;cursor:pointer;z-index:3;"
+        onclick="var v=document.getElementById('featVideo');v.muted=!v.muted;this.textContent=v.muted?'🔇':'🔊'">🔇</div>
+      {% elif featured.image_url %}<img src="{{ featured.image_url }}" class="feat-img" alt="">
       {% else %}<div class="feat-img-ph">🚙</div>{% endif %}
       {% if featured.days_remaining %}
       <div class="days-badge-feat {% if featured.days_remaining <= 2 %}red{% elif featured.days_remaining <= 4 %}amber{% else %}green{% endif %}">🔥 {{ featured.days_remaining }} Day{{ 's' if featured.days_remaining != 1 else '' }} Left</div>

@@ -58,3 +58,24 @@ def upload_cover_photo(file, salesperson_id):
     except Exception as e:
         print(f"Cloudinary error: {e}")
         return None
+
+def upload_vehicle_video(file, salesperson_id, vehicle_id=None):
+    """Upload a walk-around video to Cloudinary and return the URL."""
+    try:
+        folder = f"carsinstock/{salesperson_id}/videos"
+        if vehicle_id:
+            folder = f"carsinstock/{salesperson_id}/{vehicle_id}/videos"
+        result = cloudinary.uploader.upload(
+            file,
+            resource_type="video",
+            folder=folder,
+            format="mp4",
+            transformation=[
+                {"quality": "auto", "fetch_format": "mp4"}
+            ]
+        )
+        print(f"Video uploaded: {result['secure_url']}")
+        return result['secure_url'], result.get('width', 0), result.get('height', 0)
+    except Exception as e:
+        print(f"Cloudinary video error: {e}")
+        return None, 0, 0

@@ -49,6 +49,7 @@ class Vehicle(db.Model):
     is_team_pick = db.Column(db.Boolean, default=False)
     pick_user_id = db.Column(db.Integer, db.ForeignKey('salespeople.salesperson_id'), nullable=True)
     pick_blurb = db.Column(db.String(150))
+    video_url = db.Column(db.String(500))
     pick_salesperson = db.relationship('Salesperson', foreign_keys='Vehicle.pick_user_id', primaryjoin='Vehicle.pick_user_id == Salesperson.salesperson_id', uselist=False)
 
     # Relationship
