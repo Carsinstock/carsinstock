@@ -173,6 +173,18 @@ def sp_edit_vehicle(vehicle_id):
                 vehicle.image_url = new_url
         except Exception as e:
             print(f"Photo update error: {e}")
+    # Handle video upload — goes to pending_video_url for admin approval
+    video = request.files.get('video')
+    if video and video.filename:
+        try:
+            from app.utils.cloudinary_upload import upload_vehicle_video
+            from app.models.salesperson import Salesperson
+            dealership_sp = Salesperson.query.filter_by(salesperson_id=member['dealership_id']).first()
+            vid_url, w, h = upload_vehicle_video(video, dealership_sp.salesperson_id if dealership_sp else 1, vehicle_id)
+            if vid_url:
+                vehicle.pending_video_url = vid_url
+        except Exception as e:
+            print(f"Video upload error: {e}")
     # Renew dates if checked
     if request.form.get('renew_dates'):
         vehicle.expires_at = datetime.utcnow() + timedelta(days=7)
@@ -180,7 +192,10 @@ def sp_edit_vehicle(vehicle_id):
         vehicle.status = 'available'
     try:
         db.session.commit()
-        flash("Vehicle updated!", "success")
+        if video and video.filename:
+            flash("Changes saved. Video submitted for review — goes live once approved.", "success")
+        else:
+            flash("Vehicle updated!", "success")
     except Exception as e:
         db.session.rollback()
         flash("Something went wrong.", "error")

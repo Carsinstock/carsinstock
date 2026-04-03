@@ -64,7 +64,8 @@
             <span style="color:#00C851;font-weight:700;">Active</span><br>
             <small style="color:#64748B;">{{ v.pick_salesperson.display_name if v.pick_salesperson else '' }}</small><br>
             <button onclick="openPickModal({{ v.id }}, true, {{ v.pick_user_id or 0 }}, '{{ (v.pick_blurb or '')|replace("'", "\\'") }}')" style="margin-top:4px;padding:3px 10px;font-size:11px;background:#1E293B;color:white;border:none;border-radius:4px;cursor:pointer;">Edit</button>
-            <button onclick="openVideoModal({{ v.id }}, '{{ v.video_url or '' }}')" style="margin-top:4px;padding:3px 10px;font-size:11px;background:#7C3AED;color:white;border:none;border-radius:4px;cursor:pointer;">{% if v.video_url %}📹 Edit Video{% else %}📹 Add Video{% endif %}</button>
+            <button onclick="openVideoModal({{ v.id }}, '{{ v.video_url or '' }}', '{{ v.pending_video_url or '' }}')" style="margin-top:4px;padding:3px 10px;font-size:11px;background:#7C3AED;color:white;border:none;border-radius:4px;cursor:pointer;">{% if v.video_url %}📹 Edit Video{% else %}📹 Add Video{% endif %}</button>
+            {% if v.pending_video_url %}<div style="font-size:10px;color:#F59E0B;font-weight:700;margin-top:2px;">⏳ Video pending</div>{% endif %}
             <form method="POST" action="/admin/vehicles/{{ v.id }}/team-pick/remove" style="display:inline;">
                 <button type="submit" style="margin-top:4px;padding:3px 10px;font-size:11px;background:#EF4444;color:white;border:none;border-radius:4px;cursor:pointer;">Remove</button>
             </form>
@@ -152,16 +153,18 @@ document.getElementById('tpBlurb').addEventListener('input', function() {
     document.getElementById('tpCharCount').textContent = this.value.length + '/150';
 });
 
-function openVideoModal(vehicleId, currentUrl) {
+function openVideoModal(vehicleId, currentUrl, pendingUrl) {
     document.getElementById('videoVehicleId').value = vehicleId;
     var preview = document.getElementById('currentVideoPreview');
-    if (currentUrl) {
-        preview.style.display = 'block';
-        preview.src = currentUrl;
-    } else {
-        preview.style.display = 'none';
-        preview.src = '';
-    }
+    var pendingDiv = document.getElementById('pendingVideoSection');
+    var pendingVid = document.getElementById('pendingVideoPreview');
+    if (currentUrl) { preview.style.display = 'block'; preview.src = currentUrl; }
+    else { preview.style.display = 'none'; preview.src = ''; }
+    if (pendingUrl) {
+        pendingDiv.style.display = 'block';
+        pendingVid.src = pendingUrl;
+        document.getElementById('approveVideoVehicleId').value = vehicleId;
+    } else { pendingDiv.style.display = 'none'; }
     document.getElementById('videoModal').style.display = 'flex';
 }
 function closeVideoModal() {
@@ -176,6 +179,20 @@ function closeVideoModal() {
         <h3 style="color:#1E293B;font-size:17px;font-weight:800;margin:0 0 4px;">📹 Team Pick Walk-Around Video</h3>
         <p style="color:#64748B;font-size:13px;margin:0 0 16px;">MP4 only · Max 60 seconds · Record in landscape mode for best results</p>
         <video id="currentVideoPreview" controls style="display:none;width:100%;border-radius:8px;margin-bottom:14px;max-height:200px;" src=""></video>
+        <div id="pendingVideoSection" style="display:none;background:#FEF9C3;border:1px solid #FDE047;border-radius:8px;padding:12px;margin-bottom:14px;">
+            <div style="font-size:13px;font-weight:700;color:#854D0E;margin-bottom:8px;">⏳ Pending Video from Rep — Review & Approve</div>
+            <video id="pendingVideoPreview" controls style="width:100%;border-radius:6px;max-height:180px;margin-bottom:10px;" src=""></video>
+            <div style="display:flex;gap:8px;">
+                <form method="POST" style="flex:1;" action="" id="approveVideoForm">
+                    <input type="hidden" id="approveVideoVehicleId" name="vehicle_id">
+                    <button type="submit" onclick="setApproveAction()" style="width:100%;background:#00C851;color:white;border:none;padding:8px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;">✅ Approve & Go Live</button>
+                </form>
+                <form method="POST" style="flex:1;" id="rejectVideoForm">
+                    <input type="hidden" name="vehicle_id" id="rejectVideoVehicleId">
+                    <button type="submit" onclick="setRejectAction()" style="width:100%;background:#EF4444;color:white;border:none;padding:8px;border-radius:6px;font-size:13px;font-weight:700;cursor:pointer;">❌ Reject</button>
+                </form>
+            </div>
+        </div>
         <form method="POST" id="videoUploadForm" enctype="multipart/form-data">
             <input type="hidden" id="videoVehicleId" name="vehicle_id">
             <div style="margin-bottom:16px;">
@@ -215,6 +232,15 @@ document.getElementById('videoUploadForm').addEventListener('submit', async func
         btn.disabled = false;
     }
 });
+function setApproveAction() {
+    var id = document.getElementById('approveVideoVehicleId').value;
+    document.getElementById('approveVideoForm').action = '/admin/vehicles/' + id + '/approve-video';
+}
+function setRejectAction() {
+    var id = document.getElementById('approveVideoVehicleId').value;
+    document.getElementById('rejectVideoForm').action = '/admin/vehicles/' + id + '/reject-video';
+    document.getElementById('rejectVideoVehicleId').value = id;
+}
 async function removeVideo() {
     var id = document.getElementById('videoVehicleId').value;
     if (!confirm('Remove this video?')) return;

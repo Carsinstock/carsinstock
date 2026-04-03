@@ -192,6 +192,29 @@ def register_admin_routes(bp):
         return redirect(url_for("admin.referrals"))
 
 
+
+    @bp.route("/vehicles/<int:vehicle_id>/approve-video", methods=["POST"])
+    @admin_required
+    def approve_vehicle_video(vehicle_id):
+        from app.models.vehicle import Vehicle
+        from app.models import db
+        vehicle = Vehicle.query.get_or_404(vehicle_id)
+        if vehicle.pending_video_url:
+            vehicle.video_url = vehicle.pending_video_url
+            vehicle.pending_video_url = None
+            db.session.commit()
+        return redirect(url_for('admin.vehicles'))
+
+    @bp.route("/vehicles/<int:vehicle_id>/reject-video", methods=["POST"])
+    @admin_required
+    def reject_vehicle_video(vehicle_id):
+        from app.models.vehicle import Vehicle
+        from app.models import db
+        vehicle = Vehicle.query.get_or_404(vehicle_id)
+        vehicle.pending_video_url = None
+        db.session.commit()
+        return redirect(url_for('admin.vehicles'))
+
     @bp.route("/vehicles/<int:vehicle_id>/upload-video", methods=["POST"])
     @admin_required
     def upload_vehicle_video(vehicle_id):
