@@ -1493,7 +1493,7 @@ Output ONLY valid JSON with these exact keys:
     return jsonify(posts)
 
 
-@app.route('/api/subscribe_weekly', methods=['POST'])
+@main.route('/api/subscribe_weekly', methods=['POST'])
 def subscribe_weekly():
     from datetime import datetime
     data = request.get_json()
