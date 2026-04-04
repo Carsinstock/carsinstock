@@ -714,99 +714,95 @@ async function drawAdCanvas(data) {
         ctx.fillText('$' + Number(data.top_pick.price).toLocaleString(), W - 20, carImgY + carH - 18);
     }
 
-    // Days Left badge — red, bold, urgent
-    if (hasVehicle && data.top_pick.days_remaining) {
-        ctx.fillStyle = '#DC2626';
-        roundRect(ctx, 24, carImgY + 22, 220, 58, 29, true);
-        ctx.fillStyle = white;
-        ctx.font = 'bold 28px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('🔴 ' + data.top_pick.days_remaining + ' DAYS LEFT', 134, carImgY + 60);
-    }
-
-    // Car name + price — only if vehicle exists
-    if (hasVehicle) {
-        ctx.fillStyle = white;
-        ctx.font = 'bold 52px Arial';
-        ctx.textAlign = 'left';
-        ctx.fillText(data.top_pick.year + ' ' + data.top_pick.make.toUpperCase() + ' ' + data.top_pick.model.toUpperCase(), 30, carImgY + carH - 72);
-        ctx.fillStyle = green;
-        ctx.font = 'bold 80px Arial';
-        ctx.fillText('$' + Number(data.top_pick.price).toLocaleString(), 30, carImgY + carH - 8);
-    } else {
-        // No inventory placeholder text on car zone
-        ctx.fillStyle = white;
-        ctx.font = 'bold 52px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('Fresh inventory coming soon', size/2, carImgY + carH/2 - 20);
-        ctx.fillStyle = green;
-        ctx.font = '34px Arial';
-        ctx.fillText('Check out my storefront for updates', size/2, carImgY + carH/2 + 36);
-        ctx.textAlign = 'left';
-    }
-
-    // ── STATS BAR — navy, green numbers ──
+    // ── SECTION 3: Stats Bar ─────────────────────────────────────
     var statsY = carImgY + carH;
     ctx.fillStyle = navy;
-    ctx.fillRect(0, statsY, size, statsH);
+    ctx.fillRect(0, statsY, W, statsH);
     var stats = [
-        {label:'Cars Live', val: String(data.stats.live_count)},
-        {label:'Starting At', val:'$'+Math.round(data.stats.min_price/1000)+'k'},
+        {label:'Cars Live', val: String(data.stats ? data.stats.live_count : '')},
+        {label:'Starting At', val: data.stats ? '$'+Math.round(data.stats.min_price/1000)+'k' : ''},
         {label:'Days Fresh', val:'7'}
     ];
     stats.forEach(function(s, i) {
-        var sx = (size/3)*i + (size/3)/2;
+        var sx = (W/3)*i + (W/3)/2;
         ctx.fillStyle = green;
-        ctx.font = 'bold 48px Arial';
+        ctx.font = 'bold 36px Arial';
         ctx.textAlign = 'center';
         ctx.fillText(s.val, sx, statsY + 62);
-        ctx.fillStyle = 'rgba(255,255,255,0.55)';
-        ctx.font = '24px Arial';
-        ctx.fillText(s.label, sx, statsY + 100);
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.font = '20px Arial';
+        ctx.fillText(s.label, sx, statsY + 95);
         if (i < 2) {
             ctx.strokeStyle = 'rgba(255,255,255,0.12)';
             ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.moveTo((size/3)*(i+1), statsY + 18);
-            ctx.lineTo((size/3)*(i+1), statsY + statsH - 18);
+            ctx.moveTo((W/3)*(i+1), statsY + 18);
+            ctx.lineTo((W/3)*(i+1), statsY + statsH - 18);
             ctx.stroke();
         }
     });
 
-    // ── REFERRAL STRIP ──
+    // ── SECTION 4: Referral Strip ─────────────────────────────
     var refY = statsY + statsH;
     if (data.include_referral) {
-        ctx.fillStyle = '#F0FDF4';
-        ctx.fillRect(0, refY, size, refH);
-        ctx.fillStyle = '#065F46';
-        ctx.font = 'bold 28px Arial';
+        ctx.fillStyle = '#f0fdf4';
+        ctx.fillRect(0, refY, W, refH);
+        ctx.fillStyle = '#166534';
+        ctx.font = '22px Arial';
         ctx.textAlign = 'center';
-        ctx.fillText('Know someone looking? Refer them to ' + data.member.name.split(' ')[0] + ' — earn $100 if they buy!', size/2, refY + 55);
+        ctx.fillText('Know someone looking? Refer them to ' + data.member.name.split(' ')[0] + ' — if they buy, you get $100', W/2, refY + 50);
         refY += refH;
     }
 
-    // ── FOOTER — white, URL pill + watermark ──
-    var footerY = refY;
-    ctx.fillStyle = '#F8FAFC';
-    ctx.fillRect(0, footerY, size, footerH);
-
-    // Storefront URL pill
+    // ── SECTION 5: CTA ────────────────────────────────────────
+    var ctaY = refY;
+    ctx.fillStyle = white;
+    ctx.fillRect(0, ctaY, W, ctaH);
+    ctx.font = 'bold 28px Arial';
+    var urlTxt = data.storefront_url ? data.storefront_url.replace('https://', '') : '';
+    var urlW = ctx.measureText(urlTxt).width + 60;
+    var urlX = (W - urlW) / 2;
+    var urlY = ctaY + ctaH/2 - 28;
     ctx.fillStyle = navy;
-    roundRect(ctx, size/2 - 260, footerY + 18, 520, 62, 31, true);
+    roundRect(ctx, urlX, urlY, urlW, 56, 28, true);
     ctx.fillStyle = green;
-    ctx.font = 'bold 30px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText(data.storefront_url.replace('https://', ''), size/2, footerY + 59);
+    ctx.fillText(urlTxt, W/2, urlY + 36);
 
-    // Watermark — small, bottom right, subtle
-    ctx.fillStyle = 'rgba(148,163,184,0.45)';
+    // ── SECTION 6: Subscribe Strip ────────────────────────────
+    var subY = ctaY + ctaH;
+    ctx.fillStyle = navy;
+    ctx.fillRect(0, subY, W, subH);
+    ctx.fillStyle = white;
+    ctx.font = 'bold 28px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('📬 Subscribe to My Weekly Post', W/2, subY + 46);
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
     ctx.font = '20px Arial';
-    ctx.textAlign = 'right';
-    ctx.fillText('CarsInStock.com', size - 24, footerY + footerH - 16);
+    ctx.fillText('Get fresh inventory in your inbox every week', W/2, subY + 80);
+    ctx.fillStyle = white;
+    roundRect(ctx, 60, subY + 97, 750, 54, 10, true);
+    ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 2;
+    roundRect(ctx, 60, subY + 97, 750, 54, 10, false);
+    ctx.fillStyle = '#94a3b8'; ctx.font = '22px Arial'; ctx.textAlign = 'left';
+    ctx.fillText('Enter your email address...', 80, subY + 132);
+    ctx.fillStyle = green;
+    roundRect(ctx, 830, subY + 97, 190, 54, 10, true);
+    ctx.fillStyle = white; ctx.font = 'bold 22px Arial'; ctx.textAlign = 'center';
+    ctx.fillText('Subscribe', 925, subY + 132);
 
-    // ── SCALE PREVIEW ──
+    // ── SECTION 7: Watermark ──────────────────────────────────
+    var wmY = subY + subH;
+    ctx.fillStyle = white;
+    ctx.fillRect(0, wmY, W, wmH);
+    ctx.fillStyle = 'rgba(148,163,184,0.6)';
+    ctx.font = '18px Arial';
+    ctx.textAlign = 'right';
+    ctx.fillText('Powered by CarsInStock', W - 24, wmY + 50);
+
+    // ── SCALE PREVIEW ─────────────────────────────────────────
     var previewW = Math.min(480, window.innerWidth - 40);
-    var previewH = Math.round(previewW * (totalH / size));
+    var previewH = Math.round(previewW * (totalH / W));
     canvas.style.width = previewW + 'px';
     canvas.style.height = previewH + 'px';
     canvas.style.maxWidth = '480px';
