@@ -589,7 +589,7 @@ async function drawAdCanvas(data) {
 
     // ── BG ──
     ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, size, size);
+    ctx.fillRect(0, 0, size, totalH);
 
     // ── HEADER: profile photo large + name ──
     var profileSize = 140;
@@ -598,7 +598,7 @@ async function drawAdCanvas(data) {
     // Load both images in parallel to prevent stalling
     var hasVehicle = data.top_pick && data.top_pick.make;
     var [profileImg, carImg] = await Promise.all([
-        loadImg(data.member.photo ? data.member.photo.replace('/upload/', '/upload/fl_immutable_cache/') : null),
+        loadImg(data.member.photo ? data.member.photo.replace('/upload/', '/upload/f_auto,q_auto/') : null),
         hasVehicle ? loadImg(data.top_pick.image_url) : Promise.resolve(null)
     ]);
     // DEBUG — log what we received
@@ -657,6 +657,8 @@ async function drawAdCanvas(data) {
 
     // ── CAR PHOTO — full width, no padding ──
     var carImgY = headerH;
+    ctx.fillStyle = '#1E293B';
+    ctx.fillRect(0, carImgY, size, carH);
     if (carImg) {
         // Cover-fit: fill full width, crop height to carH
         var iw = carImg.naturalWidth || carImg.width;
