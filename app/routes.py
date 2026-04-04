@@ -65,6 +65,7 @@ def sp_dashboard():
 @main.route('/api/generate_social_ad', methods=['POST'])
 def generate_social_ad():
     """Generate AI caption for social ad using Claude Haiku based on real inventory."""
+    from flask import jsonify
     if 'team_member_id' not in session:
         return jsonify({'error': 'unauthorized'}), 401
     import sqlite3 as _sq, os, json, requests as _req
