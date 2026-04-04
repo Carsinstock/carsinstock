@@ -97,24 +97,27 @@ def generate_social_ad():
         _conn.close()
         return jsonify({'error': 'not found'}), 404
     member = dict(member)
-    # Get their vehicles
+    # Get their active (non-expired) vehicles
     from app.models.vehicle import Vehicle
-    from sqlalchemy import or_
-    vehicles = Vehicle.query.filter(
-        Vehicle.salesperson_id == member['dealership_id'],
-        Vehicle.pick_user_id == member['id'],
-        Vehicle.status == 'available',
-        or_(Vehicle.approval_status == 'approved', Vehicle.approval_status == None)
-    ).order_by(Vehicle.is_team_pick.desc(), Vehicle.price.asc()).all()
+    from datetime import datetime as _dt
+    all_vehicles = Vehicle.query.filter(
+        Vehicle.salesperson_id == member['id'],
+        Vehicle.approval_status == 'approved'
+    ).order_by(Vehicle.is_team_pick.desc(), Vehicle.created_at.desc()).all()
+    now = _dt.utcnow()
+    vehicles = [v for v in all_vehicles if not v.expires_at or v.expires_at > now]
     _conn.close()
-    if not vehicles:
-        return jsonify({'error': 'No vehicles found'}), 400
-    # Build vehicle list for prompt
-    v_list = ', '.join([f"{v.year} {v.make} {v.model} (${v.price:,.0f})" for v in vehicles[:5]])
-    top_pick = next((v for v in vehicles if v.is_team_pick), vehicles[0])
+    top_pick = next((v for v in vehicles if v.is_team_pick), None)
+    if not top_pick and vehicles:
+        top_pick = vehicles[0]
+    no_inventory = top_pick is None
+    v_list = ', '.join([f"{v.year} {v.make} {v.model} (${v.price:,.0f})" for v in vehicles[:5]]) if vehicles else 'no active inventory'
     first_name = member['name'].split()[0]
     # Call Claude Haiku for caption
-    try:
+    if no_inventory:
+        caption = f"Check out my latest inventory — I'm adding fresh cars every week. Reach out directly."
+    else:
+      try:
         resp = _req.post(
             'https://api.anthropic.com/v1/messages',
             headers={
@@ -137,7 +140,7 @@ Output ONLY the single sentence. Nothing else."""
         )
         resp_data = resp.json()
         caption = resp_data['content'][0]['text'].strip()
-    except Exception as e:
+      except Exception as e:
         caption = f"Check out what I have this week — {top_pick.year} {top_pick.make} {top_pick.model} at ${top_pick.price:,.0f}. Reach out directly."
     # Build full social caption
     full_caption = caption
@@ -147,24 +150,30 @@ Output ONLY the single sentence. Nothing else."""
     storefront_url = f"https://carsinstock.com/{member['slug']}"
     full_caption += f"\n\n{storefront_url}"
     # Return data for canvas
+    top_pick_data = {}
+    if not no_inventory:
+        days_rem = max(0, (top_pick.expires_at - _dt.utcnow()).days) if top_pick.expires_at else 7
+        top_pick_data = {
+            'year': top_pick.year,
+            'make': top_pick.make,
+            'model': top_pick.model,
+            'trim': top_pick.trim or '',
+            'price': top_pick.price,
+            'image_url': top_pick.image_url or '',
+            'days_remaining': days_rem
+        }
     return jsonify({
         'success': True,
         'caption': full_caption,
         'ai_quote': caption,
+        'no_inventory': no_inventory,
         'member': {
             'name': member['name'],
             'slug': member['slug'],
             'photo': member['profile_photo'] or '',
             'phone': member['phone'] or ''
         },
-        'top_pick': {
-            'year': top_pick.year,
-            'make': top_pick.make,
-            'model': top_pick.model,
-            'price': top_pick.price,
-            'image_url': top_pick.image_url or '',
-            'days_remaining': top_pick.days_remaining or 7
-        },
+        'top_pick': top_pick_data,
         'stats': {
             'live_count': len(vehicles),
             'min_price': min(v.price for v in vehicles if v.price) if vehicles else 0
