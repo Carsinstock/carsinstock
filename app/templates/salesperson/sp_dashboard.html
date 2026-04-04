@@ -747,8 +747,21 @@ async function drawAdCanvas(data) {
     ctx.textAlign = 'right';
     ctx.fillText('Powered by CarsInStock', size-20, urlY+80);
 
-    canvas.style.width = '100%';
-    canvas.style.height = 'auto';
+    // Scale canvas to fit nicely in dashboard — max 480px tall preview
+    var maxPreviewH = 480;
+    var aspectRatio = canvas.height / canvas.width;
+    var previewW = canvas.parentElement ? canvas.parentElement.offsetWidth - 4 : 400;
+    var previewH = previewW * aspectRatio;
+    if (previewH > maxPreviewH) {
+        previewW = maxPreviewH / aspectRatio;
+        previewH = maxPreviewH;
+    }
+    canvas.style.width = previewW + 'px';
+    canvas.style.height = previewH + 'px';
+    canvas.style.display = 'block';
+    canvas.style.margin = '0 auto';
+    canvas.style.borderRadius = '12px';
+    canvas.style.boxShadow = '0 4px 20px rgba(0,0,0,0.15)';
 }
 
 function countWrapLines(ctx, text, maxW, lineH) {
