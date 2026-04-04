@@ -101,7 +101,7 @@ def generate_social_ad():
     from app.models.vehicle import Vehicle
     from datetime import datetime as _dt
     all_vehicles = Vehicle.query.filter(
-        Vehicle.salesperson_id == member['id'],
+        Vehicle.pick_user_id == member['id'],
         Vehicle.approval_status == 'approved'
     ).order_by(Vehicle.is_team_pick.desc(), Vehicle.created_at.desc()).all()
     now = _dt.utcnow()
