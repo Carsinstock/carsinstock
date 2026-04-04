@@ -598,7 +598,7 @@ async function drawAdCanvas(data) {
     // Load both images in parallel to prevent stalling
     var hasVehicle = data.top_pick && data.top_pick.make;
     var [profileImg, carImg] = await Promise.all([
-        loadImg(data.member.photo ? data.member.photo.replace('/upload/', '/upload/f_auto,q_auto/') : null),
+        loadImg(data.member.photo ? data.member.photo.replace('/upload/', '/upload/w_140,h_140,c_fill,g_face/') + '?nc=' + Date.now() : null),
         hasVehicle ? loadImg(data.top_pick.image_url) : Promise.resolve(null)
     ]);
     // DEBUG — log what we received
