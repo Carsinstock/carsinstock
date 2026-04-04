@@ -595,9 +595,10 @@ async function drawAdCanvas(data) {
     var profileX = 40;
     var profileY = 40;
     // Load both images in parallel to prevent stalling
+    var hasVehicle = data.top_pick && data.top_pick.make;
     var [profileImg, carImg] = await Promise.all([
         loadImg(data.member.photo),
-        loadImg(data.top_pick.image_url)
+        hasVehicle ? loadImg(data.top_pick.image_url) : Promise.resolve(null)
     ]);
     // DEBUG — log what we received
     console.log('drawAdCanvas data.member:', JSON.stringify(data.member));
@@ -675,7 +676,7 @@ async function drawAdCanvas(data) {
     ctx.fillRect(0, carImgY, size, carH);
 
     // Days Left badge — red, bold, urgent
-    if (data.top_pick.days_remaining) {
+    if (hasVehicle && data.top_pick.days_remaining) {
         ctx.fillStyle = '#DC2626';
         roundRect(ctx, 24, carImgY + 22, 220, 58, 29, true);
         ctx.fillStyle = white;
@@ -684,15 +685,26 @@ async function drawAdCanvas(data) {
         ctx.fillText('🔴 ' + data.top_pick.days_remaining + ' DAYS LEFT', 134, carImgY + 60);
     }
 
-    // Car name
-    ctx.fillStyle = white;
-    ctx.font = 'bold 52px Arial';
-    ctx.textAlign = 'left';
-    ctx.fillText(data.top_pick.year + ' ' + data.top_pick.make.toUpperCase() + ' ' + data.top_pick.model.toUpperCase(), 30, carImgY + carH - 72);
-    // Price — largest text on image
-    ctx.fillStyle = green;
-    ctx.font = 'bold 80px Arial';
-    ctx.fillText('$' + Number(data.top_pick.price).toLocaleString(), 30, carImgY + carH - 8);
+    // Car name + price — only if vehicle exists
+    if (hasVehicle) {
+        ctx.fillStyle = white;
+        ctx.font = 'bold 52px Arial';
+        ctx.textAlign = 'left';
+        ctx.fillText(data.top_pick.year + ' ' + data.top_pick.make.toUpperCase() + ' ' + data.top_pick.model.toUpperCase(), 30, carImgY + carH - 72);
+        ctx.fillStyle = green;
+        ctx.font = 'bold 80px Arial';
+        ctx.fillText('$' + Number(data.top_pick.price).toLocaleString(), 30, carImgY + carH - 8);
+    } else {
+        // No inventory placeholder text on car zone
+        ctx.fillStyle = white;
+        ctx.font = 'bold 52px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Fresh inventory coming soon', size/2, carImgY + carH/2 - 20);
+        ctx.fillStyle = green;
+        ctx.font = '34px Arial';
+        ctx.fillText('Check out my storefront for updates', size/2, carImgY + carH/2 + 36);
+        ctx.textAlign = 'left';
+    }
 
     // ── STATS BAR — navy, green numbers ──
     var statsY = carImgY + carH;
