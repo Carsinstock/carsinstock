@@ -544,7 +544,12 @@ async function loadImg(src) {
         img.crossOrigin = 'anonymous';
         img.onload = function(){ resolve(img); };
         img.onerror = function(){ resolve(null); };
-        img.src = src;
+        // Proxy Cloudinary images to avoid CORS blocking canvas
+        if (src.indexOf('cloudinary.com') !== -1) {
+            img.src = '/api/proxy-image?url=' + encodeURIComponent(src);
+        } else {
+            img.src = src;
+        }
     });
 }
 

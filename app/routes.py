@@ -62,6 +62,25 @@ def sp_dashboard():
         dealership_sp=dealership_sp,
         notifications=notifications)
 
+@main.route('/api/proxy-image')
+def proxy_image():
+    """Proxy external images for canvas cross-origin use."""
+    from flask import send_file, Response
+    import requests as _req, io
+    url = request.args.get('url', '')
+    if not url or 'cloudinary.com' not in url:
+        return '', 400
+    try:
+        r = _req.get(url, timeout=10, stream=True)
+        return Response(
+            r.content,
+            content_type=r.headers.get('Content-Type', 'image/jpeg'),
+            headers={'Access-Control-Allow-Origin': '*', 'Cache-Control': 'public, max-age=3600'}
+        )
+    except Exception as e:
+        return '', 500
+
+
 @main.route('/api/generate_social_ad', methods=['POST'])
 def generate_social_ad():
     """Generate AI caption for social ad using Claude Haiku based on real inventory."""
