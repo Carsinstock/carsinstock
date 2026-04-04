@@ -128,10 +128,9 @@ def generate_social_ad():
                 'messages': [{
                     'role': 'user',
                     'content': f"""You are {first_name}, a car salesperson. Write a SHORT, HUMAN Facebook caption in first person.
-My inventory this week: {v_list}
 My featured pick: {top_pick.year} {top_pick.make} {top_pick.model} at ${top_pick.price:,.0f}
-Rules: Max 2 sentences. Sound like a real person texting a friend, not a corporate ad. Reference the actual cars. Be specific. No hashtags. No emojis unless natural.
-Output ONLY the caption text. Nothing else."""
+Rules: EXACTLY 1 sentence. Max 20 words. Sound like a real person texting. Be specific about the car and price. No hashtags. No emojis.
+Output ONLY the single sentence. Nothing else."""
                 }]
             },
             timeout=15
