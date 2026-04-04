@@ -3,6 +3,30 @@
 <meta property="og:title" content="{{ sp.display_name }} — Full Inventory">
 <meta property="og:description" content="Browse all available vehicles from {{ sp.display_name }} on CarsInStock.">
 <meta property="og:url" content="https://carsinstock.com/{{ sp.profile_url_slug }}/inventory">
+<!-- Video Lightbox -->
+<div id="videoLightbox" onclick="closeVideoLightbox()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;align-items:center;justify-content:center;flex-direction:column;">
+    <div style="position:relative;width:92%;max-width:700px;" onclick="event.stopPropagation()">
+        <button onclick="closeVideoLightbox()" style="position:absolute;top:-40px;right:0;background:none;border:none;color:white;font-size:28px;cursor:pointer;line-height:1;">×</button>
+        <div id="lightboxTitle" style="color:white;font-size:14px;font-weight:700;margin-bottom:10px;text-align:center;opacity:0.8;"></div>
+        <video id="lightboxVideo" controls autoplay style="width:100%;border-radius:12px;max-height:70vh;background:#000;"></video>
+    </div>
+</div>
+<script>
+function openVideoLightbox(url, title) {
+    var lb = document.getElementById('videoLightbox');
+    document.getElementById('lightboxTitle').textContent = title;
+    document.getElementById('lightboxVideo').src = url;
+    lb.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+function closeVideoLightbox() {
+    var vid = document.getElementById('lightboxVideo');
+    vid.pause(); vid.src = '';
+    document.getElementById('videoLightbox').style.display = 'none';
+    document.body.style.overflow = '';
+}
+document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeVideoLightbox(); });
+</script>
 {% endblock %}
 {% block content %}
 <style>
@@ -49,11 +73,20 @@
                 {% if v.days_remaining and v.days_remaining > 0 %}
                 <div class="days-badge" style="background:{% if v.days_remaining <= 2 %}#DC2626{% else %}#FF6B35{% endif %};">{{ v.days_remaining }} Day{{ 's' if v.days_remaining != 1 else '' }} Left</div>
                 {% endif %}
+                <div style="position:relative;">
                 {% if v.image_url %}
                 <img src="{{ v.image_url }}" alt="{{ v.year }} {{ v.make }} {{ v.model }}" class="vehicle-img">
                 {% else %}
                 <div class="vehicle-img" style="background:#F1F5F9;display:flex;align-items:center;justify-content:center;color:#94A3B8;font-size:32px;">🚗</div>
                 {% endif %}
+                {% if v.video_url %}
+                <div onclick="openVideoLightbox('{{ v.video_url }}', '{{ v.year }} {{ v.make }} {{ v.model }}')" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(0,0,0,0.15);">
+                    <div style="width:48px;height:48px;background:rgba(0,0,0,0.7);border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid white;">
+                        <span style="color:white;font-size:20px;margin-left:4px;">▶</span>
+                    </div>
+                </div>
+                {% endif %}
+                </div>
                 {% if v.is_team_pick and v.pick_user_id and team_lookup.get(v.pick_user_id) %}
                 <div style="position:absolute;bottom:10px;right:10px;">
                     <img src="{{ team_lookup[v.pick_user_id]['photo'] }}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #00C851;box-shadow:0 2px 8px rgba(0,0,0,0.25);">
