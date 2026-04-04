@@ -1491,3 +1491,37 @@ Output ONLY valid JSON with these exact keys:
     posts['image_urls'] = image_urls
     posts['storefront_url'] = storefront_url
     return jsonify(posts)
+
+
+@app.route('/api/subscribe_weekly', methods=['POST'])
+def subscribe_weekly():
+    from datetime import datetime
+    data = request.get_json()
+    email = (data.get('email') or '').strip().lower()
+    rep_slug = (data.get('rep_slug') or '').strip()
+
+    if not email or '@' not in email:
+        return jsonify({'success': False, 'message': 'Invalid email address.'})
+
+    conn = get_db()
+    rep = conn.execute(
+        'SELECT id, name FROM dealership_team WHERE slug = ?', (rep_slug,)
+    ).fetchone()
+
+    if not rep:
+        return jsonify({'success': False, 'message': 'Rep not found.'})
+
+    existing = conn.execute(
+        'SELECT id FROM weekly_subscribers WHERE email = ? AND rep_id = ?',
+        (email, rep['id'])
+    ).fetchone()
+
+    if existing:
+        return jsonify({'success': False, 'message': "You're already subscribed!"})
+
+    conn.execute(
+        'INSERT INTO weekly_subscribers (email, rep_id, subscribed_at) VALUES (?, ?, ?)',
+        (email, rep['id'], datetime.utcnow().isoformat())
+    )
+    conn.commit()
+    return jsonify({'success': True})

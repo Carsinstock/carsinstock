@@ -132,6 +132,25 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
                     <button onclick="copyCaption()" style="flex:1;background:#1E293B;color:white;border:none;padding:12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">📋 Copy Caption</button>
                     <button onclick="saveAdImage()" id="saveBtn" style="flex:1;background:#00C851;color:white;border:none;padding:12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">💾 Save Image</button>
                 </div>
+
+                <!-- Subscribe to Weekly Post -->
+                <div id="subscribeStrip" style="background:#1E293B;border-radius:12px;padding:24px 20px;margin-top:14px;">
+                    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:space-between;">
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <span style="font-size:28px;">📬</span>
+                            <div>
+                                <div style="color:white;font-weight:700;font-size:15px;">Subscribe to My Weekly Post</div>
+                                <div style="color:rgba(255,255,255,0.55);font-size:13px;margin-top:2px;">Get fresh inventory in your inbox every week</div>
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:8px;flex:1;min-width:260px;margin-top:8px;">
+                            <input type="email" id="subscribeEmail" placeholder="Enter your email address..." style="flex:1;padding:11px 14px;border-radius:8px;border:none;font-size:14px;color:#1E293B;outline:none;" />
+                            <button onclick="submitSubscribe()" style="background:#00C851;color:white;border:none;border-radius:8px;padding:11px 20px;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap;">Subscribe</button>
+                        </div>
+                    </div>
+                    <div id="subscribeMsg" style="display:none;margin-top:10px;font-size:13px;font-weight:600;text-align:center;"></div>
+                </div>
+
             </div>
         </div>
     </div>
@@ -572,111 +591,127 @@ function wrapText(ctx, text, x, y, maxW, lineH) {
 
 async function drawAdCanvas(data) {
     var canvas = document.getElementById('adCanvas');
-    var size = 1080;
-    // Total height: header(220) + car(440) + stats(120) + referral(90) + footer(100)
-    var carH = 440;
-    var statsH = 120;
-    var refH = data.include_referral ? 90 : 0;
-    var footerH = 100;
-    var headerH = 220;
-    var totalH = headerH + carH + statsH + refH + footerH;
-    canvas.width = size;
-    canvas.height = totalH;
-    var ctx = canvas.getContext('2d');
+    var W = 1080;
     var navy = '#1E293B';
     var green = '#00C851';
     var white = '#FFFFFF';
 
-    // ── BG ──
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, size, totalH);
+    // Heights per section
+    var headerH = 200;
+    var carH    = 480;
+    var statsH  = 120;
+    var refH    = data.include_referral ? 80 : 0;
+    var ctaH    = 120;
+    var subH    = 160;
+    var wmH     = 80;
+    var totalH  = headerH + carH + statsH + refH + ctaH + subH + wmH;
 
-    // ── HEADER: profile photo large + name ──
-    var profileSize = 140;
-    var profileX = 40;
-    var profileY = 40;
-    // Load both images in parallel to prevent stalling
+    canvas.width  = W;
+    canvas.height = totalH;
+    var ctx = canvas.getContext('2d');
+
+    // Load images
     var hasVehicle = data.top_pick && data.top_pick.make;
     var [profileImg, carImg] = await Promise.all([
-        loadImg(data.member.photo ? data.member.photo.replace('/upload/', '/upload/w_140,h_140,c_fill,g_face/') + '?nc=' + Date.now() : null),
+        loadImg(data.member.photo ? data.member.photo.replace('/upload/', '/upload/w_160,h_160,c_fill,g_face/') + '?nc=' + Date.now() : null),
         hasVehicle ? loadImg(data.top_pick.image_url) : Promise.resolve(null)
     ]);
-    // DEBUG — log what we received
-    console.log('drawAdCanvas data.member:', JSON.stringify(data.member));
-    console.log('profileImg loaded:', !!profileImg);
-    // Always draw green circle base first
-    ctx.fillStyle = green;
-    ctx.beginPath();
-    ctx.arc(profileX + profileSize/2, profileY + profileSize/2, profileSize/2, 0, Math.PI*2);
-    ctx.fill();
-    // Draw photo clipped inside circle
+
+    ctx.clearRect(0, 0, W, totalH);
+
+    // ── SECTION 1: Identity (0–200) ──────────────────────────────
+    ctx.fillStyle = white;
+    ctx.fillRect(0, 0, W, headerH);
+
+    // Profile circle 80px diameter, 30px from left, centered at y=100
     ctx.save();
     ctx.beginPath();
-    ctx.arc(profileX + profileSize/2, profileY + profileSize/2, profileSize/2, 0, Math.PI*2);
+    ctx.arc(70, 100, 40, 0, Math.PI * 2);
+    ctx.closePath();
     ctx.clip();
     if (profileImg) {
-        ctx.drawImage(profileImg, profileX, profileY, profileSize, profileSize);
-    } else {
-        ctx.fillStyle = white;
-        ctx.font = 'bold 72px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(data.member.name[0] || '?', profileX+profileSize/2, profileY+profileSize/2+26);
-    }
-    ctx.restore();
-    // Green ring
-    ctx.strokeStyle = green;
-    ctx.lineWidth = 5;
-    ctx.beginPath();
-    ctx.arc(profileX + profileSize/2, profileY + profileSize/2, profileSize/2+5, 0, Math.PI*2);
-    ctx.stroke();
-
-    // Name — biggest text in header
-    var nameX = profileX + profileSize + 30;
-    ctx.fillStyle = navy;
-    ctx.font = 'bold 68px Arial';
-    ctx.textAlign = 'left';
-    ctx.fillText(data.member.name, nameX, profileY + 72);
-    // Dealership line
-    ctx.fillStyle = '#475569';
-    ctx.font = '32px Arial';
-    ctx.fillText('Pine Belt Used Cars · Toms River, NJ', nameX, profileY + 118);
-
-    // AI quote — italic, smaller, beneath name
-    ctx.fillStyle = '#334155';
-    ctx.font = 'italic 30px Georgia';
-    var quoteText = data.ai_quote ? ('"' + data.ai_quote + '"') : '';
-    wrapText(ctx, quoteText, nameX, profileY + 162, size - nameX - 40, 40);
-
-    // ── DIVIDER ──
-    ctx.strokeStyle = '#E2E8F0';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(0, headerH);
-    ctx.lineTo(size, headerH);
-    ctx.stroke();
-
-    // ── CAR PHOTO — full width, no padding ──
-    var carImgY = headerH;
-    ctx.fillStyle = '#1E293B';
-    ctx.fillRect(0, carImgY, size, carH);
-    if (carImg) {
-        // Cover-fit: fill full width, crop height to carH
-        var iw = carImg.naturalWidth || carImg.width;
-        var ih = carImg.naturalHeight || carImg.height;
-        var scale = Math.max(size/iw, carH/ih);
-        var dw = iw*scale, dh = ih*scale;
-        var dx = (size-dw)/2, dy = carImgY + (carH-dh)/2;
-        ctx.drawImage(carImg, dx, dy, dw, dh);
+        ctx.drawImage(profileImg, 30, 60, 80, 80);
     } else {
         ctx.fillStyle = navy;
-        ctx.fillRect(0, carImgY, size, carH);
+        ctx.fill();
+        ctx.fillStyle = white;
+        ctx.font = 'bold 28px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText((data.member.name || '?')[0], 70, 107);
     }
-    // Dark gradient at bottom of car for text legibility
-    var grad = ctx.createLinearGradient(0, carImgY + carH - 220, 0, carImgY + carH);
+    ctx.restore();
+
+    // Name
+    ctx.fillStyle = navy;
+    ctx.font = 'bold 48px Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(data.member.name, 130, 88);
+
+    // Full address
+    ctx.fillStyle = '#64748b';
+    ctx.font = '22px Arial';
+    ctx.fillText('Pine Belt Used Cars · 76 Route 37 East, Toms River NJ 08753', 130, 138);
+
+    // Fresh Inventory pill — top right
+    var pillTxt = '🔥 Fresh Inventory';
+    ctx.font = 'bold 20px Arial';
+    var pillW = ctx.measureText(pillTxt).width + 32;
+    var pillX = W - pillW - 20;
+    ctx.fillStyle = green;
+    roundRect(ctx, pillX, 20, pillW, 44, 22, true);
+    ctx.fillStyle = white;
+    ctx.textAlign = 'center';
+    ctx.fillText(pillTxt, pillX + pillW / 2, 48);
+
+    // Divider
+    ctx.fillStyle = '#f1f5f9';
+    ctx.fillRect(0, 196, W, 4);
+
+    // ── SECTION 2: Vehicle Photo (200–680) ───────────────────────
+    var carImgY = headerH;
+    ctx.fillStyle = '#1E293B';
+    ctx.fillRect(0, carImgY, W, carH);
+    if (carImg) {
+        var iw = carImg.naturalWidth || carImg.width;
+        var ih = carImg.naturalHeight || carImg.height;
+        var scale = Math.max(W / iw, carH / ih);
+        var dw = iw * scale, dh = ih * scale;
+        var dx = (W - dw) / 2, dy = carImgY + (carH - dh) / 2;
+        ctx.drawImage(carImg, dx, dy, dw, dh);
+    }
+
+    // Gradient overlay bottom 30%
+    var grad = ctx.createLinearGradient(0, carImgY + carH * 0.7, 0, carImgY + carH);
     grad.addColorStop(0, 'rgba(0,0,0,0)');
-    grad.addColorStop(1, 'rgba(0,0,0,0.88)');
+    grad.addColorStop(1, 'rgba(0,0,0,0.72)');
     ctx.fillStyle = grad;
-    ctx.fillRect(0, carImgY, size, carH);
+    ctx.fillRect(0, carImgY, W, carH);
+
+    // Days Left pill — top left of photo
+    var daysLeft = data.top_pick ? data.top_pick.days_left : 7;
+    var dlTxt = '🔥 ' + daysLeft + ' DAYS LEFT';
+    ctx.font = 'bold 26px Arial';
+    var dlW = ctx.measureText(dlTxt).width + 32;
+    ctx.fillStyle = '#EF4444';
+    roundRect(ctx, 20, carImgY + 18, dlW, 46, 23, true);
+    ctx.fillStyle = white;
+    ctx.textAlign = 'center';
+    ctx.fillText(dlTxt, 20 + dlW / 2, carImgY + 47);
+
+    // Car name — bottom left
+    ctx.fillStyle = white;
+    ctx.font = 'bold 32px Arial';
+    ctx.textAlign = 'left';
+    var carLabel = hasVehicle ? (data.top_pick.year + ' ' + data.top_pick.make + ' ' + data.top_pick.model) : '';
+    ctx.fillText(carLabel, 20, carImgY + carH - 20);
+
+    // Price — bottom right
+    if (hasVehicle && data.top_pick.price) {
+        ctx.fillStyle = green;
+        ctx.font = 'bold 48px Arial';
+        ctx.textAlign = 'right';
+        ctx.fillText('$' + Number(data.top_pick.price).toLocaleString(), W - 20, carImgY + carH - 18);
+    }
 
     // Days Left badge — red, bold, urgent
     if (hasVehicle && data.top_pick.days_remaining) {
@@ -807,6 +842,46 @@ function roundRect(ctx, x, y, w, h, r, fill) {
     ctx.quadraticCurveTo(x, y, x+r, y);
     ctx.closePath();
     if (fill) ctx.fill();
+}
+
+function submitSubscribe() {
+    var email = document.getElementById('subscribeEmail').value.trim();
+    var msg = document.getElementById('subscribeMsg');
+    if (!email || email.indexOf('@') === -1) {
+        msg.style.display = 'block';
+        msg.style.color = '#EF4444';
+        msg.textContent = 'Please enter a valid email address.';
+        return;
+    }
+    var btn = event.target;
+    btn.disabled = true;
+    btn.textContent = 'Subscribing...';
+    fetch('/api/subscribe_weekly', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({email: email, rep_slug: REP_SLUG})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data) {
+        msg.style.display = 'block';
+        if (data.success) {
+            msg.style.color = '#00C851';
+            msg.textContent = '✅ Subscribed! You'll get weekly inventory updates.';
+            document.getElementById('subscribeEmail').value = '';
+        } else {
+            msg.style.color = '#EF4444';
+            msg.textContent = data.message || 'Something went wrong. Please try again.';
+        }
+        btn.disabled = false;
+        btn.textContent = 'Subscribe';
+    })
+    .catch(function() {
+        msg.style.display = 'block';
+        msg.style.color = '#EF4444';
+        msg.textContent = 'Network error. Please try again.';
+        btn.disabled = false;
+        btn.textContent = 'Subscribe';
+    });
 }
 
 function saveAdImage() {
