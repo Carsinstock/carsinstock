@@ -170,7 +170,7 @@ Output ONLY the single sentence. Nothing else."""
         'member': {
             'name': member['name'],
             'slug': member['slug'],
-            'photo': member['profile_photo'] or '',
+            'photo': (member['profile_photo'] + '?_cb=1') if member['profile_photo'] else '',
             'phone': member['phone'] or ''
         },
         'top_pick': top_pick_data,
