@@ -340,7 +340,7 @@ def full_inventory(slug):
         Vehicle.salesperson_id == sp.salesperson_id,
         Vehicle.status == 'available',
         or_(Vehicle.approval_status == 'approved', Vehicle.approval_status == None)
-    ).order_by(Vehicle.created_at.desc()).all()
+    ).order_by(Vehicle.price.asc()).all()
     vehicles = [v for v in vehicles if not v.expires_at or v.expires_at > datetime.utcnow()]
     import sqlite3 as _sq
     _conn = _sq.connect('/home/eddie/carsinstock/instance/carsinstock.db')
