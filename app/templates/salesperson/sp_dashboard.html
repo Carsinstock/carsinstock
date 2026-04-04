@@ -494,6 +494,7 @@ function showShareTab(tab) {
 
 // ── PLATFORM ──────────────────────────────────────────────────
 var selectedPlatform = 'facebook';
+        var REP_SLUG = '{{ member.slug if member else "" }}';
 function selectPlatform(p) {
     selectedPlatform = p;
     ['facebook','instagram','whatsapp','text'].forEach(function(pl) {
