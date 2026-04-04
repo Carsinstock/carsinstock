@@ -62,6 +62,99 @@ def sp_dashboard():
         dealership_sp=dealership_sp,
         notifications=notifications)
 
+@main.route('/api/generate_social_ad', methods=['POST'])
+def generate_social_ad():
+    """Generate AI caption for social ad using Claude Haiku based on real inventory."""
+    if 'team_member_id' not in session:
+        return jsonify({'error': 'unauthorized'}), 401
+    import sqlite3 as _sq, os, json, requests as _req
+    data = request.get_json() or {}
+    include_referral = data.get('include_referral', False)
+    _conn = _sq.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    _conn.row_factory = _sq.Row
+    member = _conn.execute("SELECT * FROM dealership_team WHERE id=? AND is_active=1", (session['team_member_id'],)).fetchone()
+    if not member:
+        _conn.close()
+        return jsonify({'error': 'not found'}), 404
+    member = dict(member)
+    # Get their vehicles
+    from app.models.vehicle import Vehicle
+    from sqlalchemy import or_
+    vehicles = Vehicle.query.filter(
+        Vehicle.salesperson_id == member['dealership_id'],
+        Vehicle.pick_user_id == member['id'],
+        Vehicle.status == 'available',
+        or_(Vehicle.approval_status == 'approved', Vehicle.approval_status == None)
+    ).order_by(Vehicle.is_team_pick.desc(), Vehicle.price.asc()).all()
+    _conn.close()
+    if not vehicles:
+        return jsonify({'error': 'No vehicles found'}), 400
+    # Build vehicle list for prompt
+    v_list = ', '.join([f"{v.year} {v.make} {v.model} (${v.price:,.0f})" for v in vehicles[:5]])
+    top_pick = next((v for v in vehicles if v.is_team_pick), vehicles[0])
+    first_name = member['name'].split()[0]
+    # Call Claude Haiku for caption
+    try:
+        resp = _req.post(
+            'https://api.anthropic.com/v1/messages',
+            headers={
+                'x-api-key': os.environ.get('ANTHROPIC_API_KEY', ''),
+                'anthropic-version': '2023-06-01',
+                'content-type': 'application/json'
+            },
+            json={
+                'model': 'claude-haiku-4-5-20251001',
+                'max_tokens': 150,
+                'messages': [{
+                    'role': 'user',
+                    'content': f"""You are {first_name}, a car salesperson. Write a SHORT, HUMAN Facebook caption in first person.
+My inventory this week: {v_list}
+My featured pick: {top_pick.year} {top_pick.make} {top_pick.model} at ${top_pick.price:,.0f}
+Rules: Max 2 sentences. Sound like a real person texting a friend, not a corporate ad. Reference the actual cars. Be specific. No hashtags. No emojis unless natural.
+Output ONLY the caption text. Nothing else."""
+                }]
+            },
+            timeout=15
+        )
+        resp_data = resp.json()
+        caption = resp_data['content'][0]['text'].strip()
+    except Exception as e:
+        caption = f"Check out what I have this week — {top_pick.year} {top_pick.make} {top_pick.model} at ${top_pick.price:,.0f}. Reach out directly."
+    # Build full social caption
+    full_caption = caption
+    full_caption += f"\n\nReach out directly — I'll take care of you."
+    if include_referral:
+        full_caption += f"\n\nKnow someone looking? Send them my way — if they buy, you get $100 💰"
+    storefront_url = f"https://carsinstock.com/{member['slug']}"
+    full_caption += f"\n\n{storefront_url}"
+    # Return data for canvas
+    return jsonify({
+        'success': True,
+        'caption': full_caption,
+        'ai_quote': caption,
+        'member': {
+            'name': member['name'],
+            'slug': member['slug'],
+            'photo': member['profile_photo'] or '',
+            'phone': member['phone'] or ''
+        },
+        'top_pick': {
+            'year': top_pick.year,
+            'make': top_pick.make,
+            'model': top_pick.model,
+            'price': top_pick.price,
+            'image_url': top_pick.image_url or '',
+            'days_remaining': top_pick.days_remaining or 7
+        },
+        'stats': {
+            'live_count': len(vehicles),
+            'min_price': min(v.price for v in vehicles if v.price) if vehicles else 0
+        },
+        'include_referral': include_referral,
+        'storefront_url': storefront_url
+    })
+
+
 @main.route('/sp-notification/<int:notif_id>/dismiss', methods=['POST'])
 def dismiss_notification(notif_id):
     import sqlite3
