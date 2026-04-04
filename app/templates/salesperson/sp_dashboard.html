@@ -544,6 +544,7 @@ async function loadImg(src) {
         img.crossOrigin = 'anonymous';
         img.onload = function(){ resolve(img); };
         img.onerror = function(){ resolve(null); };
+        img.onerror = function(){ resolve(null); };
         // Proxy Cloudinary images to avoid CORS blocking canvas
         if (src.indexOf('cloudinary.com') !== -1) {
             img.src = '/api/proxy-image?url=' + encodeURIComponent(src);
@@ -597,7 +598,7 @@ async function drawAdCanvas(data) {
     // Load both images in parallel to prevent stalling
     var hasVehicle = data.top_pick && data.top_pick.make;
     var [profileImg, carImg] = await Promise.all([
-        loadImg(data.member.photo),
+        loadImg(data.member.photo ? data.member.photo.replace('/upload/', '/upload/fl_immutable_cache/') : null),
         hasVehicle ? loadImg(data.top_pick.image_url) : Promise.resolve(null)
     ]);
     // DEBUG — log what we received
