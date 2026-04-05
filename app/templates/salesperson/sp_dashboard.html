@@ -82,55 +82,63 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
         <!-- Pro Social Ad tab -->
         <div id="shareTab-ad" style="display:none;">
 
+            <!-- Header -->
+            <div style="margin-bottom:14px;">
+                <div style="font-size:18px;font-weight:900;color:#1E293B;margin-bottom:4px;">&#128247; Generate My Pro Social Ad</div>
+                <div style="font-size:12px;color:#64748B;line-height:1.5;">One tap = professional post with your photo, your cars, and real Days Left urgency.</div>
+            </div>
+
             <!-- Platform selector -->
             <div style="margin-bottom:16px;">
-                <div style="font-size:12px;font-weight:700;color:#1E293B;margin-bottom:8px;">Platform</div>
-                <div style="display:flex;gap:8px;">
-                    <button onclick="selectPlatform('facebook')" id="plat-facebook" class="plat-btn active-plat">📘 Facebook</button>
-                    <button onclick="selectPlatform('instagram')" id="plat-instagram" class="plat-btn">📸 Instagram</button>
-                    <button onclick="selectPlatform('whatsapp')" id="plat-whatsapp" class="plat-btn">💬 WhatsApp</button>
-                    <button onclick="selectPlatform('text')" id="plat-text" class="plat-btn">💬 Text</button>
+                <div style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Platform</div>
+                <div style="display:flex;gap:6px;">
+                    <button onclick="selectPlatform('facebook')" id="plat-facebook" class="plat-btn active-plat">&#128216; Facebook</button>
+                    <button onclick="selectPlatform('instagram')" id="plat-instagram" class="plat-btn">&#128247; Instagram</button>
+                    <button onclick="selectPlatform('whatsapp')" id="plat-whatsapp" class="plat-btn">&#128172; WhatsApp</button>
+                    <button onclick="selectPlatform('text')" id="plat-text" class="plat-btn">&#9993;&#65039; Text</button>
+                </div>
+            </div>
+
+            <!-- Quote card -->
+            <div id="quoteCard" style="background:white;border:1.5px solid #E2E8F0;border-radius:10px;padding:14px;margin-bottom:16px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                    <span style="font-size:10px;font-weight:800;color:#94A3B8;text-transform:uppercase;letter-spacing:0.8px;">Your Quote</span>
+                    <span style="font-size:10px;font-weight:800;color:#00C851;">&#10024; AI Written</span>
+                </div>
+                <textarea id="adCaption" rows="3" style="width:100%;padding:0;border:none;outline:none;font-size:13px;font-family:inherit;resize:none;color:#1E293B;background:transparent;line-height:1.5;box-sizing:border-box;" placeholder="Tap Generate -- AI writes your quote from your real inventory..." readonly></textarea>
+                <div style="display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid #F1F5F9;">
+                    <button onclick="regenerateQuote()" style="flex:1;padding:7px 4px;font-size:11px;font-weight:700;border:1.5px solid #E2E8F0;border-radius:6px;background:white;color:#475569;cursor:pointer;">&#10024; Regenerate</button>
+                    <button onclick="editCaption()" style="flex:1;padding:7px 4px;font-size:11px;font-weight:700;border:1.5px solid #E2E8F0;border-radius:6px;background:white;color:#475569;cursor:pointer;">&#9999;&#65039; Edit</button>
+                    <button onclick="clearCaption()" style="flex:1;padding:7px 4px;font-size:11px;font-weight:700;border:1.5px solid #E2E8F0;border-radius:6px;background:white;color:#475569;cursor:pointer;">&#128465;&#65039; Clear</button>
                 </div>
             </div>
 
             <!-- Referral toggle -->
-            <div style="display:flex;align-items:center;justify-content:space-between;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:10px 14px;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:12px 14px;margin-bottom:16px;">
                 <div>
-                    <div style="font-size:13px;font-weight:700;color:#1E293B;">Include $100 Referral Callout</div>
-                    <div style="font-size:11px;color:#64748B;">Adds referral offer to image and caption</div>
+                    <div style="font-size:13px;font-weight:700;color:#1E293B;">Include $100 Referral</div>
+                    <div style="font-size:11px;color:#64748B;margin-top:2px;">Refer a friend &#x2192; they buy &#x2192; you get $100</div>
                 </div>
-                <label style="display:flex;align-items:center;cursor:pointer;gap:6px;">
-                    <input type="checkbox" id="referralToggle" style="width:18px;height:18px;accent-color:#00C851;">
+                <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;flex-shrink:0;" onclick="toggleReferral()">
+                    <input type="checkbox" id="referralToggle" checked style="opacity:0;width:0;height:0;">
+                    <span id="referralSlider" style="position:absolute;top:0;left:0;right:0;bottom:0;background:#00C851;border-radius:24px;transition:0.2s;"></span>
+                    <span id="referralKnob" style="position:absolute;top:2px;left:22px;width:20px;height:20px;background:white;border-radius:50%;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.2);"></span>
                 </label>
             </div>
 
-            <!-- AI Quote section -->
-            <div style="margin-bottom:16px;">
-                <div style="font-size:12px;font-weight:700;color:#1E293B;margin-bottom:8px;">Your Caption <span style="color:#94A3B8;font-weight:400;">(AI writes it from your inventory)</span></div>
-                <textarea id="adCaption" rows="4" style="width:100%;padding:10px 12px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:13px;font-family:inherit;resize:none;color:#1E293B;background:#F8FAFC;" placeholder="Hit Generate to create your caption..." readonly></textarea>
-                <div style="display:flex;gap:8px;margin-top:8px;">
-                    <button onclick="editCaption()" style="flex:1;padding:7px;font-size:12px;font-weight:700;border:1.5px solid #E2E8F0;border-radius:6px;background:white;color:#475569;cursor:pointer;">✏️ Edit</button>
-                    <button onclick="clearCaption()" style="flex:1;padding:7px;font-size:12px;font-weight:700;border:1.5px solid #E2E8F0;border-radius:6px;background:white;color:#475569;cursor:pointer;">🗑 Clear</button>
-                </div>
-            </div>
-
             <!-- Generate button -->
-            <button onclick="generateProAd()" id="generateBtn" style="width:100%;background:#00C851;color:white;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer;letter-spacing:0.3px;margin-bottom:6px;">Generate My Pro Social Ad →</button>
-            <div style="text-align:center;font-size:11px;color:#94A3B8;margin-bottom:16px;">Takes ~8 seconds · Image + caption ready to copy & paste</div>
+            <button onclick="generateProAd()" id="generateBtn" style="width:100%;background:#00C851;color:white;border:none;padding:15px;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer;letter-spacing:0.3px;margin-bottom:6px;">Generate My Pro Social Ad &#x2192;</button>
+            <div style="text-align:center;font-size:11px;color:#94A3B8;margin-bottom:16px;">Takes ~8 seconds &middot; Image + caption ready to copy &amp; paste</div>
 
-            <!-- Ad preview canvas -->
+            <!-- Ad preview section -->
             <div id="adPreviewWrap" style="display:none;">
                 <canvas id="adCanvas" style="width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.12);display:block;"></canvas>
-
-                <!-- iOS instruction -->
                 <div id="iosMsg" style="display:none;background:#FEF9C3;border:1px solid #FDE047;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:12px;color:#854D0E;font-weight:600;">
-                    📱 On iPhone: Long press the image above → tap <strong>Save to Photos</strong>
+                    &#128241; On iPhone: Long press the image &#x2192; tap <strong>Save to Photos</strong>
                 </div>
-
-                <!-- Action buttons -->
                 <div style="display:flex;gap:10px;margin-top:12px;">
-                    <button onclick="copyCaption()" style="flex:1;background:#1E293B;color:white;border:none;padding:12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">📋 Copy Caption</button>
-                    <button onclick="saveAdImage()" id="saveBtn" style="flex:1;background:#00C851;color:white;border:none;padding:12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">💾 Save Image</button>
+                    <button onclick="copyCaption()" style="flex:1;background:#1E293B;color:white;border:none;padding:12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">&#128203; Copy Caption</button>
+                    <button onclick="saveAdImage()" id="saveBtn" style="flex:1;background:#00C851;color:white;border:none;padding:12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">&#128190; Save Image</button>
                 </div>
             </div>
         </div>
@@ -505,6 +513,41 @@ function copyCaption() {
     });
 }
 
+// ── REFERRAL TOGGLE ───────────────────────────────────────────
+function toggleReferral() {
+    var cb = document.getElementById('referralToggle');
+    var knob = document.getElementById('referralKnob');
+    var slider = document.getElementById('referralSlider');
+    cb.checked = !cb.checked;
+    knob.style.left = cb.checked ? '22px' : '2px';
+    slider.style.background = cb.checked ? '#00C851' : '#CBD5E1';
+}
+
+// ── REGENERATE QUOTE ──────────────────────────────────────────
+async function regenerateQuote() {
+    var btn = event.target;
+    btn.textContent = '⏳...';
+    btn.disabled = true;
+    var includeReferral = document.getElementById('referralToggle').checked;
+    try {
+        var resp = await fetch('https://carsinstock.com/api/generate_social_ad', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({platform: selectedPlatform, include_referral: includeReferral})
+        });
+        var data = await resp.json();
+        if (data.error) { throw new Error(data.error); }
+        generatedAdData = data;
+        document.getElementById('adCaption').value = data.quote;
+        document.getElementById('adCaption').readOnly = false;
+    } catch(e) {
+        alert('Error: ' + e.message);
+    } finally {
+        btn.textContent = '✨ Regenerate';
+        btn.disabled = false;
+    }
+}
+
 // ── MAIN GENERATE ─────────────────────────────────────────────
 async function generateProAd() {
     var btn = document.getElementById('generateBtn');
@@ -512,20 +555,19 @@ async function generateProAd() {
     btn.disabled = true;
     var includeReferral = document.getElementById('referralToggle').checked;
     try {
-        var resp = await fetch('/api/generate_social_ad', {
+        var resp = await fetch('https://carsinstock.com/api/generate_social_ad', {
             method: 'POST',
             headers: {'Content-Type':'application/json'},
             body: JSON.stringify({platform: selectedPlatform, include_referral: includeReferral})
         });
         var data = await resp.json();
-        if (!data.success) { throw new Error(data.error || 'Failed'); }
-        generatedCaption = data.caption;
-        document.getElementById('adCaption').value = data.caption;
+        if (data.error) { throw new Error(data.error); }
+        if (data.no_inventory) { throw new Error('No active vehicles found. Add a vehicle first.'); }
+        generatedAdData = data;
+        generatedCaption = data.quote;
+        document.getElementById('adCaption').value = data.quote;
         document.getElementById('adCaption').readOnly = true;
-        document.getElementById('adCaption').style.background = '#F8FAFC';
-        await drawAdCanvas(data);
-        document.getElementById('adPreviewWrap').style.display = 'block';
-        // Show iOS message on iOS devices
+        document.getElementById('adPreviewWrap').style.display = 'none';
         var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
         document.getElementById('iosMsg').style.display = isIOS ? 'block' : 'none';
     } catch(e) {
