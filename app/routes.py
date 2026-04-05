@@ -62,29 +62,9 @@ def sp_dashboard():
         dealership_sp=dealership_sp,
         notifications=notifications)
 
-@main.route('/api/proxy-image')
-def proxy_image():
-    """Proxy external images for canvas cross-origin use."""
-    from flask import send_file, Response
-    import requests as _req, io
-    url = request.args.get('url', '')
-    if not url or 'cloudinary.com' not in url:
-        return '', 400
-    try:
-        r = _req.get(url, timeout=10, stream=True)
-        return Response(
-            r.content,
-            content_type=r.headers.get('Content-Type', 'image/jpeg'),
-            headers={'Access-Control-Allow-Origin': '*', 'Cache-Control': 'public, max-age=3600'}
-        )
-    except Exception as e:
-        return '', 500
-
-
 @main.route('/api/generate_social_ad', methods=['POST'])
 def generate_social_ad():
     """Generate AI caption for social ad using Claude Haiku based on real inventory."""
-    from flask import jsonify
     if 'team_member_id' not in session:
         return jsonify({'error': 'unauthorized'}), 401
     import sqlite3 as _sq, os, json, requests as _req
@@ -97,27 +77,24 @@ def generate_social_ad():
         _conn.close()
         return jsonify({'error': 'not found'}), 404
     member = dict(member)
-    # Get their active (non-expired) vehicles
+    # Get their vehicles
     from app.models.vehicle import Vehicle
-    from datetime import datetime as _dt
-    all_vehicles = Vehicle.query.filter(
+    from sqlalchemy import or_
+    vehicles = Vehicle.query.filter(
+        Vehicle.salesperson_id == member['dealership_id'],
         Vehicle.pick_user_id == member['id'],
-        Vehicle.approval_status == 'approved'
-    ).order_by(Vehicle.is_team_pick.desc(), Vehicle.created_at.desc()).all()
-    now = _dt.utcnow()
-    vehicles = [v for v in all_vehicles if not v.expires_at or v.expires_at > now]
+        Vehicle.status == 'available',
+        or_(Vehicle.approval_status == 'approved', Vehicle.approval_status == None)
+    ).order_by(Vehicle.is_team_pick.desc(), Vehicle.price.asc()).all()
     _conn.close()
-    top_pick = next((v for v in vehicles if v.is_team_pick), None)
-    if not top_pick and vehicles:
-        top_pick = vehicles[0]
-    no_inventory = top_pick is None
-    v_list = ', '.join([f"{v.year} {v.make} {v.model} (${v.price:,.0f})" for v in vehicles[:5]]) if vehicles else 'no active inventory'
+    if not vehicles:
+        return jsonify({'error': 'No vehicles found'}), 400
+    # Build vehicle list for prompt
+    v_list = ', '.join([f"{v.year} {v.make} {v.model} (${v.price:,.0f})" for v in vehicles[:5]])
+    top_pick = next((v for v in vehicles if v.is_team_pick), vehicles[0])
     first_name = member['name'].split()[0]
     # Call Claude Haiku for caption
-    if no_inventory:
-        caption = f"Check out my latest inventory — I'm adding fresh cars every week. Reach out directly."
-    else:
-      try:
+    try:
         resp = _req.post(
             'https://api.anthropic.com/v1/messages',
             headers={
@@ -131,16 +108,17 @@ def generate_social_ad():
                 'messages': [{
                     'role': 'user',
                     'content': f"""You are {first_name}, a car salesperson. Write a SHORT, HUMAN Facebook caption in first person.
+My inventory this week: {v_list}
 My featured pick: {top_pick.year} {top_pick.make} {top_pick.model} at ${top_pick.price:,.0f}
-Rules: EXACTLY 1 sentence. Max 20 words. Sound like a real person texting. Be specific about the car and price. No hashtags. No emojis.
-Output ONLY the single sentence. Nothing else."""
+Rules: Max 2 sentences. Sound like a real person texting a friend, not a corporate ad. Reference the actual cars. Be specific. No hashtags. No emojis unless natural.
+Output ONLY the caption text. Nothing else."""
                 }]
             },
             timeout=15
         )
         resp_data = resp.json()
         caption = resp_data['content'][0]['text'].strip()
-      except Exception as e:
+    except Exception as e:
         caption = f"Check out what I have this week — {top_pick.year} {top_pick.make} {top_pick.model} at ${top_pick.price:,.0f}. Reach out directly."
     # Build full social caption
     full_caption = caption
@@ -150,30 +128,24 @@ Output ONLY the single sentence. Nothing else."""
     storefront_url = f"https://carsinstock.com/{member['slug']}"
     full_caption += f"\n\n{storefront_url}"
     # Return data for canvas
-    top_pick_data = {}
-    if not no_inventory:
-        days_rem = max(0, (top_pick.expires_at - _dt.utcnow()).days) if top_pick.expires_at else 7
-        top_pick_data = {
-            'year': top_pick.year,
-            'make': top_pick.make,
-            'model': top_pick.model,
-            'trim': top_pick.trim or '',
-            'price': top_pick.price,
-            'image_url': top_pick.image_url or '',
-            'days_remaining': days_rem
-        }
     return jsonify({
         'success': True,
         'caption': full_caption,
         'ai_quote': caption,
-        'no_inventory': no_inventory,
         'member': {
             'name': member['name'],
             'slug': member['slug'],
-            'photo': (member['profile_photo'] + '?_cb=1') if member['profile_photo'] else '',
+            'photo': member['profile_photo'] or '',
             'phone': member['phone'] or ''
         },
-        'top_pick': top_pick_data,
+        'top_pick': {
+            'year': top_pick.year,
+            'make': top_pick.make,
+            'model': top_pick.model,
+            'price': top_pick.price,
+            'image_url': top_pick.image_url or '',
+            'days_remaining': top_pick.days_remaining or 7
+        },
         'stats': {
             'live_count': len(vehicles),
             'min_price': min(v.price for v in vehicles if v.price) if vehicles else 0
@@ -1491,37 +1463,3 @@ Output ONLY valid JSON with these exact keys:
     posts['image_urls'] = image_urls
     posts['storefront_url'] = storefront_url
     return jsonify(posts)
-
-
-@main.route('/api/subscribe_weekly', methods=['POST'])
-def subscribe_weekly():
-    from datetime import datetime
-    data = request.get_json()
-    email = (data.get('email') or '').strip().lower()
-    rep_slug = (data.get('rep_slug') or '').strip()
-
-    if not email or '@' not in email:
-        return jsonify({'success': False, 'message': 'Invalid email address.'})
-
-    conn = get_db()
-    rep = conn.execute(
-        'SELECT id, name FROM dealership_team WHERE slug = ?', (rep_slug,)
-    ).fetchone()
-
-    if not rep:
-        return jsonify({'success': False, 'message': 'Rep not found.'})
-
-    existing = conn.execute(
-        'SELECT id FROM weekly_subscribers WHERE email = ? AND rep_id = ?',
-        (email, rep['id'])
-    ).fetchone()
-
-    if existing:
-        return jsonify({'success': False, 'message': "You're already subscribed!"})
-
-    conn.execute(
-        'INSERT INTO weekly_subscribers (email, rep_id, subscribed_at) VALUES (?, ?, ?)',
-        (email, rep['id'], datetime.utcnow().isoformat())
-    )
-    conn.commit()
-    return jsonify({'success': True})
