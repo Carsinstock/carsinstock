@@ -567,7 +567,8 @@ async function generateProAd() {
         generatedCaption = data.quote;
         document.getElementById('adCaption').value = data.quote;
         document.getElementById('adCaption').readOnly = true;
-        document.getElementById('adPreviewWrap').style.display = 'none';
+        await drawAdCanvas(data);
+        document.getElementById('adPreviewWrap').style.display = 'block';
         var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
         document.getElementById('iosMsg').style.display = isIOS ? 'block' : 'none';
     } catch(e) {
@@ -607,170 +608,89 @@ function wrapText(ctx, text, x, y, maxW, lineH) {
 }
 
 async function drawAdCanvas(data) {
+    var profileImg = await loadImg(data.profile_photo);
+    var carImg = await loadImg(data.vehicle_photo);
     var canvas = document.getElementById('adCanvas');
-    var size = 1080;
-    canvas.width = size;
-    canvas.height = size;
+    var W = 1080, H = 1080;
+    canvas.width = W; canvas.height = H;
     var ctx = canvas.getContext('2d');
-    var navy = '#1E293B';
-    var green = '#00C851';
-    var white = '#FFFFFF';
-
-    // ── BG ──
-    ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, size, size);
-
-    // ── TOP SECTION (white, 0-320) ──
-    // Profile photo circle
-    var profileY = 60;
-    var profileSize = 110;
-    var profileX = 80;
-    var profileImg = await loadImg(data.member.photo);
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(profileX + profileSize/2, profileY + profileSize/2, profileSize/2, 0, Math.PI*2);
-    ctx.clip();
-    if (profileImg) {
-        ctx.drawImage(profileImg, profileX, profileY, profileSize, profileSize);
-    } else {
-        ctx.fillStyle = green;
-        ctx.fillRect(profileX, profileY, profileSize, profileSize);
-        ctx.fillStyle = white;
-        ctx.font = 'bold 48px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(data.member.name[0], profileX+profileSize/2, profileY+profileSize/2+18);
-    }
+    var navy = '#1E293B', green = '#00C851', white = '#FFFFFF';
+    ctx.fillStyle = white; ctx.fillRect(0, 0, W, H);
+    var cx = 110, cy = 100, cr = 70;
+    ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, cr, 0, Math.PI*2); ctx.clip();
+    if (profileImg) { ctx.drawImage(profileImg, cx-cr, cy-cr, cr*2, cr*2); }
+    else { ctx.fillStyle = green; ctx.fillRect(cx-cr, cy-cr, cr*2, cr*2); }
     ctx.restore();
-    // Green ring
-    ctx.strokeStyle = green;
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.arc(profileX + profileSize/2, profileY + profileSize/2, profileSize/2+4, 0, Math.PI*2);
-    ctx.stroke();
-
-    // Name
-    var nameX = profileX + profileSize + 24;
-    ctx.fillStyle = navy;
-    ctx.font = 'bold 52px Arial';
-    ctx.textAlign = 'left';
-    ctx.fillText(data.member.name, nameX, profileY + 60);
-
-    // Title/dealership
-    ctx.fillStyle = '#64748B';
-    ctx.font = '28px Arial';
-    ctx.fillText('Sales Associate · Pine Belt Used Cars', nameX, profileY + 100);
-    ctx.fillText('Toms River, NJ', nameX, profileY + 136);
-
-    // 🔥 Fresh Inventory badge (top right)
+    ctx.strokeStyle = green; ctx.lineWidth = 5;
+    ctx.beginPath(); ctx.arc(cx, cy, cr+6, 0, Math.PI*2); ctx.stroke();
+    var tx = cx + cr + 30;
+    ctx.fillStyle = navy; ctx.font = 'bold 52px Arial'; ctx.textAlign = 'left';
+    ctx.fillText(data.name || '', tx, 80);
+    ctx.fillStyle = '#64748B'; ctx.font = '30px Arial';
+    ctx.fillText((data.dealership || 'Pine Belt') + ' - ' + (data.city || 'NJ'), tx, 125);
     ctx.fillStyle = green;
-    roundRect(ctx, size-230, 60, 200, 50, 25, true);
-    ctx.fillStyle = white;
-    ctx.font = 'bold 22px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('🔥 Fresh Inventory', size-130, 93);
-
-    // ── QUOTE SECTION (white, 240-430) ──
-    var quote = data.ai_quote || '';
-    ctx.fillStyle = navy;
-    ctx.font = 'bold 36px Georgia';
-    ctx.textAlign = 'left';
-    var qLines = wrapText(ctx, '"' + quote + '"', 60, 260, size-120, 48);
-
-    // ── CAR PHOTO (430 - 700) ──
-    var carImgY = 260 + qLines * 48 + 20;
-    var carH = 270;
-    var carImg = await loadImg(data.top_pick.image_url);
+    roundRect(ctx, W-260, 30, 230, 52, 26, true);
+    ctx.fillStyle = white; ctx.font = 'bold 24px Arial'; ctx.textAlign = 'center';
+    ctx.fillText('Fresh Inventory', W-145, 65);
+    ctx.strokeStyle = '#E2E8F0'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(40, 185); ctx.lineTo(W-40, 185); ctx.stroke();
+    var carY = 200, carH = 480;
     if (carImg) {
-        ctx.drawImage(carImg, 0, carImgY, size, carH);
-    } else {
-        ctx.fillStyle = '#E2E8F0';
-        ctx.fillRect(0, carImgY, size, carH);
+        var scale = Math.max(W / carImg.width, carH / carImg.height);
+        var dw = carImg.width * scale, dh = carImg.height * scale;
+        var dx = (W - dw) / 2, dy = carY + (carH - dh) / 2;
+        ctx.drawImage(carImg, dx, dy, dw, dh);
+    } else { ctx.fillStyle = '#E2E8F0'; ctx.fillRect(0, carY, W, carH); }
+    var grad = ctx.createLinearGradient(0, carY + carH/2, 0, carY + carH);
+    grad.addColorStop(0, 'rgba(0,0,0,0)'); grad.addColorStop(1, 'rgba(0,0,0,0.82)');
+    ctx.fillStyle = grad; ctx.fillRect(0, carY, W, carH);
+    if (data.days_left > 0) {
+        var dlColor = data.days_left <= 2 ? '#DC2626' : data.days_left <= 4 ? '#F97316' : '#00C851';
+        ctx.fillStyle = dlColor;
+        roundRect(ctx, 24, carY+20, 220, 56, 28, true);
+        ctx.fillStyle = white; ctx.font = 'bold 26px Arial'; ctx.textAlign = 'center';
+        ctx.fillText(data.days_left + ' Day' + (data.days_left !== 1 ? 's' : '') + ' Left', 134, carY+56);
     }
-    // Dark gradient overlay bottom of car photo
-    var grad = ctx.createLinearGradient(0, carImgY+carH-120, 0, carImgY+carH);
-    grad.addColorStop(0, 'rgba(0,0,0,0)');
-    grad.addColorStop(1, 'rgba(0,0,0,0.75)');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, carImgY, size, carH);
-    // Days Left badge
-    if (data.top_pick.days_remaining) {
-        ctx.fillStyle = '#EF4444';
-        roundRect(ctx, 20, carImgY+16, 190, 48, 24, true);
-        ctx.fillStyle = white;
-        ctx.font = 'bold 22px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('🔥 ' + data.top_pick.days_remaining + ' Days Left', 115, carImgY+47);
-    }
-    // Car name + price overlay
-    ctx.fillStyle = white;
-    ctx.font = 'bold 38px Arial';
-    ctx.textAlign = 'left';
-    ctx.fillText(data.top_pick.year + ' ' + data.top_pick.make + ' ' + data.top_pick.model, 24, carImgY+carH-55);
-    ctx.fillStyle = green;
-    ctx.font = 'bold 46px Arial';
-    ctx.fillText('$' + Number(data.top_pick.price).toLocaleString(), 24, carImgY+carH-8);
-
-    // ── STATS BAR ──
-    var statsY = carImgY + carH;
-    ctx.fillStyle = navy;
-    ctx.fillRect(0, statsY, size, 110);
-    var stats = [
-        {label:'Cars Live', val: String(data.stats.live_count)},
-        {label:'Starting At', val:'$'+Math.round(data.stats.min_price/1000)+'k'},
-        {label:'Days Fresh', val:'7'}
+    ctx.fillStyle = white; ctx.font = 'bold 44px Arial'; ctx.textAlign = 'left';
+    ctx.fillText(data.vehicle_name || '', 30, carY + carH - 60);
+    ctx.fillStyle = green; ctx.font = 'bold 52px Arial'; ctx.textAlign = 'right';
+    ctx.fillText(data.price || '', W-30, carY + carH - 20);
+    var statsY = 680;
+    ctx.fillStyle = navy; ctx.fillRect(0, statsY, W, 100);
+    var statsData = [
+        {val: String(data.cars_live || 0), label: 'Cars Live'},
+        {val: data.starting_at || '$0k', label: 'Starting At'},
+        {val: (data.days_fresh || 0) + 'd', label: 'Days Fresh'}
     ];
-    stats.forEach(function(s, i) {
-        var sx = (size/3)*i + (size/3)/2;
-        ctx.fillStyle = green;
-        ctx.font = 'bold 40px Arial';
-        ctx.textAlign = 'center';
+    statsData.forEach(function(s, i) {
+        var sx = (W/3)*i + (W/3)/2;
+        ctx.fillStyle = green; ctx.font = 'bold 42px Arial'; ctx.textAlign = 'center';
         ctx.fillText(s.val, sx, statsY+52);
-        ctx.fillStyle = 'rgba(255,255,255,0.6)';
-        ctx.font = '22px Arial';
-        ctx.fillText(s.label, sx, statsY+84);
+        ctx.fillStyle = 'rgba(255,255,255,0.55)'; ctx.font = '22px Arial';
+        ctx.fillText(s.label, sx, statsY+82);
         if (i < 2) {
-            ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo((size/3)*(i+1), statsY+20);
-            ctx.lineTo((size/3)*(i+1), statsY+90);
-            ctx.stroke();
+            ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo((W/3)*(i+1), statsY+18); ctx.lineTo((W/3)*(i+1), statsY+88); ctx.stroke();
         }
     });
-
-    // ── REFERRAL STRIP ──
-    var refY = statsY + 110;
+    var nextY = 780;
     if (data.include_referral) {
-        ctx.fillStyle = '#F0FDF4';
-        ctx.fillRect(0, refY, size, 80);
-        ctx.strokeStyle = '#BBF7D0';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(0, refY, size, 80);
-        ctx.fillStyle = '#065F46';
-        ctx.font = 'bold 26px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText('Know someone looking? Refer them to ' + data.member.name.split(' ')[0] + ' — if they buy, you get $100', size/2, refY+48);
-        refY += 80;
+        ctx.fillStyle = '#F0FDF4'; ctx.fillRect(0, nextY, W, 80);
+        ctx.strokeStyle = '#BBF7D0'; ctx.lineWidth = 2; ctx.strokeRect(0, nextY, W, 80);
+        ctx.fillStyle = '#065F46'; ctx.font = 'bold 26px Arial'; ctx.textAlign = 'center';
+        ctx.fillText('Know someone? Refer them -- they buy -- you get $100', W/2, nextY+48);
+        nextY += 80;
     }
-
-    // ── URL PILL ──
-    var urlY = refY + 20;
+    var urlY = nextY + 20;
+    ctx.fillStyle = '#F8FAFC'; ctx.fillRect(0, nextY, W, 120);
     ctx.fillStyle = navy;
-    roundRect(ctx, size/2-200, urlY, 400, 56, 28, true);
-    ctx.fillStyle = green;
-    ctx.font = 'bold 26px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(data.storefront_url.replace('https://', ''), size/2, urlY+36);
-
-    // ── WATERMARK ──
-    ctx.fillStyle = 'rgba(148,163,184,0.7)';
-    ctx.font = '18px Arial';
-    ctx.textAlign = 'right';
-    ctx.fillText('Powered by CarsInStock', size-20, size-16);
-
-    // Resize canvas display
-    canvas.style.width = '100%';
-    canvas.style.height = 'auto';
+    roundRect(ctx, W/2-260, urlY, 520, 60, 30, true);
+    ctx.fillStyle = green; ctx.font = 'bold 28px Arial'; ctx.textAlign = 'center';
+    ctx.fillText('carsinstock.com/' + (data.slug || ''), W/2, urlY+39);
+    ctx.fillStyle = '#F1F5F9'; ctx.fillRect(0, 980, W, 100);
+    ctx.fillStyle = '#94A3B8'; ctx.font = '22px Arial'; ctx.textAlign = 'right';
+    ctx.fillText('Powered by CarsInStock', W-30, 1050);
+    canvas.style.width = '100%'; canvas.style.height = 'auto';
 }
 
 function roundRect(ctx, x, y, w, h, r, fill) {
