@@ -273,7 +273,7 @@ textarea.f-input{height:80px;resize:none}
       <div class="car-img-wrap">
         {% if v.image_url %}<img src="{{ v.image_url }}" class="car-img" alt="">
         {% else %}<div class="car-img-ph">🚗</div>{% endif %}
-        {% if v.days_remaining %}
+        {% if v.days_remaining is not none %}
         <div class="days-badge-card {% if v.days_remaining <= 2 %}red{% elif v.days_remaining <= 3 %}amber{% elif v.days_remaining >= 6 %}green{% else %}navy{% endif %}">{{ v.days_remaining }}d left</div>
         {% endif %}
       </div>
