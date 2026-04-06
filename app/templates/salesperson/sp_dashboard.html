@@ -569,6 +569,7 @@ async function generateProAd() {
         document.getElementById('adCaption').readOnly = true;
         await drawAdCanvas(data);
         document.getElementById('adPreviewWrap').style.display = 'block';
+        setTimeout(function(){ document.getElementById('adCanvas').scrollIntoView({behavior:'smooth', block:'start'}); }, 100);
         var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
         document.getElementById('iosMsg').style.display = isIOS ? 'block' : 'none';
     } catch(e) {
