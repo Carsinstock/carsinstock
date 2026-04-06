@@ -582,14 +582,15 @@ async function generateProAd() {
 
 // ── CANVAS DRAW ───────────────────────────────────────────────
 async function loadImg(src) {
-    return new Promise(function(resolve) {
-        if (!src) { resolve(null); return; }
-        var img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = function(){ resolve(img); };
-        img.onerror = function(){ resolve(null); };
-        img.src = '/api/proxy-image?url=' + encodeURIComponent(src);
-    });
+    if (!src) return null;
+    try {
+        var resp = await fetch('/api/proxy-image?url=' + encodeURIComponent(src));
+        var blob = await resp.blob();
+        var bitmap = await createImageBitmap(blob);
+        return bitmap;
+    } catch(e) {
+        return null;
+    }
 }
 
 function wrapText(ctx, text, x, y, maxW, lineH) {
