@@ -661,7 +661,7 @@ async function drawAdCanvas(data) {
     var statsData = [
         {val: String(data.cars_live || 0), label: 'Cars Live'},
         {val: data.starting_at || '$0k', label: 'Starting At'},
-        {val: data.city || 'NJ', label: 'Location'}
+        {val: (data.city ? data.city + ', NJ' : 'NJ'), label: 'Location'}
     ];
     statsData.forEach(function(s, i) {
         var sx = (W/3)*i + (W/3)/2;
