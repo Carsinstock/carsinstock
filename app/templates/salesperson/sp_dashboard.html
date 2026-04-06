@@ -584,14 +584,18 @@ async function generateProAd() {
 // ── CANVAS DRAW ───────────────────────────────────────────────
 async function loadImg(src) {
     if (!src) return null;
-    try {
-        var resp = await fetch('/api/proxy-image?url=' + encodeURIComponent(src));
-        var blob = await resp.blob();
-        var bitmap = await createImageBitmap(blob);
-        return bitmap;
-    } catch(e) {
-        return null;
+    for (var attempt = 0; attempt < 3; attempt++) {
+        try {
+            var resp = await fetch('/api/proxy-image?url=' + encodeURIComponent(src));
+            if (!resp.ok) { await new Promise(r => setTimeout(r, 300)); continue; }
+            var blob = await resp.blob();
+            var bitmap = await createImageBitmap(blob);
+            if (bitmap) return bitmap;
+        } catch(e) {
+            await new Promise(r => setTimeout(r, 300));
+        }
     }
+    return null;
 }
 
 function wrapText(ctx, text, x, y, maxW, lineH) {
