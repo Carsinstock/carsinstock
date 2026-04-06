@@ -567,10 +567,26 @@ async function generateProAd() {
         generatedCaption = data.quote;
         document.getElementById('adCaption').value = data.quote;
         document.getElementById('adCaption').readOnly = true;
-        await new Promise(r => setTimeout(r, 500));
+        await new Promise(r => setTimeout(r, 300));
         await drawAdCanvas(data);
         document.getElementById('adPreviewWrap').style.display = 'block';
         setTimeout(function(){ document.getElementById('adCanvas').scrollIntoView({behavior:'smooth', block:'start'}); }, 100);
+        // Also generate server-side image for clean download
+        var imgResp = await fetch('/api/generate_social_ad_image', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        });
+        if (imgResp.ok) {
+            var imgBlob = await imgResp.blob();
+            var imgUrl = URL.createObjectURL(imgBlob);
+            document.getElementById('saveBtn').onclick = function() {
+                var a = document.createElement('a');
+                a.download = 'my-pro-ad.png';
+                a.href = imgUrl;
+                a.click();
+            };
+        }
         var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
         document.getElementById('iosMsg').style.display = isIOS ? 'block' : 'none';
     } catch(e) {
