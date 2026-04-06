@@ -222,7 +222,12 @@ def generate_social_ad_image():
         car_img = car_img.resize((nw, nh))
         dx = (W - nw) // 2
         dy = car_y + (car_h - nh) // 2
-        img.paste(car_img, (dx, dy))
+        # Clip paste to car section only
+        from PIL import Image as _Img
+        car_region = Image.new('RGB', (W, car_h), (226, 232, 240))
+        paste_y = dy - car_y
+        car_region.paste(car_img, (dx, paste_y))
+        img.paste(car_region, (0, car_y))
     else:
         draw.rectangle([0, car_y, W, car_y+car_h], fill=(226, 232, 240))
 
