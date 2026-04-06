@@ -567,6 +567,7 @@ async function generateProAd() {
         generatedCaption = data.quote;
         document.getElementById('adCaption').value = data.quote;
         document.getElementById('adCaption').readOnly = true;
+        await new Promise(r => setTimeout(r, 500));
         await drawAdCanvas(data);
         document.getElementById('adPreviewWrap').style.display = 'block';
         setTimeout(function(){ document.getElementById('adCanvas').scrollIntoView({behavior:'smooth', block:'start'}); }, 100);
