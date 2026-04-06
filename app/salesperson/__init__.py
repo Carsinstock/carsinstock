@@ -113,3 +113,14 @@ def generate_social_ad():
         'include_referral': include_referral,
         'no_inventory': False,
     })
+
+
+@salesperson_bp.route('/api/proxy-image')
+def proxy_image():
+    import requests as _req
+    from flask import request as _request, Response
+    url = _request.args.get('url', '')
+    if not url or not url.startswith('https://res.cloudinary.com'):
+        return ('', 400)
+    r = _req.get(url, timeout=10)
+    return Response(r.content, content_type=r.headers.get('content-type', 'image/jpeg'))
