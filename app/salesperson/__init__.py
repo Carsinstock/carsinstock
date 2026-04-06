@@ -226,10 +226,16 @@ def generate_social_ad_image():
     else:
         draw.rectangle([0, car_y, W, car_y+car_h], fill=(226, 232, 240))
 
-    # Gradient overlay
+    # Gradient overlay using RGBA composite
+    gradient = Image.new('RGBA', (W, car_h), (0, 0, 0, 0))
+    grad_draw = ImageDraw.Draw(gradient)
     for i in range(car_h):
         alpha = int(200 * (i / car_h) ** 2)
-        draw.line([0, car_y+i, W, car_y+i], fill=(0, 0, 0, alpha))
+        grad_draw.line([0, i, W, i], fill=(0, 0, 0, alpha))
+    img_rgba = img.convert('RGBA')
+    img_rgba.paste(gradient, (0, car_y), gradient)
+    img = img_rgba.convert('RGB')
+    draw = ImageDraw.Draw(img)
 
     # Days left badge
     if days_left > 0:
