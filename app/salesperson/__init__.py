@@ -99,6 +99,7 @@ def generate_social_ad():
         'name': member['name'],
         'dealership': dealership,
         'city': city,
+        'full_address': ((dealership_row['address'] + ', ') if dealership_row and dealership_row['address'] else '') + city + ', ' + ((dealership_row['state']) if dealership_row and dealership_row['state'] else 'NJ') + ' ' + ((dealership_row['zip']) if dealership_row and dealership_row['zip'] else ''),
         'phone': member['phone'],
         'profile_photo': member['profile_photo'],
         'slug': member['slug'],
