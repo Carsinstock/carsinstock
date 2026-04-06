@@ -610,7 +610,14 @@ function wrapText(ctx, text, x, y, maxW, lineH) {
 }
 
 async function drawAdCanvas(data) {
-    var profileImg = await loadImg(data.profile_photo);
+    // Reuse already-loaded profile img from page to avoid race condition
+    var profileImg = null;
+    var pageProfileImg = document.querySelector('img[alt]');
+    if (pageProfileImg && pageProfileImg.complete && pageProfileImg.naturalWidth > 0) {
+        profileImg = pageProfileImg;
+    } else {
+        profileImg = await loadImg(data.profile_photo);
+    }
     var carImg = await loadImg(data.vehicle_photo);
     var canvas = document.getElementById('adCanvas');
     var W = 1080, H = 1080;
