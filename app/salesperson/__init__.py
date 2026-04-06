@@ -250,13 +250,12 @@ def generate_social_ad_image():
 
     # SECTION 3: Stats bar (660-760px)
     draw.rectangle([0, 660, W, 760], fill=NAVY)
-    stats = [(cars_live, 'Cars Live'), (starting_at, 'Starting At'), (str(days_left) + (' Day' if days_left == 1 else ' Days') + ' Left', 'Listing')]
+    stats = [(cars_live, 'Cars Live'), (starting_at, 'Starting At')]
     for i, (val, label) in enumerate(stats):
-        sx = int((W/3)*i + (W/3)/2)
+        sx = int((W/4)*(i+1))
         draw.text((sx, 700), val, font=font_bold_md, fill=GREEN, anchor='mm')
         draw.text((sx, 738), label, font=font_sm, fill=(200, 210, 220), anchor='mm')
-        if i < 2:
-            draw.line([(W//3)*(i+1), 678, (W//3)*(i+1), 748], fill=(60, 80, 100), width=1)
+    draw.line([(W//2), 678, (W//2), 748], fill=(60, 80, 100), width=1)
 
     # SECTION 4: Referral (760-840px, conditional)
     next_y = 760
