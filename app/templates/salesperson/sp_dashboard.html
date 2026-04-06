@@ -618,7 +618,7 @@ async function drawAdCanvas(data) {
     var ctx = canvas.getContext('2d');
     var navy = '#1E293B', green = '#00C851', white = '#FFFFFF';
     ctx.fillStyle = white; ctx.fillRect(0, 0, W, H);
-    var cx = 110, cy = 100, cr = 70;
+    var cx = 110, cy = 110, cr = 70;
     ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, cr, 0, Math.PI*2); ctx.clip();
     if (profileImg) { ctx.drawImage(profileImg, cx-cr, cy-cr, cr*2, cr*2); }
     else { ctx.fillStyle = green; ctx.fillRect(cx-cr, cy-cr, cr*2, cr*2); }
@@ -631,9 +631,9 @@ async function drawAdCanvas(data) {
     ctx.fillStyle = '#64748B'; ctx.font = '30px Arial';
     ctx.fillText((data.dealership || 'Pine Belt') + ' - ' + (data.city || 'NJ'), tx, 125);
     ctx.fillStyle = green;
-    roundRect(ctx, W-260, 30, 230, 52, 26, true);
+    roundRect(ctx, W-260, 20, 230, 52, 26, true);
     ctx.fillStyle = white; ctx.font = 'bold 24px Arial'; ctx.textAlign = 'center';
-    ctx.fillText('Fresh Inventory', W-145, 65);
+    ctx.fillText('Fresh Inventory', W-145, 55);
     ctx.strokeStyle = '#E2E8F0'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(40, 185); ctx.lineTo(W-40, 185); ctx.stroke();
     var carY = 200, carH = 480;
