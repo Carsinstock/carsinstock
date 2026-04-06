@@ -242,6 +242,22 @@ def generate_social_ad_image():
     img = img_rgba.convert('RGB')
     draw = ImageDraw.Draw(img)
 
+    # SECTION 1: Profile (drawn after gradient to avoid RGBA conversion loss)
+    draw.rectangle([0, 0, W, 220], fill=WHITE)
+    if profile_img:
+        profile_img = profile_img.resize((cr*2, cr*2))
+        mask = Image.new('L', (cr*2, cr*2), 0)
+        ImageDraw.Draw(mask).ellipse([0, 0, cr*2-1, cr*2-1], fill=255)
+        profile_img = profile_img.convert('RGB')
+        img.paste(profile_img, (cx-cr, cy-cr), mask)
+    draw.ellipse([cx-cr-6, cy-cr-6, cx+cr+6, cy+cr+6], outline=GREEN, width=5)
+    tx = cx + cr + 30
+    draw.text((tx, 65), name, font=font_bold_lg, fill=NAVY)
+    draw.text((tx, 125), dealership + ' - ' + city + ', NJ', font=font_reg, fill=GRAY)
+    draw.rounded_rectangle([W-260, 25, W-25, 80], radius=25, fill=GREEN)
+    draw.text((W-145, 52), 'Fresh Inventory', font=font_bold_sm, fill=WHITE, anchor='mm')
+    draw.line([40, 205, W-40, 205], fill=(226, 232, 240), width=2)
+
     # Days left badge
     if days_left > 0:
         badge_color = (220, 38, 38) if days_left <= 2 else (249, 115, 22) if days_left <= 4 else GREEN
