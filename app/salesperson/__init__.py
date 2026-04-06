@@ -48,8 +48,8 @@ def generate_social_ad():
     vehicle_photo = vehicle['image_url'] if vehicle['image_url'] else ''
 
     stats = db.execute(
-        'SELECT COUNT(*) as count, MIN(price) as lowest_price, MIN(created_at) as oldest_listing FROM vehicles WHERE salesperson_id=? AND status="available" AND expires_at > ?',
-        (member['dealership_id'], now)
+        'SELECT COUNT(*) as count, MIN(price) as lowest_price, MIN(created_at) as oldest_listing FROM vehicles WHERE pick_user_id=? AND status="available" AND expires_at > ?',
+        (team_member_id, now)
     ).fetchone()
 
     active_count = stats['count'] if stats else 0
