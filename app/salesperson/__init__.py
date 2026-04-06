@@ -123,4 +123,7 @@ def proxy_image():
     if not url or not url.startswith('https://res.cloudinary.com'):
         return ('', 400)
     r = _req.get(url, timeout=10)
-    return Response(r.content, content_type=r.headers.get('content-type', 'image/jpeg'))
+    resp = Response(r.content, content_type=r.headers.get('content-type', 'image/jpeg'))
+    resp.headers['Access-Control-Allow-Origin'] = '*'
+    resp.headers['Cache-Control'] = 'public, max-age=3600'
+    return resp
