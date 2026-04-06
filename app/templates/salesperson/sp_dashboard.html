@@ -635,8 +635,8 @@ async function drawAdCanvas(data) {
     ctx.fillStyle = white; ctx.font = 'bold 24px Arial'; ctx.textAlign = 'center';
     ctx.fillText('Fresh Inventory', W-145, 55);
     ctx.strokeStyle = '#E2E8F0'; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(40, 185); ctx.lineTo(W-40, 185); ctx.stroke();
-    var carY = 200, carH = 480;
+    ctx.beginPath(); ctx.moveTo(40, 235); ctx.lineTo(W-40, 235); ctx.stroke();
+    var carY = 250, carH = 430;
     if (carImg) {
         var scale = Math.max(W / carImg.width, carH / carImg.height);
         var dw = carImg.width * scale, dh = carImg.height * scale;
