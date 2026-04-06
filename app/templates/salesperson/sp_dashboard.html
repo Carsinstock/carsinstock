@@ -618,7 +618,7 @@ async function drawAdCanvas(data) {
     var ctx = canvas.getContext('2d');
     var navy = '#1E293B', green = '#00C851', white = '#FFFFFF';
     ctx.fillStyle = white; ctx.fillRect(0, 0, W, H);
-    var cx = 110, cy = 110, cr = 70;
+    var cx = 110, cy = 130, cr = 70;
     ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, cr, 0, Math.PI*2); ctx.clip();
     if (profileImg) { ctx.drawImage(profileImg, cx-cr, cy-cr, cr*2, cr*2); }
     else { ctx.fillStyle = green; ctx.fillRect(cx-cr, cy-cr, cr*2, cr*2); }
@@ -627,9 +627,9 @@ async function drawAdCanvas(data) {
     ctx.beginPath(); ctx.arc(cx, cy, cr+6, 0, Math.PI*2); ctx.stroke();
     var tx = cx + cr + 30;
     ctx.fillStyle = navy; ctx.font = 'bold 52px Arial'; ctx.textAlign = 'left';
-    ctx.fillText(data.name || '', tx, 80);
+    ctx.fillText(data.name || '', tx, 100);
     ctx.fillStyle = '#64748B'; ctx.font = '30px Arial';
-    ctx.fillText((data.dealership || 'Pine Belt') + ' - ' + (data.city || 'NJ'), tx, 125);
+    ctx.fillText((data.dealership || 'Pine Belt') + ' - ' + (data.city || 'NJ'), tx, 145);
     ctx.fillStyle = green;
     roundRect(ctx, W-260, 20, 230, 52, 26, true);
     ctx.fillStyle = white; ctx.font = 'bold 24px Arial'; ctx.textAlign = 'center';
