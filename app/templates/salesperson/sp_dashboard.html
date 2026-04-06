@@ -33,7 +33,7 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
     <!-- Header -->
     <div class="sp-header">
         {% if member.profile_photo %}
-        <img src="{{ member.profile_photo }}" alt="{{ member.name }}">
+        <img src="{{ member.profile_photo }}" alt="{{ member.name }}" crossorigin="anonymous">
         {% else %}
         <div style="width:60px;height:60px;border-radius:50%;background:#00C851;color:#1E293B;font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;">{{ member.name[0] }}</div>
         {% endif %}
