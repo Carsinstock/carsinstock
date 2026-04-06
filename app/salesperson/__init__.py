@@ -25,7 +25,7 @@ def generate_social_ad():
         return jsonify({'error': 'Team member not found'}), 404
 
     dealership_row = db.execute(
-        'SELECT name, city FROM dealerships WHERE id=?',
+        'SELECT name, city, address, state, zip FROM dealerships WHERE id=?',
         (member['dealership_id'],)
     ).fetchone()
     dealership = dealership_row['name'] if dealership_row and dealership_row['name'] else 'Pine Belt'
@@ -148,6 +148,7 @@ def generate_social_ad_image():
     name = data.get('name', '')
     dealership = data.get('dealership', '')
     city = data.get('city', '')
+    full_address = data.get('full_address', city + ', NJ')
     vehicle_name = data.get('vehicle_name', '')
     price = data.get('price', '')
     days_left = int(data.get('days_left', 0))
@@ -230,7 +231,7 @@ def generate_social_ad_image():
     draw.ellipse([cx-cr-6, cy-cr-6, cx+cr+6, cy+cr+6], outline=GREEN, width=5)
     tx = cx + cr + 30
     draw.text((tx, 65), name, font=font_bold_lg, fill=NAVY)
-    draw.text((tx, 125), dealership + ' - ' + city + ', NJ', font=font_reg, fill=GRAY)
+    draw.text((tx, 125), full_address, font=font_reg, fill=GRAY)
     draw.rounded_rectangle([W-260, 25, W-25, 80], radius=25, fill=GREEN)
     draw.text((W-145, 52), 'Fresh Inventory', font=font_bold_sm, fill=WHITE, anchor='mm')
     draw.line([40, 205, W-40, 205], fill=(226, 232, 240), width=2)
@@ -269,7 +270,7 @@ def generate_social_ad_image():
     draw.rectangle([0, next_y, W, next_y+120], fill=LIGHT)
     draw.rounded_rectangle([W//2-260, url_y, W//2+260, url_y+60], radius=30, fill=NAVY)
     draw.text((W//2, url_y+30), 'carsinstock.com/' + slug, font=font_bold_sm, fill=GREEN, anchor='mm')
-    draw.text((W//2, url_y+80), dealership + ' - ' + city + ', NJ', font=font_sm, fill=GRAY, anchor='mm')
+    draw.text((W//2, url_y+80), full_address, font=font_sm, fill=GRAY, anchor='mm')
 
     # SECTION 6: Watermark
     wm_y = next_y + 120
