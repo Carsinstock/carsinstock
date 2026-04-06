@@ -612,7 +612,7 @@ async function drawAdCanvas(data) {
     var profileImg = await loadImg(data.profile_photo);
     var carImg = await loadImg(data.vehicle_photo);
     var canvas = document.getElementById('adCanvas');
-    var W = 1080, H = 1080;
+    var W = 1080, H = 1200;
     canvas.width = W; canvas.height = H;
     var ctx = canvas.getContext('2d');
     var navy = '#1E293B', green = '#00C851', white = '#FFFFFF';
@@ -690,9 +690,9 @@ async function drawAdCanvas(data) {
     ctx.fillText('carsinstock.com/' + (data.slug || ''), W/2, urlY+39);
     ctx.fillStyle = '#94A3B8'; ctx.font = '22px Arial'; ctx.textAlign = 'center';
     ctx.fillText((data.dealership || '') + ' - ' + (data.city || '') + ', NJ', W/2, urlY+75);
-    ctx.fillStyle = '#F1F5F9'; ctx.fillRect(0, 980, W, 100);
+    ctx.fillStyle = '#F1F5F9'; ctx.fillRect(0, H-120, W, 120);
     ctx.fillStyle = '#94A3B8'; ctx.font = '22px Arial'; ctx.textAlign = 'right';
-    ctx.fillText('Powered by CarsInStock', W-30, 1050);
+    ctx.fillText('Powered by CarsInStock', W-30, H-30);
     canvas.style.width = '100%'; canvas.style.height = 'auto';
 }
 
