@@ -688,6 +688,8 @@ async function drawAdCanvas(data) {
     roundRect(ctx, W/2-260, urlY, 520, 60, 30, true);
     ctx.fillStyle = green; ctx.font = 'bold 28px Arial'; ctx.textAlign = 'center';
     ctx.fillText('carsinstock.com/' + (data.slug || ''), W/2, urlY+39);
+    ctx.fillStyle = '#94A3B8'; ctx.font = '22px Arial'; ctx.textAlign = 'center';
+    ctx.fillText((data.dealership || '') + ' - ' + (data.city || '') + ', NJ', W/2, urlY+75);
     ctx.fillStyle = '#F1F5F9'; ctx.fillRect(0, 980, W, 100);
     ctx.fillStyle = '#94A3B8'; ctx.font = '22px Arial'; ctx.textAlign = 'right';
     ctx.fillText('Powered by CarsInStock', W-30, 1050);
