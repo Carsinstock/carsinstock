@@ -125,5 +125,5 @@ def proxy_image():
     r = _req.get(url, timeout=10)
     resp = Response(r.content, content_type=r.headers.get('content-type', 'image/jpeg'))
     resp.headers['Access-Control-Allow-Origin'] = '*'
-    resp.headers['Cache-Control'] = 'public, max-age=3600'
+    resp.headers['Cache-Control'] = 'no-store'
     return resp

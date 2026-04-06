@@ -587,7 +587,8 @@ async function loadImg(src) {
         var img = new Image();
         img.onload = function(){ resolve(img); };
         img.onerror = function(){ resolve(null); };
-        src = '/api/proxy-image?url=' + encodeURIComponent(src);
+        img.crossOrigin = 'anonymous';
+        src = '/api/proxy-image?cb=' + Date.now() + '&url=' + encodeURIComponent(src);
         img.onerror = function(){ resolve(null); };
         img.src = src;
     });
