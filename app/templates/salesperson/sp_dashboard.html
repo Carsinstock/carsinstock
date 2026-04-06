@@ -582,20 +582,19 @@ async function generateProAd() {
 }
 
 // ── CANVAS DRAW ───────────────────────────────────────────────
-async function loadImg(src) {
-    if (!src) return null;
-    for (var attempt = 0; attempt < 3; attempt++) {
-        try {
-            var resp = await fetch('/api/proxy-image?url=' + encodeURIComponent(src));
-            if (!resp.ok) { await new Promise(r => setTimeout(r, 300)); continue; }
-            var blob = await resp.blob();
-            var bitmap = await createImageBitmap(blob);
-            if (bitmap) return bitmap;
-        } catch(e) {
-            await new Promise(r => setTimeout(r, 300));
-        }
-    }
-    return null;
+function loadImg(src) {
+    return new Promise(function(resolve) {
+        if (!src) { resolve(null); return; }
+        var img = new Image();
+        img.onload = function() { resolve(img); };
+        img.onerror = function() { resolve(null); };
+        fetch('/api/proxy-image?url=' + encodeURIComponent(src))
+            .then(function(r) { return r.blob(); })
+            .then(function(blob) {
+                img.src = URL.createObjectURL(blob);
+            })
+            .catch(function() { resolve(null); });
+    });
 }
 
 function wrapText(ctx, text, x, y, maxW, lineH) {
@@ -616,14 +615,9 @@ function wrapText(ctx, text, x, y, maxW, lineH) {
 
 async function drawAdCanvas(data) {
     // Reuse already-loaded profile img from page to avoid race condition
-    var profileImg = null;
-    var pageProfileImg = document.querySelector('img[alt]');
-    if (pageProfileImg && pageProfileImg.complete && pageProfileImg.naturalWidth > 0) {
-        profileImg = pageProfileImg;
-    } else {
-        profileImg = await loadImg(data.profile_photo);
-    }
-    var carImg = await loadImg(data.vehicle_photo);
+    var images = await Promise.all([loadImg(data.profile_photo), loadImg(data.vehicle_photo)]);
+    var profileImg = images[0];
+    var carImg = images[1];
     var canvas = document.getElementById('adCanvas');
     var W = 1080, H = 1080;
     canvas.width = W; canvas.height = H;
