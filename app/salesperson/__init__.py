@@ -233,8 +233,8 @@ def generate_social_ad_image():
     tx = cx + cr + 30
     draw.text((tx, 65), name, font=font_bold_lg, fill=NAVY)
     draw.text((tx, 125), dealership + ' · ' + full_address, font=font_reg, fill=GRAY)
-    draw.rounded_rectangle([W-260, 25, W-25, 80], radius=25, fill=GREEN)
-    draw.text((W-145, 52), 'Fresh Inventory', font=font_bold_sm, fill=WHITE, anchor='mm')
+    draw.rounded_rectangle([W-270, 25, W-15, 80], radius=25, fill=GREEN)
+    draw.text((W-143, 52), 'Fresh Inventory', font=font_bold_sm, fill=WHITE, anchor='mm')
     draw.line([40, 205, W-40, 205], fill=(226, 232, 240), width=2)
 
     # Days left badge
