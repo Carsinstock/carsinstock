@@ -718,10 +718,14 @@ function saveAdImage() {
         document.getElementById('iosMsg').style.display = 'block';
         return;
     }
-    var link = document.createElement('a');
-    link.download = 'my-pro-ad.png';
-    link.href = canvas.toDataURL('image/png');
-    link.click();
+    canvas.toBlob(function(blob) {
+        var url = URL.createObjectURL(blob);
+        var link = document.createElement('a');
+        link.download = 'my-pro-ad.png';
+        link.href = url;
+        link.click();
+        setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+    }, 'image/png');
 }
 
 // ── SORT ──────────────────────────────────────────────────────
