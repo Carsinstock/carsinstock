@@ -483,6 +483,7 @@ function showShareTab(tab) {
 
 // ── PLATFORM ──────────────────────────────────────────────────
 var selectedPlatform = 'facebook';
+var serverAdUrl = null;
 function selectPlatform(p) {
     selectedPlatform = p;
     ['facebook','instagram','whatsapp','text'].forEach(function(pl) {
@@ -580,6 +581,7 @@ async function generateProAd() {
         if (imgResp.ok) {
             var imgBlob = await imgResp.blob();
             var imgUrl = URL.createObjectURL(imgBlob);
+            serverAdUrl = imgUrl;
             document.getElementById('saveBtn').onclick = function() {
                 var a = document.createElement('a');
                 a.download = 'my-pro-ad.png';
@@ -601,12 +603,12 @@ async function generateProAd() {
 function loadImg(src) {
     return new Promise(function(resolve) {
         if (!src) { resolve(null); return; }
-        var img = new Image();
-        img.onload = function() { resolve(img); };
-        img.onerror = function() { resolve(null); };
         fetch('/api/proxy-image?url=' + encodeURIComponent(src))
             .then(function(r) { return r.blob(); })
             .then(function(blob) {
+                var img = new Image();
+                img.onload = function() { resolve(img); };
+                img.onerror = function() { resolve(null); };
                 img.src = URL.createObjectURL(blob);
             })
             .catch(function() { resolve(null); });
@@ -749,6 +751,13 @@ function saveAdImage() {
     var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     if (isIOS) {
         document.getElementById('iosMsg').style.display = 'block';
+        return;
+    }
+    if (serverAdUrl) {
+        var link = document.createElement('a');
+        link.download = 'my-pro-ad.png';
+        link.href = serverAdUrl;
+        link.click();
         return;
     }
     canvas.toBlob(function(blob) {

@@ -232,7 +232,7 @@ def generate_social_ad_image():
     draw.ellipse([cx-cr-6, cy-cr-6, cx+cr+6, cy+cr+6], outline=GREEN, width=5)
     tx = cx + cr + 30
     draw.text((tx, 65), name, font=font_bold_lg, fill=NAVY)
-    draw.text((tx, 125), dealership + ' · ' + full_address, font=font_reg, fill=GRAY)
+    draw.text((tx, 130), 'Sales Professional', font=font_sm, fill=GRAY)
     draw.rounded_rectangle([W-270, 25, W-15, 80], radius=25, fill=GREEN)
     draw.text((W-143, 52), 'Fresh Inventory', font=font_bold_sm, fill=WHITE, anchor='mm')
     draw.line([40, 205, W-40, 205], fill=(226, 232, 240), width=2)
@@ -246,34 +246,37 @@ def generate_social_ad_image():
     # Car name and price overlay
     draw.text((30, car_y+car_h-70), vehicle_name, font=font_car, fill=WHITE)
     bbox = draw.textbbox((0,0), price, font=font_price)
-    draw.text((W-30-(bbox[2]-bbox[0]), car_y+car_h-15), price, font=font_price, fill=GREEN, anchor='lb')
-
-    # SECTION 3: Stats bar (660-760px)
-    draw.rectangle([0, 660, W, 760], fill=NAVY)
+    # SECTION 3: Stats bar
+    stats_y = 660
+    draw.text((W-30, stats_y), price, font=font_price, fill=GREEN, anchor='rb')
+    draw.rectangle([0, stats_y, W, stats_y+100], fill=NAVY)
     stats = [(cars_live, 'Cars Live'), (starting_at, 'Starting At')]
+    positions = [W//4, W*3//4]
     for i, (val, label) in enumerate(stats):
-        sx = int((W/4)*(i+1))
-        draw.text((sx, 700), val, font=font_bold_md, fill=GREEN, anchor='mm')
-        draw.text((sx, 738), label, font=font_sm, fill=(200, 210, 220), anchor='mm')
-    draw.line([(W//2), 678, (W//2), 748], fill=(60, 80, 100), width=1)
+        sx = positions[i]
+        draw.text((sx, stats_y+40), val, font=font_bold_md, fill=GREEN, anchor='mm')
+        draw.text((sx, stats_y+78), label, font=font_sm, fill=(200, 210, 220), anchor='mm')
+    draw.line([(W//2), stats_y+18, (W//2), stats_y+88], fill=(60, 80, 100), width=1)
 
-    # SECTION 4: Referral (760-840px, conditional)
-    next_y = 760
+    # SECTION 4: Referral
+    next_y = stats_y + 100
     if include_referral:
         draw.rectangle([0, next_y, W, next_y+80], fill=(240, 253, 244))
         draw.rectangle([0, next_y, W, next_y+80], outline=(187, 247, 208), width=2)
         draw.text((W//2, next_y+40), 'Know someone? Refer them -- they buy -- you get $100', font=font_bold_sm, fill=(6, 95, 70), anchor='mm')
         next_y += 80
 
-    # SECTION 5: URL pill
-    url_y = next_y + 20
-    draw.rectangle([0, next_y, W, next_y+120], fill=LIGHT)
-    draw.rounded_rectangle([W//2-260, url_y, W//2+260, url_y+60], radius=30, fill=NAVY)
-    draw.text((W//2, url_y+30), 'carsinstock.com/' + slug, font=font_bold_sm, fill=GREEN, anchor='mm')
-    draw.text((W//2, url_y+80), dealership + ' · ' + full_address, font=font_sm, fill=GRAY, anchor='mm')
+    # SECTION 5: Dealership proud bottom
+    draw.rectangle([0, next_y, W, next_y+140], fill=LIGHT)
+    try:
+        font_dealership = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 58)
+    except:
+        font_dealership = font_bold_lg
+    draw.text((W//2, next_y+55), 'Pine Belt Used Cars', font=font_bold_md, fill=NAVY, anchor='mm')
+    draw.text((W//2, next_y+105), full_address, font=font_reg, fill=GRAY, anchor='mm')
 
     # SECTION 6: Watermark
-    wm_y = next_y + 120
+    wm_y = next_y + 140
     draw.rectangle([0, wm_y, W, H], fill=(241, 245, 249))
     draw.text((W-30, wm_y+40), 'Powered by CarsInStock', font=font_sm, fill=GRAY, anchor='rm')
 
