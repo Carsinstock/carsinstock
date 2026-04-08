@@ -132,7 +132,8 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
 
             <!-- Ad preview section -->
             <div id="adPreviewWrap" style="display:none;">
-                <canvas id="adCanvas" style="width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.12);display:block;"></canvas>
+                <img id="adPreviewImg" src="" alt="Your Pro Social Ad" style="width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.12);display:block;">
+                <canvas id="adCanvas" style="display:none;"></canvas>
                 <div id="iosMsg" style="display:none;background:#FEF9C3;border:1px solid #FDE047;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:12px;color:#854D0E;font-weight:600;">
                     &#128241; On iPhone: Long press the image &#x2192; tap <strong>Save to Photos</strong>
                 </div>
@@ -571,7 +572,7 @@ async function generateProAd() {
         await new Promise(r => setTimeout(r, 300));
         await drawAdCanvas(data);
         document.getElementById('adPreviewWrap').style.display = 'block';
-        setTimeout(function(){ document.getElementById('adCanvas').scrollIntoView({behavior:'smooth', block:'start'}); }, 100);
+        setTimeout(function(){ document.getElementById('adPreviewImg').scrollIntoView({behavior:'smooth', block:'start'}); }, 100);
         // Also generate server-side image for clean download
         var imgResp = await fetch('/api/generate_social_ad_image', {
             method: 'POST',
@@ -582,6 +583,7 @@ async function generateProAd() {
             var imgBlob = await imgResp.blob();
             var imgUrl = URL.createObjectURL(imgBlob);
             serverAdUrl = imgUrl;
+            document.getElementById('adPreviewImg').src = imgUrl;
             document.getElementById('saveBtn').onclick = function() {
                 var a = document.createElement('a');
                 a.download = 'my-pro-ad.png';

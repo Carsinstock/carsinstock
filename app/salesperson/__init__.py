@@ -267,18 +267,17 @@ def generate_social_ad_image():
         next_y += 80
 
     # SECTION 5: Dealership proud bottom
-    draw.rectangle([0, next_y, W, next_y+140], fill=LIGHT)
+    draw.rectangle([0, next_y, W, H], fill=WHITE)
     try:
-        font_dealership = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 58)
+        font_dealership = ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf', 54)
+        font_dealership_addr = ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf', 26)
     except:
-        font_dealership = font_bold_lg
-    draw.text((W//2, next_y+55), 'Pine Belt Used Cars', font=font_bold_md, fill=NAVY, anchor='mm')
-    draw.text((W//2, next_y+105), full_address, font=font_reg, fill=GRAY, anchor='mm')
-
-    # SECTION 6: Watermark
-    wm_y = next_y + 140
-    draw.rectangle([0, wm_y, W, H], fill=(241, 245, 249))
-    draw.text((W-30, wm_y+40), 'Powered by CarsInStock', font=font_sm, fill=GRAY, anchor='rm')
+        font_dealership = font_bold_md
+        font_dealership_addr = font_sm
+    draw.line([80, next_y+20, W-80, next_y+20], fill=(226, 232, 240), width=2)
+    draw.text((W//2, next_y+70), dealership, font=font_dealership, fill=NAVY, anchor='mm')
+    draw.text((W//2, next_y+110), full_address, font=font_dealership_addr, fill=GRAY, anchor='mm')
+    draw.text((W-30, next_y+148), 'Powered by CarsInStock', font=font_dealership_addr, fill=(203, 213, 225), anchor='rm')
 
     # Return PNG
     buf = io.BytesIO()
