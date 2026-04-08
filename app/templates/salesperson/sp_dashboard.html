@@ -139,7 +139,10 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
                 </div>
                 <div style="display:flex;gap:10px;margin-top:12px;">
                     <button onclick="copyCaption()" style="flex:1;background:#1E293B;color:white;border:none;padding:12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">&#128203; Copy Caption</button>
-                    <button onclick="saveAdImage()" id="saveBtn" style="flex:1;background:#00C851;color:white;border:none;padding:12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">&#128190; Save Image</button>
+                    <button onclick="shareAdImage()" id="shareBtn" style="flex:1;background:#00C851;color:white;border:none;padding:12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">&#128279; Share My Ad</button>
+                </div>
+                <div style="display:flex;gap:10px;margin-top:8px;">
+                    <button onclick="saveAdImage()" id="saveBtn" style="width:100%;background:#64748B;color:white;border:none;padding:10px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">&#128190; Save Image to Device</button>
                 </div>
             </div>
         </div>
@@ -485,6 +488,31 @@ function showShareTab(tab) {
 // ── PLATFORM ──────────────────────────────────────────────────
 var selectedPlatform = 'facebook';
 var serverAdUrl = null;
+
+async function shareAdImage() {
+    if (!serverAdUrl) { alert('Generate your ad first.'); return; }
+    try {
+        var response = await fetch(serverAdUrl);
+        var blob = await response.blob();
+        var file = new File([blob], 'my-pro-ad.png', {type: 'image/png'});
+        var caption = generatedCaption || '';
+        if (navigator.canShare && navigator.canShare({files: [file]})) {
+            await navigator.share({
+                files: [file],
+                title: 'My Pro Social Ad',
+                text: caption
+            });
+        } else {
+            var a = document.createElement('a');
+            a.href = serverAdUrl;
+            a.download = 'my-pro-ad.png';
+            a.click();
+            alert('Image saved! Now open Facebook or Instagram and attach it with your caption.');
+        }
+    } catch(e) {
+        if (e.name !== 'AbortError') alert('Share failed: ' + e.message);
+    }
+}
 function selectPlatform(p) {
     selectedPlatform = p;
     ['facebook','instagram','whatsapp','text'].forEach(function(pl) {
@@ -566,8 +594,8 @@ async function generateProAd() {
         if (data.error) { throw new Error(data.error); }
         if (data.no_inventory) { throw new Error('No active vehicles found. Add a vehicle first.'); }
         generatedAdData = data;
-        generatedCaption = data.quote;
-        document.getElementById('adCaption').value = data.quote;
+        generatedCaption = data.quote + '\n\nSee my inventory at carsinstock.com/' + data.slug;
+        document.getElementById('adCaption').value = generatedCaption;
         document.getElementById('adCaption').readOnly = true;
         await new Promise(r => setTimeout(r, 300));
         await drawAdCanvas(data);
