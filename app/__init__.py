@@ -52,6 +52,30 @@ def create_app():
             pass
         return {'pending_count': 0}
 
+    @app.route('/<path:slug>')
+    def cardeals_redirect(slug):
+        from flask import request, redirect
+        import sqlite3, os
+        host = request.host.lower()
+        if 'cardeals.autos' in host:
+            try:
+                basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+                db_path = os.path.join(basedir, 'instance', 'carsinstock.db')
+                conn = sqlite3.connect(db_path)
+                conn.row_factory = sqlite3.Row
+                member = conn.execute(
+                    "SELECT slug FROM dealership_team WHERE LOWER(slug) = ? LIMIT 1",
+                    (slug.lower(),)
+                ).fetchone()
+                conn.close()
+                if member:
+                    return redirect(f'https://carsinstock.com/{member["slug"]}', code=301)
+            except Exception:
+                pass
+            return redirect('https://carsinstock.com', code=301)
+        from flask import abort
+        abort(404)
+
     @app.errorhandler(404)
     def not_found(e):
         from flask import render_template
