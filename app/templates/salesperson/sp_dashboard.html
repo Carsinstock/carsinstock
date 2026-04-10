@@ -594,7 +594,8 @@ async function generateProAd() {
         if (data.error) { throw new Error(data.error); }
         if (data.no_inventory) { throw new Error('No active vehicles found. Add a vehicle first.'); }
         generatedAdData = data;
-        generatedCaption = data.quote + '\n\nSee my inventory at carsinstock.com/' + data.slug;
+        var firstName = data.name.split(' ')[0].toLowerCase();
+        generatedCaption = data.quote + '\n\nSee my inventory → cardeals.autos/' + firstName;
         document.getElementById('adCaption').value = generatedCaption;
         document.getElementById('adCaption').readOnly = true;
         await new Promise(r => setTimeout(r, 300));
