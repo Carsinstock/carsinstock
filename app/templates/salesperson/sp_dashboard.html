@@ -138,14 +138,30 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
                 <div style="display:flex;gap:10px;margin-top:8px;">
                     <button onclick="saveAdImage()" id="saveBtn" style="width:100%;background:#64748B;color:white;border:none;padding:10px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">&#128190; Save Image to Device</button>
                 </div>
-                <!-- Desktop Instructions -->
-                <div id="desktopInstructions" style="display:none;margin-top:16px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:12px;padding:16px;">
-                    <div style="font-weight:800;color:#166534;font-size:14px;margin-bottom:12px;">&#9989; Image saved! Your caption is copied. Now post it:</div>
-                    <div style="font-size:13px;color:#166534;margin-bottom:8px;"><strong>Step 1</strong> — Click the button below to open Facebook</div>
-                    <div style="font-size:13px;color:#166534;margin-bottom:8px;"><strong>Step 2</strong> — Click "What's on your mind?" to create a post</div>
-                    <div style="font-size:13px;color:#166534;margin-bottom:8px;"><strong>Step 3</strong> — Click the photo icon and attach your downloaded image</div>
-                    <div style="font-size:13px;color:#166534;margin-bottom:16px;"><strong>Step 4</strong> — Paste your caption (already copied!) and hit Post</div>
-                    <a id="fbPostBtn" href="https://www.facebook.com" target="_blank" style="display:block;background:#1877F2;color:white;text-align:center;padding:12px;border-radius:8px;font-weight:700;font-size:14px;text-decoration:none;">&#128504; Open Facebook Now</a>
+                <!-- Share Modal Overlay -->
+                <div id="shareModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
+                    <div style="background:white;border-radius:24px;padding:28px 24px;width:92%;max-width:380px;box-shadow:0 24px 60px rgba(0,0,0,0.3);">
+                        <div style="font-weight:800;font-size:20px;color:#1E293B;margin-bottom:4px;text-align:center;">&#127881; Share Your Ad</div>
+                        <div style="font-size:13px;color:#64748B;text-align:center;margin-bottom:20px;">Image saved &amp; caption copied. Pick where to post:</div>
+                        <div style="display:flex;flex-direction:column;gap:10px;">
+                            <a onclick="shareToFacebook()" style="display:flex;align-items:center;gap:14px;background:#1877F2;color:white;padding:14px 18px;border-radius:14px;font-weight:700;font-size:15px;cursor:pointer;text-decoration:none;">
+                                <span style="font-size:24px;">&#128216;</span> Post to Facebook
+                            </a>
+                            <a onclick="shareToInstagram()" style="display:flex;align-items:center;gap:14px;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:white;padding:14px 18px;border-radius:14px;font-weight:700;font-size:15px;cursor:pointer;text-decoration:none;">
+                                <span style="font-size:24px;">&#128247;</span> Post to Instagram
+                            </a>
+                            <a onclick="shareToWhatsApp()" style="display:flex;align-items:center;gap:14px;background:#25D366;color:white;padding:14px 18px;border-radius:14px;font-weight:700;font-size:15px;cursor:pointer;text-decoration:none;">
+                                <span style="font-size:24px;">&#128172;</span> Share on WhatsApp
+                            </a>
+                            <a onclick="shareViaSMS()" style="display:flex;align-items:center;gap:14px;background:#1E293B;color:white;padding:14px 18px;border-radius:14px;font-weight:700;font-size:15px;cursor:pointer;text-decoration:none;">
+                                <span style="font-size:24px;">&#9993;</span> Send as Text
+                            </a>
+                            <a onclick="copyStoreLink()" style="display:flex;align-items:center;gap:14px;background:#F1F5F9;color:#1E293B;padding:14px 18px;border-radius:14px;font-weight:700;font-size:15px;cursor:pointer;text-decoration:none;">
+                                <span style="font-size:24px;">&#128279;</span> Copy My Store Link
+                            </a>
+                        </div>
+                        <button onclick="closeShareModal()" style="width:100%;margin-top:14px;background:none;border:1px solid #E2E8F0;padding:11px;border-radius:12px;font-size:14px;color:#64748B;cursor:pointer;font-weight:600;">Cancel</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -492,6 +508,49 @@ function showShareTab(tab) {
 var selectedPlatform = 'facebook';
 var serverAdUrl = null;
 
+function closeShareModal() {
+    document.getElementById('shareModal').style.display = 'none';
+}
+
+function shareToFacebook() {
+    closeShareModal();
+    window.open('https://www.facebook.com', '_blank');
+}
+
+function shareToInstagram() {
+    closeShareModal();
+    var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile) {
+        window.open('instagram://app', '_blank');
+        setTimeout(function(){ window.open('https://www.instagram.com', '_blank'); }, 1500);
+    } else {
+        window.open('https://www.instagram.com', '_blank');
+    }
+}
+
+function shareToWhatsApp() {
+    closeShareModal();
+    var caption = generatedCaption || '';
+    var url = 'https://wa.me/?text=' + encodeURIComponent(caption);
+    window.open(url, '_blank');
+}
+
+function shareViaSMS() {
+    closeShareModal();
+    var caption = generatedCaption || '';
+    window.open('sms:?body=' + encodeURIComponent(caption), '_blank');
+}
+
+function copyStoreLink() {
+    closeShareModal();
+    var caption = generatedCaption || '';
+    navigator.clipboard.writeText(caption).then(function() {
+        alert('Caption copied! Open any app and paste it.');
+    }).catch(function() {
+        alert('Your caption:\n\n' + caption);
+    });
+}
+
 async function shareAdImage() {
     if (!serverAdUrl) { alert('Generate your ad first.'); return; }
     var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -514,8 +573,8 @@ async function shareAdImage() {
             if (caption) {
                 navigator.clipboard.writeText(caption).catch(function(){});
             }
-            document.getElementById('desktopInstructions').style.display = 'block';
-            document.getElementById('fbPostBtn').href = 'https://www.facebook.com';
+            var modal = document.getElementById('shareModal');
+            modal.style.display = 'flex';
         }
     } catch(e) {
         if (e.name !== 'AbortError') alert('Share failed: ' + e.message);
