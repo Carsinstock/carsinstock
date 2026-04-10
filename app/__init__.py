@@ -64,8 +64,8 @@ def create_app():
                 conn = sqlite3.connect(db_path)
                 conn.row_factory = sqlite3.Row
                 member = conn.execute(
-                    "SELECT slug FROM dealership_team WHERE LOWER(slug) = ? LIMIT 1",
-                    (slug.lower(),)
+                    "SELECT slug FROM dealership_team WHERE LOWER(slug) = ? OR LOWER(SUBSTR(name, 1, INSTR(name, ' ')-1)) = ? LIMIT 1",
+                    (slug.lower(), slug.lower())
                 ).fetchone()
                 conn.close()
                 if member:
