@@ -90,13 +90,7 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
 
             <!-- Platform selector -->
             <div style="margin-bottom:16px;">
-                <div style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;">Platform</div>
-                <div style="display:flex;gap:6px;">
-                    <button onclick="selectPlatform('facebook')" id="plat-facebook" class="plat-btn active-plat">&#128216; Facebook</button>
-                    <button onclick="selectPlatform('instagram')" id="plat-instagram" class="plat-btn">&#128247; Instagram</button>
-                    <button onclick="selectPlatform('whatsapp')" id="plat-whatsapp" class="plat-btn">&#128172; WhatsApp</button>
-                    <button onclick="selectPlatform('text')" id="plat-text" class="plat-btn">&#9993;&#65039; Text</button>
-                </div>
+                
             </div>
 
             <!-- Quote card -->
@@ -143,6 +137,15 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
                 </div>
                 <div style="display:flex;gap:10px;margin-top:8px;">
                     <button onclick="saveAdImage()" id="saveBtn" style="width:100%;background:#64748B;color:white;border:none;padding:10px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">&#128190; Save Image to Device</button>
+                </div>
+                <!-- Desktop Instructions -->
+                <div id="desktopInstructions" style="display:none;margin-top:16px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:12px;padding:16px;">
+                    <div style="font-weight:800;color:#166534;font-size:14px;margin-bottom:12px;">&#9989; Image saved! Your caption is copied. Now post it:</div>
+                    <div style="font-size:13px;color:#166534;margin-bottom:8px;"><strong>Step 1</strong> — Click the button below to open Facebook</div>
+                    <div style="font-size:13px;color:#166534;margin-bottom:8px;"><strong>Step 2</strong> — Click "What's on your mind?" to create a post</div>
+                    <div style="font-size:13px;color:#166534;margin-bottom:8px;"><strong>Step 3</strong> — Click the photo icon and attach your downloaded image</div>
+                    <div style="font-size:13px;color:#166534;margin-bottom:16px;"><strong>Step 4</strong> — Paste your caption (already copied!) and hit Post</div>
+                    <a id="fbPostBtn" href="https://www.facebook.com" target="_blank" style="display:block;background:#1877F2;color:white;text-align:center;padding:12px;border-radius:8px;font-weight:700;font-size:14px;text-decoration:none;">&#128504; Open Facebook Now</a>
                 </div>
             </div>
         </div>
@@ -491,12 +494,13 @@ var serverAdUrl = null;
 
 async function shareAdImage() {
     if (!serverAdUrl) { alert('Generate your ad first.'); return; }
+    var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     try {
         var response = await fetch(serverAdUrl);
         var blob = await response.blob();
         var file = new File([blob], 'my-pro-ad.png', {type: 'image/png'});
         var caption = generatedCaption || '';
-        if (navigator.canShare && navigator.canShare({files: [file]})) {
+        if (isMobile && navigator.canShare && navigator.canShare({files: [file]})) {
             await navigator.share({
                 files: [file],
                 title: 'My Pro Social Ad',
@@ -507,7 +511,11 @@ async function shareAdImage() {
             a.href = serverAdUrl;
             a.download = 'my-pro-ad.png';
             a.click();
-            alert('Image saved! Now open Facebook or Instagram and attach it with your caption.');
+            if (caption) {
+                navigator.clipboard.writeText(caption).catch(function(){});
+            }
+            document.getElementById('desktopInstructions').style.display = 'block';
+            document.getElementById('fbPostBtn').href = 'https://www.facebook.com';
         }
     } catch(e) {
         if (e.name !== 'AbortError') alert('Share failed: ' + e.message);
