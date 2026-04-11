@@ -75,7 +75,7 @@
     </style>
 </head>
 <body>
-    <header>
+    {% block header %}<header>
         <div class="nav-container">
             <a href="/" class="nav-brand"><span style="color:white;font-weight:400;">Cars</span> <span style="color:#00C851;font-weight:700;">IN STOCK</span></a>
             <button class="hamburger" onclick="this.classList.toggle('active');document.querySelector('.nav-links').classList.toggle('open')" aria-label="Menu">
@@ -109,7 +109,7 @@
                 {% endif %}
             </div>
         </div>
-    </header>
+    </header>{% endblock %}
     <div class="container">
         {% block content %}{% endblock %}
     </div>
