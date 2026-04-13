@@ -352,7 +352,7 @@ def full_inventory(slug):
 
 @main.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('index.html', hide_nav_auth=True)
 
 @main.route('/salespeople')
 def salespeople():

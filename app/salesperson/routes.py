@@ -390,6 +390,19 @@ def register_routes(bp):
         return render_template("salesperson/edit_vehicle.html", vehicle=vehicle, sp=sp, team_members=_team_e)
 
 
+    @bp.route("/sp/leads/delete/<int:lead_id>", methods=["POST"])
+    def delete_lead(lead_id):
+        from flask import session, redirect
+        from app.extensions import db
+        from app.models.lead import Lead
+        team_member_id = session.get('team_member_id')
+        if not team_member_id:
+            return redirect('/login')
+        lead = Lead.query.get_or_404(lead_id)
+        db.session.delete(lead)
+        db.session.commit()
+        return redirect('/sp-dashboard')
+
     @bp.route("/vehicles/delete/<int:vehicle_id>", methods=["POST"])
     @login_required
     def delete_vehicle(vehicle_id):
@@ -1630,4 +1643,5 @@ Always guide the conversation toward signing up. Never be pushy - be like a frie
         </body>
         </html>
         """
+
 
