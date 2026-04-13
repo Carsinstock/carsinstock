@@ -294,7 +294,7 @@ def delete_lead(lead_id):
     if not team_member_id:
         return redirect('/login')
     db = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
-    db.execute('DELETE FROM leads WHERE id=?', (lead_id,))
+    db.execute('DELETE FROM leads WHERE lead_id=?', (lead_id,))
     db.commit()
     db.close()
     return redirect('/sp-dashboard')

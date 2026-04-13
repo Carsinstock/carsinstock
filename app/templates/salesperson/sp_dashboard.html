@@ -336,7 +336,7 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
                 <div class="ldetail" style="color:#475569;margin-top:2px;">{{ lead.vehicle_name or '' }} · {{ lead.created_at.strftime('%b %d') if lead.created_at else '' }}</div>
             </div>
             <div style="flex-shrink:0;">
-                <form method="POST" action="/sp/leads/delete/{{ lead.id }}" onsubmit="return confirm('Remove this lead?')" style="display:inline;">
+                <form method="POST" action="/sp/leads/delete/{{ lead.lead_id }}" onsubmit="return confirm('Remove this lead?')" style="display:inline;">
                     <button type="submit" style="background:none;border:none;cursor:pointer;color:#94A3B8;font-size:18px;padding:4px;" title="Delete Lead">🗑</button>
                 </form>
             </div>
