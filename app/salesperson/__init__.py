@@ -284,3 +284,17 @@ def generate_social_ad_image():
     img.save(buf, format='PNG')
     buf.seek(0)
     return Response(buf.read(), content_type='image/png')
+
+
+@salesperson_bp.route('/sp/leads/delete/<int:lead_id>', methods=['POST'])
+def delete_lead(lead_id):
+    from flask import session, redirect
+    import sqlite3
+    team_member_id = session.get('team_member_id')
+    if not team_member_id:
+        return redirect('/login')
+    db = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    db.execute('DELETE FROM leads WHERE id=?', (lead_id,))
+    db.commit()
+    db.close()
+    return redirect('/sp-dashboard')
