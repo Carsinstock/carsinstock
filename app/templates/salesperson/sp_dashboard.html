@@ -317,7 +317,7 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
                 </form>
                 <button onclick="openEditModal({{ v.id }}, '{{ v.year }} {{ v.make }} {{ v.model }}', {{ v.price or 0 }}, {{ v.mileage or 0 }}, '{{ v.image_url or '' }}')" style="background:none;border:none;cursor:pointer;color:#00C851;font-size:18px;padding:4px;" title="Edit">✏️</button>
                 {% if v.days_remaining is not none and v.days_remaining <= 3 %}
-                <form method="POST" action="/vehicles/renew/{{ v.id }}" onsubmit="return confirm('Renew this listing for 7 more days?')" style="display:inline;">
+                <form method="POST" action="/sp/vehicles/renew/{{ v.id }}" onsubmit="return confirm('Renew this listing for 7 more days?')" style="display:inline;">
                     <button type="submit" style="background:#FEF9C3;border:1px solid #FDE047;border-radius:6px;cursor:pointer;color:#854D0E;font-size:11px;font-weight:700;padding:3px 8px;" title="Renew Listing">🔄 Renew</button>
                 </form>
                 {% endif %}

@@ -298,3 +298,22 @@ def delete_lead(lead_id):
     db.commit()
     db.close()
     return redirect('/sp-dashboard')
+
+
+@salesperson_bp.route('/sp/vehicles/renew/<int:vehicle_id>', methods=['POST'])
+def sp_renew_vehicle(vehicle_id):
+    from flask import session, redirect
+    from datetime import datetime, timedelta
+    import sqlite3
+    team_member_id = session.get('team_member_id')
+    if not team_member_id:
+        return redirect('/login')
+    conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    cur = conn.cursor()
+    new_expiry = datetime.utcnow() + timedelta(days=7)
+    cur.execute('''UPDATE vehicles SET expires_at=?, created_at=?, expiration_warning_sent=0 
+                   WHERE id=? AND pick_user_id=?''',
+                (new_expiry, datetime.utcnow(), vehicle_id, team_member_id))
+    conn.commit()
+    conn.close()
+    return redirect('/sp-dashboard')
