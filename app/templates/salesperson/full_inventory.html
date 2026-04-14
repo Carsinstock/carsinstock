@@ -70,8 +70,8 @@ document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeVide
         {% for v in vehicles %}
         <div class="vehicle-card">
             <div style="position:relative;">
-                {% if v.days_remaining and v.days_remaining > 0 %}
-                <div class="days-badge" style="background:{% if v.days_remaining <= 2 %}#DC2626{% else %}#FF6B35{% endif %};">{{ v.days_remaining }} Day{{ 's' if v.days_remaining != 1 else '' }} Left</div>
+                {% if v.expires_at and v.days_remaining and v.days_remaining > 0 %}
+                <div class="days-badge" style="background:{% if v.days_remaining <= 2 %}#DC2626{% elif v.days_remaining <= 4 %}#FF6B35{% else %}#00C851{% endif %};">{{ v.days_remaining }} Day{{ 's' if v.days_remaining != 1 else '' }} Left</div>
                 {% endif %}
                 <div style="position:relative;">
                 {% if v.image_url %}
