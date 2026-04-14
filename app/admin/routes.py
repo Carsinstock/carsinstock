@@ -284,6 +284,7 @@ def register_admin_routes(bp):
         vehicle = Vehicle.query.get_or_404(vehicle_id)
         vehicle.approval_status = 'approved'
         vehicle.rejection_reason = None
+        vehicle.is_team_pick = True
         db.session.commit()
         # Write in-app notification + send email
         try:
