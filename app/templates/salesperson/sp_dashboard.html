@@ -518,6 +518,7 @@ function showShareTab(tab) {
 // ── PLATFORM ──────────────────────────────────────────────────
 var selectedPlatform = 'facebook';
 var serverAdUrl = null;
+var serverAdBlob = null;
 
 function closeShareModal() {
     document.getElementById('shareModal').style.display = 'none';
@@ -563,11 +564,14 @@ function copyStoreLink() {
 }
 
 async function shareAdImage() {
-    if (!serverAdUrl) { alert('Generate your ad first.'); return; }
+    if (!serverAdBlob && !serverAdUrl) { alert('Generate your ad first.'); return; }
     var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
     try {
-        var response = await fetch(serverAdUrl);
-        var blob = await response.blob();
+        var blob = serverAdBlob;
+        if (!blob && serverAdUrl) {
+            var response = await fetch(serverAdUrl);
+            blob = await response.blob();
+        }
         var file = new File([blob], 'my-pro-ad.png', {type: 'image/png'});
         var caption = generatedCaption || '';
         if (isMobile && navigator.canShare && navigator.canShare({files: [file]})) {
@@ -689,6 +693,7 @@ async function generateProAd() {
             var imgBlob = await imgResp.blob();
             var imgUrl = URL.createObjectURL(imgBlob);
             serverAdUrl = imgUrl;
+            serverAdBlob = imgBlob;
             document.getElementById('adPreviewImg').src = imgUrl;
             document.getElementById('saveBtn').onclick = function() {
                 var a = document.createElement('a');
