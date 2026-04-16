@@ -113,6 +113,9 @@ def generate_social_ad():
         'quote': quote,
         'include_referral': include_referral,
         'no_inventory': False,
+        'mileage': vehicle['mileage'] if vehicle['mileage'] else '',
+        'exterior_color': vehicle['exterior_color'] if vehicle['exterior_color'] else '',
+        'transmission': vehicle['transmission'] if vehicle['transmission'] else '',
     })
 
 
@@ -538,7 +541,7 @@ def generate_social_ad_image():
         ds_draw.text((W-140, 53), "THIS WEEK'S PICK", font=font_bold_sm, fill=WHITE, anchor='mm')
 
         # Divider
-        ds_draw.line([30, 130, W-30, 130], fill=(226, 232, 240), width=2)
+        ds_draw.line([30, 140, W-30, 140], fill=(226, 232, 240), width=2)
 
         # Car photo — full width, clean
         if car_img:
@@ -547,10 +550,10 @@ def generate_social_ad_image():
             nw, nh = int(car_copy.width * scale), int(car_copy.height * scale)
             car_copy = car_copy.resize((nw, nh))
             dx = (W - nw) // 2
-            dy = 140 + (400 - nh) // 2
+            dy = 160 + (380 - nh) // 2
             ds_img.paste(car_copy, (dx, dy))
         else:
-            ds_draw.rectangle([0, 140, W, 540], fill=(241, 245, 249))
+            ds_draw.rectangle([0, 160, W, 540], fill=(241, 245, 249))
 
         # Days left badge on photo
         if days_left > 0:
