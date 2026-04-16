@@ -509,6 +509,101 @@ def generate_social_ad_image():
         buf.seek(0)
         return Response(buf.read(), content_type='image/png')
 
+    if template == 'dealsheet':
+        ds_img = Image.new('RGB', (W, H), (255, 255, 255))
+        ds_draw = ImageDraw.Draw(ds_img)
+
+        # Top green accent bar
+        ds_draw.rectangle([0, 0, W, 10], fill=GREEN)
+
+        # Top section — white background
+        # Rep photo small top left
+        if profile_img:
+            pr = profile_img.convert('RGB')
+            pw, ph = pr.size
+            side = min(pw, ph)
+            pr = pr.crop(((pw-side)//2, 0, (pw-side)//2+side, side))
+            pr = pr.resize((90, 90))
+            mask = Image.new('L', (90, 90), 0)
+            ImageDraw.Draw(mask).ellipse([0, 0, 89, 89], fill=255)
+            ds_img.paste(pr, (30, 25), mask)
+            ds_draw.ellipse([24, 19, 126, 121], outline=GREEN, width=3)
+
+        # Rep name and dealership top left
+        ds_draw.text((145, 45), name, font=font_bold_md, fill=NAVY, anchor='lm')
+        ds_draw.text((145, 85), dealership, font=font_sm, fill=(100, 116, 139), anchor='lm')
+
+        # THIS WEEK'S PICK badge top right
+        ds_draw.rounded_rectangle([W-260, 28, W-20, 78], radius=25, fill=GREEN)
+        ds_draw.text((W-140, 53), "THIS WEEK'S PICK", font=font_bold_sm, fill=WHITE, anchor='mm')
+
+        # Divider
+        ds_draw.line([30, 130, W-30, 130], fill=(226, 232, 240), width=2)
+
+        # Car photo — full width, clean
+        if car_img:
+            car_copy = car_img.convert('RGB')
+            scale = max(W / car_copy.width, 400 / car_copy.height)
+            nw, nh = int(car_copy.width * scale), int(car_copy.height * scale)
+            car_copy = car_copy.resize((nw, nh))
+            dx = (W - nw) // 2
+            dy = 140 + (400 - nh) // 2
+            ds_img.paste(car_copy, (dx, dy))
+        else:
+            ds_draw.rectangle([0, 140, W, 540], fill=(241, 245, 249))
+
+        # Days left badge on photo
+        if days_left > 0:
+            badge_color = (220, 38, 38) if days_left <= 2 else (249, 115, 22) if days_left <= 4 else GREEN
+            ds_draw.rounded_rectangle([20, 150, 220, 202], radius=26, fill=badge_color)
+            ds_draw.text((120, 176), f'{days_left} Days Left', font=font_bold_sm, fill=WHITE, anchor='mm')
+
+        # Divider after photo
+        ds_draw.line([30, 550, W-30, 550], fill=(226, 232, 240), width=2)
+
+        # Navy data section
+        ds_draw.rectangle([0, 560, W, 800], fill=NAVY)
+
+        # Vehicle name
+        ds_draw.text((W//2, 610), vehicle_name, font=font_bold_lg, fill=WHITE, anchor='mm')
+
+        # Price — large green
+        ds_draw.text((W//2, 680), price, font=font_price, fill=GREEN, anchor='mm')
+
+        # Three data points row
+        mileage_str = f"{int(data.get('mileage', 0)):,} mi" if data.get('mileage') else 'N/A'
+        color_str = data.get('exterior_color', '') or 'N/A'
+        trans_str = data.get('transmission', '') or 'N/A'
+        if len(trans_str) > 12:
+            trans_str = trans_str[:12]
+
+        ds_draw.line([W//3, 715, W//3, 775], fill=(255,255,255,60), width=1)
+        ds_draw.line([W*2//3, 715, W*2//3, 775], fill=(255,255,255,60), width=1)
+
+        for idx, (val, label) in enumerate([(mileage_str, 'Mileage'), (color_str, 'Color'), (trans_str, 'Trans')]):
+            sx = W//6 + (W//3)*idx
+            ds_draw.text((sx, 738), val, font=font_bold_sm, fill=WHITE, anchor='mm')
+            ds_draw.text((sx, 768), label, font=font_sm, fill=(148, 163, 184), anchor='mm')
+
+        # Bottom white section
+        ds_draw.rectangle([0, 800, W, 920], fill=(248, 250, 252))
+        ds_draw.text((W//2, 860), 'cardeals.autos/' + slug, font=font_bold_md, fill=GREEN, anchor='mm')
+
+        # Dealership strip
+        ds_draw.rectangle([0, 920, W, 1010], fill=NAVY)
+        ds_draw.text((W//2, 948), dealership, font=font_bold_sm, fill=WHITE, anchor='mm')
+        ds_draw.text((W//2, 976), full_address, font=font_sm, fill=(148, 163, 184), anchor='mm')
+        try:
+            font_tiny = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 18)
+        except:
+            font_tiny = font_sm
+        ds_draw.text((W-30, 1000), 'Powered by CarsInStock', font=font_tiny, fill=(100, 116, 139), anchor='rm')
+
+        buf = io.BytesIO()
+        ds_img.save(buf, format='PNG')
+        buf.seek(0)
+        return Response(buf.read(), content_type='image/png')
+
     # Return PNG (classic template)
     buf = io.BytesIO()
     img.save(buf, format='PNG')
