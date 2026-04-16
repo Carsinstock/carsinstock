@@ -355,7 +355,7 @@ def generate_social_ad_image():
             font_tiny = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 16)
         except:
             font_tiny = font_sm
-        jl_draw.text((W-30, 1058), 'Powered by CarsInStock', font=font_tiny, fill=(90, 100, 115), anchor='rm')
+        jl_draw.text((W-30, 1058), 'Powered by CarsInStock', font=font_sm, fill=(160, 170, 185), anchor='rm')
 
         buf = io.BytesIO()
         jl_img.save(buf, format='PNG')
