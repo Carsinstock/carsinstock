@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block meta %}
+<link rel="canonical" href="https://carsinstock.com/{{ sp.profile_url_slug }}">
 <meta property="og:title" content="{{ sp.display_name }} — Browse This Week's Inventory">
 <meta property="og:description" content="{{ vehicles|length }} cars available · From ${{ '{:,.0f}'.format(vehicles|map(attribute='price')|min) if vehicles else '0' }} · {{ sp.dealership_address or 'Toms River, NJ' }} · Updated daily">
 <meta property="og:image" content="{{ sp.profile_photo or 'https://res.cloudinary.com/dbpa9qqtb/image/upload/v1772163049/demo/demo_cover_photo.jpg' }}">
