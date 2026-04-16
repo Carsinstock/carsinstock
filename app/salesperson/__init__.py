@@ -32,13 +32,13 @@ def generate_social_ad():
     city = dealership_row['city'] if dealership_row and dealership_row['city'] else ''
 
     vehicle = db.execute(
-        'SELECT id, year, make, model, price, mileage, image_url, created_at, expires_at FROM vehicles WHERE pick_user_id=? AND status="available" AND expires_at > ? AND is_team_pick=1 ORDER BY expires_at DESC LIMIT 1',
+        'SELECT id, year, make, model, price, mileage, exterior_color, transmission, image_url, created_at, expires_at FROM vehicles WHERE pick_user_id=? AND status="available" AND expires_at > ? AND is_team_pick=1 ORDER BY expires_at DESC LIMIT 1',
         (team_member_id, now)
     ).fetchone()
 
     if not vehicle:
         vehicle = db.execute(
-            'SELECT id, year, make, model, price, mileage, image_url, created_at, expires_at FROM vehicles WHERE salesperson_id=? AND status="available" AND expires_at > ? ORDER BY created_at DESC LIMIT 1',
+            'SELECT id, year, make, model, price, mileage, exterior_color, transmission, image_url, created_at, expires_at FROM vehicles WHERE salesperson_id=? AND status="available" AND expires_at > ? ORDER BY created_at DESC LIMIT 1',
             (member['dealership_id'], now)
         ).fetchone()
 
