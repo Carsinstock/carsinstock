@@ -526,24 +526,24 @@ def generate_social_ad_image():
             pw, ph = pr.size
             side = min(pw, ph)
             pr = pr.crop(((pw-side)//2, 0, (pw-side)//2+side, side))
-            pr = pr.resize((100, 100))
-            mask = Image.new('L', (100, 100), 0)
-            ImageDraw.Draw(mask).ellipse([0, 0, 99, 99], fill=255)
-            ds_img.paste(pr, (20, 22), mask)
-            ds_draw.ellipse([14, 16, 126, 128], outline=GREEN, width=3)
-        ds_draw.text((140, 55), name, font=font_bold_md, fill=NAVY, anchor='lm')
-        ds_draw.text((140, 90), dealership, font=font_sm, fill=(100, 116, 139), anchor='lm')
+        pr = pr.resize((80, 80))
+        mask = Image.new('L', (80, 80), 0)
+        ImageDraw.Draw(mask).ellipse([0, 0, 79, 79], fill=255)
+        ds_img.paste(pr, (20, 15), mask)
+        ds_draw.ellipse([14, 9, 106, 101], outline=GREEN, width=3)
+        ds_draw.text((115, 42), name, font=font_bold_sm, fill=NAVY, anchor='lm')
+        ds_draw.text((115, 70), dealership, font=font_sm, fill=(100, 116, 139), anchor='lm')
         ds_draw.rounded_rectangle([W-220, 30, W-15, 72], radius=20, fill=GREEN)
         ds_draw.text((W-118, 51), "THIS WEEK'S PICK", font=font_sm, fill=WHITE, anchor='mm')
-        ds_draw.line([20, 148, W-20, 148], fill=(220, 228, 240), width=1)
+        ds_draw.line([20, 118, W-20, 118], fill=(220, 228, 240), width=1)
 
         # ZONE 3: Car photo fixed crop (y=150 to y=530)
-        car_zone_top = 150
-        car_zone_height = 380
+        car_zone_top = 120
+        car_zone_height = 440
         car_region = Image.new('RGB', (W, car_zone_height), (230, 235, 240))
         if car_img:
             car_copy = car_img.convert('RGB')
-            scale = min(W / car_copy.width, car_zone_height / car_copy.height)
+            scale = max(W / car_copy.width, car_zone_height / car_copy.height)
             nw = int(car_copy.width * scale)
             nh = int(car_copy.height * scale)
             car_copy = car_copy.resize((nw, nh))
@@ -560,8 +560,8 @@ def generate_social_ad_image():
 
         # ZONE 4: Navy data section (y=530 to y=720)
         ds_draw.rectangle([0, 530, W, 720], fill=NAVY)
-        ds_draw.text((W//2, 580), vehicle_name, font=font_bold_lg, fill=WHITE, anchor='mm')
-        ds_draw.text((W//2, 648), price, font=font_price, fill=GREEN, anchor='mm')
+        ds_draw.text((W//2, 592), vehicle_name, font=font_bold_lg, fill=WHITE, anchor='mm')
+        ds_draw.text((W//2, 652), price, font=font_bold_md, fill=GREEN, anchor='mm')
 
         # Three data points
         mileage_str = f"{int(data.get('mileage', 0)):,} mi" if data.get('mileage') else 'N/A'
