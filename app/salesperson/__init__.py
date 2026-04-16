@@ -543,7 +543,7 @@ def generate_social_ad_image():
         car_region = Image.new('RGB', (W, car_zone_height), (230, 235, 240))
         if car_img:
             car_copy = car_img.convert('RGB')
-            scale = max(W / car_copy.width, car_zone_height / car_copy.height)
+            scale = min(W / car_copy.width, car_zone_height / car_copy.height)
             nw = int(car_copy.width * scale)
             nh = int(car_copy.height * scale)
             car_copy = car_copy.resize((nw, nh))
