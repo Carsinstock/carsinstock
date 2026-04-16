@@ -559,9 +559,9 @@ def generate_social_ad_image():
             ds_draw.text((114, car_zone_top+37), f'{days_left} Days Left', font=font_bold_sm, fill=WHITE, anchor='mm')
 
         # ZONE 4: Navy data section (y=530 to y=720)
-        ds_draw.rectangle([0, 580, W, 730], fill=NAVY)
-        ds_draw.text((W//2, 618), vehicle_name, font=font_bold_lg, fill=WHITE, anchor='mm')
-        ds_draw.text((W//2, 668), price, font=font_bold_md, fill=GREEN, anchor='mm')
+        ds_draw.rectangle([0, 580, W, 710], fill=NAVY)
+        ds_draw.text((W//2, 610), vehicle_name, font=font_bold_lg, fill=WHITE, anchor='mm')
+        ds_draw.text((W//2, 655), price, font=font_bold_md, fill=GREEN, anchor='mm')
 
         # Three data points
         mileage_str = f"{int(data.get('mileage', 0)):,} mi" if data.get('mileage') else 'N/A'
@@ -572,28 +572,28 @@ def generate_social_ad_image():
         if len(color_str) > 12:
             color_str = color_str[:12]
 
-        ds_draw.line([W//3, 684, W//3, 718], fill=(80, 100, 130), width=1)
-        ds_draw.line([W*2//3, 684, W*2//3, 718], fill=(80, 100, 130), width=1)
+        ds_draw.line([W//3, 668, W//3, 700], fill=(80, 100, 130), width=1)
+        ds_draw.line([W*2//3, 668, W*2//3, 700], fill=(80, 100, 130), width=1)
         for idx, (val, label) in enumerate([(mileage_str, 'Mileage'), (color_str, 'Color'), (trans_str, 'Trans')]):
             sx = W//6 + (W//3)*idx
-        ds_draw.text((sx, 697), val, font=font_bold_sm, fill=WHITE, anchor='mm')
-        ds_draw.text((sx, 716), label, font=font_sm, fill=(148, 163, 184), anchor='mm')
+        ds_draw.text((sx, 678), val, font=font_bold_sm, fill=WHITE, anchor='mm')
+        ds_draw.text((sx, 696), label, font=font_sm, fill=(148, 163, 184), anchor='mm')
 
         # ZONE 5: Link section (y=720 to y=860)
-        ds_draw.rectangle([0, 730, W, 820], fill=(248, 250, 252))
-        ds_draw.line([20, 732, W-20, 732], fill=(220, 228, 240), width=1)
-        ds_draw.text((W//2, 775), 'cardeals.autos/' + slug, font=font_bold_md, fill=GREEN, anchor='mm')
+        ds_draw.rectangle([0, 710, W, 780], fill=(248, 250, 252))
+        ds_draw.line([20, 712, W-20, 712], fill=(220, 228, 240), width=1)
+        ds_draw.text((W//2, 745), 'cardeals.autos/' + slug, font=font_bold_md, fill=GREEN, anchor='mm')
 
         # ZONE 6: Footer (y=860 to y=1000)
-        ds_draw.rectangle([0, 820, W, 1000], fill=(241, 245, 249))
-        ds_draw.line([20, 822, W-20, 822], fill=(220, 228, 240), width=1)
-        ds_draw.text((W//2, 868), dealership, font=font_bold_sm, fill=NAVY, anchor='mm')
-        ds_draw.text((W//2, 900), full_address, font=font_sm, fill=(100, 116, 139), anchor='mm')
+        ds_draw.rectangle([0, 780, W, 920], fill=(241, 245, 249))
+        ds_draw.line([20, 782, W-20, 782], fill=(220, 228, 240), width=1)
+        ds_draw.text((W//2, 820), dealership, font=font_bold_sm, fill=NAVY, anchor='mm')
+        ds_draw.text((W//2, 850), full_address, font=font_sm, fill=(100, 116, 139), anchor='mm')
         try:
             font_tiny = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 18)
         except:
             font_tiny = font_sm
-        ds_draw.text((W-20, 935), 'Powered by CarsInStock', font=font_tiny, fill=(160, 170, 185), anchor='rm')
+        ds_draw.text((W-20, 880), 'Powered by CarsInStock', font=font_tiny, fill=(160, 170, 185), anchor='rm')
 
         buf = io.BytesIO()
         ds_img.save(buf, format='PNG')
