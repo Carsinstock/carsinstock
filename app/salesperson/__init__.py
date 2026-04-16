@@ -514,7 +514,7 @@ def generate_social_ad_image():
 
     if template == 'dealsheet':
         from PIL import ImageOps
-        ds_img = Image.new('RGB', (W, H), (255, 255, 255))
+        ds_img = Image.new('RGB', (W, 900), (255, 255, 255))
         ds_draw = ImageDraw.Draw(ds_img)
 
         # ZONE 1: Top green accent line
