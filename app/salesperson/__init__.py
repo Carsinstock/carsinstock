@@ -319,8 +319,6 @@ def generate_social_ad_image():
         jl_draw.rounded_rectangle([W-280, 30, W-20, 84], radius=27, fill=GREEN)
         jl_draw.text((W-150, 57), 'Fresh Inventory', font=font_bold_sm, fill=WHITE, anchor='mm')
 
-        # Rep name top left next to photo
-        jl_draw.text((150, 58), name, font=font_bold_sm, fill=WHITE, anchor='lm')
 
         # Center Just Listed text
         try:
@@ -350,9 +348,14 @@ def generate_social_ad_image():
         jl_draw.text((W-40, 860), 'cardeals.autos/' + slug, font=font_bold_sm, fill=GREEN, anchor='rm')
 
         # Dealership strip
-        jl_draw.rectangle([0, 920, W, 1000], fill=(20, 30, 48))
-        jl_draw.text((W//2, 960), dealership, font=font_bold_sm, fill=WHITE, anchor='mm')
-        jl_draw.text((W-30, 990), 'Powered by CarsInStock', font=font_sm, fill=(150, 160, 175), anchor='rm')
+        jl_draw.rectangle([0, 910, W, 1080], fill=(20, 30, 48))
+        jl_draw.text((W//2, 945), dealership, font=font_bold_sm, fill=WHITE, anchor='mm')
+        jl_draw.text((W//2, 978), full_address, font=font_sm, fill=(180, 190, 200), anchor='mm')
+        try:
+            font_tiny = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 16)
+        except:
+            font_tiny = font_sm
+        jl_draw.text((W-30, 1058), 'Powered by CarsInStock', font=font_tiny, fill=(90, 100, 115), anchor='rm')
 
         buf = io.BytesIO()
         jl_img.save(buf, format='PNG')
