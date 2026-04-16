@@ -348,14 +348,14 @@ def generate_social_ad_image():
         jl_draw.text((W-40, 860), 'cardeals.autos/' + slug, font=font_bold_sm, fill=GREEN, anchor='rm')
 
         # Dealership strip
-        jl_draw.rectangle([0, 910, W, 1080], fill=(20, 30, 48))
-        jl_draw.text((W//2, 945), dealership, font=font_bold_sm, fill=WHITE, anchor='mm')
-        jl_draw.text((W//2, 978), full_address, font=font_sm, fill=(180, 190, 200), anchor='mm')
+        jl_draw.rectangle([0, 920, W, 1010], fill=(20, 30, 48))
+        jl_draw.text((W//2, 948), dealership, font=font_bold_sm, fill=WHITE, anchor='mm')
+        jl_draw.text((W//2, 976), full_address, font=font_sm, fill=(180, 190, 200), anchor='mm')
         try:
-            font_tiny = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 16)
+            font_tiny = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 18)
         except:
             font_tiny = font_sm
-        jl_draw.text((W-30, 1058), 'Powered by CarsInStock', font=font_sm, fill=(160, 170, 185), anchor='rm')
+        jl_draw.text((W-30, 1000), 'Powered by CarsInStock', font=font_tiny, fill=WHITE, anchor='rm')
 
         buf = io.BytesIO()
         jl_img.save(buf, format='PNG')
