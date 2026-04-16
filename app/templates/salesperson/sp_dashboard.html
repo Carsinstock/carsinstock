@@ -50,7 +50,7 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
         <a href="/{{ member.slug }}" target="_blank" style="display:flex;align-items:center;justify-content:space-between;background:#1E293B;color:white;padding:14px 20px;border-radius:10px;text-decoration:none;">
             <div>
                 <div style="font-size:13px;font-weight:800;letter-spacing:0.3px;">🏪 My Storefront</div>
-                <div style="font-size:12px;color:#00C851;margin-top:2px;">carsinstock.com/{{ member.slug }}</div>
+                <div style="font-size:12px;color:#00C851;margin-top:2px;">cardeals.autos/{{ member.slug }}</div>
             </div>
             <span style="color:#00C851;font-size:18px;">→</span>
         </a>
@@ -396,7 +396,7 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
 var storefrontUrl = "{{ storefront_url }}";
 var dealershipSlug = "{{ dealership_sp.profile_url_slug if dealership_sp else '' }}";
 var memberSlug = "{{ member.slug if member.slug else '' }}";
-var referralUrl = dealershipSlug ? "https://carsinstock.com/" + dealershipSlug + "?ref=" + memberSlug : storefrontUrl;
+var referralUrl = dealershipSlug ? "https://cardeals.autos/" + dealershipSlug + "?ref=" + memberSlug : storefrontUrl;
 var dealershipSpId = {{ dealership_sp.salesperson_id if dealership_sp else 0 }};
 
 function copyLink() {
@@ -845,7 +845,7 @@ async function drawAdCanvas(data) {
     ctx.fillStyle = navy;
     roundRect(ctx, W/2-260, urlY, 520, 60, 30, true);
     ctx.fillStyle = green; ctx.font = 'bold 28px Arial'; ctx.textAlign = 'center';
-    ctx.fillText('carsinstock.com/' + (data.slug || ''), W/2, urlY+39);
+    ctx.fillText('cardeals.autos/' + (data.slug || ''), W/2, urlY+39);
     ctx.fillStyle = '#94A3B8'; ctx.font = '22px Arial'; ctx.textAlign = 'center';
     ctx.fillText((data.dealership || '') + ' - ' + (data.city || '') + ', NJ', W/2, urlY+75);
     ctx.fillStyle = '#F1F5F9'; ctx.fillRect(0, 980, W, 100);
