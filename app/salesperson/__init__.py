@@ -550,7 +550,7 @@ def generate_social_ad_image():
             nw, nh = int(car_copy.width * scale), int(car_copy.height * scale)
             car_copy = car_copy.resize((nw, nh))
             dx = (W - nw) // 2
-            dy = 160 + (380 - nh) // 2
+            dy = max(160, 160 + (380 - nh) // 2)
             ds_img.paste(car_copy, (dx, dy))
         else:
             ds_draw.rectangle([0, 160, W, 540], fill=(241, 245, 249))
