@@ -124,6 +124,14 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
                 </label>
             </div>
 
+            <!-- Template selector -->
+            <div style="margin-bottom:14px;">
+                <div style="font-size:11px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Choose Your Style</div>
+                <div style="display:flex;gap:8px;">
+                    <button onclick="selectTemplate('classic')" id="tmpl-classic" style="flex:1;padding:10px 6px;border:2px solid #00C851;border-radius:8px;background:#00C851;color:#1E293B;font-size:12px;font-weight:800;cursor:pointer;">⚡ Classic</button>
+                    <button onclick="selectTemplate('just_listed')" id="tmpl-just_listed" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">✨ Just Listed</button>
+                </div>
+            </div>
             <!-- Generate button -->
             <button onclick="generateProAd()" id="generateBtn" style="width:100%;background:#00C851;color:white;border:none;padding:15px;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer;letter-spacing:0.3px;margin-bottom:6px;">Generate My Pro Social Ad &#x2192;</button>
             <div style="text-align:center;font-size:11px;color:#94A3B8;margin-bottom:16px;">Takes ~8 seconds &middot; Image + caption ready to copy &amp; paste</div>
@@ -529,6 +537,17 @@ function showShareTab(tab) {
 var selectedPlatform = 'facebook';
 var serverAdUrl = null;
 var serverAdBlob = null;
+var selectedTemplate = 'classic';
+function selectTemplate(t) {
+    selectedTemplate = t;
+    ['classic','just_listed'].forEach(function(name) {
+        var btn = document.getElementById('tmpl-' + name);
+        if (!btn) return;
+        btn.style.background = name === t ? '#00C851' : 'white';
+        btn.style.color = name === t ? '#1E293B' : '#475569';
+        btn.style.borderColor = name === t ? '#00C851' : '#E2E8F0';
+    });
+}
 
 function closeShareModal() {
     document.getElementById('shareModal').style.display = 'none';
@@ -680,7 +699,7 @@ async function generateProAd() {
         var resp = await fetch('https://carsinstock.com/api/generate_social_ad', {
             method: 'POST',
             headers: {'Content-Type':'application/json'},
-            body: JSON.stringify({platform: selectedPlatform, include_referral: includeReferral})
+            body: JSON.stringify({platform: selectedPlatform, include_referral: includeReferral, template: selectedTemplate})
         });
         var data = await resp.json();
         if (data.error) { throw new Error(data.error); }
@@ -697,7 +716,7 @@ async function generateProAd() {
         var imgResp = await fetch('/api/generate_social_ad_image', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(data)
+            body: JSON.stringify({...data, template: selectedTemplate})
         });
         if (imgResp.ok) {
             var imgBlob = await imgResp.blob();

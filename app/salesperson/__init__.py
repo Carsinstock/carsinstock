@@ -279,7 +279,87 @@ def generate_social_ad_image():
     draw.text((W//2, next_y+110), full_address, font=font_dealership_addr, fill=GRAY, anchor='mm')
     draw.text((W-30, next_y+148), 'Powered by CarsInStock', font=font_dealership_addr, fill=(203, 213, 225), anchor='rm')
 
-    # Return PNG
+    template = data.get('template', 'classic')
+
+    if template == 'just_listed':
+        # JUST LISTED TEMPLATE — Full bleed car photo, elegant overlay
+        jl_img = Image.new('RGB', (W, H), (0, 0, 0))
+
+        # Full bleed car photo
+        if car_img:
+            car_copy = car_img.convert('RGB')
+            scale = max(W / car_copy.width, H / car_copy.height)
+            nw, nh = int(car_copy.width * scale), int(car_copy.height * scale)
+            car_copy = car_copy.resize((nw, nh))
+            dx = (W - nw) // 2
+            dy = (H - nh) // 2
+            jl_img.paste(car_copy, (dx, dy))
+
+        # Dark gradient overlay
+        gradient = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+        grad_draw = ImageDraw.Draw(gradient)
+        for i in range(H):
+            alpha = int(210 * (i / H) ** 1.4)
+            grad_draw.line([0, i, W, i], fill=(0, 0, 0, alpha))
+        jl_rgba = jl_img.convert('RGBA')
+        jl_rgba.paste(gradient, (0, 0), gradient)
+        jl_img = jl_rgba.convert('RGB')
+        jl_draw = ImageDraw.Draw(jl_img)
+
+        # Top left profile photo
+        if profile_img:
+            pr = profile_img.resize((90, 90))
+            mask = Image.new('L', (90, 90), 0)
+            ImageDraw.Draw(mask).ellipse([0, 0, 89, 89], fill=255)
+            pr = pr.convert('RGB')
+            jl_img.paste(pr, (30, 30), mask)
+        jl_draw.ellipse([24, 24, 126, 126], outline=GREEN, width=4)
+
+        # Top right Fresh Inventory badge
+        jl_draw.rounded_rectangle([W-280, 30, W-20, 84], radius=27, fill=GREEN)
+        jl_draw.text((W-150, 57), 'Fresh Inventory', font=font_bold_sm, fill=WHITE, anchor='mm')
+
+        # Rep name top left next to photo
+        jl_draw.text((150, 58), name, font=font_bold_sm, fill=WHITE, anchor='lm')
+
+        # Center Just Listed text
+        try:
+            font_script = ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSerif-BoldItalic.ttf', 100)
+        except:
+            font_script = font_bold_lg
+        jl_draw.text((W//2, 360), 'Just Listed', font=font_script, fill=WHITE, anchor='mm')
+
+        # Divider line
+        jl_draw.line([120, 420, W-120, 420], fill=(255, 255, 255), width=1)
+
+        # Vehicle name
+        jl_draw.text((W//2, 490), vehicle_name, font=font_bold_lg, fill=WHITE, anchor='mm')
+
+        # Price in green
+        jl_draw.text((W//2, 575), price, font=font_price, fill=GREEN, anchor='mm')
+
+        # Days left badge
+        if days_left > 0:
+            badge_color = (220, 38, 38) if days_left <= 2 else (249, 115, 22) if days_left <= 4 else GREEN
+            jl_draw.rounded_rectangle([W//2-110, 625, W//2+110, 681], radius=28, fill=badge_color)
+            jl_draw.text((W//2, 653), f'{days_left} Days Left', font=font_bold_sm, fill=WHITE, anchor='mm')
+
+        # Bottom navy strip
+        jl_draw.rectangle([0, 800, W, 920], fill=NAVY)
+        jl_draw.text((40, 860), name, font=font_bold_md, fill=WHITE, anchor='lm')
+        jl_draw.text((W-40, 860), 'cardeals.autos/' + slug, font=font_bold_sm, fill=GREEN, anchor='rm')
+
+        # Dealership strip
+        jl_draw.rectangle([0, 920, W, 1000], fill=(20, 30, 48))
+        jl_draw.text((W//2, 960), dealership, font=font_bold_sm, fill=WHITE, anchor='mm')
+        jl_draw.text((W-30, 990), 'Powered by CarsInStock', font=font_sm, fill=(150, 160, 175), anchor='rm')
+
+        buf = io.BytesIO()
+        jl_img.save(buf, format='PNG')
+        buf.seek(0)
+        return Response(buf.read(), content_type='image/png')
+
+    # Return PNG (classic template)
     buf = io.BytesIO()
     img.save(buf, format='PNG')
     buf.seek(0)
