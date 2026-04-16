@@ -478,7 +478,7 @@ def generate_social_ad_image():
         except:
             font_name_lg = font_bold_lg
         pb_draw.text((60, 650), name, font=font_name_lg, fill=WHITE, anchor='lm')
-        pb_draw.text((60, 710), 'Sales Professional', font=font_sm, fill=GREEN, anchor='lm')
+        pb_draw.text((60, 706), 'Sales Professional', font=font_sm, fill=GREEN, anchor='lm')
 
         # Vehicle info right side
         pb_draw.text((580, 540), vehicle_name, font=font_bold_md, fill=WHITE, anchor='lm')
