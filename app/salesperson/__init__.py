@@ -562,16 +562,16 @@ def generate_social_ad_image():
             ds_draw.text((120, 176), f'{days_left} Days Left', font=font_bold_sm, fill=WHITE, anchor='mm')
 
         # Divider after photo
-        ds_draw.line([30, 550, W-30, 550], fill=(226, 232, 240), width=2)
+        ds_draw.line([30, 598, W-30, 598], fill=(226, 232, 240), width=2)
 
         # Navy data section
-        ds_draw.rectangle([0, 560, W, 800], fill=NAVY)
+        ds_draw.rectangle([0, 600, W, 790], fill=NAVY)
 
         # Vehicle name
-        ds_draw.text((W//2, 610), vehicle_name, font=font_bold_lg, fill=WHITE, anchor='mm')
+        ds_draw.text((W//2, 630), vehicle_name, font=font_bold_lg, fill=WHITE, anchor='mm')
 
         # Price — large green
-        ds_draw.text((W//2, 680), price, font=font_price, fill=GREEN, anchor='mm')
+        ds_draw.text((W//2, 690), price, font=font_price, fill=GREEN, anchor='mm')
 
         # Three data points row
         mileage_str = f"{int(data.get('mileage', 0)):,} mi" if data.get('mileage') else 'N/A'
@@ -580,17 +580,17 @@ def generate_social_ad_image():
         if len(trans_str) > 12:
             trans_str = trans_str[:12]
 
-        ds_draw.line([W//3, 715, W//3, 775], fill=(255,255,255,60), width=1)
-        ds_draw.line([W*2//3, 715, W*2//3, 775], fill=(255,255,255,60), width=1)
+        ds_draw.line([W//3, 720, W//3, 768], fill=(255,255,255,60), width=1)
+        ds_draw.line([W*2//3, 720, W*2//3, 768], fill=(255,255,255,60), width=1)
 
         for idx, (val, label) in enumerate([(mileage_str, 'Mileage'), (color_str, 'Color'), (trans_str, 'Trans')]):
             sx = W//6 + (W//3)*idx
-            ds_draw.text((sx, 738), val, font=font_bold_sm, fill=WHITE, anchor='mm')
-            ds_draw.text((sx, 768), label, font=font_sm, fill=(148, 163, 184), anchor='mm')
+        ds_draw.text((sx, 738), val, font=font_bold_sm, fill=WHITE, anchor='mm')
+        ds_draw.text((sx, 762), label, font=font_sm, fill=(148, 163, 184), anchor='mm')
 
         # Bottom white section
-        ds_draw.rectangle([0, 800, W, 920], fill=(248, 250, 252))
-        ds_draw.text((W//2, 860), 'cardeals.autos/' + slug, font=font_bold_md, fill=GREEN, anchor='mm')
+        ds_draw.rectangle([0, 790, W, 920], fill=(248, 250, 252))
+        ds_draw.text((W//2, 855), 'cardeals.autos/' + slug, font=font_bold_md, fill=GREEN, anchor='mm')
 
         # Dealership strip
         ds_draw.rectangle([0, 920, W, 1010], fill=(241, 245, 249))
