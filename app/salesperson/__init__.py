@@ -513,94 +513,87 @@ def generate_social_ad_image():
         return Response(buf.read(), content_type='image/png')
 
     if template == 'dealsheet':
+        from PIL import ImageOps
         ds_img = Image.new('RGB', (W, H), (255, 255, 255))
         ds_draw = ImageDraw.Draw(ds_img)
 
-        # Top green accent bar
-        ds_draw.rectangle([0, 0, W, 10], fill=GREEN)
+        # ZONE 1: Top green accent line
+        ds_draw.rectangle([0, 0, W, 8], fill=GREEN)
 
-        # Top section — white background
-        # Rep photo small top left
+        # ZONE 2: Rep info bar (y=8 to y=155)
         if profile_img:
             pr = profile_img.convert('RGB')
             pw, ph = pr.size
             side = min(pw, ph)
             pr = pr.crop(((pw-side)//2, 0, (pw-side)//2+side, side))
-            pr = pr.resize((90, 90))
-            mask = Image.new('L', (90, 90), 0)
-            ImageDraw.Draw(mask).ellipse([0, 0, 89, 89], fill=255)
-            ds_img.paste(pr, (30, 25), mask)
-            ds_draw.ellipse([24, 19, 126, 121], outline=GREEN, width=3)
+            pr = pr.resize((100, 100))
+            mask = Image.new('L', (100, 100), 0)
+            ImageDraw.Draw(mask).ellipse([0, 0, 99, 99], fill=255)
+            ds_img.paste(pr, (20, 22), mask)
+            ds_draw.ellipse([14, 16, 126, 128], outline=GREEN, width=3)
+        ds_draw.text((140, 55), name, font=font_bold_md, fill=NAVY, anchor='lm')
+        ds_draw.text((140, 90), dealership, font=font_sm, fill=(100, 116, 139), anchor='lm')
+        ds_draw.rounded_rectangle([W-220, 30, W-15, 72], radius=20, fill=GREEN)
+        ds_draw.text((W-118, 51), "THIS WEEK'S PICK", font=font_sm, fill=WHITE, anchor='mm')
+        ds_draw.line([20, 148, W-20, 148], fill=(220, 228, 240), width=1)
 
-        # Rep name and dealership top left
-        ds_draw.text((145, 45), name, font=font_bold_md, fill=NAVY, anchor='lm')
-        ds_draw.text((145, 85), dealership, font=font_sm, fill=(100, 116, 139), anchor='lm')
-
-        # THIS WEEK'S PICK badge top right
-        ds_draw.rounded_rectangle([W-230, 32, W-20, 72], radius=20, fill=GREEN)
-        ds_draw.text((W-125, 52), "THIS WEEK'S PICK", font=font_sm, fill=WHITE, anchor='mm')
-
-        # Divider
-        ds_draw.line([30, 140, W-30, 140], fill=(226, 232, 240), width=2)
-
-        # Car photo — full width, clean
+        # ZONE 3: Car photo fixed crop (y=150 to y=530)
+        car_zone_top = 150
+        car_zone_height = 380
+        car_region = Image.new('RGB', (W, car_zone_height), (230, 235, 240))
         if car_img:
             car_copy = car_img.convert('RGB')
-            scale = max(W / car_copy.width, 400 / car_copy.height)
-            nw, nh = int(car_copy.width * scale), int(car_copy.height * scale)
+            scale = max(W / car_copy.width, car_zone_height / car_copy.height)
+            nw = int(car_copy.width * scale)
+            nh = int(car_copy.height * scale)
             car_copy = car_copy.resize((nw, nh))
             dx = (W - nw) // 2
-            dy = max(160, 160 + (380 - nh) // 2)
-            ds_img.paste(car_copy, (dx, dy))
-        else:
-            ds_draw.rectangle([0, 160, W, 540], fill=(241, 245, 249))
+            dy = (car_zone_height - nh) // 2
+            car_region.paste(car_copy, (dx, dy))
+        ds_img.paste(car_region, (0, car_zone_top))
 
-        # Days left badge on photo
+        # Days left badge on car
         if days_left > 0:
             badge_color = (220, 38, 38) if days_left <= 2 else (249, 115, 22) if days_left <= 4 else GREEN
-            ds_draw.rounded_rectangle([20, 150, 220, 202], radius=26, fill=badge_color)
-            ds_draw.text((120, 176), f'{days_left} Days Left', font=font_bold_sm, fill=WHITE, anchor='mm')
+            ds_draw.rounded_rectangle([18, car_zone_top+14, 210, car_zone_top+60], radius=24, fill=badge_color)
+            ds_draw.text((114, car_zone_top+37), f'{days_left} Days Left', font=font_bold_sm, fill=WHITE, anchor='mm')
 
-        # Divider after photo
-        ds_draw.line([30, 598, W-30, 598], fill=(226, 232, 240), width=2)
+        # ZONE 4: Navy data section (y=530 to y=720)
+        ds_draw.rectangle([0, 530, W, 720], fill=NAVY)
+        ds_draw.text((W//2, 580), vehicle_name, font=font_bold_lg, fill=WHITE, anchor='mm')
+        ds_draw.text((W//2, 648), price, font=font_price, fill=GREEN, anchor='mm')
 
-        # Navy data section
-        ds_draw.rectangle([0, 600, W, 790], fill=NAVY)
-
-        # Vehicle name
-        ds_draw.text((W//2, 630), vehicle_name, font=font_bold_lg, fill=WHITE, anchor='mm')
-
-        # Price — large green
-        ds_draw.text((W//2, 690), price, font=font_price, fill=GREEN, anchor='mm')
-
-        # Three data points row
+        # Three data points
         mileage_str = f"{int(data.get('mileage', 0)):,} mi" if data.get('mileage') else 'N/A'
-        color_str = data.get('exterior_color', '') or 'N/A'
-        trans_str = data.get('transmission', '') or 'N/A'
+        color_str = str(data.get('exterior_color', '') or 'N/A')
+        trans_str = str(data.get('transmission', '') or 'N/A')
         if len(trans_str) > 12:
             trans_str = trans_str[:12]
+        if len(color_str) > 12:
+            color_str = color_str[:12]
 
-        ds_draw.line([W//3, 720, W//3, 768], fill=(255,255,255,60), width=1)
-        ds_draw.line([W*2//3, 720, W*2//3, 768], fill=(255,255,255,60), width=1)
-
+        ds_draw.line([W//3, 672, W//3, 714], fill=(80, 100, 130), width=1)
+        ds_draw.line([W*2//3, 672, W*2//3, 714], fill=(80, 100, 130), width=1)
         for idx, (val, label) in enumerate([(mileage_str, 'Mileage'), (color_str, 'Color'), (trans_str, 'Trans')]):
             sx = W//6 + (W//3)*idx
-        ds_draw.text((sx, 738), val, font=font_bold_sm, fill=WHITE, anchor='mm')
-        ds_draw.text((sx, 762), label, font=font_sm, fill=(148, 163, 184), anchor='mm')
+            ds_draw.text((sx, 686), val, font=font_bold_sm, fill=WHITE, anchor='mm')
+            ds_draw.text((sx, 710), label, font=font_sm, fill=(148, 163, 184), anchor='mm')
 
-        # Bottom white section
-        ds_draw.rectangle([0, 790, W, 920], fill=(248, 250, 252))
-        ds_draw.text((W//2, 855), 'cardeals.autos/' + slug, font=font_bold_md, fill=GREEN, anchor='mm')
+        # ZONE 5: Link section (y=720 to y=860)
+        ds_draw.rectangle([0, 720, W, 860], fill=(248, 250, 252))
+        ds_draw.line([20, 722, W-20, 722], fill=(220, 228, 240), width=1)
+        ds_draw.text((W//2, 790), 'cardeals.autos/' + slug, font=font_bold_md, fill=GREEN, anchor='mm')
 
-        # Dealership strip
-        ds_draw.rectangle([0, 920, W, 1010], fill=(241, 245, 249))
-        ds_draw.text((W//2, 948), dealership, font=font_bold_sm, fill=NAVY, anchor='mm')
-        ds_draw.text((W//2, 976), full_address, font=font_sm, fill=(100, 116, 139), anchor='mm')
+        # ZONE 6: Footer (y=860 to y=1000)
+        ds_draw.rectangle([0, 860, W, 1000], fill=(241, 245, 249))
+        ds_draw.line([20, 862, W-20, 862], fill=(220, 228, 240), width=1)
+        ds_draw.text((W//2, 910), dealership, font=font_bold_sm, fill=NAVY, anchor='mm')
+        ds_draw.text((W//2, 945), full_address, font=font_sm, fill=(100, 116, 139), anchor='mm')
         try:
             font_tiny = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 18)
         except:
             font_tiny = font_sm
-        ds_draw.text((W-30, 1000), 'Powered by CarsInStock', font=font_tiny, fill=(100, 116, 139), anchor='rm')
+        ds_draw.text((W-20, 980), 'Powered by CarsInStock', font=font_tiny, fill=(160, 170, 185), anchor='rm')
 
         buf = io.BytesIO()
         ds_img.save(buf, format='PNG')
