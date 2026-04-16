@@ -537,8 +537,8 @@ def generate_social_ad_image():
         ds_draw.text((145, 85), dealership, font=font_sm, fill=(100, 116, 139), anchor='lm')
 
         # THIS WEEK'S PICK badge top right
-        ds_draw.rounded_rectangle([W-260, 28, W-20, 78], radius=25, fill=GREEN)
-        ds_draw.text((W-140, 53), "THIS WEEK'S PICK", font=font_bold_sm, fill=WHITE, anchor='mm')
+        ds_draw.rounded_rectangle([W-230, 32, W-20, 72], radius=20, fill=GREEN)
+        ds_draw.text((W-125, 52), "THIS WEEK'S PICK", font=font_sm, fill=WHITE, anchor='mm')
 
         # Divider
         ds_draw.line([30, 140, W-30, 140], fill=(226, 232, 240), width=2)
@@ -593,9 +593,9 @@ def generate_social_ad_image():
         ds_draw.text((W//2, 860), 'cardeals.autos/' + slug, font=font_bold_md, fill=GREEN, anchor='mm')
 
         # Dealership strip
-        ds_draw.rectangle([0, 920, W, 1010], fill=NAVY)
-        ds_draw.text((W//2, 948), dealership, font=font_bold_sm, fill=WHITE, anchor='mm')
-        ds_draw.text((W//2, 976), full_address, font=font_sm, fill=(148, 163, 184), anchor='mm')
+        ds_draw.rectangle([0, 920, W, 1010], fill=(241, 245, 249))
+        ds_draw.text((W//2, 948), dealership, font=font_bold_sm, fill=NAVY, anchor='mm')
+        ds_draw.text((W//2, 976), full_address, font=font_sm, fill=(100, 116, 139), anchor='mm')
         try:
             font_tiny = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 18)
         except:
