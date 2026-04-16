@@ -714,7 +714,7 @@ async function generateProAd() {
         await new Promise(r => setTimeout(r, 300));
         await drawAdCanvas(data);
         document.getElementById('adPreviewWrap').style.display = 'block';
-        setTimeout(function(){ document.getElementById('adPreviewImg').scrollIntoView({behavior:'smooth', block:'start'}); }, 100);
+        setTimeout(function(){ document.getElementById('adPreviewImg').scrollIntoView({behavior:'smooth', block:'start'}); document.getElementById('adPreviewWrap').scrollTop = 0; }, 100);
         // Also generate server-side image for clean download
         var imgResp = await fetch('/api/generate_social_ad_image', {
             method: 'POST',
