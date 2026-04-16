@@ -386,15 +386,14 @@ def generate_social_ad_image():
         urg_img = urg_rgba.convert('RGB')
         urg_draw = ImageDraw.Draw(urg_img)
 
-        # Top left profile photo
+        # Top left profile photo - bigger, no name
         if profile_img:
-            pr = profile_img.resize((80, 80))
-            mask = Image.new('L', (80, 80), 0)
-            ImageDraw.Draw(mask).ellipse([0, 0, 79, 79], fill=255)
+            pr = profile_img.resize((110, 110))
+            mask = Image.new('L', (110, 110), 0)
+            ImageDraw.Draw(mask).ellipse([0, 0, 109, 109], fill=255)
             pr = pr.convert('RGB')
-            urg_img.paste(pr, (30, 30), mask)
-        urg_draw.ellipse([24, 24, 116, 116], outline=GREEN, width=4)
-        urg_draw.text((135, 58), name, font=font_bold_sm, fill=WHITE, anchor='lm')
+            urg_img.paste(pr, (25, 25), mask)
+        urg_draw.ellipse([19, 19, 141, 141], outline=GREEN, width=5)
 
         # Days left — BIG urgent badge top center
         if days_left > 0:
@@ -406,12 +405,12 @@ def generate_social_ad_image():
                 font_urgent = font_bold_md
             urg_draw.text((W//2, 65), f'⚠ {days_left} DAYS LEFT', font=font_urgent, fill=WHITE, anchor='mm')
 
-        # THIS WON'T LAST text
+        # THIS WON'T LAST text - elegant serif italic
         try:
-            font_wont = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 36)
+            font_wont = ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSerif-BoldItalic.ttf', 52)
         except:
-            font_wont = font_bold_sm
-        urg_draw.text((W//2, 160), "THIS WON'T LAST", font=font_wont, fill=(255, 200, 50), anchor='mm')
+            font_wont = font_bold_md
+        urg_draw.text((W//2, 165), "This Won't Last", font=font_wont, fill=(255, 210, 60), anchor='mm')
 
         # Vehicle name
         urg_draw.text((W//2, 480), vehicle_name, font=font_bold_lg, fill=WHITE, anchor='mm')
