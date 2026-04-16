@@ -582,7 +582,10 @@ def generate_social_ad_image():
         # ZONE 5: Link section (y=720 to y=860)
         ds_draw.rectangle([0, 720, W, 790], fill=(248, 250, 252))
         ds_draw.line([20, 722, W-20, 722], fill=(220, 228, 240), width=1)
-        ds_draw.text((W//2, 745), 'cardeals.autos/' + slug, font=font_bold_md, fill=GREEN, anchor='mm')
+        if include_referral:
+            ds_draw.rectangle([0, 720, W, 758], fill=(240, 253, 244))
+            ds_draw.text((W//2, 739), 'Refer a friend — they buy — you get $100', font=font_sm, fill=(6, 95, 70), anchor='mm')
+        ds_draw.text((W//2, 762), 'cardeals.autos/' + slug, font=font_bold_md, fill=GREEN, anchor='mm')
 
         # ZONE 6: Footer (y=860 to y=1000)
         ds_draw.rectangle([0, 790, W, 880], fill=(241, 245, 249))
