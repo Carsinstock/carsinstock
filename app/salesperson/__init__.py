@@ -438,6 +438,71 @@ def generate_social_ad_image():
         buf.seek(0)
         return Response(buf.read(), content_type='image/png')
 
+    if template == 'personal':
+        pb_img = Image.new('RGB', (W, H), NAVY)
+        pb_draw = ImageDraw.Draw(pb_img)
+
+        # Left half — rep photo large
+        if profile_img:
+            pr = profile_img.resize((480, 480))
+            mask = Image.new('L', (480, 480), 0)
+            ImageDraw.Draw(mask).ellipse([0, 0, 479, 479], fill=255)
+            pr = pr.convert('RGB')
+            pb_img.paste(pr, (60, 140), mask)
+            pb_draw.ellipse([54, 134, 546, 626], outline=GREEN, width=6)
+
+        # Right half — car photo
+        if car_img:
+            car_copy = car_img.convert('RGB')
+            scale = max(480 / car_copy.width, 360 / car_copy.height)
+            nw, nh = int(car_copy.width * scale), int(car_copy.height * scale)
+            car_copy = car_copy.resize((nw, nh))
+            car_region = Image.new('RGB', (480, 360), NAVY)
+            dx = (480 - nw) // 2
+            dy = (360 - nh) // 2
+            car_region.paste(car_copy, (dx, dy))
+            pb_img.paste(car_region, (580, 160))
+
+        # Green accent line top
+        pb_draw.rectangle([0, 0, W, 8], fill=GREEN)
+
+        # Rep name — large and bold left side bottom
+        try:
+            font_name_lg = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 52)
+        except:
+            font_name_lg = font_bold_lg
+        pb_draw.text((60, 650), name, font=font_name_lg, fill=WHITE, anchor='lm')
+        pb_draw.text((60, 710), 'Sales Professional', font=font_sm, fill=GREEN, anchor='lm')
+
+        # Vehicle info right side
+        pb_draw.text((580, 540), vehicle_name, font=font_bold_md, fill=WHITE, anchor='lm')
+        pb_draw.text((580, 590), price, font=font_bold_lg, fill=GREEN, anchor='lm')
+
+        # Days left badge
+        if days_left > 0:
+            badge_color = (220, 38, 38) if days_left <= 2 else (249, 115, 22) if days_left <= 4 else GREEN
+            pb_draw.rounded_rectangle([580, 630, 580+200, 630+46], radius=23, fill=badge_color)
+            pb_draw.text((680, 653), f'{days_left} Days Left', font=font_bold_sm, fill=WHITE, anchor='mm')
+
+        # Bottom strip
+        pb_draw.rectangle([0, 800, W, 920], fill=(20, 30, 48))
+        pb_draw.text((40, 860), 'cardeals.autos/' + slug, font=font_bold_sm, fill=GREEN, anchor='lm')
+        pb_draw.text((W-40, 860), dealership, font=font_bold_sm, fill=WHITE, anchor='rm')
+
+        # Dealership address
+        pb_draw.rectangle([0, 920, W, 1010], fill=(15, 23, 42))
+        pb_draw.text((W//2, 948), full_address, font=font_sm, fill=(180, 190, 200), anchor='mm')
+        try:
+            font_tiny = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 18)
+        except:
+            font_tiny = font_sm
+        pb_draw.text((W-30, 990), 'Powered by CarsInStock', font=font_tiny, fill=(160, 170, 185), anchor='rm')
+
+        buf = io.BytesIO()
+        pb_img.save(buf, format='PNG')
+        buf.seek(0)
+        return Response(buf.read(), content_type='image/png')
+
     # Return PNG (classic template)
     buf = io.BytesIO()
     img.save(buf, format='PNG')
