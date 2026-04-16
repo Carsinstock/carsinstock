@@ -362,6 +362,83 @@ def generate_social_ad_image():
         buf.seek(0)
         return Response(buf.read(), content_type='image/png')
 
+    if template == 'urgency':
+        urg_img = Image.new('RGB', (W, H), (0, 0, 0))
+
+        # Full bleed car photo
+        if car_img:
+            car_copy = car_img.convert('RGB')
+            scale = max(W / car_copy.width, H / car_copy.height)
+            nw, nh = int(car_copy.width * scale), int(car_copy.height * scale)
+            car_copy = car_copy.resize((nw, nh))
+            dx = (W - nw) // 2
+            dy = (H - nh) // 2
+            urg_img.paste(car_copy, (dx, dy))
+
+        # Heavy dark overlay — more dramatic than Just Listed
+        gradient = Image.new('RGBA', (W, H), (0, 0, 0, 0))
+        grad_draw = ImageDraw.Draw(gradient)
+        for i in range(H):
+            alpha = int(230 * (i / H) ** 1.2)
+            grad_draw.line([0, i, W, i], fill=(0, 0, 0, alpha))
+        urg_rgba = urg_img.convert('RGBA')
+        urg_rgba.paste(gradient, (0, 0), gradient)
+        urg_img = urg_rgba.convert('RGB')
+        urg_draw = ImageDraw.Draw(urg_img)
+
+        # Top left profile photo
+        if profile_img:
+            pr = profile_img.resize((80, 80))
+            mask = Image.new('L', (80, 80), 0)
+            ImageDraw.Draw(mask).ellipse([0, 0, 79, 79], fill=255)
+            pr = pr.convert('RGB')
+            urg_img.paste(pr, (30, 30), mask)
+        urg_draw.ellipse([24, 24, 116, 116], outline=GREEN, width=4)
+        urg_draw.text((135, 58), name, font=font_bold_sm, fill=WHITE, anchor='lm')
+
+        # Days left — BIG urgent badge top center
+        if days_left > 0:
+            badge_color = (220, 38, 38) if days_left <= 2 else (249, 115, 22) if days_left <= 4 else (200, 30, 30)
+            urg_draw.rounded_rectangle([W//2-180, 25, W//2+180, 105], radius=50, fill=badge_color)
+            try:
+                font_urgent = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 48)
+            except:
+                font_urgent = font_bold_md
+            urg_draw.text((W//2, 65), f'⚠ {days_left} DAYS LEFT', font=font_urgent, fill=WHITE, anchor='mm')
+
+        # THIS WON'T LAST text
+        try:
+            font_wont = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 36)
+        except:
+            font_wont = font_bold_sm
+        urg_draw.text((W//2, 160), "THIS WON'T LAST", font=font_wont, fill=(255, 200, 50), anchor='mm')
+
+        # Vehicle name
+        urg_draw.text((W//2, 480), vehicle_name, font=font_bold_lg, fill=WHITE, anchor='mm')
+
+        # Price
+        urg_draw.text((W//2, 570), price, font=font_price, fill=GREEN, anchor='mm')
+
+        # Bottom navy strip
+        urg_draw.rectangle([0, 800, W, 920], fill=NAVY)
+        urg_draw.text((40, 860), name, font=font_bold_md, fill=WHITE, anchor='lm')
+        urg_draw.text((W-40, 860), 'cardeals.autos/' + slug, font=font_bold_sm, fill=GREEN, anchor='rm')
+
+        # Dealership strip
+        urg_draw.rectangle([0, 920, W, 1010], fill=(20, 30, 48))
+        urg_draw.text((W//2, 948), dealership, font=font_bold_sm, fill=WHITE, anchor='mm')
+        urg_draw.text((W//2, 976), full_address, font=font_sm, fill=(180, 190, 200), anchor='mm')
+        try:
+            font_tiny = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 18)
+        except:
+            font_tiny = font_sm
+        urg_draw.text((W-30, 1000), 'Powered by CarsInStock', font=font_tiny, fill=(160, 170, 185), anchor='rm')
+
+        buf = io.BytesIO()
+        urg_img.save(buf, format='PNG')
+        buf.seek(0)
+        return Response(buf.read(), content_type='image/png')
+
     # Return PNG (classic template)
     buf = io.BytesIO()
     img.save(buf, format='PNG')

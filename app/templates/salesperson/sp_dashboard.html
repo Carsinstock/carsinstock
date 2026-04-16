@@ -130,6 +130,7 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
                 <div style="display:flex;gap:8px;">
                     <button onclick="selectTemplate('classic')" id="tmpl-classic" style="flex:1;padding:10px 6px;border:2px solid #00C851;border-radius:8px;background:#00C851;color:#1E293B;font-size:12px;font-weight:800;cursor:pointer;">⚡ Classic</button>
                     <button onclick="selectTemplate('just_listed')" id="tmpl-just_listed" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">✨ Just Listed</button>
+                    <button onclick="selectTemplate('urgency')" id="tmpl-urgency" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">🔥 Urgency</button>
                 </div>
             </div>
             <!-- Generate button -->
@@ -540,7 +541,7 @@ var serverAdBlob = null;
 var selectedTemplate = 'classic';
 function selectTemplate(t) {
     selectedTemplate = t;
-    ['classic','just_listed'].forEach(function(name) {
+    ['classic','just_listed','urgency'].forEach(function(name) {
         var btn = document.getElementById('tmpl-' + name);
         if (!btn) return;
         btn.style.background = name === t ? '#00C851' : 'white';
