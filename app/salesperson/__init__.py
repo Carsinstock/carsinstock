@@ -493,16 +493,16 @@ def generate_social_ad_image():
         # Bottom strip
         pb_draw.rectangle([0, 800, W, 920], fill=(20, 30, 48))
         pb_draw.text((40, 860), 'cardeals.autos/' + slug, font=font_bold_sm, fill=GREEN, anchor='lm')
-        pb_draw.text((W-40, 860), dealership, font=font_bold_sm, fill=WHITE, anchor='rm')
+        pb_draw.text((W-40, 845), dealership, font=font_bold_sm, fill=WHITE, anchor='rm')
+        pb_draw.text((W-40, 878), full_address, font=font_sm, fill=(180, 190, 200), anchor='rm')
 
         # Dealership address
         pb_draw.rectangle([0, 920, W, 1010], fill=(15, 23, 42))
-        pb_draw.text((W//2, 948), full_address, font=font_sm, fill=(180, 190, 200), anchor='mm')
         try:
             font_tiny = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 18)
         except:
             font_tiny = font_sm
-        pb_draw.text((W-30, 990), 'Powered by CarsInStock', font=font_tiny, fill=(160, 170, 185), anchor='rm')
+        pb_draw.text((40, 965), 'Powered by CarsInStock', font=font_tiny, fill=(160, 170, 185), anchor='lm')
 
         buf = io.BytesIO()
         pb_img.save(buf, format='PNG')
