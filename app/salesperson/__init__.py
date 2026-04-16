@@ -442,12 +442,18 @@ def generate_social_ad_image():
         pb_img = Image.new('RGB', (W, H), NAVY)
         pb_draw = ImageDraw.Draw(pb_img)
 
-        # Left half — rep photo large
+        # Left half — rep photo large, face centered
         if profile_img:
-            pr = profile_img.resize((480, 480))
+            pr = profile_img.convert('RGB')
+            # Crop to square from top center to show face
+            pw, ph = pr.size
+            side = min(pw, ph)
+            left = (pw - side) // 2
+            top = 0
+            pr = pr.crop((left, top, left + side, top + side))
+            pr = pr.resize((480, 480))
             mask = Image.new('L', (480, 480), 0)
             ImageDraw.Draw(mask).ellipse([0, 0, 479, 479], fill=255)
-            pr = pr.convert('RGB')
             pb_img.paste(pr, (60, 140), mask)
             pb_draw.ellipse([54, 134, 546, 626], outline=GREEN, width=6)
 
