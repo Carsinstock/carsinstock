@@ -134,6 +134,14 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
                     <button onclick="selectTemplate('personal')" id="tmpl-personal" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">👤 My Brand</button>
                     <button onclick="selectTemplate('dealsheet')" id="tmpl-dealsheet" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">📋 Deal Sheet</button>
                 </div>
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                    <button onclick="selectTemplate('lowmiles')" id="tmpl-lowmiles" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">🔢 Low Miles</button>
+                    <button onclick="selectTemplate('warranty')" id="tmpl-warranty" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">🏭 Warranty</button>
+                    <button onclick="selectTemplate('cleancarfax')" id="tmpl-cleancarfax" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">✅ Clean Carfax</button>
+                    <button onclick="selectTemplate('oneowner')" id="tmpl-oneowner" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">👤 One Owner</button>
+                    <button onclick="selectTemplate('referral')" id="tmpl-referral" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">🎁 Referral</button>
+                </div>
+                </div>
             </div>
             <!-- Generate button -->
             <button onclick="generateProAd()" id="generateBtn" style="width:100%;background:#00C851;color:white;border:none;padding:15px;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer;letter-spacing:0.3px;margin-bottom:6px;">Generate My Pro Social Ad &#x2192;</button>
@@ -543,7 +551,7 @@ var serverAdBlob = null;
 var selectedTemplate = 'classic';
 function selectTemplate(t) {
     selectedTemplate = t;
-    ['classic','just_listed','urgency','personal','dealsheet'].forEach(function(name) {
+    ['classic','just_listed','urgency','personal','dealsheet','lowmiles','warranty','cleancarfax','oneowner','referral'].forEach(function(name) {
         var btn = document.getElementById('tmpl-' + name);
         if (!btn) return;
         btn.style.background = name === t ? '#00C851' : 'white';
