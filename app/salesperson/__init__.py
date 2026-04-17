@@ -768,32 +768,38 @@ def generate_social_ad_image():
     if template == 'referral':
         rf_img = Image.new('RGB', (W, H), NAVY)
         rf_draw = ImageDraw.Draw(rf_img)
+        # Top green accent
         rf_draw.rectangle([0,0,W,8],fill=GREEN)
-        # Large rep photo center
+        # Large rep photo center top
         if profile_img:
             pr=profile_img.convert('RGB'); pw,ph=pr.size; side=min(pw,ph)
-            pr=pr.crop(((pw-side)//2,0,(pw-side)//2+side,side)).resize((320,320))
-            mask=Image.new('L',(320,320),0); ImageDraw.Draw(mask).ellipse([0,0,319,319],fill=255)
-            rf_img.paste(pr,(W//2-160,80),mask)
-            rf_draw.ellipse([W//2-166,74,W//2+166,406],outline=GREEN,width=6)
-        rf_draw.text((W//2,450),name,font=font_bold_lg,fill=WHITE,anchor='mm')
-        rf_draw.text((W//2,510),'Sales Professional · '+dealership,font=font_sm,fill=(148,163,184),anchor='mm')
-        rf_draw.line([80,550,W-80,550],fill=(51,65,85),width=1)
+            pr=pr.crop(((pw-side)//2,0,(pw-side)//2+side,side)).resize((280,280))
+            mask=Image.new('L',(280,280),0); ImageDraw.Draw(mask).ellipse([0,0,279,279],fill=255)
+            rf_img.paste(pr,(W//2-140,60),mask)
+            rf_draw.ellipse([W//2-146,54,W//2+146,346],outline=GREEN,width=6)
+        # Rep name and title
+        rf_draw.text((W//2,390),name,font=font_bold_lg,fill=WHITE,anchor='mm')
+        rf_draw.text((W//2,440),'Sales Professional · '+dealership,font=font_sm,fill=(148,163,184),anchor='mm')
+        rf_draw.line([80,475,W-80,475],fill=(51,65,85),width=1)
+        # Message
+        rf_draw.text((W//2,540),'Know someone buying a car?',font=font_bold_md,fill=WHITE,anchor='mm')
         try:
-            font_referral = ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSerif-BoldItalic.ttf',58)
+            font_script=ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSerif-BoldItalic.ttf',64)
         except:
-            font_referral = font_bold_lg
-        rf_draw.text((W//2,630),'Know someone buying a car?',font=font_bold_sm,fill=WHITE,anchor='mm')
-        rf_draw.text((W//2,690),'Send them my way.',font=font_referral,fill=GREEN,anchor='mm')
-        rf_draw.rounded_rectangle([W//2-280,740,W//2+280,810],radius=35,fill=GREEN)
-        rf_draw.text((W//2,775),'They buy — You get $100',font=font_bold_md,fill=NAVY,anchor='mm')
-        rf_draw.rectangle([0,860,W,920],fill=(20,30,48))
-        rf_draw.text((W//2,890),'cardeals.autos/'+slug,font=font_bold_md,fill=GREEN,anchor='mm')
-        rf_draw.rectangle([0,920,W,1010],fill=(15,23,42))
-        rf_draw.text((W//2,948),dealership,font=font_bold_sm,fill=WHITE,anchor='mm')
-        rf_draw.text((W//2,976),full_address,font=font_sm,fill=(180,190,200),anchor='mm')
+            font_script=font_bold_lg
+        rf_draw.text((W//2,620),'Send them my way.',font=font_script,fill=GREEN,anchor='mm')
+        # $100 badge — full width with padding
+        rf_draw.rounded_rectangle([60,670,W-60,740],radius=35,fill=GREEN)
+        rf_draw.text((W//2,705),'They buy — You get $100',font=font_bold_md,fill=NAVY,anchor='mm')
+        # Referral link
+        rf_draw.text((W//2,800),'cardeals.autos/'+slug,font=font_bold_md,fill=GREEN,anchor='mm')
+        # Footer
+        rf_draw.rectangle([0,870,W,960],fill=(20,30,48))
+        rf_draw.text((W//2,903),dealership,font=font_bold_sm,fill=WHITE,anchor='mm')
+        rf_draw.text((W//2,935),full_address,font=font_sm,fill=(180,190,200),anchor='mm')
         buf=io.BytesIO(); rf_img.save(buf,format='PNG'); buf.seek(0)
         return Response(buf.read(),content_type='image/png')
+
 
     # Return PNG (classic template)
     buf = io.BytesIO()
