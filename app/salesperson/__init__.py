@@ -660,7 +660,7 @@ def generate_social_ad_image():
             region.paste(car_copy,((W-nw)//2,(420-nh)//2))
             wt_img.paste(region,(0,120))
         wt_draw.rounded_rectangle([W//2-260,130,W//2+260,200],radius=35,fill=(234,179,8))
-        wt_draw.text((W//2,165),'🏭  FACTORY WARRANTY',font=font_bold_md,fill=NAVY,anchor='mm')
+        wt_draw.text((W//2,60),'FACTORY WARRANTY',font=font_bold_md,fill=NAVY,anchor='mm')
         if profile_img:
             pr=profile_img.convert('RGB'); pw,ph=pr.size; side=min(pw,ph)
             pr=pr.crop(((pw-side)//2,0,(pw-side)//2+side,side)).resize((80,80))
