@@ -71,7 +71,7 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
         <div id="shareTab-quick">
             <div class="social-btns">
                 <button class="social-btn" onclick="copyLink()">🔗 Copy My Store Link</button>
-                <a href="/qr-code" class="social-btn" download>📲 Download QR Code</a>
+                <a href="/qr-code" class="social-btn" download target="_blank">📲 Download QR Code</a>
                 <button class="social-btn" onclick="copyText()">💬 Copy Text Template</button>
                 <button class="social-btn green" onclick="generateWeeklyPost()">✨ Create My Weekly Post</button>
                 <a href="{{ '/' + member.slug if member.slug else '/' + (dealership_sp.profile_url_slug if dealership_sp else '') }}" target="_blank" class="social-btn" style="background:#475569;text-decoration:none;">🤝 My Referral Page</a>
