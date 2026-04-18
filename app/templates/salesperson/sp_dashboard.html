@@ -1003,4 +1003,17 @@ function copyPost(id) {
         </form>
     </div>
 </div>
+
+<!-- QR Code Modal -->
+<div id="qrModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:white;border-radius:16px;padding:28px;max-width:340px;width:90%;text-align:center;">
+        <h3 style="margin:0 0 6px;color:#1E293B;font-size:18px;font-weight:700;">📲 Your QR Code</h3>
+        <p style="margin:0 0 16px;color:#64748B;font-size:13px;">Customers scan this to visit your store.</p>
+        <img src="/qr-code" style="width:220px;height:220px;border:1px solid #E2E8F0;border-radius:8px;margin-bottom:16px;" />
+        <div style="display:flex;gap:10px;justify-content:center;">
+            <a href="/qr-code" download style="flex:1;background:#1E293B;color:white;padding:12px;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;display:block;">⬇ Save</a>
+            <button onclick="document.getElementById('qrModal').style.display='none'" style="flex:1;background:#F1F5F9;color:#475569;border:none;padding:12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">✕ Close</button>
+        </div>
+    </div>
+</div>
 {% endblock %}
