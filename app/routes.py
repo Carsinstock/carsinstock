@@ -62,6 +62,7 @@ def sp_dashboard():
         dealership_sp=dealership_sp,
         notifications=notifications)
 
+@main.route('/sp-notification/<int:notif_id>/dismiss', methods=['POST'])
 def dismiss_notification(notif_id):
     import sqlite3
     conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
