@@ -1379,12 +1379,14 @@ def weekly_post():
     vehicle_lines = "\n".join([f"• {v.year} {v.make} {v.model} — ${v.price:,.0f}" + (f" | {v.mileage:,} miles" if v.mileage else "") for v in vehicles])
     image_urls = [v.image_url for v in vehicles if v.image_url][:5]
     storefront_url = f"https://carsinstock.com/{sp.profile_url_slug}"
+    contact_url = f"https://cardeals.autos/{sp.profile_url_slug}/contact"
     prompt = f"""Write social media posts for a car salesperson named {sp.display_name}. Sound personal, human, not corporate. Use their voice like a real person posting on their own Facebook.
 
 Their current inventory:
 {vehicle_lines}
 
 Their storefront: {storefront_url}
+Their contact page (save to phone): {contact_url}
 
 Output ONLY valid JSON with these exact keys:
 {{
