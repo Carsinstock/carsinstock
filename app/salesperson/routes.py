@@ -388,6 +388,61 @@ def register_routes(bp):
         return send_file(buf, mimetype='image/png', as_attachment=True,
                         download_name=f'{slug}-business-card.png')
 
+    @bp.route("/vcard")
+    def vcard():
+        import sqlite3
+        from flask import send_file, session, Response
+        import io
+
+        if 'team_member_id' not in session:
+            return "Not found", 404
+
+        _conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        _conn.row_factory = sqlite3.Row
+        member = _conn.execute("""
+            SELECT dt.*, d.name as dealership_name, d.address as d_address,
+                   d.city as d_city, d.state as d_state, d.zip as d_zip
+            FROM dealership_team dt
+            LEFT JOIN dealerships d ON dt.dealership_id=d.id
+            WHERE dt.id=? AND dt.is_active=1
+        """, (session['team_member_id'],)).fetchone()
+        _conn.close()
+
+        if not member:
+            return "Not found", 404
+
+        name = member['name'] or ''
+        slug = member['slug'] or ''
+        phone = member['phone'] or ''
+        email = member['email'] or ''
+        dealership = member['dealership_name'] or ''
+        address = member['d_address'] or ''
+        city = member['d_city'] or ''
+        state = member['d_state'] or 'NJ'
+        zip_code = member['d_zip'] or ''
+
+        # Split name into first/last
+        parts = name.strip().split(' ', 1)
+        first = parts[0] if parts else name
+        last = parts[1] if len(parts) > 1 else ''
+
+        vcf = f"""BEGIN:VCARD
+VERSION:3.0
+N:{last};{first};;;
+FN:{name}
+ORG:{dealership}
+TITLE:Sales Professional
+TEL;TYPE=CELL:{phone}
+EMAIL:{email}
+URL:https://cardeals.autos/{slug}
+ADR;TYPE=WORK:;;{address};{city};{state};{zip_code};USA
+NOTE:View my inventory at cardeals.autos/{slug}
+END:VCARD"""
+
+        response = Response(vcf, mimetype='text/vcard')
+        response.headers['Content-Disposition'] = f'attachment; filename="{slug}.vcf"'
+        return response
+
     @bp.route("/api/vin-decode/<vin>")
     def vin_decode(vin):
         from flask import jsonify
