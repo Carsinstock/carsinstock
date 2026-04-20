@@ -300,6 +300,94 @@ def register_routes(bp):
         return send_file(buf, mimetype='image/png', as_attachment=True,
                         download_name=filename)
 
+    @bp.route("/business-card")
+    def business_card():
+        import io, sqlite3, requests as _req
+        from PIL import Image, ImageDraw, ImageFont
+        from flask import send_file, session
+        from app.models.salesperson import Salesperson
+        import qrcode as _qr
+
+        # Get member data
+        if 'team_member_id' in session and 'user_id' not in session:
+            _conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+            _conn.row_factory = sqlite3.Row
+            member = _conn.execute("SELECT dt.*, d.name as dealership_name, d.address as d_address, d.city as d_city, d.state as d_state, d.zip as d_zip FROM dealership_team dt LEFT JOIN dealerships d ON dt.dealership_id=d.id WHERE dt.id=? AND dt.is_active=1", (session['team_member_id'],)).fetchone()
+            _conn.close()
+            if not member: return "Not found", 404
+            name = member['name'] or ''
+            slug = member['slug'] or ''
+            phone = member['phone'] or ''
+            email = member['email'] or ''
+            photo_url = member['profile_photo'] or ''
+            dealership = member['dealership_name'] or ''
+            address = ((member['d_address'] + ', ') if member['d_address'] else '') + (member['d_city'] or '') + ', ' + (member['d_state'] or 'NJ') + ' ' + (member['d_zip'] or '')
+        else:
+            return "Not found", 404
+
+        # Canvas — business card proportions 1080x640
+        W, H = 1080, 640
+        NAVY = (30, 41, 59)
+        GREEN = (0, 200, 81)
+        WHITE = (255, 255, 255)
+        card = Image.new('RGB', (W, H), NAVY)
+        draw = ImageDraw.Draw(card)
+
+        # Green left accent bar
+        draw.rectangle([0, 0, 8, H], fill=GREEN)
+        draw.rectangle([0, H-8, W, H], fill=GREEN)
+
+        # Fonts
+        try:
+            font_name = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 52)
+            font_title = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 28)
+            font_info = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 24)
+            font_sm = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf', 20)
+        except:
+            font_name = font_title = font_info = font_sm = ImageFont.load_default()
+
+        # Profile photo left side
+        if photo_url:
+            try:
+                r = _req.get(photo_url, timeout=8)
+                pr = Image.open(io.BytesIO(r.content)).convert('RGB')
+                pw, ph = pr.size; side = min(pw, ph)
+                pr = pr.crop(((pw-side)//2, 0, (pw-side)//2+side, side)).resize((220, 220))
+                mask = Image.new('L', (220, 220), 0)
+                ImageDraw.Draw(mask).ellipse([0, 0, 219, 219], fill=255)
+                card.paste(pr, (50, H//2-110), mask)
+                draw.ellipse([44, H//2-116, 276, H//2+116], outline=GREEN, width=4)
+            except:
+                pass
+
+        # Rep info — right of photo
+        tx = 310
+        draw.text((tx, 80), name, font=font_name, fill=WHITE)
+        draw.text((tx, 148), 'Sales Professional', font=font_title, fill=GREEN)
+        draw.text((tx, 195), dealership, font=font_title, fill=(148, 163, 184))
+        draw.line([tx, 238, tx+480, 238], fill=(51, 65, 85), width=1)
+        if phone:
+            draw.text((tx, 260), '📞  ' + phone, font=font_info, fill=WHITE)
+        if email:
+            draw.text((tx, 300), '✉  ' + email, font=font_info, fill=WHITE)
+        if address:
+            draw.text((tx, 340), '📍  ' + address, font=font_sm, fill=(148, 163, 184))
+
+        # QR code right side
+        qr = _qr.QRCode(version=1, box_size=6, border=2)
+        qr.add_data(f'https://carsinstock.com/{slug}')
+        qr.make(fit=True)
+        qr_img = qr.make_image(fill_color=NAVY, back_color='white').convert('RGB')
+        qr_img = qr_img.resize((160, 160))
+        card.paste(qr_img, (W-200, H//2-100))
+        draw.text((W-200, H//2+75), 'cardeals.autos/' + slug, font=font_sm, fill=GREEN)
+
+        buf = io.BytesIO()
+        card.save(buf, format='PNG')
+        buf.seek(0)
+        return send_file(buf, mimetype='image/png', as_attachment=True,
+                        download_name=f'{slug}-business-card.png')
+
     @bp.route("/api/vin-decode/<vin>")
     def vin_decode(vin):
         from flask import jsonify
