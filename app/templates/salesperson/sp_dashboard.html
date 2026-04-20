@@ -441,7 +441,7 @@ async function generateWeeklyPost() {
         var resp = await fetch('/api/weekly_post', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({salesperson_id: dealershipSpId})
+            body: JSON.stringify({salesperson_id: dealershipSpId, member_slug: memberSlug, member_name: '{{ member.name }}'})
         });
         var data = await resp.json();
         document.getElementById('fbPost').value = data.facebook_post || '';

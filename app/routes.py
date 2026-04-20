@@ -1368,6 +1368,8 @@ def weekly_post():
     import anthropic, os
     data = request.get_json()
     sp_id = data.get('salesperson_id')
+    member_slug = data.get('member_slug', '')
+    member_name = data.get('member_name', '')
     from app.models.salesperson import Salesperson
     from app.models.vehicle import Vehicle
     sp = Salesperson.query.filter_by(salesperson_id=sp_id).first()
@@ -1378,9 +1380,11 @@ def weekly_post():
         return jsonify({'error': 'No active vehicles'}), 400
     vehicle_lines = "\n".join([f"• {v.year} {v.make} {v.model} — ${v.price:,.0f}" + (f" | {v.mileage:,} miles" if v.mileage else "") for v in vehicles])
     image_urls = [v.image_url for v in vehicles if v.image_url][:5]
-    storefront_url = f"https://carsinstock.com/{sp.profile_url_slug}"
-    contact_url = f"https://cardeals.autos/{sp.profile_url_slug}/contact"
-    prompt = f"""Write social media posts for a car salesperson named {sp.display_name}. Sound personal, human, not corporate. Use their voice like a real person posting on their own Facebook.
+    rep_slug = member_slug or sp.profile_url_slug
+    rep_name = member_name or sp.display_name
+    storefront_url = f"https://cardeals.autos/{rep_slug}"
+    contact_url = f"https://cardeals.autos/{rep_slug}/contact"
+    prompt = f"""Write social media posts for a car salesperson named {rep_name}. Sound personal, human, not corporate. Use their voice like a real person posting on their own Facebook.
 
 Their current inventory:
 {vehicle_lines}
