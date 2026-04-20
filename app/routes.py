@@ -327,6 +327,45 @@ def sp_add_vehicle():
     return redirect('/sp-dashboard')
 
 
+@main.route('/<slug>/contact')
+def public_contact(slug):
+    import sqlite3
+    conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    conn.row_factory = sqlite3.Row
+    sql = "SELECT dt.*, d.name as dealership_name, d.address as d_address, d.city as d_city, d.state as d_state, d.zip as d_zip FROM dealership_team dt LEFT JOIN dealerships d ON dt.dealership_id=d.id WHERE dt.slug=? AND dt.is_active=1"
+    member = conn.execute(sql, (slug,)).fetchone()
+    conn.close()
+    if not member:
+        return "Not found", 404
+    return render_template('salesperson/public_contact.html', member=dict(member))
+
+@main.route('/<slug>/vcard')
+def public_vcard(slug):
+    import sqlite3
+    from flask import Response
+    conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    conn.row_factory = sqlite3.Row
+    sql = "SELECT dt.*, d.name as dealership_name, d.address as d_address, d.city as d_city, d.state as d_state, d.zip as d_zip FROM dealership_team dt LEFT JOIN dealerships d ON dt.dealership_id=d.id WHERE dt.slug=? AND dt.is_active=1"
+    member = conn.execute(sql, (slug,)).fetchone()
+    conn.close()
+    if not member:
+        return "Not found", 404
+    name = member['name'] or ''
+    parts = name.strip().split(' ', 1)
+    first = parts[0] if parts else name
+    last = parts[1] if len(parts) > 1 else ''
+    phone = member['phone'] or ''
+    email = member['email'] or ''
+    dealership = member['dealership_name'] or ''
+    address = member['d_address'] or ''
+    city = member['d_city'] or ''
+    state = member['d_state'] or 'NJ'
+    zip_code = member['d_zip'] or ''
+    vcf = "BEGIN:VCARD\nVERSION:3.0\nN:" + last + ";" + first + ";;;\nFN:" + name + "\nORG:" + dealership + "\nTITLE:Sales Professional\nTEL;TYPE=CELL:" + phone + "\nEMAIL:" + email + "\nURL:https://cardeals.autos/" + slug + "\nADR;TYPE=WORK:;;" + address + ";" + city + ";" + state + ";" + zip_code + ";USA\nNOTE:View my inventory at cardeals.autos/" + slug + "\nEND:VCARD"
+    response = Response(vcf, mimetype='text/vcard')
+    response.headers['Content-Disposition'] = 'attachment; filename="' + slug + '.vcf"'
+    return response
+
 @main.route('/<slug>/inventory')
 def full_inventory(slug):
     from app.models.salesperson import Salesperson
