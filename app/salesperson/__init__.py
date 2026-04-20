@@ -266,7 +266,7 @@ def generate_social_ad_image():
     if include_referral:
         draw.rectangle([0, next_y, W, next_y+80], fill=(240, 253, 244))
         draw.rectangle([0, next_y, W, next_y+80], outline=(187, 247, 208), width=2)
-        draw.text((W//2, next_y+40), 'Know someone? Refer them -- they buy -- you get $100', font=font_bold_sm, fill=(6, 95, 70), anchor='mm')
+        draw.text((W//2, next_y+40), 'Know someone? Refer them -- they buy -- you receive a Thank You gift', font=font_bold_sm, fill=(6, 95, 70), anchor='mm')
         next_y += 80
 
     # SECTION 5: Dealership proud bottom
@@ -584,7 +584,7 @@ def generate_social_ad_image():
         ds_draw.line([20, 722, W-20, 722], fill=(220, 228, 240), width=1)
         if include_referral:
             ds_draw.rectangle([0, 720, W, 758], fill=(240, 253, 244))
-            ds_draw.text((W//2, 739), 'Refer a friend — they buy — you get $100', font=font_sm, fill=(6, 95, 70), anchor='mm')
+            ds_draw.text((W//2, 739), 'Refer a friend — they buy — you receive a Thank You gift', font=font_sm, fill=(6, 95, 70), anchor='mm')
         ds_draw.text((W//2, 762), 'cardeals.autos/' + slug, font=font_bold_md, fill=GREEN, anchor='mm')
 
         # ZONE 6: Footer (y=860 to y=1000)
@@ -790,7 +790,7 @@ def generate_social_ad_image():
         rf_draw.text((W//2,620),'Send them my way.',font=font_script,fill=GREEN,anchor='mm')
         # $100 badge — full width with padding
         rf_draw.rounded_rectangle([60,670,W-60,740],radius=35,fill=GREEN)
-        rf_draw.text((W//2,705),'They buy — You get $100',font=font_bold_md,fill=NAVY,anchor='mm')
+        rf_draw.text((W//2,705),'They buy — You receive a Thank You gift',font=font_bold_md,fill=NAVY,anchor='mm')
         # Referral link
         rf_draw.text((W//2,800),'cardeals.autos/'+slug,font=font_bold_md,fill=GREEN,anchor='mm')
         # Footer

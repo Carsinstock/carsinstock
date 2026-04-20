@@ -115,7 +115,7 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
             <div style="display:flex;align-items:center;justify-content:space-between;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:12px 14px;margin-bottom:16px;">
                 <div>
                     <div style="font-size:13px;font-weight:700;color:#1E293B;">Include $100 Referral</div>
-                    <div style="font-size:11px;color:#64748B;margin-top:2px;">Refer a friend &#x2192; they buy &#x2192; you get $100</div>
+                    <div style="font-size:11px;color:#64748B;margin-top:2px;">Refer a friend &#x2192; they buy &#x2192; you'll receive a Thank You gift</div>
                 </div>
                 <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;flex-shrink:0;" onclick="toggleReferral()">
                     <input type="checkbox" id="referralToggle" checked style="opacity:0;width:0;height:0;">
@@ -885,7 +885,7 @@ async function drawAdCanvas(data) {
         ctx.fillStyle = '#F0FDF4'; ctx.fillRect(0, nextY, W, 80);
         ctx.strokeStyle = '#BBF7D0'; ctx.lineWidth = 2; ctx.strokeRect(0, nextY, W, 80);
         ctx.fillStyle = '#065F46'; ctx.font = 'bold 26px Arial'; ctx.textAlign = 'center';
-        ctx.fillText('Know someone? Refer them -- they buy -- you get $100', W/2, nextY+48);
+        ctx.fillText('Know someone? Refer them -- they buy -- you'll receive a Thank You gift', W/2, nextY+48);
         nextY += 80;
     }
     var urlY = nextY + 20;

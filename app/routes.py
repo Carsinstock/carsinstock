@@ -652,7 +652,7 @@ def referral_submit(slug):
           <div style="background:#1E293B;padding:16px 24px;border-radius:10px 10px 0 0;"><span style="color:white;font-weight:400;">Cars</span><span style="color:#00C851;font-weight:700;"> IN STOCK</span></div>
           <div style="background:#fff;border:1px solid #E2E8F0;border-top:none;border-radius:0 0 10px 10px;padding:28px;">
             <h2 style="color:#1E293B;margin:0 0 8px;">Got your referral!</h2>
-            <p style="color:#475569;font-size:15px;margin:0 0 16px;">Hey {referrer_name.split()[0]}, we received your referral for {friend_name}. If they buy, you get $100.</p>
+            <p style="color:#475569;font-size:15px;margin:0 0 16px;">Hey {referrer_name.split()[0]}, we received your referral for {friend_name}. If they buy, you receive a Thank You gift.</p>
             <p style="color:#94A3B8;font-size:12px;margin:0;">— {sp.display_name} via CarsInStock</p>
           </div></div>"""
         send_email(referrer_email, f"Got your referral — thanks, {referrer_name.split()[0]}!", html)

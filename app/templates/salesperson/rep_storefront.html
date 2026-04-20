@@ -201,7 +201,7 @@ textarea.f-input{height:80px;resize:none}
     {% else %}
     <div class="cta-call">📞 Call {{ member.name.split()[0] }} Directly</div>
     {% endif %}
-    <button class="cta-ref" onclick="document.getElementById('referralModal').classList.add('open')">🤝 Refer &amp; Earn $100</button>
+    <button class="cta-ref" onclick="document.getElementById('referralModal').classList.add('open')">🤝 Refer &amp; Receive a Gift</button>
   </div>
   <div class="wave"></div>
 </div>
@@ -340,7 +340,7 @@ textarea.f-input{height:80px;resize:none}
     <button class="modal-close" onclick="document.getElementById('referralModal').classList.remove('open')">✕</button>
     <div class="modal-handle"></div>
     <div class="modal-title">Send a Referral</div>
-    <div class="modal-sub">Know someone looking for a car? Send them {{ member.name.split()[0] }}'s way. <strong>If they buy, you get $100.</strong></div>
+    <div class="modal-sub">Know someone looking for a car? Send them {{ member.name.split()[0] }}'s way. <strong>If they buy, you'll receive a Thank You gift.</strong></div>
     <div id="refFormContent">
       <div class="f-field"><input class="f-input" id="ref_your_name" type="text" placeholder="Your Name *"></div>
       <div class="f-field"><input class="f-input" id="ref_your_phone" type="tel" placeholder="Your Phone Number *"></div>
