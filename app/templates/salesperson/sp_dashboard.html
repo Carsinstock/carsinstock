@@ -71,7 +71,7 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
         <div id="shareTab-quick">
             <div class="social-btns">
                 <button class="social-btn" onclick="copyLink()">🔗 Copy My Store Link</button>
-                <button onclick="document.getElementById('qrModal').style.display='flex'" class="social-btn">📲 Download QR Code</button>
+                <button onclick="shareMyContact()" class="social-btn">💼 Share My Contact</button>
                 <button class="social-btn" onclick="copyText()">💬 Copy Text Template</button>
                 <button class="social-btn green" onclick="generateWeeklyPost()">✨ Create My Weekly Post</button>
                 <a href="{{ '/' + member.slug if member.slug else '/' + (dealership_sp.profile_url_slug if dealership_sp else '') }}" target="_blank" class="social-btn" style="background:#475569;text-decoration:none;">🤝 My Referral Page</a>
@@ -547,6 +547,24 @@ function showShareTab(tab) {
 // ── PLATFORM ──────────────────────────────────────────────────
 var selectedPlatform = 'facebook';
 var serverAdUrl = null;
+async function shareMyContact() {
+    try {
+        const response = await fetch('/vcard');
+        const blob = await response.blob();
+        const file = new File([blob], 'contact.vcf', {type: 'text/vcard'});
+        if (navigator.share && navigator.canShare && navigator.canShare({files: [file]})) {
+            await navigator.share({
+                title: 'My Contact Card',
+                files: [file]
+            });
+        } else {
+            // Fallback — open QR modal
+            document.getElementById('qrModal').style.display = 'flex';
+        }
+    } catch(e) {
+        document.getElementById('qrModal').style.display = 'flex';
+    }
+}
 var serverAdBlob = null;
 var selectedTemplate = 'classic';
 function selectTemplate(t) {
