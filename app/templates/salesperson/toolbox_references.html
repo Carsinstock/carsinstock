@@ -73,12 +73,16 @@
   <div class="step" id="scanStep">
     <div class="step-label">Step 2</div>
     <h2>Add references</h2>
-    <div class="upload-area" id="uploadArea" onclick="document.getElementById('imageInput').click()">
-      <input type="file" id="imageInput" accept="image/*" capture="environment">
+    <div class="upload-area" id="uploadArea"
+         onclick="document.getElementById('imageInput').click()"
+         ondragover="event.preventDefault();this.style.borderColor='#00C851'"
+         ondragleave="this.style.borderColor=''"
+         ondrop="handleDrop(event)">
+      <input type="file" id="imageInput" accept="image/*,application/pdf">
       <div class="upload-icon">📷</div>
-      <p>Take a photo of the reference sheet</p>
-      <p>or tap to upload from your camera roll</p>
-      <span class="upload-btn">Scan Reference Sheet</span>
+      <p>📱 Mobile: tap to use your camera</p>
+      <p>💻 Desktop: drag & drop or click to upload</p>
+      <span class="upload-btn">Choose File</span>
     </div>
     <div id="loadingSpinner" class="hidden">⏳ Reading handwriting...</div>
     <div id="warningBox" class="warning-box hidden"></div>
@@ -106,6 +110,17 @@
 
 <script>
 let extractedEntries = [];
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('uploadArea').style.borderColor = '';
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+  const dt = new DataTransfer();
+  dt.items.add(file);
+  document.getElementById('imageInput').files = dt.files;
+  document.getElementById('imageInput').dispatchEvent(new Event('change'));
+}
 
 document.getElementById('imageInput').addEventListener('change', async function(e) {
   const file = e.target.files[0];
