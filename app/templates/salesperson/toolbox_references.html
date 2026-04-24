@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+{% block header %}{% endblock %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reference Letters — CarsInStock Toolbox</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0F172A; font-family: 'DM Sans', sans-serif; min-height: 100vh; color: white; }
+  .tb-nav { background: #1E293B; border-bottom: 1px solid rgba(255,255,255,0.08); padding: 16px 24px; display: flex; align-items: center; gap: 16px; }
+  .tb-nav a { color: rgba(255,255,255,0.5); text-decoration: none; font-size: 14px; }
+  .tb-nav a:hover { color: white; }
+  .tb-nav .sep { color: rgba(255,255,255,0.2); }
+  .tb-nav .current { color: white; font-weight: 700; }
+  .tb-wrap { max-width: 640px; margin: 0 auto; padding: 40px 24px; }
+  h1 { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
+  .tb-sub { color: rgba(255,255,255,0.5); font-size: 15px; margin-bottom: 32px; }
+  .step { background: #1E293B; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+  .step-label { font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #00C851; margin-bottom: 8px; }
+  .step h2 { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+  label { display: block; font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 6px; font-weight: 600; }
+  input[type=text] { width: 100%; background: #0F172A; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 12px 14px; color: white; font-size: 15px; margin-bottom: 16px; }
+  input[type=text]:focus { outline: none; border-color: #00C851; }
+  .upload-area { border: 2px dashed rgba(255,255,255,0.2); border-radius: 12px; padding: 40px 24px; text-align: center; cursor: pointer; transition: border-color 0.2s; }
+  .upload-area:hover { border-color: #00C851; }
+  .upload-area input { display: none; }
+  .upload-icon { font-size: 40px; margin-bottom: 12px; }
+  .upload-area p { color: rgba(255,255,255,0.5); font-size: 14px; }
+  .upload-area .upload-btn { display: inline-block; margin-top: 12px; background: #00C851; color: white; padding: 10px 24px; border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; }
+  .btn-primary { width: 100%; background: #00C851; color: #0F172A; border: none; padding: 16px; border-radius: 10px; font-size: 16px; font-weight: 800; cursor: pointer; margin-top: 8px; }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-secondary { width: 100%; background: transparent; color: white; border: 1px solid rgba(255,255,255,0.2); padding: 14px; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; }
+  .entry-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-start; }
+  .entry-row input { margin-bottom: 0; flex: 1; }
+  .entry-row .remove-btn { background: none; border: none; color: rgba(255,255,255,0.3); font-size: 20px; cursor: pointer; padding: 12px 8px; line-height: 1; }
+  .entry-row .remove-btn:hover { color: #ef4444; }
+  .add-entry-btn { background: none; border: 1px dashed rgba(255,255,255,0.2); color: rgba(255,255,255,0.5); width: 100%; padding: 12px; border-radius: 8px; font-size: 14px; cursor: pointer; margin-top: 4px; }
+  .add-entry-btn:hover { border-color: #00C851; color: #00C851; }
+  .warning-box { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); border-radius: 8px; padding: 12px 16px; color: #fbbf24; font-size: 14px; margin-bottom: 16px; }
+  .error-box { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; padding: 12px 16px; color: #ef4444; font-size: 14px; margin-bottom: 16px; }
+  .success-box { background: rgba(0,200,81,0.1); border: 1px solid rgba(0,200,81,0.3); border-radius: 8px; padding: 20px; text-align: center; margin-bottom: 16px; }
+  .success-box .success-icon { font-size: 36px; margin-bottom: 8px; }
+  .success-box h3 { font-size: 20px; margin-bottom: 4px; }
+  .success-box p { color: rgba(255,255,255,0.6); font-size: 14px; }
+  .hidden { display: none; }
+  #loadingSpinner { text-align: center; padding: 20px; color: rgba(255,255,255,0.5); }
+</style>
+</head>
+<body>
+<div class="tb-nav">
+  <a href="/sp-dashboard">Dashboard</a>
+  <span class="sep">›</span>
+  <a href="/sp-dashboard/toolbox">Toolbox</a>
+  <span class="sep">›</span>
+  <span class="current">📋 Reference Letters</span>
+</div>
+<div class="tb-wrap">
+  <h1>📋 Reference Letters</h1>
+  <p class="tb-sub">Scan your customer's reference sheet or enter names manually. We'll generate a professional letter for each one.</p>
+
+  <!-- STEP 1: Customer Name -->
+  <div class="step">
+    <div class="step-label">Step 1</div>
+    <h2>Who just bought?</h2>
+    <label for="customerName">Customer's Full Name</label>
+    <input type="text" id="customerName" placeholder="e.g. Mike Johnson">
+  </div>
+
+  <!-- STEP 2: Scan or Enter -->
+  <div class="step" id="scanStep">
+    <div class="step-label">Step 2</div>
+    <h2>Add references</h2>
+    <div class="upload-area" id="uploadArea" onclick="document.getElementById('imageInput').click()">
+      <input type="file" id="imageInput" accept="image/*" capture="environment">
+      <div class="upload-icon">📷</div>
+      <p>Take a photo of the reference sheet</p>
+      <p>or tap to upload from your camera roll</p>
+      <span class="upload-btn">Scan Reference Sheet</span>
+    </div>
+    <div id="loadingSpinner" class="hidden">⏳ Reading handwriting...</div>
+    <div id="warningBox" class="warning-box hidden"></div>
+    <div id="errorBox" class="error-box hidden"></div>
+    <div id="entriesSection" class="hidden" style="margin-top:20px;">
+      <div id="entriesList"></div>
+      <button class="add-entry-btn" onclick="addEntryRow()">+ Add another reference manually</button>
+    </div>
+    <button class="btn-secondary" style="margin-top:16px;" onclick="showManualEntry()">Enter manually instead</button>
+  </div>
+
+  <!-- STEP 3: Generate -->
+  <div class="step hidden" id="generateStep">
+    <div class="step-label">Step 3</div>
+    <h2>Generate letters</h2>
+    <p style="color:rgba(255,255,255,0.55);font-size:14px;margin-bottom:16px;">Each reference will receive a personalized letter with a unique $500 offer code. Valid for 30 days.</p>
+    <div id="successBox" class="success-box hidden">
+      <div class="success-icon">🎉</div>
+      <h3 id="successMsg"></h3>
+      <p>Download, print, fold, and drop in the dealership outbox.</p>
+    </div>
+    <button class="btn-primary" id="generateBtn" onclick="generatePDF()">Generate Letters →</button>
+  </div>
+</div>
+
+<script>
+let extractedEntries = [];
+
+document.getElementById('imageInput').addEventListener('change', async function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  document.getElementById('loadingSpinner').classList.remove('hidden');
+  document.getElementById('errorBox').classList.add('hidden');
+  document.getElementById('warningBox').classList.add('hidden');
+
+  const fd = new FormData();
+  fd.append('image', file);
+
+  try {
+    const r = await fetch('/api/toolbox/scan-references', { method: 'POST', body: fd });
+    const data = await r.json();
+    document.getElementById('loadingSpinner').classList.add('hidden');
+
+    if (data.error && data.manual_fallback) {
+      showError(data.error);
+      showManualEntry();
+      return;
+    }
+    if (data.warning) {
+      document.getElementById('warningBox').textContent = data.warning;
+      document.getElementById('warningBox').classList.remove('hidden');
+    }
+    extractedEntries = data.entries || [];
+    renderEntries(extractedEntries);
+  } catch(err) {
+    document.getElementById('loadingSpinner').classList.add('hidden');
+    showError('Scan failed — try better lighting or enter manually.');
+    showManualEntry();
+  }
+});
+
+function renderEntries(entries) {
+  const list = document.getElementById('entriesList');
+  list.innerHTML = '';
+  entries.forEach((e, i) => addEntryRow(e.name, e.address));
+  document.getElementById('entriesSection').classList.remove('hidden');
+  document.getElementById('generateStep').classList.remove('hidden');
+}
+
+function addEntryRow(name='', address='') {
+  const list = document.getElementById('entriesList');
+  const row = document.createElement('div');
+  row.className = 'entry-row';
+  row.innerHTML = `
+    <div style="flex:1">
+      <input type="text" placeholder="Full name" value="${name}" class="entry-name">
+      <input type="text" placeholder="Street address, City ST ZIP" value="${address}" class="entry-address">
+    </div>
+    <button class="remove-btn" onclick="this.parentElement.remove()">×</button>
+  `;
+  list.appendChild(row);
+  document.getElementById('entriesSection').classList.remove('hidden');
+  document.getElementById('generateStep').classList.remove('hidden');
+}
+
+function showManualEntry() {
+  document.getElementById('entriesSection').classList.remove('hidden');
+  document.getElementById('generateStep').classList.remove('hidden');
+  if (document.getElementById('entriesList').children.length === 0) {
+    addEntryRow();
+  }
+}
+
+function showError(msg) {
+  const box = document.getElementById('errorBox');
+  box.textContent = msg;
+  box.classList.remove('hidden');
+}
+
+async function generatePDF() {
+  const customerName = document.getElementById('customerName').value.trim();
+  if (!customerName) { alert('Please enter the customer name first.'); return; }
+
+  const rows = document.querySelectorAll('.entry-row');
+  const entries = [];
+  rows.forEach(row => {
+    const name = row.querySelector('.entry-name').value.trim();
+    const address = row.querySelector('.entry-address').value.trim();
+    if (name) entries.push({ name, address });
+  });
+
+  if (entries.length === 0) { alert('Please add at least one reference.'); return; }
+
+  const btn = document.getElementById('generateBtn');
+  btn.disabled = true;
+  btn.textContent = 'Generating...';
+
+  try {
+    const r = await fetch('/api/toolbox/generate-reference-pdfs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ entries, customer_name: customerName })
+    });
+
+    if (!r.ok) { throw new Error('Generation failed'); }
+
+    const blob = await r.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `references-${customerName.toLowerCase().replace(/\s+/g,'-')}.pdf`;
+    a.click();
+
+    const successBox = document.getElementById('successBox');
+    document.getElementById('successMsg').textContent = `🎉 ${entries.length} letter${entries.length > 1 ? 's' : ''} ready to print`;
+    successBox.classList.remove('hidden');
+    btn.textContent = 'Download Again →';
+    btn.disabled = false;
+    btn.onclick = () => { a.click(); };
+  } catch(err) {
+    btn.disabled = false;
+    btn.textContent = 'Generate Letters →';
+    alert('Something went wrong — please try again.');
+  }
+}
+</script>
+</body>
+</html>
+{% endblock %}

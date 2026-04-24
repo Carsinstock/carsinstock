@@ -1775,3 +1775,245 @@ Always guide the conversation toward signing up. Never be pushy - be like a frie
         """
 
 
+
+    # ─────────────────────────────────────────────
+    # HELP ME SELL TOOLBOX
+    # ─────────────────────────────────────────────
+
+    @bp.route('/sp-dashboard/toolbox')
+    def toolbox_home():
+        if not session.get('team_member_id'):
+            return redirect('/login')
+        return render_template('salesperson/toolbox_home.html')
+
+    @bp.route('/sp-dashboard/toolbox/references')
+    def toolbox_references():
+        if not session.get('team_member_id'):
+            return redirect('/login')
+        return render_template('salesperson/toolbox_references.html')
+
+    @bp.route('/sp-dashboard/toolbox/neighbors')
+    def toolbox_neighbors():
+        if not session.get('team_member_id'):
+            return redirect('/login')
+        return render_template('salesperson/toolbox_neighbors.html')
+
+    @bp.route('/api/toolbox/scan-references', methods=['POST'])
+    def toolbox_scan_references():
+        if not session.get('team_member_id'):
+            return jsonify({'error': 'Unauthorized'}), 401
+        if 'image' not in request.files:
+            return jsonify({'error': 'No image uploaded'}), 400
+        f = request.files['image']
+        image_bytes = f.read()
+        media_type = f.mimetype or 'image/jpeg'
+        try:
+            from app.utils.claude_vision import extract_references_from_image
+            entries = extract_references_from_image(image_bytes, media_type)
+            if len(entries) > 10:
+                return jsonify({'entries': entries, 'warning': f'We found {len(entries)} names — confirm each one is correct before generating.'})
+            return jsonify({'entries': entries})
+        except ValueError as e:
+            return jsonify({'error': str(e), 'manual_fallback': True}), 422
+        except Exception as e:
+            return jsonify({'error': 'Scan failed — try better lighting or enter manually.', 'manual_fallback': True}), 500
+
+    @bp.route('/api/toolbox/geocode-neighbors', methods=['POST'])
+    def toolbox_geocode_neighbors():
+        if not session.get('team_member_id'):
+            return jsonify({'error': 'Unauthorized'}), 401
+        data = request.get_json()
+        address = (data or {}).get('address', '').strip()
+        if not address:
+            return jsonify({'error': 'Address required'}), 400
+        try:
+            from app.utils.nominatim import get_neighbor_addresses
+            neighbors = get_neighbor_addresses(address)
+            if len(neighbors) < 15:
+                return jsonify({
+                    'addresses': neighbors,
+                    'warning': f'We could only find {len(neighbors)} nearby addresses. You can add more manually or try a different format of the buyer\'s address.'
+                })
+            return jsonify({'addresses': neighbors})
+        except ValueError as e:
+            return jsonify({'error': str(e)}), 422
+        except Exception as e:
+            return jsonify({'error': 'Geocoding failed — try a different format of the address.'}), 500
+
+    @bp.route('/api/toolbox/generate-reference-pdfs', methods=['POST'])
+    def toolbox_generate_reference_pdfs():
+        if not session.get('team_member_id'):
+            return jsonify({'error': 'Unauthorized'}), 401
+        import sqlite3
+        from datetime import datetime, timedelta
+        from app.utils.offer_pdf import generate_reference_pdf, generate_offer_code
+
+        data = request.get_json()
+        entries = data.get('entries', [])
+        customer_name = data.get('customer_name', '').strip()
+        if not entries or not customer_name:
+            return jsonify({'error': 'entries and customer_name required'}), 400
+
+        team_member_id = session['team_member_id']
+        dealership_id = session.get('dealership_id', 1)
+
+        db = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        db.row_factory = sqlite3.Row
+
+        member = db.execute(
+            'SELECT name, phone, slug FROM dealership_team WHERE id = ?',
+            (team_member_id,)
+        ).fetchone()
+        dealership = db.execute(
+            'SELECT name FROM dealerships WHERE id = ?',
+            (dealership_id,)
+        ).fetchone()
+
+        if not member or not dealership:
+            db.close()
+            return jsonify({'error': 'Rep or dealership not found'}), 404
+
+        letters = []
+        offer_records = []
+        now = datetime.utcnow()
+        expires_at = now + timedelta(days=30)
+
+        for e in entries:
+            code = generate_offer_code('REF')
+            first_name = e.get('name', '').split()[0] if e.get('name') else 'Friend'
+            letters.append({
+                'reference_name': e.get('name', ''),
+                'reference_first_name': first_name,
+                'reference_address': e.get('address', ''),
+                'customer_name': customer_name,
+                'rep_name': member['name'],
+                'dealership_name': dealership['name'],
+                'rep_phone': member['phone'] or '',
+                'rep_slug': member['slug'] or '',
+                'offer_code': code,
+            })
+            offer_records.append((
+                code, 'reference', team_member_id, dealership_id,
+                e.get('name', ''), e.get('address', ''), None,
+                500, expires_at.isoformat()
+            ))
+
+        pdf_bytes, codes = generate_reference_pdf(letters)
+
+        for rec in offer_records:
+            db.execute('''
+                INSERT OR IGNORE INTO offer_codes
+                (offer_code, offer_type, team_member_id, dealership_id,
+                 recipient_name, recipient_address, source_customer_id,
+                 amount, expires_at)
+                VALUES (?,?,?,?,?,?,?,?,?)
+            ''', rec)
+        db.commit()
+        db.close()
+
+        from flask import Response
+        import re
+        safe_name = re.sub(r'[^a-zA-Z0-9]', '-', customer_name.lower())
+        filename = f"references-{safe_name}-{now.strftime('%Y%m%d')}.pdf"
+        return Response(
+            pdf_bytes,
+            mimetype='application/pdf',
+            headers={'Content-Disposition': f'attachment; filename="{filename}"'}
+        )
+
+    @bp.route('/api/toolbox/generate-neighbor-pdfs', methods=['POST'])
+    def toolbox_generate_neighbor_pdfs():
+        if not session.get('team_member_id'):
+            return jsonify({'error': 'Unauthorized'}), 401
+        import sqlite3
+        from datetime import datetime, timedelta
+        from app.utils.offer_pdf import generate_neighbor_pdf, generate_offer_code
+
+        data = request.get_json()
+        addresses = data.get('addresses', [])
+        if not addresses:
+            return jsonify({'error': 'addresses required'}), 400
+
+        team_member_id = session['team_member_id']
+        dealership_id = session.get('dealership_id', 1)
+
+        db = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        db.row_factory = sqlite3.Row
+
+        member = db.execute(
+            'SELECT name, phone, slug FROM dealership_team WHERE id = ?',
+            (team_member_id,)
+        ).fetchone()
+        dealership = db.execute(
+            'SELECT name FROM dealerships WHERE id = ?',
+            (dealership_id,)
+        ).fetchone()
+
+        if not member or not dealership:
+            db.close()
+            return jsonify({'error': 'Rep or dealership not found'}), 404
+
+        letters = []
+        offer_records = []
+        now = datetime.utcnow()
+        expires_at = now + timedelta(days=30)
+
+        for addr in addresses:
+            code = generate_offer_code('NBR')
+            letters.append({
+                'neighbor_address': addr,
+                'rep_name': member['name'],
+                'dealership_name': dealership['name'],
+                'rep_phone': member['phone'] or '',
+                'rep_slug': member['slug'] or '',
+                'offer_code': code,
+            })
+            offer_records.append((
+                code, 'neighbor', team_member_id, dealership_id,
+                None, addr, None, 500, expires_at.isoformat()
+            ))
+
+        pdf_bytes, codes = generate_neighbor_pdf(letters)
+
+        for rec in offer_records:
+            db.execute('''
+                INSERT OR IGNORE INTO offer_codes
+                (offer_code, offer_type, team_member_id, dealership_id,
+                 recipient_name, recipient_address, source_customer_id,
+                 amount, expires_at)
+                VALUES (?,?,?,?,?,?,?,?,?)
+            ''', rec)
+        db.commit()
+        db.close()
+
+        from flask import Response
+        filename = f"neighbors-{now.strftime('%Y%m%d')}.pdf"
+        return Response(
+            pdf_bytes,
+            mimetype='application/pdf',
+            headers={'Content-Disposition': f'attachment; filename="{filename}"'}
+        )
+
+    @bp.route('/api/toolbox/verify-offer/<code>')
+    def toolbox_verify_offer(code):
+        import sqlite3
+        db = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        db.row_factory = sqlite3.Row
+        row = db.execute(
+            'SELECT * FROM offer_codes WHERE offer_code = ?', (code.upper(),)
+        ).fetchone()
+        db.close()
+        if not row:
+            return jsonify({'valid': False, 'error': 'Offer code not found'}), 404
+        return jsonify({
+            'valid': True,
+            'offer_code': row['offer_code'],
+            'offer_type': row['offer_type'],
+            'recipient_name': row['recipient_name'],
+            'recipient_address': row['recipient_address'],
+            'amount': row['amount'],
+            'expires_at': row['expires_at'],
+            'redeemed': bool(row['redeemed']),
+            'redeemed_at': row['redeemed_at'],
+        })
+

@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block header %}{% endblock %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Help Me Sell Toolbox — CarsInStock</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0F172A; font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;600;700;800&display=swap');
+  .tb-nav {
+    background: #1E293B;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+  .tb-nav a { color: rgba(255,255,255,0.5); text-decoration: none; font-size: 14px; }
+  .tb-nav a:hover { color: white; }
+  .tb-nav .sep { color: rgba(255,255,255,0.2); }
+  .tb-nav .current { color: white; font-weight: 700; }
+  .tb-wrap { max-width: 700px; margin: 0 auto; padding: 48px 24px; }
+  .tb-header { text-align: center; margin-bottom: 48px; }
+  .tb-header .icon { font-size: 48px; margin-bottom: 16px; }
+  .tb-header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    color: white;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+  }
+  .tb-header p { color: rgba(255,255,255,0.55); font-size: 17px; line-height: 1.6; max-width: 480px; margin: 0 auto; }
+  .tb-cards { display: flex; flex-direction: column; gap: 20px; }
+  .tb-card {
+    background: #1E293B;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 32px;
+    text-decoration: none;
+    display: block;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .tb-card:hover { border-color: #00C851; transform: translateY(-2px); }
+  .tb-card-icon { font-size: 36px; margin-bottom: 16px; }
+  .tb-card-title { font-size: 22px; font-weight: 800; color: white; margin-bottom: 8px; }
+  .tb-card-desc { color: rgba(255,255,255,0.55); font-size: 15px; line-height: 1.6; margin-bottom: 16px; }
+  .tb-card-meta { display: flex; gap: 12px; flex-wrap: wrap; }
+  .tb-badge {
+    background: rgba(0,200,81,0.12);
+    border: 1px solid rgba(0,200,81,0.3);
+    color: #00C851;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 100px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .tb-card-arrow { color: #00C851; font-size: 20px; float: right; margin-top: -40px; }
+  .tb-back { display: block; text-align: center; margin-top: 32px; color: rgba(255,255,255,0.3); font-size: 14px; text-decoration: none; }
+  .tb-back:hover { color: white; }
+</style>
+</head>
+<body>
+<div class="tb-nav">
+  <a href="/sp-dashboard">Dashboard</a>
+  <span class="sep">›</span>
+  <span class="current">🧰 Help Me Sell Toolbox</span>
+</div>
+<div class="tb-wrap">
+  <div class="tb-header">
+    <div class="icon">🧰</div>
+    <h1>Help Me Sell Toolbox</h1>
+    <p>Post-close tools that turn every deal into 18–20 warm marketing touches. Print and mail from the dealership mailroom.</p>
+  </div>
+  <div class="tb-cards">
+    <a href="/sp-dashboard/toolbox/references" class="tb-card">
+      <div class="tb-card-icon">📋</div>
+      <div class="tb-card-title">Reference Letters</div>
+      <div class="tb-card-desc">Scan your customer's handwritten reference sheet. We extract the names and addresses, then generate a professional letter for each one — with a $500 offer code attached.</div>
+      <div class="tb-card-meta">
+        <span class="tb-badge">3–5 letters per deal</span>
+        <span class="tb-badge">$500 offer per letter</span>
+        <span class="tb-badge">Print & mail</span>
+      </div>
+      <div class="tb-card-arrow">→</div>
+    </a>
+    <a href="/sp-dashboard/toolbox/neighbors" class="tb-card">
+      <div class="tb-card-icon">🏘️</div>
+      <div class="tb-card-title">Neighbor Letters</div>
+      <div class="tb-card-desc">Enter the buyer's address. We find the 15 closest neighbors and generate a letter for each — letting them know about the sale and offering them $500 toward their next vehicle.</div>
+      <div class="tb-card-meta">
+        <span class="tb-badge">15 letters per deal</span>
+        <span class="tb-badge">$500 offer per letter</span>
+        <span class="tb-badge">Print & mail</span>
+      </div>
+      <div class="tb-card-arrow">→</div>
+    </a>
+  </div>
+  <a href="/sp-dashboard" class="tb-back">← Back to Dashboard</a>
+</div>
+</body>
+</html>
+{% endblock %}
