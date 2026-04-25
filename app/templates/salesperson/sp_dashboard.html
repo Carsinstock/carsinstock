@@ -41,8 +41,13 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
             <h2>{{ member.name }}</h2>
             <p>{{ member.email }}</p>
         </div>
-        <a href="/sp-dashboard/toolbox" style="display:inline-block;background:#00C851;color:#0F172A;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:800;text-decoration:none;margin-right:8px;">🧰 Toolbox</a><a href="/sp-logout" class="logout">Sign Out</a>
+        <a href="/sp-logout" class="logout">Sign Out</a>
     </div>
+
+    <!-- Toolbox Button -->
+    <a href="/sp-dashboard/toolbox" style="display:flex;align-items:center;justify-content:center;gap:10px;background:#00C851;color:#0F172A;padding:14px 20px;border-radius:10px;text-decoration:none;font-size:15px;font-weight:800;margin-bottom:16px;letter-spacing:0.3px;">
+        <span style="font-size:20px;">🧰</span> Help Me Sell Toolbox
+    </a>
 
     <!-- My Storefront Link -->
     {% if member.slug %}
