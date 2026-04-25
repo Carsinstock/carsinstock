@@ -146,7 +146,6 @@ def generate_reference_pdf(letters):
         ))
 
         story.append(Paragraph(f"📞 {l['rep_phone']}", offer_style))
-        story.append(Paragraph(f"🌐 cardeals.autos/{l['rep_slug']}", offer_style))
         story.append(Spacer(1, 0.2 * inch))
 
         story.append(Paragraph(f"Thank you,", body_style))
@@ -238,7 +237,6 @@ def generate_neighbor_pdf(letters):
         ))
 
         story.append(Paragraph(f"📞 {l['rep_phone']}", offer_style))
-        story.append(Paragraph(f"🌐 cardeals.autos/{l['rep_slug']}", offer_style))
         story.append(Spacer(1, 0.2 * inch))
 
         story.append(Paragraph("Sincerely,", body_style))
