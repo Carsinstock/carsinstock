@@ -1865,13 +1865,15 @@ Always guide the conversation toward signing up. Never be pushy - be like a frie
             (team_member_id,)
         ).fetchone()
         dealership = db.execute(
-            'SELECT name FROM dealerships WHERE id = ?',
+            'SELECT name, address, city, state, zip FROM dealerships WHERE id = ?',
             (dealership_id,)
         ).fetchone()
 
         if not member or not dealership:
             db.close()
             return jsonify({'error': 'Rep or dealership not found'}), 404
+
+        dealership_address = f"{dealership['address']}, {dealership['city']}, {dealership['state']} {dealership['zip']}"
 
         letters = []
         offer_records = []
@@ -1888,6 +1890,7 @@ Always guide the conversation toward signing up. Never be pushy - be like a frie
                 'customer_name': customer_name,
                 'rep_name': member['name'],
                 'dealership_name': dealership['name'],
+                'dealership_address': dealership_address,
                 'rep_phone': member['phone'] or '',
                 'rep_slug': member['slug'] or '',
                 'offer_code': code,
@@ -1945,13 +1948,15 @@ Always guide the conversation toward signing up. Never be pushy - be like a frie
             (team_member_id,)
         ).fetchone()
         dealership = db.execute(
-            'SELECT name FROM dealerships WHERE id = ?',
+            'SELECT name, address, city, state, zip FROM dealerships WHERE id = ?',
             (dealership_id,)
         ).fetchone()
 
         if not member or not dealership:
             db.close()
             return jsonify({'error': 'Rep or dealership not found'}), 404
+
+        dealership_address = f"{dealership['address']}, {dealership['city']}, {dealership['state']} {dealership['zip']}"
 
         letters = []
         offer_records = []
@@ -1964,6 +1969,7 @@ Always guide the conversation toward signing up. Never be pushy - be like a frie
                 'neighbor_address': addr,
                 'rep_name': member['name'],
                 'dealership_name': dealership['name'],
+                'dealership_address': dealership_address,
                 'rep_phone': member['phone'] or '',
                 'rep_slug': member['slug'] or '',
                 'offer_code': code,
