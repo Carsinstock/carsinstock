@@ -8,6 +8,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable,
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.enums import TA_CENTER
 from io import BytesIO
+from reportlab.pdfgen import canvas
 
 NAVY = colors.HexColor('#1E293B')
 GREEN = colors.HexColor('#00C851')
@@ -129,3 +130,75 @@ def generate_neighbor_pdf(letters):
 
     doc.build(story)
     return buffer.getvalue(), offer_codes
+
+
+def generate_avery_5160_labels(addresses, return_address=None):
+    """
+    Generates a printable Avery 5160 label sheet PDF.
+    30 labels per page, 3 columns x 10 rows.
+    Label size: 2.625" x 1"
+    Compatible with Avery 5160 / 8160 label sheets.
+    """
+    from reportlab.platypus import BaseDocTemplate, Frame, PageTemplate
+    from reportlab.lib.units import inch
+
+    buffer = BytesIO()
+
+    # Page setup — US Letter
+    PAGE_W, PAGE_H = letter
+
+    # Avery 5160 specs
+    COLS = 3
+    ROWS = 10
+    LABEL_W = 2.625 * inch
+    LABEL_H = 1.0 * inch
+    LEFT_MARGIN = 0.19 * inch
+    TOP_MARGIN = 0.5 * inch
+    COL_GAP = 0.125 * inch
+
+    label_style = ParagraphStyle('Label', fontSize=9, fontName='Helvetica', textColor=NAVY, leading=13, spaceAfter=0)
+    small_style = ParagraphStyle('Small', fontSize=7, fontName='Helvetica', textColor=GRAY, leading=10)
+
+    c = canvas.Canvas(buffer, pagesize=letter)
+
+    idx = 0
+    total = len(addresses)
+
+    while idx < total:
+        # Draw 30 labels per page
+        for row in range(ROWS):
+            for col in range(COLS):
+                if idx >= total:
+                    break
+                addr = addresses[idx]
+                idx += 1
+
+                x = LEFT_MARGIN + col * (LABEL_W + COL_GAP)
+                y = PAGE_H - TOP_MARGIN - (row + 1) * LABEL_H
+
+                # Draw label border (light, for alignment — remove for final print)
+                c.setStrokeColor(colors.HexColor('#E2E8F0'))
+                c.setLineWidth(0.3)
+                c.rect(x, y, LABEL_W, LABEL_H)
+
+                # Address text
+                lines = [l.strip() for l in addr.split(',') if l.strip()]
+                text_x = x + 0.12 * inch
+                text_y = y + LABEL_H - 0.22 * inch
+
+                c.setFont('Helvetica', 9)
+                c.setFillColor(NAVY)
+                for line in lines[:3]:
+                    c.drawString(text_x, text_y, line)
+                    text_y -= 13
+
+        if idx < total:
+            c.showPage()
+
+    # Footer note on last page
+    c.setFont('Helvetica', 7)
+    c.setFillColor(colors.HexColor('#94A3B8'))
+    c.drawString(LEFT_MARGIN, 0.3 * inch, 'Print on Avery 5160 / 8160 label sheets (30 labels per sheet, 2-5/8" x 1"). Available at Staples, Office Depot, or Amazon.')
+
+    c.save()
+    return buffer.getvalue()

@@ -2000,6 +2000,35 @@ Always guide the conversation toward signing up. Never be pushy - be like a frie
             headers={'Content-Disposition': f'attachment; filename="{filename}"'}
         )
 
+    @bp.route('/api/toolbox/generate-reference-labels', methods=['POST'])
+    def toolbox_generate_reference_labels():
+        if not session.get('team_member_id'):
+            return jsonify({'error': 'Unauthorized'}), 401
+        from app.utils.offer_pdf import generate_avery_5160_labels
+        data = request.get_json()
+        entries = data.get('entries', [])
+        addresses = [e.get('address', '') for e in entries if e.get('address', '').strip()]
+        if not addresses:
+            return jsonify({'error': 'No addresses provided'}), 400
+        pdf_bytes = generate_avery_5160_labels(addresses)
+        from flask import Response
+        return Response(pdf_bytes, mimetype='application/pdf',
+            headers={'Content-Disposition': 'attachment; filename="reference-mailing-labels.pdf"'})
+
+    @bp.route('/api/toolbox/generate-neighbor-labels', methods=['POST'])
+    def toolbox_generate_neighbor_labels():
+        if not session.get('team_member_id'):
+            return jsonify({'error': 'Unauthorized'}), 401
+        from app.utils.offer_pdf import generate_avery_5160_labels
+        data = request.get_json()
+        addresses = data.get('addresses', [])
+        if not addresses:
+            return jsonify({'error': 'No addresses provided'}), 400
+        pdf_bytes = generate_avery_5160_labels(addresses)
+        from flask import Response
+        return Response(pdf_bytes, mimetype='application/pdf',
+            headers={'Content-Disposition': 'attachment; filename="neighbor-mailing-labels.pdf"'})
+
     @bp.route('/api/toolbox/verify-offer/<code>')
     def toolbox_verify_offer(code):
         import sqlite3

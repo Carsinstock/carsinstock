@@ -106,6 +106,7 @@
       <p>Download, print, fold, and drop in the dealership outbox.</p>
     </div>
     <button class="btn-primary" id="generateBtn" onclick="generatePDF()">Generate Letters →</button>
+    <button class="btn-secondary hidden" id="labelsBtn">🏷️ Download Mailing Labels (Avery 5160)</button>
   </div>
 </div>
 
@@ -234,6 +235,23 @@ async function generatePDF() {
     btn.textContent = 'Download Again →';
     btn.disabled = false;
     btn.onclick = () => { a.click(); };
+
+    // Show labels button
+    const labelsBtn = document.getElementById('labelsBtn');
+    labelsBtn.classList.remove('hidden');
+    labelsBtn.onclick = async () => {
+      const r2 = await fetch('/api/toolbox/generate-reference-labels', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({entries})
+      });
+      const blob2 = await r2.blob();
+      const url2 = URL.createObjectURL(blob2);
+      const a2 = document.createElement('a');
+      a2.href = url2;
+      a2.download = 'reference-mailing-labels.pdf';
+      a2.click();
+    };
   } catch(err) {
     btn.disabled = false;
     btn.textContent = 'Generate Letters →';
