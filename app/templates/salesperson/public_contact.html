@@ -54,7 +54,7 @@ body { background: #0F172A; font-family: -apple-system, BlinkMacSystemFont, 'Seg
         <div class="info-text">{{ member.d_address }}, {{ member.d_city }}, {{ member.d_state }}</div>
     </div>
     {% endif %}
-    <a href="/{{ member.slug }}/vcard" class="btn-save" download>📇 Save to My Contacts</a>
+    <a href="/{{ member.slug }}/contact.vcf" class="btn-save" download>📇 Save to My Contacts</a>
     <a href="https://cardeals.autos/{{ member.slug }}" class="btn-store">🚗 View My Inventory</a>
 </div>
 </body>
