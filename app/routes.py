@@ -318,6 +318,23 @@ def sp_add_vehicle():
     try:
         db.session.add(vehicle)
         db.session.commit()
+        # Notify admin of pending vehicle approval
+        try:
+            from app.utils.email import send_email as _se
+            import sqlite3 as _sq
+            _conn = _sq.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+            _conn.row_factory = _sq.Row
+            _m = _conn.execute('SELECT name, slug FROM dealership_team WHERE id=?', (member['id'],)).fetchone()
+            _conn.close()
+            _rep = _m['name'] if _m else 'A rep'
+            _slug = _m['slug'] if _m else ''
+            _se(
+                to='ecastillo@pinebeltauto.com',
+                subject=f'New Vehicle Pending Approval — {year} {make} {model}',
+                body=f"""{_rep} just submitted a vehicle for approval:\n\n{year} {make} {model}\nVIN: {vin}\nPrice: ${price_val:,.0f}\n\nReview and approve at:\nhttps://carsinstock.com/admin/vehicles\n\nRep storefront: https://carsinstock.com/{_slug}"""
+            )
+        except Exception as _e:
+            print(f"Approval email error: {_e}")
         flash(f"{year} {make} {model} submitted! Your manager will review it shortly.", "success")
     except Exception as e:
         db.session.rollback()

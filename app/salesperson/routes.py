@@ -1438,32 +1438,69 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
     @bp.route("/api/chatbot", methods=["POST"])
     def chatbot_api():
         from app.utils.ai import chatbot_response
-        from app.models.salesperson import Salesperson
         from app.models.chat_conversation import ChatConversation
-        from app.models.user import User
-        import json
+        import json, sqlite3
+        from datetime import datetime
         data = request.get_json()
         message = data.get("message", "")
         history = data.get("history", [])
         slug = data.get("slug", "")
         session_id = data.get("session_id", "")
-        sp = Salesperson.query.filter_by(profile_url_slug=slug).first()
-        if not sp:
-            return jsonify({"response": "Sorry, something went wrong."})
-        # Get inventory summary
-        from app.models.vehicle import Vehicle
-        from datetime import datetime
-        vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status='available').all()
-        vehicles = [v for v in vehicles if not v.expires_at or v.expires_at > datetime.utcnow()]
-        inv_summary = ", ".join([f"{v.year} {v.make} {v.model} (${v.price:,.0f})" for v in vehicles]) if vehicles else "No vehicles currently listed"
-        response = chatbot_response(message, sp.display_name, inv_summary, history, dealership_name=sp.dealership_name)
+
+        # Look up rep from dealership_team first (Pine Belt reps)
+        _db = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        _db.row_factory = sqlite3.Row
+        member = _db.execute(
+            "SELECT dt.*, d.name as dealership_name FROM dealership_team dt LEFT JOIN dealerships d ON dt.dealership_id=d.id WHERE dt.slug=? AND dt.is_active=1",
+            (slug,)
+        ).fetchone()
+
+        if member:
+            # Get inventory for this team member
+            from app.models.vehicle import Vehicle
+            from app.models.salesperson import Salesperson
+            sp = Salesperson.query.filter_by(salesperson_id=member['dealership_id']).first()
+            salesperson_id = sp.salesperson_id if sp else None
+            vehicles = []
+            if salesperson_id:
+                all_v = _db.execute(
+                    "SELECT year, make, model, price FROM vehicles WHERE salesperson_id=? AND status='available' AND pick_user_id=? AND expires_at > ? AND is_team_pick=1",
+                    (salesperson_id, member['id'], datetime.utcnow().isoformat())
+                ).fetchall()
+                if not all_v:
+                    all_v = _db.execute(
+                        "SELECT year, make, model, price FROM vehicles WHERE salesperson_id=? AND status='available' AND expires_at > ? ORDER BY created_at DESC LIMIT 10",
+                        (salesperson_id, datetime.utcnow().isoformat())
+                    ).fetchall()
+                vehicles = all_v
+            _db.close()
+            inv_summary = ", ".join([f"{v['year']} {v['make']} {v['model']} (${v['price']:,.0f})" for v in vehicles]) if vehicles else "No vehicles currently listed"
+            rep_name = member['name']
+            dealership_name = member['dealership_name'] or ''
+            sp_id = salesperson_id or 1
+        else:
+            # Fall back to salespeople table
+            from app.models.salesperson import Salesperson
+            from app.models.vehicle import Vehicle
+            _db.close()
+            sp = Salesperson.query.filter_by(profile_url_slug=slug).first()
+            if not sp:
+                return jsonify({"response": "Sorry, something went wrong."})
+            vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status='available').all()
+            vehicles = [v for v in vehicles if not v.expires_at or v.expires_at > datetime.utcnow()]
+            inv_summary = ", ".join([f"{v.year} {v.make} {v.model} (${v.price:,.0f})" for v in vehicles]) if vehicles else "No vehicles currently listed"
+            rep_name = sp.display_name
+            dealership_name = sp.dealership_name or ''
+            sp_id = sp.salesperson_id
+
+        response = chatbot_response(message, rep_name, inv_summary, history, dealership_name=dealership_name)
         # Save conversation to database
         try:
             from app.models import db
-            convo = ChatConversation.query.filter_by(session_id=session_id, salesperson_id=sp.salesperson_id).first()
+            convo = ChatConversation.query.filter_by(session_id=session_id, salesperson_id=sp_id).first()
             if not convo:
                 convo = ChatConversation(
-                    salesperson_id=sp.salesperson_id,
+                    salesperson_id=sp_id,
                     session_id=session_id,
                     messages=json.dumps([])
                 )
@@ -1532,7 +1569,7 @@ Always guide the conversation toward signing up. Never be pushy - be like a frie
         if not sp:
             return jsonify({"success": False})
         from app.models import db
-        convo = ChatConversation.query.filter_by(session_id=session_id, salesperson_id=sp.salesperson_id).first()
+        convo = ChatConversation.query.filter_by(session_id=session_id, salesperson_id=sp_id).first()
         if not convo or convo.transcript_sent:
             return jsonify({"success": True})
         # Update visitor info if provided
