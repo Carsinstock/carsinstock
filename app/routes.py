@@ -362,9 +362,16 @@ def public_vcard(slug):
     state = member['d_state'] or 'NJ'
     zip_code = member['d_zip'] or ''
     vcf = "BEGIN:VCARD\nVERSION:3.0\nN:" + last + ";" + first + ";;;\nFN:" + name + "\nORG:" + dealership + "\nTITLE:Sales Professional\nTEL;TYPE=CELL:" + phone + "\nEMAIL:" + email + "\nURL:https://cardeals.autos/" + slug + "\nADR;TYPE=WORK:;;" + address + ";" + city + ";" + state + ";" + zip_code + ";USA\nNOTE:View my inventory at cardeals.autos/" + slug + "\nEND:VCARD"
-    response = Response(vcf, mimetype='text/vcard')
+    response = Response(vcf, mimetype='text/x-vcard; charset=utf-8')
     response.headers['Content-Disposition'] = 'attachment; filename="' + slug + '.vcf"'
+    response.headers['Cache-Control'] = 'no-cache'
     return response
+
+
+
+@main.route('/<slug>/contact.vcf')
+def public_vcard_vcf(slug):
+    return public_vcard(slug)
 
 @main.route('/<slug>/inventory')
 def full_inventory(slug):
