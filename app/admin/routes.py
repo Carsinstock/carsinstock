@@ -63,6 +63,7 @@ def register_admin_routes(bp):
         email = request.form.get("email", "").strip()
         conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
         photo = request.files.get("photo")
+        new_password = request.form.get("new_password", "").strip()
         if photo and photo.filename:
             result = cloudinary.uploader.upload(photo, folder="carsinstock/team")
             photo_url = result["secure_url"]
@@ -71,6 +72,10 @@ def register_admin_routes(bp):
         else:
             conn.execute("UPDATE dealership_team SET name=?, phone=?, email=? WHERE id=?",
                 (name, phone, email, member_id))
+        if new_password:
+            import bcrypt as _bcrypt
+            hashed = _bcrypt.hashpw(new_password.encode('utf-8'), _bcrypt.gensalt()).decode('utf-8')
+            conn.execute("UPDATE dealership_team SET password_hash=? WHERE id=?", (hashed, member_id))
         conn.commit()
         conn.close()
         return redirect(url_for("admin.team"))
