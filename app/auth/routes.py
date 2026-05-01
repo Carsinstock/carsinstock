@@ -146,8 +146,8 @@ def login():
         _member = _cL.execute("SELECT * FROM dealership_team WHERE LOWER(email)=LOWER(?) AND is_active=1 AND password_hash IS NOT NULL", (email,)).fetchone()
         _cL.close()
         if _member:
-            from werkzeug.security import check_password_hash as _cph
-            if _cph(_member['password_hash'], password):
+            import bcrypt as _bcrypt
+            if _bcrypt.checkpw(password.encode('utf-8'), _member['password_hash'].encode('utf-8')):
                 session.permanent = True
                 session['team_member_id'] = _member['id']
                 session['team_member_name'] = _member['name']
