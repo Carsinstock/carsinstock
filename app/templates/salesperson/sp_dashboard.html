@@ -839,7 +839,7 @@ async function drawAdCanvas(data) {
     ctx.fillStyle = navy; ctx.font = 'bold 52px Arial'; ctx.textAlign = 'left';
     ctx.fillText(data.name || '', tx, 100);
     ctx.fillStyle = '#64748B'; ctx.font = '30px Arial';
-    ctx.fillText((data.dealership || 'Pine Belt') + ' - ' + (data.city || 'NJ'), tx, 145);
+    ctx.fillText((data.dealership || '') + (data.city ? ' - ' + data.city : ''), tx, 145);
     ctx.fillStyle = green;
     roundRect(ctx, W-260, 20, 230, 52, 26, true);
     ctx.fillStyle = white; ctx.font = 'bold 24px Arial'; ctx.textAlign = 'center';
