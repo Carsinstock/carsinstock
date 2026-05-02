@@ -372,8 +372,8 @@ Message:
             )
         except Exception as e:
             print(f"Dealer register email error: {e}")
-        return render_template('dealer_register.html', submitted=True, turnstile_site_key=current_app.config.get('TURNSTILE_SITE_KEY', '0x4AAAAAACgqeOAo_1v9EOb3'))
-    return render_template('dealer_register.html', submitted=False, turnstile_site_key=current_app.config.get('TURNSTILE_SITE_KEY', '0x4AAAAAACgqeOAo_1v9EOb3'))
+        return render_template('dealer_register.html', submitted=True, turnstile_site_key='0x4AAAAAACgqeOAo_1v9EOb3')
+    return render_template('dealer_register.html', submitted=False, turnstile_site_key='0x4AAAAAACgqeOAo_1v9EOb3')
 
 @main.route('/<slug>/contact')
 def public_contact(slug):
