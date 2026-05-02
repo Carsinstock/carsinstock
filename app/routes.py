@@ -344,6 +344,37 @@ def sp_add_vehicle():
     return redirect('/sp-dashboard')
 
 
+@main.route('/dealer-register', methods=['GET', 'POST'])
+def dealer_register():
+    if request.method == 'POST':
+        first_name = request.form.get('first_name', '').strip()
+        last_name = request.form.get('last_name', '').strip()
+        dealership_name = request.form.get('dealership_name', '').strip()
+        email = request.form.get('email', '').strip()
+        phone = request.form.get('phone', '').strip()
+        num_salespeople = request.form.get('num_salespeople', '').strip()
+        message = request.form.get('message', '').strip()
+        try:
+            from app.utils.email import send_email as _se
+            _se(
+                to='sales@carsinstock.com',
+                subject=f'New Dealership Demo Request — {dealership_name}',
+                body=f"""New dealership demo request:
+
+Name: {first_name} {last_name}
+Dealership: {dealership_name}
+Email: {email}
+Phone: {phone}
+Team Size: {num_salespeople}
+
+Message:
+{message}"""
+            )
+        except Exception as e:
+            print(f"Dealer register email error: {e}")
+        return render_template('dealer_register.html', submitted=True)
+    return render_template('dealer_register.html', submitted=False)
+
 @main.route('/<slug>/contact')
 def public_contact(slug):
     import sqlite3
@@ -379,7 +410,7 @@ def public_vcard(slug):
     state = member['d_state'] or 'NJ'
     zip_code = member['d_zip'] or ''
     vcf = "BEGIN:VCARD\nVERSION:3.0\nN:" + last + ";" + first + ";;;\nFN:" + name + "\nORG:" + dealership + "\nTITLE:Sales Professional\nTEL;TYPE=CELL:" + phone + "\nEMAIL:" + email + "\nURL:https://cardeals.autos/" + slug + "\nADR;TYPE=WORK:;;" + address + ";" + city + ";" + state + ";" + zip_code + ";USA\nNOTE:View my inventory at cardeals.autos/" + slug + "\nEND:VCARD"
-    response = Response(vcf, mimetype='text/x-vcard; charset=utf-8')
+    response = Response(vcf, mimetype='text/x-vcard', content_type='text/x-vcard; charset=utf-8')
     response.headers['Content-Disposition'] = 'attachment; filename="' + slug + '.vcf"'
     response.headers['Cache-Control'] = 'no-cache'
     return response
