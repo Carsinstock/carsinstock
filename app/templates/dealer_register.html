@@ -48,6 +48,7 @@
             <label for="message">Questions or Comments</label>
             <textarea id="message" name="message" rows="4" placeholder="Tell us anything — questions, timeline, specific needs..." style="width:100%;padding:12px 14px;border:2px solid #ddd;border-radius:8px;font-size:15px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
         </div>
+        <div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}" style="margin-bottom:15px;"></div>
         <button type="submit" class="btn-primary">Request a Demo →</button>
     </form>
     {% endif %}
@@ -73,4 +74,5 @@
         div[style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
     }
 </style>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 {% endblock %}
