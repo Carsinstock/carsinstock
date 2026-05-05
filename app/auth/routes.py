@@ -147,7 +147,11 @@ def login():
         _cL.close()
         if _member:
             import bcrypt as _bcrypt
-            if _bcrypt.checkpw(password.encode('utf-8'), _member['password_hash'].encode('utf-8')):
+            try:
+                _pw_ok = _bcrypt.checkpw(password.encode('utf-8'), _member['password_hash'].encode('utf-8'))
+            except Exception:
+                _pw_ok = False
+            if _pw_ok:
                 session.permanent = True
                 session['team_member_id'] = _member['id']
                 session['team_member_name'] = _member['name']
