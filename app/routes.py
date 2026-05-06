@@ -784,6 +784,15 @@ def rep_storefront(member):
     else:
         og_description = f"Browse {member['name']}'s inventory at CarsInStock — carsinstock.com/{member['slug']}"
 
+    # Fetch Google review data from DB cache
+    _gconn = _sq.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    _gconn.row_factory = _sq.Row
+    _grow = _gconn.execute("SELECT google_rating, google_review_count, google_place_id FROM dealerships WHERE id=?", (member['dealership_id'],)).fetchone()
+    _gconn.close()
+    google_rating = _grow['google_rating'] if _grow else None
+    google_review_count = _grow['google_review_count'] if _grow else None
+    google_place_id = _grow['google_place_id'] if _grow else None
+
     return render_template('salesperson/rep_storefront.html',
         member=member,
         dealership_sp=dealership_sp,
@@ -796,6 +805,9 @@ def rep_storefront(member):
         og_title=og_title,
         og_description=og_description,
         hide_nav_auth=True,
+        google_rating=google_rating,
+        google_review_count=google_review_count,
+        google_place_id=google_place_id,
     )
 
 
