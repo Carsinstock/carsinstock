@@ -25,7 +25,7 @@ def generate_social_ad():
         return jsonify({'error': 'Team member not found'}), 404
 
     dealership_row = db.execute(
-        'SELECT name, city, address, state, zip FROM dealerships WHERE id=?',
+        'SELECT name, city, address, state, zip, google_rating, google_review_count FROM dealerships WHERE id=?',
         (member['dealership_id'],)
     ).fetchone()
     dealership = dealership_row['name'] if dealership_row and dealership_row['name'] else 'Pine Belt'
@@ -100,6 +100,8 @@ def generate_social_ad():
         'dealership': dealership,
         'city': city,
         'full_address': ((dealership_row['address'] + ', ') if dealership_row and dealership_row['address'] else '') + city + ', ' + ((dealership_row['state']) if dealership_row and dealership_row['state'] else 'NJ') + ' ' + ((dealership_row['zip']) if dealership_row and dealership_row['zip'] else ''),
+        'google_rating': dealership_row['google_rating'] if dealership_row and dealership_row['google_rating'] else None,
+        'google_review_count': dealership_row['google_review_count'] if dealership_row and dealership_row['google_review_count'] else None,
         'phone': member['phone'],
         'profile_photo': member['profile_photo'],
         'slug': member['slug'],
@@ -280,7 +282,38 @@ def generate_social_ad_image():
     draw.line([80, next_y+20, W-80, next_y+20], fill=(226, 232, 240), width=2)
     draw.text((W//2, next_y+70), dealership, font=font_dealership, fill=NAVY, anchor='mm')
     draw.text((W//2, next_y+110), full_address, font=font_dealership_addr, fill=GRAY, anchor='mm')
-    draw.text((W-30, next_y+148), 'Powered by CarsInStock', font=font_dealership_addr, fill=(203, 213, 225), anchor='rm')
+    # Google reviews badge
+    google_rating = data.get('google_rating')
+    google_review_count = data.get('google_review_count')
+    if google_rating and google_review_count:
+        badge_y = next_y + 138
+        badge_text = f'★ {google_rating}  ·  {google_review_count} Google reviews'
+        try:
+            font_badge = ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf', 22)
+        except:
+            font_badge = font_sm
+        # Draw pill background
+        bbox = draw.textbbox((0,0), badge_text, font=font_badge)
+        bw = bbox[2] - bbox[0] + 32
+        bh = bbox[3] - bbox[1] + 14
+        bx = W//2 - bw//2
+        by = badge_y
+        draw.rounded_rectangle([bx, by, bx+bw, by+bh], radius=12, fill=(255,255,255), outline=(226,232,240), width=1)
+        # Draw G in blue
+        try:
+            font_g = ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf', 22)
+        except:
+            font_g = font_badge
+        draw.text((bx+10, by+bh//2), 'G', font=font_g, fill=(66,133,244), anchor='lm')
+        # Draw stars in gold
+        draw.text((bx+26, by+bh//2), f'★ {google_rating}', font=font_badge, fill=(245,158,11), anchor='lm')
+        # Draw review count
+        rating_bbox = draw.textbbox((0,0), f'★ {google_rating}', font=font_badge)
+        rw = rating_bbox[2] - rating_bbox[0]
+        draw.text((bx+30+rw, by+bh//2), f'  ·  {google_review_count} Google reviews', font=font_badge, fill=(107,114,128), anchor='lm')
+        draw.text((W-30, badge_y+bh+8), 'Powered by CarsInStock', font=font_dealership_addr, fill=(203, 213, 225), anchor='rm')
+    else:
+        draw.text((W-30, next_y+148), 'Powered by CarsInStock', font=font_dealership_addr, fill=(203, 213, 225), anchor='rm')
 
     template = data.get('template', 'classic')
 
