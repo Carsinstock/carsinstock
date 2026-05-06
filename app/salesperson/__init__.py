@@ -827,9 +827,27 @@ def generate_social_ad_image():
         # Referral link
         rf_draw.text((W//2,800),'cardeals.autos/'+slug,font=font_bold_md,fill=GREEN,anchor='mm')
         # Footer
-        rf_draw.rectangle([0,870,W,960],fill=(20,30,48))
+        rf_draw.rectangle([0,870,W,1010],fill=(20,30,48))
         rf_draw.text((W//2,903),dealership,font=font_bold_sm,fill=WHITE,anchor='mm')
         rf_draw.text((W//2,935),full_address,font=font_sm,fill=(180,190,200),anchor='mm')
+        # Google badge
+        if google_rating and google_review_count:
+            try:
+                font_badge = ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf', 20)
+            except:
+                font_badge = font_sm
+            g_text = f'G  ★ {google_rating}  ·  {google_review_count} Google reviews'
+            bbox = rf_draw.textbbox((0,0), g_text, font=font_badge)
+            bw = bbox[2] - bbox[0] + 28
+            bh = bbox[3] - bbox[1] + 12
+            bx = W//2 - bw//2
+            by = 952
+            rf_draw.rounded_rectangle([bx,by,bx+bw,by+bh],radius=10,fill=WHITE)
+            rf_draw.text((bx+10, by+bh//2),'G',font=font_badge,fill=(66,133,244),anchor='lm')
+            rf_draw.text((bx+26, by+bh//2),f'★ {google_rating}',font=font_badge,fill=(245,158,11),anchor='lm')
+            star_bbox = rf_draw.textbbox((0,0),f'★ {google_rating}',font=font_badge)
+            sw = star_bbox[2]-star_bbox[0]
+            rf_draw.text((bx+30+sw, by+bh//2),f'  ·  {google_review_count} Google reviews',font=font_badge,fill=(100,116,139),anchor='lm')
         buf=io.BytesIO(); rf_img.save(buf,format='PNG'); buf.seek(0)
         return Response(buf.read(),content_type='image/png')
 
