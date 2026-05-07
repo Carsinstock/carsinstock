@@ -329,9 +329,12 @@ def sp_add_vehicle():
             _rep = _m['name'] if _m else 'A rep'
             _slug = _m['slug'] if _m else ''
             _se(
-                to='ecastillo@pinebeltauto.com',
+                to_email='ecastillo@pinebeltauto.com',
                 subject=f'New Vehicle Pending Approval — {year} {make} {model}',
-                body=f"""{_rep} just submitted a vehicle for approval:\n\n{year} {make} {model}\nVIN: {vin}\nPrice: ${price_val:,.0f}\n\nReview and approve at:\nhttps://carsinstock.com/admin/vehicles\n\nRep storefront: https://carsinstock.com/{_slug}"""
+                html_content=f"""<p>{_rep} just submitted a vehicle for approval:</p>
+<p><strong>{year} {make} {model}</strong><br>VIN: {vin}<br>Price: ${price_val:,.0f}</p>
+<p><a href='https://carsinstock.com/admin/vehicles'>Review and approve here</a></p>
+<p>Rep storefront: <a href='https://carsinstock.com/{_slug}'>carsinstock.com/{_slug}</a></p>"""
             )
         except Exception as _e:
             print(f"Approval email error: {_e}")
