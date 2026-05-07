@@ -41,6 +41,9 @@ def register_admin_routes(bp):
         phone = request.form.get("phone", "").strip()
         email = request.form.get("email", "").strip()
         slug = request.form.get("slug", "").strip().lower().replace(" ", "")
+        if not slug and name:
+            import re
+            slug = re.sub(r'[^a-z0-9]', '', name.lower().replace(" ", ""))
         photo_url = None
         photo = request.files.get("photo")
         if photo and photo.filename:
