@@ -347,6 +347,34 @@ def sp_add_vehicle():
     return redirect('/sp-dashboard')
 
 
+@main.route('/careers', methods=['GET', 'POST'])
+def careers():
+    if request.method == 'POST':
+        first_name = request.form.get('first_name', '').strip()
+        last_name = request.form.get('last_name', '').strip()
+        email = request.form.get('email', '').strip()
+        phone = request.form.get('phone', '').strip()
+        position = request.form.get('position', '').strip()
+        employer = request.form.get('employer', '').strip()
+        message = request.form.get('message', '').strip()
+        try:
+            from app.utils.email import send_email as _se
+            _se(
+                to_email='carsinstockllc@gmail.com',
+                subject=f'New Career Application — {position} — {first_name} {last_name}',
+                html_content=f"""<p><strong>New career application received:</strong></p>
+<p><strong>Name:</strong> {first_name} {last_name}<br>
+<strong>Email:</strong> {email}<br>
+<strong>Phone:</strong> {phone}<br>
+<strong>Position:</strong> {position}<br>
+<strong>Current Employer:</strong> {employer}</p>
+<p><strong>About them:</strong><br>{message}</p>"""
+            )
+        except Exception as e:
+            print(f"Careers email error: {e}")
+        return render_template('careers.html', submitted=True)
+    return render_template('careers.html', submitted=False)
+
 @main.route('/dealer-register', methods=['GET', 'POST'])
 def dealer_register():
     if request.method == 'POST':

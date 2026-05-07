@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="auth-container" style="max-width:580px;">
+    <h1 style="font-size:26px;">We're Growing — Come Build With Us.</h1>
+    <p class="auth-subtitle" style="font-size:15px;line-height:1.7;">CarsInStock is looking for driven people to join a platform that's changing the way car salespeople work. If you're hungry, tech-curious, and ready to be part of something early — we want to hear from you.</p>
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px 20px;margin-bottom:28px;">
+        <p style="font-weight:700;color:#166534;font-size:14px;margin:0 0 8px;">We are actively hiring:</p>
+        <p style="color:#166534;font-size:14px;margin:0;line-height:1.8;">✅ Regional Sales Representatives<br>✅ Territory Sales Representatives</p>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    {% if submitted %}
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:24px;text-align:center;">
+        <p style="font-size:20px;margin:0 0 8px;">✅</p>
+        <p style="color:#166534;font-size:16px;font-weight:700;margin:0 0 6px;">We got your application — thank you.</p>
+        <p style="color:#4b5563;font-size:14px;margin:0;">Someone from CarsInStock will be in touch.</p>
+    </div>
+    {% else %}
+    <form method="POST" action="/careers">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+            <div class="form-group">
+                <label for="first_name">First Name</label>
+                <input type="text" id="first_name" name="first_name" placeholder="John" required>
+            </div>
+            <div class="form-group">
+                <label for="last_name">Last Name</label>
+                <input type="text" id="last_name" name="last_name" placeholder="Smith" required>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" placeholder="you@email.com" required>
+        </div>
+        <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" placeholder="(555) 555-5555" required>
+        </div>
+        <div class="form-group">
+            <label for="position">Position of Interest</label>
+            <select id="position" name="position" required style="width:100%;padding:12px 14px;border:2px solid #ddd;border-radius:8px;font-size:16px;background:white;box-sizing:border-box;">
+                <option value="" disabled selected>Select a position...</option>
+                <option value="Regional Sales Representative">Regional Sales Representative</option>
+                <option value="Territory Sales Representative">Territory Sales Representative</option>
+                <option value="Tech / Engineering">Tech / Engineering</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="employer">Current Employer</label>
+            <input type="text" id="employer" name="employer" placeholder="e.g. ABC Auto Group">
+        </div>
+        <div class="form-group">
+            <label for="message">Tell Us About Yourself</label>
+            <textarea id="message" name="message" rows="4" placeholder="Tell us your background, why you're interested, and what you bring to the table..." style="width:100%;padding:12px 14px;border:2px solid #ddd;border-radius:8px;font-size:15px;font-family:inherit;resize:vertical;box-sizing:border-box;"></textarea>
+        </div>
+        <div class="cf-turnstile" data-sitekey="0x4AAAAAACgqeOAo_1v9EOb3" style="margin-bottom:15px;"></div>
+        <button type="submit" class="btn-primary">Apply Now →</button>
+    </form>
+    {% endif %}
+    <p class="auth-footer"><a href="/">← Back to CarsInStock</a></p>
+</div>
+<style>
+    .auth-container { max-width: 580px; margin: 40px auto; padding: 40px; background: #fff; border-radius: 12px; box-shadow: 0 2px 16px rgba(45,29,54,0.10); }
+    .auth-container h1 { color: #1E293B; margin-bottom: 8px; }
+    .auth-subtitle { color: #666; margin-bottom: 20px; font-size: 14px; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 6px; font-weight: 600; color: #1E293B; font-size: 14px; }
+    .form-group input, .form-group select { width: 100%; padding: 12px 14px; border: 2px solid #ddd; border-radius: 8px; font-size: 16px; transition: border-color 0.2s; box-sizing: border-box; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #1E293B; }
+    .btn-primary { width: 100%; padding: 14px; background: #1E293B; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    .btn-primary:hover { background: #00C851; }
+    .auth-footer { text-align: center; margin-top: 20px; color: #666; font-size: 14px; }
+    .auth-footer a { color: #1E293B; font-weight: 600; text-decoration: none; }
+    .alert { padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
+    .alert-error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .alert-success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+    @media (max-width: 520px) {
+        .auth-container { margin: 20px 16px; padding: 28px 20px; }
+        div[style*="grid-template-columns"] { grid-template-columns: 1fr !important; }
+    }
+</style>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+{% endblock %}
