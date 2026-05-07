@@ -392,7 +392,19 @@ def generate_social_ad_image():
         except:
             font_tiny = font_sm
         jl_draw.text((W-30, 1000), 'Powered by CarsInStock', font=font_tiny, fill=(160, 170, 185), anchor='rm')
-
+        if google_rating and google_review_count:
+            try:
+                font_badge = ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf', 20)
+            except:
+                font_badge = font_sm
+            bbox = jl_draw.textbbox((0,0), f'G ★ {google_rating} · {google_review_count} Google reviews', font=font_badge)
+            bw = bbox[2]-bbox[0]+28; bh = bbox[3]-bbox[1]+12
+            bx = W//2-bw//2; by = 992
+            jl_draw.rounded_rectangle([bx,by,bx+bw,by+bh],radius=10,fill=WHITE)
+            jl_draw.text((bx+10,by+bh//2),'G',font=font_badge,fill=(66,133,244),anchor='lm')
+            jl_draw.text((bx+26,by+bh//2),f'★ {google_rating}',font=font_badge,fill=(245,158,11),anchor='lm')
+            sw = jl_draw.textbbox((0,0),f'★ {google_rating}',font=font_badge)[2]-jl_draw.textbbox((0,0),f'★ {google_rating}',font=font_badge)[0]
+            jl_draw.text((bx+30+sw,by+bh//2),f' · {google_review_count} Google reviews',font=font_badge,fill=(100,116,139),anchor='lm')
         buf = io.BytesIO()
         jl_img.save(buf, format='PNG')
         buf.seek(0)
@@ -468,7 +480,19 @@ def generate_social_ad_image():
         except:
             font_tiny = font_sm
         urg_draw.text((W-30, 1000), 'Powered by CarsInStock', font=font_tiny, fill=(160, 170, 185), anchor='rm')
-
+        if google_rating and google_review_count:
+            try:
+                font_badge = ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf', 20)
+            except:
+                font_badge = font_sm
+            bbox = urg_draw.textbbox((0,0), f'G ★ {google_rating} · {google_review_count} Google reviews', font=font_badge)
+            bw = bbox[2]-bbox[0]+28; bh = bbox[3]-bbox[1]+12
+            bx = W//2-bw//2; by = 992
+            urg_draw.rounded_rectangle([bx,by,bx+bw,by+bh],radius=10,fill=WHITE)
+            urg_draw.text((bx+10,by+bh//2),'G',font=font_badge,fill=(66,133,244),anchor='lm')
+            urg_draw.text((bx+26,by+bh//2),f'★ {google_rating}',font=font_badge,fill=(245,158,11),anchor='lm')
+            sw = urg_draw.textbbox((0,0),f'★ {google_rating}',font=font_badge)[2]-urg_draw.textbbox((0,0),f'★ {google_rating}',font=font_badge)[0]
+            urg_draw.text((bx+30+sw,by+bh//2),f' · {google_review_count} Google reviews',font=font_badge,fill=(100,116,139),anchor='lm')
         buf = io.BytesIO()
         urg_img.save(buf, format='PNG')
         buf.seek(0)
@@ -539,6 +563,19 @@ def generate_social_ad_image():
         except:
             font_tiny = font_sm
         pb_draw.text((40, 965), 'Powered by CarsInStock', font=font_tiny, fill=(160, 170, 185), anchor='lm')
+        if google_rating and google_review_count:
+            try:
+                font_badge = ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf', 20)
+            except:
+                font_badge = font_sm
+            bbox = pb_draw.textbbox((0,0), f'G ★ {google_rating} · {google_review_count} Google reviews', font=font_badge)
+            bw = bbox[2]-bbox[0]+28; bh = bbox[3]-bbox[1]+12
+            bx = W//2-bw//2; by = 982
+            pb_draw.rounded_rectangle([bx,by,bx+bw,by+bh],radius=10,fill=WHITE)
+            pb_draw.text((bx+10,by+bh//2),'G',font=font_badge,fill=(66,133,244),anchor='lm')
+            pb_draw.text((bx+26,by+bh//2),f'★ {google_rating}',font=font_badge,fill=(245,158,11),anchor='lm')
+            sw = pb_draw.textbbox((0,0),f'★ {google_rating}',font=font_badge)[2]-pb_draw.textbbox((0,0),f'★ {google_rating}',font=font_badge)[0]
+            pb_draw.text((bx+30+sw,by+bh//2),f' · {google_review_count} Google reviews',font=font_badge,fill=(100,116,139),anchor='lm')
 
         buf = io.BytesIO()
         pb_img.save(buf, format='PNG')
@@ -630,6 +667,19 @@ def generate_social_ad_image():
         except:
             font_tiny = font_sm
         ds_draw.text((W-20, 872), 'Powered by CarsInStock', font=font_tiny, fill=(160, 170, 185), anchor='rm')
+        if google_rating and google_review_count:
+            try:
+                font_badge = ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf', 20)
+            except:
+                font_badge = font_sm
+            bbox = ds_draw.textbbox((0,0), f'G ★ {google_rating} · {google_review_count} Google reviews', font=font_badge)
+            bw = bbox[2]-bbox[0]+28; bh = bbox[3]-bbox[1]+12
+            bx = W//2-bw//2; by = 888
+            ds_draw.rounded_rectangle([bx,by,bx+bw,by+bh],radius=10,fill=(240,242,245))
+            ds_draw.text((bx+10,by+bh//2),'G',font=font_badge,fill=(66,133,244),anchor='lm')
+            ds_draw.text((bx+26,by+bh//2),f'★ {google_rating}',font=font_badge,fill=(245,158,11),anchor='lm')
+            sw = ds_draw.textbbox((0,0),f'★ {google_rating}',font=font_badge)[2]-ds_draw.textbbox((0,0),f'★ {google_rating}',font=font_badge)[0]
+            ds_draw.text((bx+30+sw,by+bh//2),f' · {google_review_count} Google reviews',font=font_badge,fill=(100,116,139),anchor='lm')
 
         buf = io.BytesIO()
         ds_img.save(buf, format='PNG')
@@ -677,6 +727,19 @@ def generate_social_ad_image():
         lm_draw.rectangle([0,920,W,1010],fill=(20,30,48))
         lm_draw.text((W//2,948),dealership,font=font_bold_sm,fill=WHITE,anchor='mm')
         lm_draw.text((W//2,976),full_address,font=font_sm,fill=(180,190,200),anchor='mm')
+        if google_rating and google_review_count:
+            try:
+                font_badge = ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf', 20)
+            except:
+                font_badge = font_sm
+            bbox = lm_draw.textbbox((0,0), f'G ★ {google_rating} · {google_review_count} Google reviews', font=font_badge)
+            bw = bbox[2]-bbox[0]+28; bh = bbox[3]-bbox[1]+12
+            bx = W//2-bw//2; by = 992
+            lm_draw.rounded_rectangle([bx,by,bx+bw,by+bh],radius=10,fill=WHITE)
+            lm_draw.text((bx+10,by+bh//2),'G',font=font_badge,fill=(66,133,244),anchor='lm')
+            lm_draw.text((bx+26,by+bh//2),f'★ {google_rating}',font=font_badge,fill=(245,158,11),anchor='lm')
+            sw = lm_draw.textbbox((0,0),f'★ {google_rating}',font=font_badge)[2]-lm_draw.textbbox((0,0),f'★ {google_rating}',font=font_badge)[0]
+            lm_draw.text((bx+30+sw,by+bh//2),f' · {google_review_count} Google reviews',font=font_badge,fill=(100,116,139),anchor='lm')
         buf=io.BytesIO(); lm_img.save(buf,format='PNG'); buf.seek(0)
         return Response(buf.read(),content_type='image/png')
 
@@ -721,6 +784,19 @@ def generate_social_ad_image():
         wt_draw.rectangle([0,920,W,1010],fill=(20,30,48))
         wt_draw.text((W//2,948),dealership,font=font_bold_sm,fill=WHITE,anchor='mm')
         wt_draw.text((W//2,976),full_address,font=font_sm,fill=(180,190,200),anchor='mm')
+        if google_rating and google_review_count:
+            try:
+                font_badge = ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf', 20)
+            except:
+                font_badge = font_sm
+            bbox = wt_draw.textbbox((0,0), f'G ★ {google_rating} · {google_review_count} Google reviews', font=font_badge)
+            bw = bbox[2]-bbox[0]+28; bh = bbox[3]-bbox[1]+12
+            bx = W//2-bw//2; by = 992
+            wt_draw.rounded_rectangle([bx,by,bx+bw,by+bh],radius=10,fill=WHITE)
+            wt_draw.text((bx+10,by+bh//2),'G',font=font_badge,fill=(66,133,244),anchor='lm')
+            wt_draw.text((bx+26,by+bh//2),f'★ {google_rating}',font=font_badge,fill=(245,158,11),anchor='lm')
+            sw = wt_draw.textbbox((0,0),f'★ {google_rating}',font=font_badge)[2]-wt_draw.textbbox((0,0),f'★ {google_rating}',font=font_badge)[0]
+            wt_draw.text((bx+30+sw,by+bh//2),f' · {google_review_count} Google reviews',font=font_badge,fill=(100,116,139),anchor='lm')
         buf=io.BytesIO(); wt_img.save(buf,format='PNG'); buf.seek(0)
         return Response(buf.read(),content_type='image/png')
 
@@ -758,6 +834,19 @@ def generate_social_ad_image():
         cc_draw.rectangle([0,920,W,1010],fill=(20,30,48))
         cc_draw.text((W//2,948),dealership,font=font_bold_sm,fill=WHITE,anchor='mm')
         cc_draw.text((W//2,976),full_address,font=font_sm,fill=(180,190,200),anchor='mm')
+        if google_rating and google_review_count:
+            try:
+                font_badge = ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf', 20)
+            except:
+                font_badge = font_sm
+            bbox = cc_draw.textbbox((0,0), f'G ★ {google_rating} · {google_review_count} Google reviews', font=font_badge)
+            bw = bbox[2]-bbox[0]+28; bh = bbox[3]-bbox[1]+12
+            bx = W//2-bw//2; by = 992
+            cc_draw.rounded_rectangle([bx,by,bx+bw,by+bh],radius=10,fill=WHITE)
+            cc_draw.text((bx+10,by+bh//2),'G',font=font_badge,fill=(66,133,244),anchor='lm')
+            cc_draw.text((bx+26,by+bh//2),f'★ {google_rating}',font=font_badge,fill=(245,158,11),anchor='lm')
+            sw = cc_draw.textbbox((0,0),f'★ {google_rating}',font=font_badge)[2]-cc_draw.textbbox((0,0),f'★ {google_rating}',font=font_badge)[0]
+            cc_draw.text((bx+30+sw,by+bh//2),f' · {google_review_count} Google reviews',font=font_badge,fill=(100,116,139),anchor='lm')
         buf=io.BytesIO(); cc_img.save(buf,format='PNG'); buf.seek(0)
         return Response(buf.read(),content_type='image/png')
 
@@ -795,6 +884,19 @@ def generate_social_ad_image():
         oo_draw.rectangle([0,920,W,1010],fill=(20,30,48))
         oo_draw.text((W//2,948),dealership,font=font_bold_sm,fill=WHITE,anchor='mm')
         oo_draw.text((W//2,976),full_address,font=font_sm,fill=(180,190,200),anchor='mm')
+        if google_rating and google_review_count:
+            try:
+                font_badge = ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf', 20)
+            except:
+                font_badge = font_sm
+            bbox = oo_draw.textbbox((0,0), f'G ★ {google_rating} · {google_review_count} Google reviews', font=font_badge)
+            bw = bbox[2]-bbox[0]+28; bh = bbox[3]-bbox[1]+12
+            bx = W//2-bw//2; by = 992
+            oo_draw.rounded_rectangle([bx,by,bx+bw,by+bh],radius=10,fill=WHITE)
+            oo_draw.text((bx+10,by+bh//2),'G',font=font_badge,fill=(66,133,244),anchor='lm')
+            oo_draw.text((bx+26,by+bh//2),f'★ {google_rating}',font=font_badge,fill=(245,158,11),anchor='lm')
+            sw = oo_draw.textbbox((0,0),f'★ {google_rating}',font=font_badge)[2]-oo_draw.textbbox((0,0),f'★ {google_rating}',font=font_badge)[0]
+            oo_draw.text((bx+30+sw,by+bh//2),f' · {google_review_count} Google reviews',font=font_badge,fill=(100,116,139),anchor='lm')
         buf=io.BytesIO(); oo_img.save(buf,format='PNG'); buf.seek(0)
         return Response(buf.read(),content_type='image/png')
 
