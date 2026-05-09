@@ -1004,12 +1004,12 @@ def generate_social_ad_image():
         # Footer
         mg_draw.rectangle([0,H-50,W,H],fill=(10,10,20))
         mg_draw.text((W//2,H-25),dealership+' · '+full_address,font=font_sm,fill=(80,90,110),anchor='mm')
-        # Google badge
+        # Google badge — positioned bottom right, clear of rep circle
         if google_rating and google_review_count:
             try: font_badge=ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',20)
             except: font_badge=font_sm
             bbox=mg_draw.textbbox((0,0),f'G * {google_rating} · {google_review_count} Google reviews',font=font_badge)
-            bw=bbox[2]-bbox[0]+28;bh=bbox[3]-bbox[1]+12;bx=50;by=H-330-bh-12
+            bw=bbox[2]-bbox[0]+28;bh=bbox[3]-bbox[1]+12;bx=W-bw-20;by=H-58-bh
             mg_draw.rounded_rectangle([bx,by,bx+bw,by+bh],radius=10,fill=WHITE)
             mg_draw.text((bx+10,by+bh//2),'G',font=font_badge,fill=(66,133,244),anchor='lm')
             mg_draw.text((bx+26,by+bh//2),f'* {google_rating}',font=font_badge,fill=(245,158,11),anchor='lm')
