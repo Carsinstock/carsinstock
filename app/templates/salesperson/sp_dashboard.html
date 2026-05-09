@@ -146,6 +146,13 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
                     <button onclick="selectTemplate('oneowner')" id="tmpl-oneowner" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">👤 One Owner</button>
                     <button onclick="selectTemplate('referral')" id="tmpl-referral" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">🎁 Referral</button>
                 </div>
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                    <button onclick="selectTemplate('magazine')" id="tmpl-magazine" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">🎬 Magazine</button>
+                    <button onclick="selectTemplate('pricedrop')" id="tmpl-pricedrop" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">🔻 Price Drop</button>
+                    <button onclick="selectTemplate('freshtraded')" id="tmpl-freshtraded" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">🚗 Fresh Trade</button>
+                    <button onclick="selectTemplate('boldstreet')" id="tmpl-boldstreet" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">🔥 Bold Street</button>
+                    <button onclick="selectTemplate('cleanstudio')" id="tmpl-cleanstudio" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">✨ Clean Studio</button>
+                </div>
                 </div>
             </div>
             <!-- Generate button -->
@@ -574,7 +581,7 @@ var serverAdBlob = null;
 var selectedTemplate = 'classic';
 function selectTemplate(t) {
     selectedTemplate = t;
-    ['classic','just_listed','urgency','personal','dealsheet','lowmiles','warranty','cleancarfax','oneowner','referral'].forEach(function(name) {
+    ['classic','just_listed','urgency','personal','dealsheet','lowmiles','warranty','cleancarfax','oneowner','referral','magazine','pricedrop','freshtraded','boldstreet','cleanstudio'].forEach(function(name) {
         var btn = document.getElementById('tmpl-' + name);
         if (!btn) return;
         btn.style.background = name === t ? '#00C851' : 'white';
