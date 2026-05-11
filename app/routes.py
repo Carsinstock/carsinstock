@@ -912,6 +912,35 @@ def referral_submit(slug):
             send_email(sp_user.email, f"New Referral: {referrer_name} referred {friend_name}", admin_html)
     except Exception as e:
         print(f"Referral admin email error: {e}")
+    # Hook into birddog system
+    try:
+        import secrets as _sec
+        _conn2 = _sq.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        _conn2.row_factory = _sq.Row
+        team_member = _conn2.execute("SELECT id FROM dealership_team WHERE slug=? AND is_active=1", (slug,)).fetchone()
+        if team_member:
+            tm_id = team_member['id']
+            existing_bd = _conn2.execute("SELECT id, token FROM birddogs WHERE phone=? AND team_member_id=?", (referrer_phone, tm_id)).fetchone()
+            if existing_bd:
+                bd_id = existing_bd['id']
+                bd_token = existing_bd['token']
+            else:
+                bd_token = _sec.token_urlsafe(16)
+                _conn2.execute("INSERT INTO birddogs (team_member_id, name, email, phone, token) VALUES (?,?,?,?,?)", (tm_id, referrer_name, referrer_email, referrer_phone, bd_token))
+                _conn2.commit()
+                bd_id = _conn2.execute("SELECT last_insert_rowid()").fetchone()[0]
+                if referrer_email:
+                    try:
+                        from app.utils.email import send_email as _se2
+                        tracking_url = 'https://carsinstock.com/track/' + bd_token
+                        _se2(to_email=referrer_email, subject='Track your referral — CarsInStock', html_content='<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;"><div style="background:#1E293B;padding:20px;text-align:center;border-radius:12px 12px 0 0;"><h1 style="color:#00C851;margin:0;">Cars IN STOCK</h1></div><div style="background:#f8fafc;padding:30px;border-radius:0 0 12px 12px;"><h2 style="color:#1E293B;">Track your referral</h2><p style="color:#555;">Bookmark this link to track your referral and gift status.</p><div style="text-align:center;margin:24px 0;"><a href="' + tracking_url + '" style="background:#00C851;color:#1E293B;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;">Track My Referral</a></div></div></div>')
+                    except Exception as _e3:
+                        print(f"Tracking email error: {_e3}")
+            _conn2.execute("INSERT INTO birddog_referrals (birddog_id, team_member_id, buyer_name, buyer_phone, status) VALUES (?,?,?,?,?)", (bd_id, tm_id, friend_name, friend_phone, 'pending'))
+            _conn2.commit()
+        _conn2.close()
+    except Exception as _e2:
+        print(f"Birddog hook error: {_e2}")
     return jsonify({"success": True})
 
 
