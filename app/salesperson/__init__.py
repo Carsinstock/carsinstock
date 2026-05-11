@@ -1260,6 +1260,898 @@ def generate_social_ad_image():
         buf=io.BytesIO(); cs_img.save(buf,format='PNG'); buf.seek(0)
         return Response(buf.read(),content_type='image/png')
 
+    # ── TEMPLATE: certified ─────────────────────────────────────────────────
+    if template == 'certified':
+        GOLD = (201, 169, 97)
+        DARK_NAVY = (15, 23, 42)
+        MUTED = (148, 163, 184)
+
+        ct_img = Image.new('RGB', (W, H), NAVY)
+        ct_draw = ImageDraw.Draw(ct_img)
+
+        try:
+            font_cert_xl = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 56)
+        except:
+            font_cert_xl = font_bold_lg
+        try:
+            font_cert_seal = ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf', 18)
+        except:
+            font_cert_seal = font_bold_sm
+        try:
+            font_cert_strip = ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf', 22)
+        except:
+            font_cert_strip = font_bold_sm
+        try:
+            font_cert_sub = ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf', 18)
+        except:
+            font_cert_sub = font_bold_sm
+
+        # TOP GOLD BAND
+        ct_draw.rectangle([0, 0, W, 140], fill=GOLD)
+        ct_draw.text((W//2, 60), 'DEALER CERTIFIED', font=font_cert_xl, fill=NAVY, anchor='mm')
+        ct_draw.text((W//2, 110), 'INSPECTED  ·  APPROVED  ·  WARRANTY READY', font=font_cert_sub, fill=NAVY, anchor='mm')
+
+        # HERO VEHICLE AREA
+        ct_draw.rounded_rectangle([60, 180, W-60, 680], radius=14, fill=DARK_NAVY)
+        ct_draw.rounded_rectangle([76, 196, W-76, 664], radius=8, outline=GOLD, width=1)
+
+        if car_img:
+            car_copy = car_img.convert('RGB')
+            target_w, target_h = 860, 440
+            scale = min(target_w/car_copy.width, target_h/car_copy.height)
+            nw, nh = int(car_copy.width*scale), int(car_copy.height*scale)
+            car_copy = car_copy.resize((nw, nh))
+            cx = (W - nw) // 2
+            cy = 210 + (460 - nh) // 2
+            ct_img.paste(car_copy, (cx, cy))
+
+        # CERTIFIED SEAL
+        seal_cx, seal_cy, seal_r = 900, 295, 90
+        ct_draw.ellipse([seal_cx-seal_r, seal_cy-seal_r, seal_cx+seal_r, seal_cy+seal_r], fill=GOLD)
+        ct_draw.ellipse([seal_cx-78, seal_cy-78, seal_cx+78, seal_cy+78], outline=NAVY, width=2)
+        ct_draw.ellipse([seal_cx-70, seal_cy-70, seal_cx+70, seal_cy+70], outline=NAVY, width=1)
+        ct_draw.text((seal_cx, seal_cy-44), 'DEALER', font=font_cert_seal, fill=NAVY, anchor='mm')
+        ct_draw.line([(seal_cx-22, seal_cy-2), (seal_cx-6, seal_cy+14)], fill=NAVY, width=6)
+        ct_draw.line([(seal_cx-6, seal_cy+14), (seal_cx+22, seal_cy-18)], fill=NAVY, width=6)
+        ct_draw.text((seal_cx, seal_cy+38), 'CERTIFIED', font=font_cert_seal, fill=NAVY, anchor='mm')
+        ct_draw.text((seal_cx, seal_cy+58), 'INSPECTED', font=font_sm, fill=NAVY, anchor='mm')
+
+        # TRUST STRIP
+        ct_draw.rectangle([0, 700, W, 780], fill=DARK_NAVY)
+        ct_draw.rectangle([0, 700, W, 702], fill=GOLD)
+        ct_draw.rectangle([0, 778, W, 780], fill=GOLD)
+        for cx_pos, label_txt in [(215, 'MULTI-POINT INSPECTION'), (W//2, 'WARRANTY ELIGIBLE'), (W-215, 'VERIFIED HISTORY')]:
+            full_str = '✓  ' + label_txt
+            fbbox = ct_draw.textbbox((0, 0), full_str, font=font_cert_strip)
+            full_w = fbbox[2] - fbbox[0]
+            sx = cx_pos - full_w // 2
+            cbbox = ct_draw.textbbox((0, 0), '✓  ', font=font_cert_strip)
+            chk_w = cbbox[2] - cbbox[0]
+            ct_draw.text((sx, 740), '✓', font=font_cert_strip, fill=GOLD, anchor='lm')
+            ct_draw.text((sx + chk_w, 740), label_txt, font=font_cert_strip, fill=WHITE, anchor='lm')
+
+        # VEHICLE INFO
+        ct_draw.text((W//2, 830), vehicle_name.upper(), font=font_bold_lg, fill=WHITE, anchor='mm')
+        mileage_str = '{:,}'.format(vehicle['mileage'] or 0)
+        ct_draw.text((W//2, 895), '{}  ·  {} MI'.format(price, mileage_str), font=font_bold_lg, fill=GOLD, anchor='mm')
+
+        # FOOTER
+        ct_draw.rectangle([0, 940, W, H], fill=DARK_NAVY)
+        ct_draw.rectangle([0, 940, W, 942], fill=GOLD)
+
+        ct_draw.text((W//2, 980), dealership.upper(), font=font_bold_md, fill=WHITE, anchor='mm')
+        ct_draw.text((W//2, 1010), full_address, font=font_sm, fill=MUTED, anchor='mm')
+        ct_draw.text((W//2, 1050), 'cardeals.autos/'+slug, font=font_bold_sm, fill=GREEN, anchor='mm')
+
+        if profile_img:
+            pr = profile_img.convert('RGB'); pw, ph = pr.size; side = min(pw, ph)
+            pr = pr.crop(((pw-side)//2, 0, (pw-side)//2+side, side)).resize((78, 78))
+            mask = Image.new('L', (78, 78), 0); ImageDraw.Draw(mask).ellipse([0, 0, 77, 77], fill=255)
+            ct_img.paste(pr, (W-130, 968), mask)
+            ct_draw.ellipse([W-133, 965, W-49, 1049], outline=GOLD, width=3)
+        ct_draw.text((W-91, 1063), name.upper()[:16], font=font_sm, fill=WHITE, anchor='mm')
+
+        if google_rating and google_review_count:
+            try:
+                font_badge = ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf', 18)
+            except:
+                font_badge = font_sm
+            bx, by = 60, 980
+            ct_draw.ellipse([bx, by, bx+44, by+44], fill=WHITE)
+            ct_draw.text((bx+22, by+22), 'G', font=font_badge, fill=(66,133,244), anchor='mm')
+            ct_draw.text((bx+58, by+10), '★ {}'.format(google_rating), font=font_badge, fill=(245,158,11), anchor='lm')
+            ct_draw.text((bx+58, by+34), '{} reviews'.format(google_review_count), font=font_badge, fill=MUTED, anchor='lm')
+
+        buf = io.BytesIO(); ct_img.save(buf, format='PNG'); buf.seek(0)
+        return Response(buf.read(), content_type='image/png')
+
+
+
+
+
+    # ── TEMPLATE: certified ─────────────────────────────────────────────────
+    if template == 'certified':
+        ct_img = Image.new('RGB', (W, H), (15, 25, 50))
+        ct_draw = ImageDraw.Draw(ct_img)
+        # Gold top bar
+        ct_draw.rectangle([0,0,W,8], fill=(212,175,55))
+        ct_draw.text((W//2,50),'CERTIFIED PRE-OWNED',font=font_bold_md,fill=(212,175,55),anchor='mm')
+        ct_draw.line([80,80,W-80,80],fill=(212,175,55),width=1)
+        # Car photo center
+        if car_img:
+            car_copy=car_img.convert('RGB')
+            scale=max(W/car_copy.width,420/car_copy.height)
+            nw,nh=int(car_copy.width*scale),int(car_copy.height*scale)
+            car_copy=car_copy.resize((nw,nh))
+            region=Image.new('RGB',(W,420),(15,25,50))
+            region.paste(car_copy,((W-nw)//2,(420-nh)//2))
+            ct_img.paste(region,(0,100))
+        # Gradient
+        grad=Image.new('RGBA',(W,420),(0,0,0,0))
+        gd=ImageDraw.Draw(grad)
+        for i in range(420):
+            a=int(200*(i/420)**1.5)
+            gd.line([0,i,W,i],fill=(15,25,50,min(a,255)))
+        ct_rgba=ct_img.convert('RGBA')
+        ct_rgba.paste(grad,(0,100),grad)
+        ct_img=ct_rgba.convert('RGB')
+        ct_draw=ImageDraw.Draw(ct_img)
+        # Gold badge
+        ct_draw.ellipse([W//2-60,480,W//2+60,600],fill=(212,175,55))
+        ct_draw.text((W//2,540),'✓',font=font_bold_lg,fill=(15,25,50),anchor='mm')
+        # Vehicle info
+        ct_draw.text((W//2,650),vehicle_name,font=font_bold_lg,fill=WHITE,anchor='mm')
+        ct_draw.text((W//2,720),price,font=font_price,fill=(212,175,55),anchor='mm')
+        ct_draw.text((W//2,790),'Inspected · Verified · Ready to Drive',font=font_sm,fill=(148,163,184),anchor='mm')
+        # Rep row
+        if profile_img:
+            pr=profile_img.convert('RGB');pw,ph=pr.size;side=min(pw,ph)
+            pr=pr.crop(((pw-side)//2,0,(pw-side)//2+side,side)).resize((80,80))
+            mask=Image.new('L',(80,80),0);ImageDraw.Draw(mask).ellipse([0,0,79,79],fill=255)
+            ct_img.paste(pr,(40,860),mask)
+            ct_draw.ellipse([34,854,126,946],outline=(212,175,55),width=3)
+        ct_draw.text((140,890),name,font=font_bold_sm,fill=WHITE,anchor='lm')
+        ct_draw.text((140,926),'cardeals.autos/'+slug,font=font_sm,fill=(212,175,55),anchor='lm')
+        ct_draw.rectangle([0,H-60,W,H],fill=(10,18,35))
+        ct_draw.text((W//2,H-30),dealership+' · '+full_address,font=font_sm,fill=(80,90,110),anchor='mm')
+        if google_rating and google_review_count:
+            try: font_badge=ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',20)
+            except: font_badge=font_sm
+            bbox=ct_draw.textbbox((0,0),f'G * {google_rating} · {google_review_count} Google reviews',font=font_badge)
+            bw=bbox[2]-bbox[0]+28;bh=bbox[3]-bbox[1]+12;bx=W//2-bw//2;by=H-60-bh-8
+            ct_draw.rounded_rectangle([bx,by,bx+bw,by+bh],radius=10,fill=WHITE)
+            ct_draw.text((bx+10,by+bh//2),'G',font=font_badge,fill=(66,133,244),anchor='lm')
+            ct_draw.text((bx+26,by+bh//2),f'* {google_rating}',font=font_badge,fill=(245,158,11),anchor='lm')
+            sw=ct_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[2]-ct_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[0]
+            ct_draw.text((bx+30+sw,by+bh//2),f' · {google_review_count} Google reviews',font=font_badge,fill=(100,116,139),anchor='lm')
+        buf=io.BytesIO();ct_img.save(buf,format='PNG');buf.seek(0)
+        return Response(buf.read(),content_type='image/png')
+
+    # ── TEMPLATE: familyready ───────────────────────────────────────────────
+    if template == 'familyready':
+        fr_img = Image.new('RGB', (W, H), (20, 40, 80))
+        fr_draw = ImageDraw.Draw(fr_img)
+        fr_draw.rectangle([0,0,W,8],fill=GREEN)
+        fr_draw.text((W//2,50),'👨‍👩‍👧 PERFECT FOR YOUR FAMILY',font=font_bold_sm,fill=GREEN,anchor='mm')
+        fr_draw.line([80,80,W-80,80],fill=(40,80,140),width=1)
+        if car_img:
+            car_copy=car_img.convert('RGB')
+            scale=max(W/car_copy.width,440/car_copy.height)
+            nw,nh=int(car_copy.width*scale),int(car_copy.height*scale)
+            car_copy=car_copy.resize((nw,nh))
+            region=Image.new('RGB',(W,440),(20,40,80))
+            region.paste(car_copy,((W-nw)//2,(440-nh)//2))
+            fr_img.paste(region,(0,100))
+        grad=Image.new('RGBA',(W,440),(0,0,0,0))
+        gd=ImageDraw.Draw(grad)
+        for i in range(440):
+            a=int(220*(i/440)**1.6)
+            gd.line([0,i,W,i],fill=(20,40,80,min(a,255)))
+        fr_rgba=fr_img.convert('RGBA')
+        fr_rgba.paste(grad,(0,100),grad)
+        fr_img=fr_rgba.convert('RGB')
+        fr_draw=ImageDraw.Draw(fr_img)
+        fr_draw.text((W//2,580),vehicle_name,font=font_bold_lg,fill=WHITE,anchor='mm')
+        fr_draw.text((W//2,650),price,font=font_price,fill=GREEN,anchor='mm')
+        fr_draw.text((W//2,720),'Safe · Spacious · Ready for the Road',font=font_sm,fill=(148,163,184),anchor='mm')
+        if profile_img:
+            pr=profile_img.convert('RGB');pw,ph=pr.size;side=min(pw,ph)
+            pr=pr.crop(((pw-side)//2,0,(pw-side)//2+side,side)).resize((80,80))
+            mask=Image.new('L',(80,80),0);ImageDraw.Draw(mask).ellipse([0,0,79,79],fill=255)
+            fr_img.paste(pr,(40,790),mask)
+            fr_draw.ellipse([34,784,126,876],outline=GREEN,width=3)
+        fr_draw.text((140,820),name,font=font_bold_sm,fill=WHITE,anchor='lm')
+        fr_draw.text((140,856),'cardeals.autos/'+slug,font=font_sm,fill=GREEN,anchor='lm')
+        fr_draw.rectangle([0,920,W,1010],fill=(12,25,50))
+        fr_draw.text((W//2,948),dealership,font=font_bold_sm,fill=WHITE,anchor='mm')
+        fr_draw.text((W//2,976),full_address,font=font_sm,fill=(148,163,184),anchor='mm')
+        if google_rating and google_review_count:
+            try: font_badge=ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',20)
+            except: font_badge=font_sm
+            bbox=fr_draw.textbbox((0,0),f'G * {google_rating} · {google_review_count} Google reviews',font=font_badge)
+            bw=bbox[2]-bbox[0]+28;bh=bbox[3]-bbox[1]+12;bx=W//2-bw//2;by=992
+            fr_draw.rounded_rectangle([bx,by,bx+bw,by+bh],radius=10,fill=WHITE)
+            fr_draw.text((bx+10,by+bh//2),'G',font=font_badge,fill=(66,133,244),anchor='lm')
+            fr_draw.text((bx+26,by+bh//2),f'* {google_rating}',font=font_badge,fill=(245,158,11),anchor='lm')
+            sw=fr_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[2]-fr_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[0]
+            fr_draw.text((bx+30+sw,by+bh//2),f' · {google_review_count} Google reviews',font=font_badge,fill=(100,116,139),anchor='lm')
+        buf=io.BytesIO();fr_img.save(buf,format='PNG');buf.seek(0)
+        return Response(buf.read(),content_type='image/png')
+
+    # ── TEMPLATE: getapproved ───────────────────────────────────────────────
+    if template == 'getapproved':
+        ga_img = Image.new('RGB', (W, H), NAVY)
+        ga_draw = ImageDraw.Draw(ga_img)
+        ga_draw.rectangle([0,0,W,90],fill=GREEN)
+        ga_draw.text((W//2,45),'✅ GET APPROVED TODAY',font=font_bold_lg,fill=NAVY,anchor='mm')
+        if car_img:
+            car_copy=car_img.convert('RGB')
+            scale=max(W/car_copy.width,400/car_copy.height)
+            nw,nh=int(car_copy.width*scale),int(car_copy.height*scale)
+            car_copy=car_copy.resize((nw,nh))
+            region=Image.new('RGB',(W,400),NAVY)
+            region.paste(car_copy,((W-nw)//2,(400-nh)//2))
+            ga_img.paste(region,(0,100))
+        grad=Image.new('RGBA',(W,400),(0,0,0,0))
+        gd=ImageDraw.Draw(grad)
+        for i in range(400):
+            a=int(220*(i/400)**1.5)
+            gd.line([0,i,W,i],fill=(30,41,59,min(a,255)))
+        ga_rgba=ga_img.convert('RGBA')
+        ga_rgba.paste(grad,(0,100),grad)
+        ga_img=ga_rgba.convert('RGB')
+        ga_draw=ImageDraw.Draw(ga_img)
+        ga_draw.text((W//2,540),'All Credit Situations Welcome',font=font_bold_sm,fill=GREEN,anchor='mm')
+        ga_draw.text((W//2,600),vehicle_name,font=font_bold_lg,fill=WHITE,anchor='mm')
+        ga_draw.text((W//2,670),price,font=font_price,fill=GREEN,anchor='mm')
+        ga_draw.rounded_rectangle([60,720,W-60,790],radius=35,fill=GREEN)
+        ga_draw.text((W//2,755),'Let\'s Get You On The Road Today',font=font_bold_sm,fill=NAVY,anchor='mm')
+        if profile_img:
+            pr=profile_img.convert('RGB');pw,ph=pr.size;side=min(pw,ph)
+            pr=pr.crop(((pw-side)//2,0,(pw-side)//2+side,side)).resize((80,80))
+            mask=Image.new('L',(80,80),0);ImageDraw.Draw(mask).ellipse([0,0,79,79],fill=255)
+            ga_img.paste(pr,(40,820),mask)
+            ga_draw.ellipse([34,814,126,906],outline=GREEN,width=3)
+        ga_draw.text((140,850),name,font=font_bold_sm,fill=WHITE,anchor='lm')
+        ga_draw.text((140,886),'cardeals.autos/'+slug,font=font_sm,fill=GREEN,anchor='lm')
+        ga_draw.rectangle([0,940,W,1010],fill=(20,30,48))
+        ga_draw.text((W//2,963),dealership,font=font_bold_sm,fill=WHITE,anchor='mm')
+        ga_draw.text((W//2,990),full_address,font=font_sm,fill=(148,163,184),anchor='mm')
+        if google_rating and google_review_count:
+            try: font_badge=ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',20)
+            except: font_badge=font_sm
+            bbox=ga_draw.textbbox((0,0),f'G * {google_rating} · {google_review_count} Google reviews',font=font_badge)
+            bw=bbox[2]-bbox[0]+28;bh=bbox[3]-bbox[1]+12;bx=W//2-bw//2;by=H-48-bh
+            ga_draw.rounded_rectangle([bx,by,bx+bw,by+bh],radius=10,fill=WHITE)
+            ga_draw.text((bx+10,by+bh//2),'G',font=font_badge,fill=(66,133,244),anchor='lm')
+            ga_draw.text((bx+26,by+bh//2),f'* {google_rating}',font=font_badge,fill=(245,158,11),anchor='lm')
+            sw=ga_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[2]-ga_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[0]
+            ga_draw.text((bx+30+sw,by+bh//2),f' · {google_review_count} Google reviews',font=font_badge,fill=(100,116,139),anchor='lm')
+        buf=io.BytesIO();ga_img.save(buf,format='PNG');buf.seek(0)
+        return Response(buf.read(),content_type='image/png')
+
+    # ── TEMPLATE: allcredit ─────────────────────────────────────────────────
+    if template == 'allcredit':
+        ac_img = Image.new('RGB', (W, H), (10, 20, 40))
+        ac_draw = ImageDraw.Draw(ac_img)
+        ac_draw.rectangle([0,0,W,8],fill=GREEN)
+        ac_draw.text((W//2,50),'ALL CREDIT WELCOME',font=font_bold_lg,fill=WHITE,anchor='mm')
+        ac_draw.text((W//2,100),'Good · Fair · Bad · No Credit — We Work With Everyone',font=font_sm,fill=GREEN,anchor='mm')
+        ac_draw.line([60,125,W-60,125],fill=(30,60,100),width=1)
+        if car_img:
+            car_copy=car_img.convert('RGB')
+            scale=max(W/car_copy.width,380/car_copy.height)
+            nw,nh=int(car_copy.width*scale),int(car_copy.height*scale)
+            car_copy=car_copy.resize((nw,nh))
+            region=Image.new('RGB',(W,380),(10,20,40))
+            region.paste(car_copy,((W-nw)//2,(380-nh)//2))
+            ac_img.paste(region,(0,140))
+        grad=Image.new('RGBA',(W,380),(0,0,0,0))
+        gd=ImageDraw.Draw(grad)
+        for i in range(380):
+            a=int(210*(i/380)**1.5)
+            gd.line([0,i,W,i],fill=(10,20,40,min(a,255)))
+        ac_rgba=ac_img.convert('RGBA')
+        ac_rgba.paste(grad,(0,140),grad)
+        ac_img=ac_rgba.convert('RGB')
+        ac_draw=ImageDraw.Draw(ac_img)
+        ac_draw.text((W//2,565),vehicle_name,font=font_bold_lg,fill=WHITE,anchor='mm')
+        ac_draw.text((W//2,635),price,font=font_price,fill=GREEN,anchor='mm')
+        ac_draw.text((W//2,705),'Don\'t let credit stop you. Let\'s talk.',font=font_sm,fill=(148,163,184),anchor='mm')
+        if profile_img:
+            pr=profile_img.convert('RGB');pw,ph=pr.size;side=min(pw,ph)
+            pr=pr.crop(((pw-side)//2,0,(pw-side)//2+side,side)).resize((80,80))
+            mask=Image.new('L',(80,80),0);ImageDraw.Draw(mask).ellipse([0,0,79,79],fill=255)
+            ac_img.paste(pr,(40,770),mask)
+            ac_draw.ellipse([34,764,126,856],outline=GREEN,width=3)
+        ac_draw.text((140,800),name,font=font_bold_sm,fill=WHITE,anchor='lm')
+        ac_draw.text((140,836),'cardeals.autos/'+slug,font=font_sm,fill=GREEN,anchor='lm')
+        ac_draw.rectangle([0,900,W,1010],fill=(6,12,25))
+        ac_draw.text((W//2,928),dealership,font=font_bold_sm,fill=WHITE,anchor='mm')
+        ac_draw.text((W//2,956),full_address,font=font_sm,fill=(148,163,184),anchor='mm')
+        if google_rating and google_review_count:
+            try: font_badge=ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',20)
+            except: font_badge=font_sm
+            bbox=ac_draw.textbbox((0,0),f'G * {google_rating} · {google_review_count} Google reviews',font=font_badge)
+            bw=bbox[2]-bbox[0]+28;bh=bbox[3]-bbox[1]+12;bx=W//2-bw//2;by=972
+            ac_draw.rounded_rectangle([bx,by,bx+bw,by+bh],radius=10,fill=WHITE)
+            ac_draw.text((bx+10,by+bh//2),'G',font=font_badge,fill=(66,133,244),anchor='lm')
+            ac_draw.text((bx+26,by+bh//2),f'* {google_rating}',font=font_badge,fill=(245,158,11),anchor='lm')
+            sw=ac_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[2]-ac_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[0]
+            ac_draw.text((bx+30+sw,by+bh//2),f' · {google_review_count} Google reviews',font=font_badge,fill=(100,116,139),anchor='lm')
+        buf=io.BytesIO();ac_img.save(buf,format='PNG');buf.seek(0)
+        return Response(buf.read(),content_type='image/png')
+
+    # ── TEMPLATE: firsttime ─────────────────────────────────────────────────
+    if template == 'firsttime':
+        ft2_img = Image.new('RGB', (W, H), (5, 30, 60))
+        ft2_draw = ImageDraw.Draw(ft2_img)
+        ft2_draw.rectangle([0,0,W,8],fill=GREEN)
+        ft2_draw.text((W//2,50),'🌱 FIRST TIME BUYER?',font=font_bold_lg,fill=WHITE,anchor='mm')
+        ft2_draw.text((W//2,100),'We\'ll walk you through every step.',font=font_sm,fill=GREEN,anchor='mm')
+        ft2_draw.line([60,125,W-60,125],fill=(20,60,100),width=1)
+        if car_img:
+            car_copy=car_img.convert('RGB')
+            scale=max(W/car_copy.width,400/car_copy.height)
+            nw,nh=int(car_copy.width*scale),int(car_copy.height*scale)
+            car_copy=car_copy.resize((nw,nh))
+            region=Image.new('RGB',(W,400),(5,30,60))
+            region.paste(car_copy,((W-nw)//2,(400-nh)//2))
+            ft2_img.paste(region,(0,140))
+        grad=Image.new('RGBA',(W,400),(0,0,0,0))
+        gd=ImageDraw.Draw(grad)
+        for i in range(400):
+            a=int(210*(i/400)**1.5)
+            gd.line([0,i,W,i],fill=(5,30,60,min(a,255)))
+        ft2_rgba=ft2_img.convert('RGBA')
+        ft2_rgba.paste(grad,(0,140),grad)
+        ft2_img=ft2_rgba.convert('RGB')
+        ft2_draw=ImageDraw.Draw(ft2_img)
+        ft2_draw.text((W//2,580),vehicle_name,font=font_bold_lg,fill=WHITE,anchor='mm')
+        ft2_draw.text((W//2,650),price,font=font_price,fill=GREEN,anchor='mm')
+        ft2_draw.text((W//2,720),'No experience needed. Just reach out.',font=font_sm,fill=(148,163,184),anchor='mm')
+        ft2_draw.rounded_rectangle([60,760,W-60,820],radius=30,fill=GREEN)
+        ft2_draw.text((W//2,790),'I\'ll make it easy. I promise.',font=font_bold_sm,fill=NAVY,anchor='mm')
+        if profile_img:
+            pr=profile_img.convert('RGB');pw,ph=pr.size;side=min(pw,ph)
+            pr=pr.crop(((pw-side)//2,0,(pw-side)//2+side,side)).resize((80,80))
+            mask=Image.new('L',(80,80),0);ImageDraw.Draw(mask).ellipse([0,0,79,79],fill=255)
+            ft2_img.paste(pr,(40,850),mask)
+            ft2_draw.ellipse([34,844,126,936],outline=GREEN,width=3)
+        ft2_draw.text((140,880),name,font=font_bold_sm,fill=WHITE,anchor='lm')
+        ft2_draw.text((140,916),'cardeals.autos/'+slug,font=font_sm,fill=GREEN,anchor='lm')
+        ft2_draw.rectangle([0,960,W,1010],fill=(3,18,38))
+        ft2_draw.text((W//2,978),dealership+' · '+full_address,font=font_sm,fill=(80,100,130),anchor='mm')
+        if google_rating and google_review_count:
+            try: font_badge=ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',18)
+            except: font_badge=font_sm
+            bbox=ft2_draw.textbbox((0,0),f'G * {google_rating} · {google_review_count} Google reviews',font=font_badge)
+            bw=bbox[2]-bbox[0]+24;bh=bbox[3]-bbox[1]+10;bx=W-bw-20;by=H-50-bh
+            ft2_draw.rounded_rectangle([bx,by,bx+bw,by+bh],radius=8,fill=WHITE)
+            ft2_draw.text((bx+8,by+bh//2),'G',font=font_badge,fill=(66,133,244),anchor='lm')
+            ft2_draw.text((bx+22,by+bh//2),f'* {google_rating}',font=font_badge,fill=(245,158,11),anchor='lm')
+            sw=ft2_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[2]-ft2_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[0]
+            ft2_draw.text((bx+26+sw,by+bh//2),f' · {google_review_count} Google reviews',font=font_badge,fill=(100,116,139),anchor='lm')
+        buf=io.BytesIO();ft2_img.save(buf,format='PNG');buf.seek(0)
+        return Response(buf.read(),content_type='image/png')
+
+    # ── TEMPLATE: under20k ──────────────────────────────────────────────────
+    if template == 'under20k':
+        u20_img = Image.new('RGB', (W, H), NAVY)
+        u20_draw = ImageDraw.Draw(u20_img)
+        u20_draw.rectangle([0,0,W,8],fill=GREEN)
+        u20_draw.text((W//2-20,-30),'UNDER',font=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',180) if True else font_bold_lg,fill=(0,200,81,30),anchor='mm')
+        try:
+            font_hero=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',130)
+        except:
+            font_hero=font_bold_lg
+        u20_draw.text((W//2,80),'UNDER $20K',font=font_bold_lg,fill=GREEN,anchor='mm')
+        u20_draw.text((W//2,130),'Quality cars that fit your budget',font=font_sm,fill=(148,163,184),anchor='mm')
+        u20_draw.line([60,155,W-60,155],fill=(40,60,90),width=1)
+        if car_img:
+            car_copy=car_img.convert('RGB')
+            scale=max(W/car_copy.width,420/car_copy.height)
+            nw,nh=int(car_copy.width*scale),int(car_copy.height*scale)
+            car_copy=car_copy.resize((nw,nh))
+            region=Image.new('RGB',(W,420),NAVY)
+            region.paste(car_copy,((W-nw)//2,(420-nh)//2))
+            u20_img.paste(region,(0,165))
+        grad=Image.new('RGBA',(W,420),(0,0,0,0))
+        gd=ImageDraw.Draw(grad)
+        for i in range(420):
+            a=int(220*(i/420)**1.5)
+            gd.line([0,i,W,i],fill=(30,41,59,min(a,255)))
+        u20_rgba=u20_img.convert('RGBA')
+        u20_rgba.paste(grad,(0,165),grad)
+        u20_img=u20_rgba.convert('RGB')
+        u20_draw=ImageDraw.Draw(u20_img)
+        u20_draw.text((W//2,630),vehicle_name,font=font_bold_lg,fill=WHITE,anchor='mm')
+        u20_draw.text((W//2,700),price,font=font_price,fill=GREEN,anchor='mm')
+        if profile_img:
+            pr=profile_img.convert('RGB');pw,ph=pr.size;side=min(pw,ph)
+            pr=pr.crop(((pw-side)//2,0,(pw-side)//2+side,side)).resize((75,75))
+            mask=Image.new('L',(75,75),0);ImageDraw.Draw(mask).ellipse([0,0,74,74],fill=255)
+            u20_img.paste(pr,(40,790),mask)
+            u20_draw.ellipse([34,784,121,871],outline=GREEN,width=3)
+        u20_draw.text((130,815),name,font=font_bold_sm,fill=WHITE,anchor='lm')
+        u20_draw.text((130,850),'cardeals.autos/'+slug,font=font_sm,fill=GREEN,anchor='lm')
+        u20_draw.rectangle([0,920,W,1010],fill=(20,30,48))
+        u20_draw.text((W//2,948),dealership,font=font_bold_sm,fill=WHITE,anchor='mm')
+        u20_draw.text((W//2,976),full_address,font=font_sm,fill=(148,163,184),anchor='mm')
+        if google_rating and google_review_count:
+            try: font_badge=ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',20)
+            except: font_badge=font_sm
+            bbox=u20_draw.textbbox((0,0),f'G * {google_rating} · {google_review_count} Google reviews',font=font_badge)
+            bw=bbox[2]-bbox[0]+28;bh=bbox[3]-bbox[1]+12;bx=W//2-bw//2;by=992
+            u20_draw.rounded_rectangle([bx,by,bx+bw,by+bh],radius=10,fill=WHITE)
+            u20_draw.text((bx+10,by+bh//2),'G',font=font_badge,fill=(66,133,244),anchor='lm')
+            u20_draw.text((bx+26,by+bh//2),f'* {google_rating}',font=font_badge,fill=(245,158,11),anchor='lm')
+            sw=u20_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[2]-u20_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[0]
+            u20_draw.text((bx+30+sw,by+bh//2),f' · {google_review_count} Google reviews',font=font_badge,fill=(100,116,139),anchor='lm')
+        buf=io.BytesIO();u20_img.save(buf,format='PNG');buf.seek(0)
+        return Response(buf.read(),content_type='image/png')
+
+    # ── TEMPLATE: lotclearance ──────────────────────────────────────────────
+    if template == 'lotclearance':
+        lc_img = Image.new('RGB', (W, H), (180,20,20))
+        lc_draw = ImageDraw.Draw(lc_img)
+        lc_draw.rectangle([0,0,W,8],fill=WHITE)
+        lc_draw.text((W//2,60),'🏷️ LOT CLEARANCE',font=font_bold_lg,fill=WHITE,anchor='mm')
+        lc_draw.text((W//2,110),'BEST DEALS ON THE LOT — TODAY ONLY',font=font_bold_sm,fill=(255,200,200),anchor='mm')
+        if car_img:
+            car_copy=car_img.convert('RGB')
+            scale=max(W/car_copy.width,400/car_copy.height)
+            nw,nh=int(car_copy.width*scale),int(car_copy.height*scale)
+            car_copy=car_copy.resize((nw,nh))
+            region=Image.new('RGB',(W,400),(180,20,20))
+            region.paste(car_copy,((W-nw)//2,(400-nh)//2))
+            lc_img.paste(region,(0,140))
+        grad=Image.new('RGBA',(W,400),(0,0,0,0))
+        gd=ImageDraw.Draw(grad)
+        for i in range(400):
+            a=int(220*(i/400)**1.5)
+            gd.line([0,i,W,i],fill=(180,20,20,min(a,255)))
+        lc_rgba=lc_img.convert('RGBA')
+        lc_rgba.paste(grad,(0,140),grad)
+        lc_img=lc_rgba.convert('RGB')
+        lc_draw=ImageDraw.Draw(lc_img)
+        lc_draw.text((W//2,585),vehicle_name,font=font_bold_lg,fill=WHITE,anchor='mm')
+        lc_draw.text((W//2,655),price,font=font_price,fill=WHITE,anchor='mm')
+        lc_draw.text((W//2,725),'Move fast — this won\'t last',font=font_sm,fill=(255,200,200),anchor='mm')
+        if profile_img:
+            pr=profile_img.convert('RGB');pw,ph=pr.size;side=min(pw,ph)
+            pr=pr.crop(((pw-side)//2,0,(pw-side)//2+side,side)).resize((75,75))
+            mask=Image.new('L',(75,75),0);ImageDraw.Draw(mask).ellipse([0,0,74,74],fill=255)
+            lc_img.paste(pr,(40,800),mask)
+            lc_draw.ellipse([34,794,121,871],outline=WHITE,width=3)
+        lc_draw.text((130,820),name,font=font_bold_sm,fill=WHITE,anchor='lm')
+        lc_draw.text((130,856),'cardeals.autos/'+slug,font=font_sm,fill=(255,220,220),anchor='lm')
+        lc_draw.rectangle([0,920,W,1010],fill=(120,10,10))
+        lc_draw.text((W//2,948),dealership,font=font_bold_sm,fill=WHITE,anchor='mm')
+        lc_draw.text((W//2,976),full_address,font=font_sm,fill=(255,180,180),anchor='mm')
+        if google_rating and google_review_count:
+            try: font_badge=ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',20)
+            except: font_badge=font_sm
+            bbox=lc_draw.textbbox((0,0),f'G * {google_rating} · {google_review_count} Google reviews',font=font_badge)
+            bw=bbox[2]-bbox[0]+28;bh=bbox[3]-bbox[1]+12;bx=W//2-bw//2;by=992
+            lc_draw.rounded_rectangle([bx,by,bx+bw,by+bh],radius=10,fill=WHITE)
+            lc_draw.text((bx+10,by+bh//2),'G',font=font_badge,fill=(66,133,244),anchor='lm')
+            lc_draw.text((bx+26,by+bh//2),f'* {google_rating}',font=font_badge,fill=(245,158,11),anchor='lm')
+            sw=lc_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[2]-lc_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[0]
+            lc_draw.text((bx+30+sw,by+bh//2),f' · {google_review_count} Google reviews',font=font_badge,fill=(100,116,139),anchor='lm')
+        buf=io.BytesIO();lc_img.save(buf,format='PNG');buf.seek(0)
+        return Response(buf.read(),content_type='image/png')
+
+    # ── TEMPLATE: truckready ────────────────────────────────────────────────
+    if template == 'truckready':
+        tr_img = Image.new('RGB', (W, H), (20,15,10))
+        tr_draw = ImageDraw.Draw(tr_img)
+        tr_draw.rectangle([0,0,W,8],fill=(180,100,20))
+        tr_draw.text((W//2,50),'🛻 TRUCK READY',font=font_bold_lg,fill=(180,100,20),anchor='mm')
+        tr_draw.text((W//2,100),'Built for work. Priced to move.',font=font_sm,fill=(148,130,110),anchor='mm')
+        tr_draw.line([60,125,W-60,125],fill=(50,40,30),width=1)
+        if car_img:
+            car_copy=car_img.convert('RGB')
+            scale=max(W/car_copy.width,420/car_copy.height)
+            nw,nh=int(car_copy.width*scale),int(car_copy.height*scale)
+            car_copy=car_copy.resize((nw,nh))
+            region=Image.new('RGB',(W,420),(20,15,10))
+            region.paste(car_copy,((W-nw)//2,(420-nh)//2))
+            tr_img.paste(region,(0,140))
+        grad=Image.new('RGBA',(W,420),(0,0,0,0))
+        gd=ImageDraw.Draw(grad)
+        for i in range(420):
+            a=int(220*(i/420)**1.5)
+            gd.line([0,i,W,i],fill=(20,15,10,min(a,255)))
+        tr_rgba=tr_img.convert('RGBA')
+        tr_rgba.paste(grad,(0,140),grad)
+        tr_img=tr_rgba.convert('RGB')
+        tr_draw=ImageDraw.Draw(tr_img)
+        tr_draw.text((W//2,600),vehicle_name,font=font_bold_lg,fill=WHITE,anchor='mm')
+        tr_draw.text((W//2,670),price,font=font_price,fill=(180,100,20),anchor='mm')
+        tr_draw.text((W//2,740),'Ready to haul. Ready to work.',font=font_sm,fill=(148,130,110),anchor='mm')
+        if profile_img:
+            pr=profile_img.convert('RGB');pw,ph=pr.size;side=min(pw,ph)
+            pr=pr.crop(((pw-side)//2,0,(pw-side)//2+side,side)).resize((75,75))
+            mask=Image.new('L',(75,75),0);ImageDraw.Draw(mask).ellipse([0,0,74,74],fill=255)
+            tr_img.paste(pr,(40,800),mask)
+            tr_draw.ellipse([34,794,121,871],outline=(180,100,20),width=3)
+        tr_draw.text((130,820),name,font=font_bold_sm,fill=WHITE,anchor='lm')
+        tr_draw.text((130,856),'cardeals.autos/'+slug,font=font_sm,fill=(180,100,20),anchor='lm')
+        tr_draw.rectangle([0,920,W,1010],fill=(10,8,5))
+        tr_draw.text((W//2,948),dealership,font=font_bold_sm,fill=WHITE,anchor='mm')
+        tr_draw.text((W//2,976),full_address,font=font_sm,fill=(100,90,80),anchor='mm')
+        if google_rating and google_review_count:
+            try: font_badge=ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',20)
+            except: font_badge=font_sm
+            bbox=tr_draw.textbbox((0,0),f'G * {google_rating} · {google_review_count} Google reviews',font=font_badge)
+            bw=bbox[2]-bbox[0]+28;bh=bbox[3]-bbox[1]+12;bx=W//2-bw//2;by=992
+            tr_draw.rounded_rectangle([bx,by,bx+bw,by+bh],radius=10,fill=WHITE)
+            tr_draw.text((bx+10,by+bh//2),'G',font=font_badge,fill=(66,133,244),anchor='lm')
+            tr_draw.text((bx+26,by+bh//2),f'* {google_rating}',font=font_badge,fill=(245,158,11),anchor='lm')
+            sw=tr_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[2]-tr_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[0]
+            tr_draw.text((bx+30+sw,by+bh//2),f' · {google_review_count} Google reviews',font=font_badge,fill=(100,116,139),anchor='lm')
+        buf=io.BytesIO();tr_img.save(buf,format='PNG');buf.seek(0)
+        return Response(buf.read(),content_type='image/png')
+
+    # ── TEMPLATE: sporty ────────────────────────────────────────────────────
+    if template == 'sporty':
+        sp2_img = Image.new('RGB', (W, H), (5,5,15))
+        sp2_draw = ImageDraw.Draw(sp2_img)
+        sp2_draw.rectangle([0,0,W,8],fill=(150,0,255))
+        sp2_draw.text((W//2,50),'🏎️ SPORTY & AFFORDABLE',font=font_bold_lg,fill=(150,0,255),anchor='mm')
+        sp2_draw.text((W//2,100),'Drive something you\'re proud of.',font=font_sm,fill=(100,80,130),anchor='mm')
+        if car_img:
+            car_copy=car_img.convert('RGB')
+            scale=max(W/car_copy.width,460/car_copy.height)
+            nw,nh=int(car_copy.width*scale),int(car_copy.height*scale)
+            car_copy=car_copy.resize((nw,nh))
+            region=Image.new('RGB',(W,460),(5,5,15))
+            region.paste(car_copy,((W-nw)//2,(460-nh)//2))
+            sp2_img.paste(region,(0,130))
+        grad=Image.new('RGBA',(W,460),(0,0,0,0))
+        gd=ImageDraw.Draw(grad)
+        for i in range(460):
+            a=int(230*(i/460)**1.4)
+            gd.line([0,i,W,i],fill=(5,5,15,min(a,255)))
+        sp2_rgba=sp2_img.convert('RGBA')
+        sp2_rgba.paste(grad,(0,130),grad)
+        sp2_img=sp2_rgba.convert('RGB')
+        sp2_draw=ImageDraw.Draw(sp2_img)
+        sp2_draw.text((W//2,635),vehicle_name,font=font_bold_lg,fill=WHITE,anchor='mm')
+        sp2_draw.text((W//2,705),price,font=font_price,fill=(150,0,255),anchor='mm')
+        sp2_draw.text((W//2,770),'Fun to drive. Easy to own.',font=font_sm,fill=(100,80,130),anchor='mm')
+        if profile_img:
+            pr=profile_img.convert('RGB');pw,ph=pr.size;side=min(pw,ph)
+            pr=pr.crop(((pw-side)//2,0,(pw-side)//2+side,side)).resize((75,75))
+            mask=Image.new('L',(75,75),0);ImageDraw.Draw(mask).ellipse([0,0,74,74],fill=255)
+            sp2_img.paste(pr,(40,820),mask)
+            sp2_draw.ellipse([34,814,121,891],outline=(150,0,255),width=3)
+        sp2_draw.text((130,840),name,font=font_bold_sm,fill=WHITE,anchor='lm')
+        sp2_draw.text((130,876),'cardeals.autos/'+slug,font=font_sm,fill=(150,0,255),anchor='lm')
+        sp2_draw.rectangle([0,930,W,1010],fill=(3,3,10))
+        sp2_draw.text((W//2,955),dealership,font=font_bold_sm,fill=WHITE,anchor='mm')
+        sp2_draw.text((W//2,982),full_address,font=font_sm,fill=(80,70,100),anchor='mm')
+        if google_rating and google_review_count:
+            try: font_badge=ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',20)
+            except: font_badge=font_sm
+            bbox=sp2_draw.textbbox((0,0),f'G * {google_rating} · {google_review_count} Google reviews',font=font_badge)
+            bw=bbox[2]-bbox[0]+28;bh=bbox[3]-bbox[1]+12;bx=W//2-bw//2;by=H-42-bh
+            sp2_draw.rounded_rectangle([bx,by,bx+bw,by+bh],radius=10,fill=WHITE)
+            sp2_draw.text((bx+10,by+bh//2),'G',font=font_badge,fill=(66,133,244),anchor='lm')
+            sp2_draw.text((bx+26,by+bh//2),f'* {google_rating}',font=font_badge,fill=(245,158,11),anchor='lm')
+            sw=sp2_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[2]-sp2_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[0]
+            sp2_draw.text((bx+30+sw,by+bh//2),f' · {google_review_count} Google reviews',font=font_badge,fill=(100,116,139),anchor='lm')
+        buf=io.BytesIO();sp2_img.save(buf,format='PNG');buf.seek(0)
+        return Response(buf.read(),content_type='image/png')
+
+    # ── TEMPLATE: weekendwarrior ────────────────────────────────────────────
+    if template == 'weekendwarrior':
+        ww_img = Image.new('RGB', (W, H), (8,25,15))
+        ww_draw = ImageDraw.Draw(ww_img)
+        ww_draw.rectangle([0,0,W,8],fill=GREEN)
+        ww_draw.text((W//2,50),'🌄 WEEKEND WARRIOR',font=font_bold_lg,fill=GREEN,anchor='mm')
+        ww_draw.text((W//2,100),'Adventure starts in the driveway.',font=font_sm,fill=(80,120,90),anchor='mm')
+        if car_img:
+            car_copy=car_img.convert('RGB')
+            scale=max(W/car_copy.width,460/car_copy.height)
+            nw,nh=int(car_copy.width*scale),int(car_copy.height*scale)
+            car_copy=car_copy.resize((nw,nh))
+            region=Image.new('RGB',(W,460),(8,25,15))
+            region.paste(car_copy,((W-nw)//2,(460-nh)//2))
+            ww_img.paste(region,(0,130))
+        grad=Image.new('RGBA',(W,460),(0,0,0,0))
+        gd=ImageDraw.Draw(grad)
+        for i in range(460):
+            a=int(230*(i/460)**1.4)
+            gd.line([0,i,W,i],fill=(8,25,15,min(a,255)))
+        ww_rgba=ww_img.convert('RGBA')
+        ww_rgba.paste(grad,(0,130),grad)
+        ww_img=ww_rgba.convert('RGB')
+        ww_draw=ImageDraw.Draw(ww_img)
+        ww_draw.text((W//2,635),vehicle_name,font=font_bold_lg,fill=WHITE,anchor='mm')
+        ww_draw.text((W//2,705),price,font=font_price,fill=GREEN,anchor='mm')
+        ww_draw.text((W//2,770),'Ready for wherever the road takes you.',font=font_sm,fill=(80,120,90),anchor='mm')
+        if profile_img:
+            pr=profile_img.convert('RGB');pw,ph=pr.size;side=min(pw,ph)
+            pr=pr.crop(((pw-side)//2,0,(pw-side)//2+side,side)).resize((75,75))
+            mask=Image.new('L',(75,75),0);ImageDraw.Draw(mask).ellipse([0,0,74,74],fill=255)
+            ww_img.paste(pr,(40,820),mask)
+            ww_draw.ellipse([34,814,121,891],outline=GREEN,width=3)
+        ww_draw.text((130,840),name,font=font_bold_sm,fill=WHITE,anchor='lm')
+        ww_draw.text((130,876),'cardeals.autos/'+slug,font=font_sm,fill=GREEN,anchor='lm')
+        ww_draw.rectangle([0,930,W,1010],fill=(5,15,8))
+        ww_draw.text((W//2,955),dealership,font=font_bold_sm,fill=WHITE,anchor='mm')
+        ww_draw.text((W//2,982),full_address,font=font_sm,fill=(60,100,70),anchor='mm')
+        if google_rating and google_review_count:
+            try: font_badge=ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',20)
+            except: font_badge=font_sm
+            bbox=ww_draw.textbbox((0,0),f'G * {google_rating} · {google_review_count} Google reviews',font=font_badge)
+            bw=bbox[2]-bbox[0]+28;bh=bbox[3]-bbox[1]+12;bx=W//2-bw//2;by=H-42-bh
+            ww_draw.rounded_rectangle([bx,by,bx+bw,by+bh],radius=10,fill=WHITE)
+            ww_draw.text((bx+10,by+bh//2),'G',font=font_badge,fill=(66,133,244),anchor='lm')
+            ww_draw.text((bx+26,by+bh//2),f'* {google_rating}',font=font_badge,fill=(245,158,11),anchor='lm')
+            sw=ww_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[2]-ww_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[0]
+            ww_draw.text((bx+30+sw,by+bh//2),f' · {google_review_count} Google reviews',font=font_badge,fill=(100,116,139),anchor='lm')
+        buf=io.BytesIO();ww_img.save(buf,format='PNG');buf.seek(0)
+        return Response(buf.read(),content_type='image/png')
+
+    # ── TEMPLATE: suvseason ─────────────────────────────────────────────────
+    if template == 'suvseason':
+        ss_img = Image.new('RGB', (W, H), (10,20,35))
+        ss_draw = ImageDraw.Draw(ss_img)
+        ss_draw.rectangle([0,0,W,8],fill=GREEN)
+        ss_draw.text((W//2,50),'🚙 SUV SEASON',font=font_bold_lg,fill=GREEN,anchor='mm')
+        ss_draw.text((W//2,100),'Room for everyone. Ready for anything.',font=font_sm,fill=(80,110,140),anchor='mm')
+        if car_img:
+            car_copy=car_img.convert('RGB')
+            scale=max(W/car_copy.width,460/car_copy.height)
+            nw,nh=int(car_copy.width*scale),int(car_copy.height*scale)
+            car_copy=car_copy.resize((nw,nh))
+            region=Image.new('RGB',(W,460),(10,20,35))
+            region.paste(car_copy,((W-nw)//2,(460-nh)//2))
+            ss_img.paste(region,(0,130))
+        grad=Image.new('RGBA',(W,460),(0,0,0,0))
+        gd=ImageDraw.Draw(grad)
+        for i in range(460):
+            a=int(230*(i/460)**1.4)
+            gd.line([0,i,W,i],fill=(10,20,35,min(a,255)))
+        ss_rgba=ss_img.convert('RGBA')
+        ss_rgba.paste(grad,(0,130),grad)
+        ss_img=ss_rgba.convert('RGB')
+        ss_draw=ImageDraw.Draw(ss_img)
+        ss_draw.text((W//2,635),vehicle_name,font=font_bold_lg,fill=WHITE,anchor='mm')
+        ss_draw.text((W//2,705),price,font=font_price,fill=GREEN,anchor='mm')
+        ss_draw.text((W//2,770),'Space · Safety · Style',font=font_sm,fill=(80,110,140),anchor='mm')
+        if profile_img:
+            pr=profile_img.convert('RGB');pw,ph=pr.size;side=min(pw,ph)
+            pr=pr.crop(((pw-side)//2,0,(pw-side)//2+side,side)).resize((75,75))
+            mask=Image.new('L',(75,75),0);ImageDraw.Draw(mask).ellipse([0,0,74,74],fill=255)
+            ss_img.paste(pr,(40,820),mask)
+            ss_draw.ellipse([34,814,121,891],outline=GREEN,width=3)
+        ss_draw.text((130,840),name,font=font_bold_sm,fill=WHITE,anchor='lm')
+        ss_draw.text((130,876),'cardeals.autos/'+slug,font=font_sm,fill=GREEN,anchor='lm')
+        ss_draw.rectangle([0,930,W,1010],fill=(6,12,22))
+        ss_draw.text((W//2,955),dealership,font=font_bold_sm,fill=WHITE,anchor='mm')
+        ss_draw.text((W//2,982),full_address,font=font_sm,fill=(60,90,120),anchor='mm')
+        if google_rating and google_review_count:
+            try: font_badge=ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',20)
+            except: font_badge=font_sm
+            bbox=ss_draw.textbbox((0,0),f'G * {google_rating} · {google_review_count} Google reviews',font=font_badge)
+            bw=bbox[2]-bbox[0]+28;bh=bbox[3]-bbox[1]+12;bx=W//2-bw//2;by=H-42-bh
+            ss_draw.rounded_rectangle([bx,by,bx+bw,by+bh],radius=10,fill=WHITE)
+            ss_draw.text((bx+10,by+bh//2),'G',font=font_badge,fill=(66,133,244),anchor='lm')
+            ss_draw.text((bx+26,by+bh//2),f'* {google_rating}',font=font_badge,fill=(245,158,11),anchor='lm')
+            sw=ss_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[2]-ss_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[0]
+            ss_draw.text((bx+30+sw,by+bh//2),f' · {google_review_count} Google reviews',font=font_badge,fill=(100,116,139),anchor='lm')
+        buf=io.BytesIO();ss_img.save(buf,format='PNG');buf.seek(0)
+        return Response(buf.read(),content_type='image/png')
+
+    # ── TEMPLATE: freshstart ────────────────────────────────────────────────
+    if template == 'freshstart':
+        fs2_img = Image.new('RGB', (W, H), (5,20,10))
+        fs2_draw = ImageDraw.Draw(fs2_img)
+        fs2_draw.rectangle([0,0,W,8],fill=GREEN)
+        fs2_draw.text((W//2,50),'🔄 FRESH START',font=font_bold_lg,fill=GREEN,anchor='mm')
+        fs2_draw.text((W//2,100),'Everyone deserves a second chance.',font=font_sm,fill=(60,120,70),anchor='mm')
+        fs2_draw.line([60,125,W-60,125],fill=(20,60,30),width=1)
+        if car_img:
+            car_copy=car_img.convert('RGB')
+            scale=max(W/car_copy.width,400/car_copy.height)
+            nw,nh=int(car_copy.width*scale),int(car_copy.height*scale)
+            car_copy=car_copy.resize((nw,nh))
+            region=Image.new('RGB',(W,400),(5,20,10))
+            region.paste(car_copy,((W-nw)//2,(400-nh)//2))
+            fs2_img.paste(region,(0,140))
+        grad=Image.new('RGBA',(W,400),(0,0,0,0))
+        gd=ImageDraw.Draw(grad)
+        for i in range(400):
+            a=int(210*(i/400)**1.5)
+            gd.line([0,i,W,i],fill=(5,20,10,min(a,255)))
+        fs2_rgba=fs2_img.convert('RGBA')
+        fs2_rgba.paste(grad,(0,140),grad)
+        fs2_img=fs2_rgba.convert('RGB')
+        fs2_draw=ImageDraw.Draw(fs2_img)
+        fs2_draw.text((W//2,580),vehicle_name,font=font_bold_lg,fill=WHITE,anchor='mm')
+        fs2_draw.text((W//2,650),price,font=font_price,fill=GREEN,anchor='mm')
+        fs2_draw.text((W//2,720),'Rebuilding credit? I work with lenders who can help.',font=font_sm,fill=(100,150,110),anchor='mm')
+        if profile_img:
+            pr=profile_img.convert('RGB');pw,ph=pr.size;side=min(pw,ph)
+            pr=pr.crop(((pw-side)//2,0,(pw-side)//2+side,side)).resize((80,80))
+            mask=Image.new('L',(80,80),0);ImageDraw.Draw(mask).ellipse([0,0,79,79],fill=255)
+            fs2_img.paste(pr,(40,790),mask)
+            fs2_draw.ellipse([34,784,126,876],outline=GREEN,width=3)
+        fs2_draw.text((140,820),name,font=font_bold_sm,fill=WHITE,anchor='lm')
+        fs2_draw.text((140,856),'cardeals.autos/'+slug,font=font_sm,fill=GREEN,anchor='lm')
+        fs2_draw.rectangle([0,920,W,1010],fill=(3,12,6))
+        fs2_draw.text((W//2,948),dealership,font=font_bold_sm,fill=WHITE,anchor='mm')
+        fs2_draw.text((W//2,976),full_address,font=font_sm,fill=(60,100,70),anchor='mm')
+        if google_rating and google_review_count:
+            try: font_badge=ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',20)
+            except: font_badge=font_sm
+            bbox=fs2_draw.textbbox((0,0),f'G * {google_rating} · {google_review_count} Google reviews',font=font_badge)
+            bw=bbox[2]-bbox[0]+28;bh=bbox[3]-bbox[1]+12;bx=W//2-bw//2;by=992
+            fs2_draw.rounded_rectangle([bx,by,bx+bw,by+bh],radius=10,fill=WHITE)
+            fs2_draw.text((bx+10,by+bh//2),'G',font=font_badge,fill=(66,133,244),anchor='lm')
+            fs2_draw.text((bx+26,by+bh//2),f'* {google_rating}',font=font_badge,fill=(245,158,11),anchor='lm')
+            sw=fs2_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[2]-fs2_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[0]
+            fs2_draw.text((bx+30+sw,by+bh//2),f' · {google_review_count} Google reviews',font=font_badge,fill=(100,116,139),anchor='lm')
+        buf=io.BytesIO();fs2_img.save(buf,format='PNG');buf.seek(0)
+        return Response(buf.read(),content_type='image/png')
+
+    # ── TEMPLATE: earngifts ─────────────────────────────────────────────────
+    if template == 'earngifts':
+        eg_img = Image.new('RGB', (W, H), NAVY)
+        eg_draw = ImageDraw.Draw(eg_img)
+        eg_draw.rectangle([0,0,W,8],fill=GREEN)
+        eg_draw.text((W//2,60),'🎀 EARN GIFTS WITH ME',font=font_bold_lg,fill=GREEN,anchor='mm')
+        if profile_img:
+            pr=profile_img.convert('RGB');pw,ph=pr.size;side=min(pw,ph)
+            pr=pr.crop(((pw-side)//2,0,(pw-side)//2+side,side)).resize((200,200))
+            mask=Image.new('L',(200,200),0);ImageDraw.Draw(mask).ellipse([0,0,199,199],fill=255)
+            eg_img.paste(pr,(W//2-100,100),mask)
+            eg_draw.ellipse([W//2-106,94,W//2+106,306],outline=GREEN,width=5)
+        eg_draw.text((W//2,360),name,font=font_bold_lg,fill=WHITE,anchor='mm')
+        eg_draw.text((W//2,410),'Sales Professional · '+dealership,font=font_sm,fill=(148,163,184),anchor='mm')
+        eg_draw.line([80,445,W-80,445],fill=(51,65,85),width=1)
+        eg_draw.text((W//2,510),'Send me a buyer.',font=font_bold_md,fill=WHITE,anchor='mm')
+        eg_draw.text((W//2,570),'They buy — I send you a Thank You gift.',font=font_sm,fill=(148,163,184),anchor='mm')
+        eg_draw.rounded_rectangle([60,620,W-60,690],radius=35,fill=GREEN)
+        eg_draw.text((W//2,655),'🎁 Refer · Buy · Receive',font=font_bold_md,fill=NAVY,anchor='mm')
+        eg_draw.text((W//2,760),'cardeals.autos/'+slug,font=font_bold_md,fill=GREEN,anchor='mm')
+        eg_draw.rectangle([0,830,W,1010],fill=(20,30,48))
+        eg_draw.text((W//2,863),dealership,font=font_bold_sm,fill=WHITE,anchor='mm')
+        eg_draw.text((W//2,895),full_address,font=font_sm,fill=(180,190,200),anchor='mm')
+        if google_rating and google_review_count:
+            try: font_badge=ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',20)
+            except: font_badge=font_sm
+            bbox=eg_draw.textbbox((0,0),f'G * {google_rating} · {google_review_count} Google reviews',font=font_badge)
+            bw=bbox[2]-bbox[0]+28;bh=bbox[3]-bbox[1]+12;bx=W//2-bw//2;by=912
+            eg_draw.rounded_rectangle([bx,by,bx+bw,by+bh],radius=10,fill=WHITE)
+            eg_draw.text((bx+10,by+bh//2),'G',font=font_badge,fill=(66,133,244),anchor='lm')
+            eg_draw.text((bx+26,by+bh//2),f'* {google_rating}',font=font_badge,fill=(245,158,11),anchor='lm')
+            sw=eg_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[2]-eg_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[0]
+            eg_draw.text((bx+30+sw,by+bh//2),f' · {google_review_count} Google reviews',font=font_badge,fill=(100,116,139),anchor='lm')
+        buf=io.BytesIO();eg_img.save(buf,format='PNG');buf.seek(0)
+        return Response(buf.read(),content_type='image/png')
+
+    # ── TEMPLATE: helpme ────────────────────────────────────────────────────
+    if template == 'helpme':
+        hm_img = Image.new('RGB', (W, H), NAVY)
+        hm_draw = ImageDraw.Draw(hm_img)
+        hm_draw.rectangle([0,0,W,8],fill=GREEN)
+        if profile_img:
+            pr=profile_img.convert('RGB');pw,ph=pr.size;side=min(pw,ph)
+            pr=pr.crop(((pw-side)//2,0,(pw-side)//2+side,side)).resize((220,220))
+            mask=Image.new('L',(220,220),0);ImageDraw.Draw(mask).ellipse([0,0,219,219],fill=255)
+            hm_img.paste(pr,(W//2-110,60),mask)
+            hm_draw.ellipse([W//2-116,54,W//2+116,286],outline=GREEN,width=5)
+        hm_draw.text((W//2,350),name,font=font_bold_lg,fill=WHITE,anchor='mm')
+        hm_draw.text((W//2,400),'Sales Professional · '+dealership,font=font_sm,fill=(148,163,184),anchor='mm')
+        hm_draw.line([80,435,W-80,435],fill=(51,65,85),width=1)
+        try:
+            font_ask=ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSerif-BoldItalic.ttf',52)
+        except:
+            font_ask=font_bold_md
+        hm_draw.text((W//2,510),'Help me sell.',font=font_ask,fill=GREEN,anchor='mm')
+        hm_draw.text((W//2,580),'Know someone shopping for a car?',font=font_bold_sm,fill=WHITE,anchor='mm')
+        hm_draw.text((W//2,630),'Send them my way — I\'ll take care of the rest.',font=font_sm,fill=(148,163,184),anchor='mm')
+        hm_draw.rounded_rectangle([60,680,W-60,750],radius=35,fill=GREEN)
+        hm_draw.text((W//2,715),'🤝 They buy — You receive a Thank You gift',font=font_bold_sm,fill=NAVY,anchor='mm')
+        hm_draw.text((W//2,810),'cardeals.autos/'+slug,font=font_bold_md,fill=GREEN,anchor='mm')
+        hm_draw.rectangle([0,870,W,1010],fill=(20,30,48))
+        hm_draw.text((W//2,903),dealership,font=font_bold_sm,fill=WHITE,anchor='mm')
+        hm_draw.text((W//2,935),full_address,font=font_sm,fill=(180,190,200),anchor='mm')
+        if google_rating and google_review_count:
+            try: font_badge=ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',20)
+            except: font_badge=font_sm
+            bbox=hm_draw.textbbox((0,0),f'G * {google_rating} · {google_review_count} Google reviews',font=font_badge)
+            bw=bbox[2]-bbox[0]+28;bh=bbox[3]-bbox[1]+12;bx=W//2-bw//2;by=952
+            hm_draw.rounded_rectangle([bx,by,bx+bw,by+bh],radius=10,fill=WHITE)
+            hm_draw.text((bx+10,by+bh//2),'G',font=font_badge,fill=(66,133,244),anchor='lm')
+            hm_draw.text((bx+26,by+bh//2),f'* {google_rating}',font=font_badge,fill=(245,158,11),anchor='lm')
+            sw=hm_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[2]-hm_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[0]
+            hm_draw.text((bx+30+sw,by+bh//2),f' · {google_review_count} Google reviews',font=font_badge,fill=(100,116,139),anchor='lm')
+        buf=io.BytesIO();hm_img.save(buf,format='PNG');buf.seek(0)
+        return Response(buf.read(),content_type='image/png')
+
+    # ── TEMPLATE: knowsomeone ───────────────────────────────────────────────
+    if template == 'knowsomeone':
+        ks_img = Image.new('RGB', (W, H), (15,25,45))
+        ks_draw = ImageDraw.Draw(ks_img)
+        ks_draw.rectangle([0,0,W,8],fill=GREEN)
+        if profile_img:
+            pr=profile_img.convert('RGB');pw,ph=pr.size;side=min(pw,ph)
+            pr=pr.crop(((pw-side)//2,0,(pw-side)//2+side,side)).resize((200,200))
+            mask=Image.new('L',(200,200),0);ImageDraw.Draw(mask).ellipse([0,0,199,199],fill=255)
+            ks_img.paste(pr,(W//2-100,80),mask)
+            ks_draw.ellipse([W//2-106,74,W//2+106,286],outline=GREEN,width=5)
+        ks_draw.text((W//2,340),name,font=font_bold_lg,fill=WHITE,anchor='mm')
+        ks_draw.text((W//2,390),dealership,font=font_sm,fill=(148,163,184),anchor='mm')
+        ks_draw.line([80,425,W-80,425],fill=(40,60,90),width=1)
+        ks_draw.text((W//2,490),'Know someone buying a car?',font=font_bold_md,fill=WHITE,anchor='mm')
+        ks_draw.text((W//2,550),'Tag them below 👇',font=font_bold_sm,fill=GREEN,anchor='mm')
+        ks_draw.text((W//2,620),'I\'ll get them taken care of —',font=font_sm,fill=(148,163,184),anchor='mm')
+        ks_draw.text((W//2,660),'no pressure, no runaround.',font=font_sm,fill=(148,163,184),anchor='mm')
+        ks_draw.rounded_rectangle([60,710,W-60,780],radius=35,fill=GREEN)
+        ks_draw.text((W//2,745),'👥 Refer · Relax · They\'ll Thank You',font=font_bold_sm,fill=NAVY,anchor='mm')
+        ks_draw.text((W//2,840),'cardeals.autos/'+slug,font=font_bold_md,fill=GREEN,anchor='mm')
+        ks_draw.rectangle([0,890,W,1010],fill=(10,18,32))
+        ks_draw.text((W//2,918),dealership,font=font_bold_sm,fill=WHITE,anchor='mm')
+        ks_draw.text((W//2,946),full_address,font=font_sm,fill=(148,163,184),anchor='mm')
+        if google_rating and google_review_count:
+            try: font_badge=ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',20)
+            except: font_badge=font_sm
+            bbox=ks_draw.textbbox((0,0),f'G * {google_rating} · {google_review_count} Google reviews',font=font_badge)
+            bw=bbox[2]-bbox[0]+28;bh=bbox[3]-bbox[1]+12;bx=W//2-bw//2;by=962
+            ks_draw.rounded_rectangle([bx,by,bx+bw,by+bh],radius=10,fill=WHITE)
+            ks_draw.text((bx+10,by+bh//2),'G',font=font_badge,fill=(66,133,244),anchor='lm')
+            ks_draw.text((bx+26,by+bh//2),f'* {google_rating}',font=font_badge,fill=(245,158,11),anchor='lm')
+            sw=ks_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[2]-ks_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[0]
+            ks_draw.text((bx+30+sw,by+bh//2),f' · {google_review_count} Google reviews',font=font_badge,fill=(100,116,139),anchor='lm')
+        buf=io.BytesIO();ks_img.save(buf,format='PNG');buf.seek(0)
+        return Response(buf.read(),content_type='image/png')
+
+    # ── TEMPLATE: tagafriend ────────────────────────────────────────────────
+    if template == 'tagafriend':
+        taf_img = Image.new('RGB', (W, H), (5,10,25))
+        taf_draw = ImageDraw.Draw(taf_img)
+        taf_draw.rectangle([0,0,W,8],fill=GREEN)
+        if profile_img:
+            pr=profile_img.convert('RGB');pw,ph=pr.size;side=min(pw,ph)
+            pr=pr.crop(((pw-side)//2,0,(pw-side)//2+side,side)).resize((200,200))
+            mask=Image.new('L',(200,200),0);ImageDraw.Draw(mask).ellipse([0,0,199,199],fill=255)
+            taf_img.paste(pr,(W//2-100,80),mask)
+            taf_draw.ellipse([W//2-106,74,W//2+106,286],outline=GREEN,width=5)
+        taf_draw.text((W//2,340),name,font=font_bold_lg,fill=WHITE,anchor='mm')
+        taf_draw.text((W//2,390),dealership,font=font_sm,fill=(148,163,184),anchor='mm')
+        taf_draw.line([80,425,W-80,425],fill=(30,50,80),width=1)
+        try:
+            font_tag=ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSerif-BoldItalic.ttf',60)
+        except:
+            font_tag=font_bold_lg
+        taf_draw.text((W//2,500),'Tag a friend.',font=font_tag,fill=GREEN,anchor='mm')
+        taf_draw.text((W//2,570),'⬇️ Someone you know needs a car.',font=font_bold_sm,fill=WHITE,anchor='mm')
+        taf_draw.text((W//2,630),'Tag them in the comments.',font=font_sm,fill=(148,163,184),anchor='mm')
+        taf_draw.text((W//2,680),'I\'ll take it from there.',font=font_sm,fill=(148,163,184),anchor='mm')
+        taf_draw.rounded_rectangle([60,730,W-60,800],radius=35,fill=GREEN)
+        taf_draw.text((W//2,765),'📲 Tag · Connect · Drive Home Happy',font=font_bold_sm,fill=NAVY,anchor='mm')
+        taf_draw.text((W//2,855),'cardeals.autos/'+slug,font=font_bold_md,fill=GREEN,anchor='mm')
+        taf_draw.rectangle([0,900,W,1010],fill=(3,6,18))
+        taf_draw.text((W//2,928),dealership,font=font_bold_sm,fill=WHITE,anchor='mm')
+        taf_draw.text((W//2,956),full_address,font=font_sm,fill=(148,163,184),anchor='mm')
+        if google_rating and google_review_count:
+            try: font_badge=ImageFont.truetype('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',20)
+            except: font_badge=font_sm
+            bbox=taf_draw.textbbox((0,0),f'G * {google_rating} · {google_review_count} Google reviews',font=font_badge)
+            bw=bbox[2]-bbox[0]+28;bh=bbox[3]-bbox[1]+12;bx=W//2-bw//2;by=972
+            taf_draw.rounded_rectangle([bx,by,bx+bw,by+bh],radius=10,fill=WHITE)
+            taf_draw.text((bx+10,by+bh//2),'G',font=font_badge,fill=(66,133,244),anchor='lm')
+            taf_draw.text((bx+26,by+bh//2),f'* {google_rating}',font=font_badge,fill=(245,158,11),anchor='lm')
+            sw=taf_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[2]-taf_draw.textbbox((0,0),f'* {google_rating}',font=font_badge)[0]
+            taf_draw.text((bx+30+sw,by+bh//2),f' · {google_review_count} Google reviews',font=font_badge,fill=(100,116,139),anchor='lm')
+        buf=io.BytesIO();taf_img.save(buf,format='PNG');buf.seek(0)
+        return Response(buf.read(),content_type='image/png')
 
 
     # Return PNG (classic template)
