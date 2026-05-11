@@ -131,28 +131,84 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
 
             <!-- Template selector -->
             <div style="margin-bottom:14px;">
-                <div style="font-size:11px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Choose Your Style</div>
-                <div style="display:flex;gap:8px;">
-                    <button onclick="selectTemplate('classic')" id="tmpl-classic" style="flex:1;padding:10px 6px;border:2px solid #00C851;border-radius:8px;background:#00C851;color:#1E293B;font-size:12px;font-weight:800;cursor:pointer;">⚡ Classic</button>
-                    <button onclick="selectTemplate('just_listed')" id="tmpl-just_listed" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">✨ Just Listed</button>
-                    <button onclick="selectTemplate('urgency')" id="tmpl-urgency" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">🔥 Urgency</button>
-                    <button onclick="selectTemplate('personal')" id="tmpl-personal" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">👤 My Brand</button>
-                    <button onclick="selectTemplate('dealsheet')" id="tmpl-dealsheet" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">📋 Deal Sheet</button>
+                <style>
+                .tmpl-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-bottom:4px;}
+                .tmpl-card{border:2px solid #E2E8F0;border-radius:10px;padding:9px 5px;background:white;cursor:pointer;text-align:center;transition:all 0.15s;}
+                .tmpl-card:hover{border-color:#00C851;background:#f0fdf4;}
+                .tmpl-card.active{border-color:#00C851;background:#f0fdf4;}
+                .tmpl-card .ti{font-size:18px;margin-bottom:4px;}
+                .tmpl-card .tn{font-size:10px;font-weight:700;color:#1E293B;margin-bottom:2px;line-height:1.2;}
+                .tmpl-card.active .tn{color:#00C851;}
+                .tmpl-card .tt{font-size:8px;color:#94A3B8;text-transform:uppercase;letter-spacing:0.5px;}
+                .tmpl-section{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#94A3B8;margin:12px 0 6px;}
+                .tmpl-divider{border:none;border-top:1px solid #F1F5F9;margin:10px 0;}
+                .tmpl-desc{font-size:10px;color:#94A3B8;margin:-2px 0 8px;line-height:1.5;}
+                </style>
+
+                <div class="tmpl-section">⚡ My Go-To Styles</div>
+                <div class="tmpl-grid">
+                    <div class="tmpl-card active" onclick="selectTemplate('classic')"><div class="ti">⚡</div><div class="tn">Classic</div><div class="tt">All purpose</div></div>
+                    <div class="tmpl-card" onclick="selectTemplate('just_listed')"><div class="ti">🏷️</div><div class="tn">Just Listed</div><div class="tt">New arrival</div></div>
+                    <div class="tmpl-card" onclick="selectTemplate('urgency')"><div class="ti">🔥</div><div class="tn">Urgency</div><div class="tt">Days left</div></div>
+                    <div class="tmpl-card" onclick="selectTemplate('personal')"><div class="ti">👤</div><div class="tn">My Brand</div><div class="tt">Personal</div></div>
+                    <div class="tmpl-card" onclick="selectTemplate('freshtraded')"><div class="ti">🚗</div><div class="tn">Fresh Trade</div><div class="tt">Just arrived</div></div>
                 </div>
-                <div style="display:flex;gap:8px;margin-top:8px;">
-                    <button onclick="selectTemplate('lowmiles')" id="tmpl-lowmiles" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">🔢 Low Miles</button>
-                    <button onclick="selectTemplate('warranty')" id="tmpl-warranty" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">🏭 Warranty</button>
-                    <button onclick="selectTemplate('cleancarfax')" id="tmpl-cleancarfax" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">✅ Clean Carfax</button>
-                    <button onclick="selectTemplate('oneowner')" id="tmpl-oneowner" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">👤 One Owner</button>
-                    <button onclick="selectTemplate('referral')" id="tmpl-referral" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">🎁 Referral</button>
+
+                <hr class="tmpl-divider">
+                <div class="tmpl-section">💰 Price & Value</div>
+                <div class="tmpl-grid">
+                    <div class="tmpl-card" onclick="selectTemplate('pricedrop')"><div class="ti">🔻</div><div class="tn">Price Drop</div><div class="tt">Reduced</div></div>
+                    <div class="tmpl-card" onclick="selectTemplate('under20k')"><div class="ti">💵</div><div class="tn">Under $20K</div><div class="tt">Budget buyers</div></div>
+                    <div class="tmpl-card" onclick="selectTemplate('lotclearance')"><div class="ti">🏷️</div><div class="tn">Lot Clearance</div><div class="tt">Best deal</div></div>
+                    <div class="tmpl-card" onclick="selectTemplate('dealsheet')"><div class="ti">📋</div><div class="tn">Deal Sheet</div><div class="tt">Full details</div></div>
                 </div>
-                <div style="display:flex;gap:8px;margin-top:8px;">
-                    <button onclick="selectTemplate('magazine')" id="tmpl-magazine" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">🎬 Magazine</button>
-                    <button onclick="selectTemplate('pricedrop')" id="tmpl-pricedrop" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">🔻 Price Drop</button>
-                    <button onclick="selectTemplate('freshtraded')" id="tmpl-freshtraded" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">🚗 Fresh Trade</button>
-                    <button onclick="selectTemplate('boldstreet')" id="tmpl-boldstreet" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">🔥 Bold Street</button>
-                    <button onclick="selectTemplate('cleanstudio')" id="tmpl-cleanstudio" style="flex:1;padding:10px 6px;border:2px solid #E2E8F0;border-radius:8px;background:white;color:#475569;font-size:12px;font-weight:700;cursor:pointer;">✨ Clean Studio</button>
+
+                <hr class="tmpl-divider">
+                <div class="tmpl-section">🤝 Finance & Credit</div>
+                <div class="tmpl-grid">
+                    <div class="tmpl-card" onclick="selectTemplate('getapproved')"><div class="ti">✅</div><div class="tn">Get Approved</div><div class="tt">Finance ready</div></div>
+                    <div class="tmpl-card" onclick="selectTemplate('allcredit')"><div class="ti">💳</div><div class="tn">All Credit</div><div class="tt">Bad/no credit</div></div>
+                    <div class="tmpl-card" onclick="selectTemplate('firsttime')"><div class="ti">🌱</div><div class="tn">First Time</div><div class="tt">New buyers</div></div>
+                    <div class="tmpl-card" onclick="selectTemplate('freshstart')"><div class="ti">🔄</div><div class="tn">Fresh Start</div><div class="tt">Rebuild credit</div></div>
                 </div>
+
+                <hr class="tmpl-divider">
+                <div class="tmpl-section">🚘 Vehicle Type</div>
+                <div class="tmpl-grid">
+                    <div class="tmpl-card" onclick="selectTemplate('familyready')"><div class="ti">👨‍👩‍👧</div><div class="tn">Family Ready</div><div class="tt">SUV shoppers</div></div>
+                    <div class="tmpl-card" onclick="selectTemplate('truckready')"><div class="ti">🛻</div><div class="tn">Truck Ready</div><div class="tt">Work trucks</div></div>
+                    <div class="tmpl-card" onclick="selectTemplate('sporty')"><div class="ti">🏎️</div><div class="tn">Sporty</div><div class="tt">Fun drives</div></div>
+                    <div class="tmpl-card" onclick="selectTemplate('weekendwarrior')"><div class="ti">🌄</div><div class="tn">Weekend</div><div class="tt">Lifestyle</div></div>
+                    <div class="tmpl-card" onclick="selectTemplate('suvseason')"><div class="ti">🚙</div><div class="tn">SUV Season</div><div class="tt">SUV buyers</div></div>
+                </div>
+
+                <hr class="tmpl-divider">
+                <div class="tmpl-section">🏆 Trust & Quality</div>
+                <div class="tmpl-grid">
+                    <div class="tmpl-card" onclick="selectTemplate('certified')"><div class="ti">🏅</div><div class="tn">Certified</div><div class="tt">CPO feel</div></div>
+                    <div class="tmpl-card" onclick="selectTemplate('cleancarfax')"><div class="ti">✅</div><div class="tn">Clean Carfax</div><div class="tt">No accidents</div></div>
+                    <div class="tmpl-card" onclick="selectTemplate('oneowner')"><div class="ti">👤</div><div class="tn">One Owner</div><div class="tt">Single owner</div></div>
+                    <div class="tmpl-card" onclick="selectTemplate('lowmiles')"><div class="ti">🔢</div><div class="tn">Low Miles</div><div class="tt">Mileage hero</div></div>
+                    <div class="tmpl-card" onclick="selectTemplate('warranty')"><div class="ti">🏭</div><div class="tn">Warranty</div><div class="tt">Covered</div></div>
+                </div>
+
+                <hr class="tmpl-divider">
+                <div class="tmpl-section">🎨 Creative Styles</div>
+                <div class="tmpl-grid">
+                    <div class="tmpl-card" onclick="selectTemplate('magazine')"><div class="ti">🎬</div><div class="tn">Magazine</div><div class="tt">Editorial</div></div>
+                    <div class="tmpl-card" onclick="selectTemplate('boldstreet')"><div class="ti">🔥</div><div class="tn">Bold Street</div><div class="tt">High energy</div></div>
+                    <div class="tmpl-card" onclick="selectTemplate('cleanstudio')"><div class="ti">✨</div><div class="tn">Clean Studio</div><div class="tt">White bg</div></div>
+                </div>
+
+                <hr class="tmpl-divider">
+                <div class="tmpl-section">🌐 Your Network Sells For You</div>
+                <div class="tmpl-desc">Post → someone taps your link → lead captured → deal closes → you deliver the gift. Your platform does the rest.</div>
+                <div class="tmpl-grid">
+                    <div class="tmpl-card" onclick="selectTemplate('referral')"><div class="ti">🎁</div><div class="tn">Referral</div><div class="tt">Send my way</div></div>
+                    <div class="tmpl-card" onclick="selectTemplate('earngifts')"><div class="ti">🎀</div><div class="tn">Earn Gifts</div><div class="tt">Reward first</div></div>
+                    <div class="tmpl-card" onclick="selectTemplate('helpme')"><div class="ti">🤝</div><div class="tn">Help Me Sell</div><div class="tt">Direct ask</div></div>
+                    <div class="tmpl-card" onclick="selectTemplate('knowsomeone')"><div class="ti">👥</div><div class="tn">Know Someone?</div><div class="tt">Casual share</div></div>
+                    <div class="tmpl-card" onclick="selectTemplate('tagafriend')"><div class="ti">📲</div><div class="tn">Tag a Friend</div><div class="tt">Social engage</div></div>
                 </div>
             </div>
             <!-- Generate button -->
@@ -581,12 +637,14 @@ var serverAdBlob = null;
 var selectedTemplate = 'classic';
 function selectTemplate(t) {
     selectedTemplate = t;
-    ['classic','just_listed','urgency','personal','dealsheet','lowmiles','warranty','cleancarfax','oneowner','referral','magazine','pricedrop','freshtraded','boldstreet','cleanstudio'].forEach(function(name) {
-        var btn = document.getElementById('tmpl-' + name);
-        if (!btn) return;
-        btn.style.background = name === t ? '#00C851' : 'white';
-        btn.style.color = name === t ? '#1E293B' : '#475569';
-        btn.style.borderColor = name === t ? '#00C851' : '#E2E8F0';
+    document.querySelectorAll('.tmpl-card').forEach(function(c) {
+        c.classList.remove('active');
+    });
+    document.querySelectorAll('.tmpl-card').forEach(function(c) {
+        var oc = c.getAttribute('onclick') || '';
+        if (oc.indexOf("'" + t + "'") > -1) {
+            c.classList.add('active');
+        }
     });
 }
 
