@@ -1111,7 +1111,7 @@ function loadBirddogNetwork() {
 
 function markSold(referralId, btn) {
     btn.disabled = true; btn.textContent = '...';
-    fetch('/api/birddog/mark-sold/' + referralId, {method:'POST'})
+    fetch('/api/birddog/mark-sold/' + referralId, {method:'POST', headers:{'Content-Type':'application/json'}})
     .then(function(r) { return r.json(); })
     .then(function(d) { if (d.success) { loadBirddogNetwork(); } });
 }
