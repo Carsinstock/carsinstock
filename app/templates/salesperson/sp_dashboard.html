@@ -1064,8 +1064,11 @@ function copyPost(id) {
 }
 
 function loadBirddogNetwork() {
-    fetch('/api/birddog/my-network')
-    .then(function(r) { return r.json(); })
+    fetch('/api/birddog/my-network', {credentials: 'same-origin'})
+    .then(function(r) {
+        if (!r.ok || r.status === 401) throw new Error('auth');
+        return r.json();
+    })
     .then(function(d) {
         var el = document.getElementById('birddogList');
         if (!el) return;
@@ -1105,7 +1108,7 @@ function loadBirddogNetwork() {
     })
     .catch(function() {
         var el = document.getElementById('birddogList');
-        if (el) el.innerHTML = '<div style="text-align:center;padding:20px;color:#94A3B8;font-size:13px;">Unable to load network.</div>';
+        if (el) el.innerHTML = '<div style="text-align:center;padding:20px;color:#94A3B8;font-size:13px;">No birddogs yet. Share your referral templates to build your network.</div>';
     });
 }
 
