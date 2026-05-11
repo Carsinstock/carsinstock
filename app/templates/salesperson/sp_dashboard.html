@@ -821,7 +821,12 @@ async function generateProAd() {
         if (data.error) { throw new Error(data.error); }
         if (data.no_inventory) { throw new Error('No active vehicles found. Add a vehicle first.'); }
         generatedAdData = data;
-        generatedCaption = data.quote + '\n\nSee my inventory → https://cardeals.autos/' + data.slug + '\nSave my contact → https://carsinstock.com/' + data.slug + '/contact';
+        var referralTemplates = ['referral','earngifts','helpme','knowsomeone','tagafriend'];
+        if (referralTemplates.indexOf(selectedTemplate) > -1) {
+            generatedCaption = data.quote + '\n\nEarn a gift when your referral buys → https://carsinstock.com/earn/' + data.slug + '\nSend this to anyone who knows someone buying a car.';
+        } else {
+            generatedCaption = data.quote + '\n\nSee my inventory → https://cardeals.autos/' + data.slug + '\nSave my contact → https://carsinstock.com/' + data.slug + '/contact';
+        }
         document.getElementById('adCaption').value = generatedCaption;
         document.getElementById('adCaption').readOnly = true;
         await new Promise(r => setTimeout(r, 300));

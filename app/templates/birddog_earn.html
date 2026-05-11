@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block content %}
+<div style="max-width:560px;margin:0 auto;padding:20px 16px;">
+
+  <!-- Header -->
+  <div style="background:#1E293B;border-radius:16px;padding:32px 24px;margin-bottom:20px;text-align:center;">
+    {% if rep.profile_photo %}
+    <img src="{{ rep.profile_photo }}" style="width:80px;height:80px;border-radius:50%;border:3px solid #00C851;margin-bottom:14px;object-fit:cover;display:block;margin-left:auto;margin-right:auto;">
+    {% endif %}
+    <div style="font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#00C851;margin-bottom:8px;">Referral Program</div>
+    <div style="font-size:24px;font-weight:800;color:white;margin-bottom:6px;">Earn money by sending car buyers my way.</div>
+    <div style="font-size:15px;color:rgba(255,255,255,0.6);line-height:1.5;">— {{ rep.name }}, {{ dealership }}</div>
+  </div>
+
+  <!-- How it works -->
+  <div style="background:white;border-radius:16px;padding:24px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+    <div style="font-size:14px;font-weight:800;color:#1E293B;margin-bottom:16px;text-transform:uppercase;letter-spacing:1px;">How It Works</div>
+    <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:16px;">
+      <div style="background:#00C851;color:#1E293B;font-size:13px;font-weight:800;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#1E293B;">You know someone looking for a car</div>
+        <div style="font-size:13px;color:#94A3B8;margin-top:2px;">A friend, family member, coworker — anyone shopping for a vehicle.</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:16px;">
+      <div style="background:#00C851;color:#1E293B;font-size:13px;font-weight:800;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#1E293B;">Send them my way</div>
+        <div style="font-size:13px;color:#94A3B8;margin-top:2px;">Share this page or have them contact me directly. I take it from there.</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:16px;">
+      <div style="background:#00C851;color:#1E293B;font-size:13px;font-weight:800;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#1E293B;">They buy — you receive a Thank You gift</div>
+        <div style="font-size:13px;color:#94A3B8;margin-top:2px;">Every closed deal earns you a gift from the dealership. No limits.</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:14px;align-items:flex-start;">
+      <div style="background:#00C851;color:#1E293B;font-size:13px;font-weight:800;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#1E293B;">Track everything from your personal dashboard</div>
+        <div style="font-size:13px;color:#94A3B8;margin-top:2px;">You get a private link to see every referral you sent and its status in real time.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sign up form -->
+  <div style="background:white;border-radius:16px;padding:24px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+    <div style="font-size:15px;font-weight:800;color:#1E293B;margin-bottom:4px;">Join {{ rep.name.split()[0] }}'s Referral Network</div>
+    <div style="font-size:13px;color:#94A3B8;margin-bottom:20px;">Sign up in 30 seconds. Get your personal tracking link instantly.</div>
+
+    <div id="earnForm">
+      <div style="margin-bottom:12px;">
+        <input type="text" id="earn_name" placeholder="Your Full Name *" style="width:100%;padding:13px 14px;border:2px solid #E2E8F0;border-radius:10px;font-size:15px;box-sizing:border-box;outline:none;" onfocus="this.style.borderColor='#00C851'" onblur="this.style.borderColor='#E2E8F0'">
+      </div>
+      <div style="margin-bottom:12px;">
+        <input type="email" id="earn_email" placeholder="Your Email Address *" style="width:100%;padding:13px 14px;border:2px solid #E2E8F0;border-radius:10px;font-size:15px;box-sizing:border-box;outline:none;" onfocus="this.style.borderColor='#00C851'" onblur="this.style.borderColor='#E2E8F0'">
+      </div>
+      <div style="margin-bottom:20px;">
+        <input type="tel" id="earn_phone" placeholder="Your Phone Number *" style="width:100%;padding:13px 14px;border:2px solid #E2E8F0;border-radius:10px;font-size:15px;box-sizing:border-box;outline:none;" onfocus="this.style.borderColor='#00C851'" onblur="this.style.borderColor='#E2E8F0'">
+      </div>
+      <div id="earnErr" style="display:none;color:#ef4444;font-size:13px;text-align:center;margin-bottom:12px;"></div>
+      <button onclick="earnSignup()" id="earnBtn" style="width:100%;background:#00C851;color:#1E293B;border:none;padding:16px;border-radius:12px;font-size:16px;font-weight:800;cursor:pointer;letter-spacing:0.3px;">Join the Referral Network →</button>
+      <div style="text-align:center;font-size:11px;color:#94A3B8;margin-top:10px;">No spam. No fees. Just referrals and gifts.</div>
+    </div>
+
+    <div id="earnSuccess" style="display:none;text-align:center;padding:20px 0;">
+      <div style="font-size:48px;margin-bottom:12px;">🎉</div>
+      <div style="font-size:20px;font-weight:800;color:#00C851;margin-bottom:8px;">You're in!</div>
+      <div style="font-size:14px;color:#64748B;line-height:1.6;margin-bottom:20px;">Check your email for your personal tracking link.<br>Bookmark it to track every referral and gift.</div>
+      <div id="earnTrackingLink" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:14px;font-size:13px;color:#166534;word-break:break-all;"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div style="text-align:center;padding:10px 0 30px;">
+    <div style="font-size:13px;color:#94A3B8;">{{ dealership }} · {{ full_address }}</div>
+    <div style="font-size:11px;color:#CBD5E1;margin-top:6px;">Powered by <a href="https://carsinstock.com" style="color:#CBD5E1;">CarsInStock</a></div>
+  </div>
+</div>
+
+<script>
+var earnTeamMemberId = {{ rep.id }};
+
+async function earnSignup() {
+  var name = document.getElementById('earn_name').value.trim();
+  var email = document.getElementById('earn_email').value.trim();
+  var phone = document.getElementById('earn_phone').value.trim();
+  var errEl = document.getElementById('earnErr');
+  if (!name || !email || !phone) {
+    errEl.textContent = 'Please fill in all fields.';
+    errEl.style.display = 'block'; return;
+  }
+  var btn = document.getElementById('earnBtn');
+  btn.textContent = 'Joining...'; btn.disabled = true;
+  errEl.style.display = 'none';
+  try {
+    var r = await fetch('/api/birddog/signup', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({name: name, email: email, phone: phone, team_member_id: earnTeamMemberId})
+    });
+    var d = await r.json();
+    if (d.success) {
+      document.getElementById('earnForm').style.display = 'none';
+      document.getElementById('earnSuccess').style.display = 'block';
+      if (d.token) {
+        var link = 'https://carsinstock.com/track/' + d.token;
+        document.getElementById('earnTrackingLink').innerHTML = '🔗 Your tracking link:<br><strong>' + link + '</strong>';
+      }
+    } else {
+      btn.textContent = 'Join the Referral Network →'; btn.disabled = false;
+      errEl.textContent = 'Something went wrong. Please try again.';
+      errEl.style.display = 'block';
+    }
+  } catch(e) {
+    btn.textContent = 'Join the Referral Network →'; btn.disabled = false;
+    errEl.textContent = 'Connection error. Please try again.';
+    errEl.style.display = 'block';
+  }
+}
+</script>
+{% endblock %}

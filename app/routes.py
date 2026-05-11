@@ -526,6 +526,27 @@ def birddog_my_network():
     conn.close()
     return jsonify({'birddogs': result})
 
+@main.route('/earn/<slug>')
+def birddog_earn(slug):
+    import sqlite3
+    conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    conn.row_factory = sqlite3.Row
+    rep = conn.execute('SELECT * FROM dealership_team WHERE slug=? AND is_active=1', (slug,)).fetchone()
+    if not rep:
+        conn.close()
+        return render_template('404.html'), 404
+    dealership_row = conn.execute('SELECT name, city, address, state, zip FROM dealerships WHERE id=?', (rep['dealership_id'],)).fetchone()
+    dealership = dealership_row['name'] if dealership_row else ''
+    full_address = ''
+    if dealership_row:
+        parts = [dealership_row['address'], dealership_row['city'], dealership_row['state'], dealership_row['zip']]
+        full_address = ', '.join(p for p in parts if p)
+    conn.close()
+    return render_template('birddog_earn.html',
+        rep=dict(rep),
+        dealership=dealership,
+        full_address=full_address)
+
 @main.route('/dealer-register', methods=['GET', 'POST'])
 def dealer_register():
     if request.method == 'POST':
