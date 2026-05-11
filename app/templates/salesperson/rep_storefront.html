@@ -462,4 +462,65 @@ async function sendChat() {
   } catch(e){}
 }
 </script>
+<!-- Birddog signup slide-up -->
+<div id="birddogPrompt" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:999;padding:16px;">
+  <div style="background:#1E293B;border-radius:16px;padding:24px;box-shadow:0 -4px 30px rgba(0,0,0,0.3);max-width:480px;margin:0 auto;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+      <div>
+        <div style="font-size:15px;font-weight:800;color:white;margin-bottom:4px;">👋 Want to earn when your referral buys?</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);">Join the referral network. Takes 30 seconds.</div>
+      </div>
+      <button onclick="document.getElementById('birddogPrompt').style.display='none'" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:20px;cursor:pointer;padding:0 0 0 12px;">✕</button>
+    </div>
+    <div id="birddogForm">
+      <input type="text" id="bd_name" placeholder="Your Name" style="width:100%;padding:11px 14px;border:2px solid rgba(255,255,255,0.1);border-radius:8px;font-size:14px;background:rgba(255,255,255,0.08);color:white;box-sizing:border-box;margin-bottom:8px;" oninput="this.style.borderColor='rgba(255,255,255,0.3)'">
+      <input type="email" id="bd_email" placeholder="Your Email" style="width:100%;padding:11px 14px;border:2px solid rgba(255,255,255,0.1);border-radius:8px;font-size:14px;background:rgba(255,255,255,0.08);color:white;box-sizing:border-box;margin-bottom:8px;" oninput="this.style.borderColor='rgba(255,255,255,0.3)'">
+      <input type="tel" id="bd_phone" placeholder="Your Phone" style="width:100%;padding:11px 14px;border:2px solid rgba(255,255,255,0.1);border-radius:8px;font-size:14px;background:rgba(255,255,255,0.08);color:white;box-sizing:border-box;margin-bottom:12px;" oninput="this.style.borderColor='rgba(255,255,255,0.3)'">
+      <button onclick="birddogSignup()" style="width:100%;background:#00C851;color:#1E293B;border:none;padding:14px;border-radius:10px;font-size:14px;font-weight:800;cursor:pointer;">Join Referral Network →</button>
+    </div>
+    <div id="birddogSuccess" style="display:none;text-align:center;padding:10px 0;">
+      <div style="font-size:24px;margin-bottom:8px;">🎉</div>
+      <div style="font-size:15px;font-weight:700;color:#00C851;margin-bottom:4px;">You're in!</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.6);">Check your email for your tracking link.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+var birddogTeamMemberId = {{ member.id if member else 'null' }};
+// Show prompt after 3 seconds if came via referral link
+setTimeout(function() {
+  var urlParams = new URLSearchParams(window.location.search);
+  var alreadyDismissed = localStorage.getItem('bd_dismissed_' + birddogTeamMemberId);
+  if (!alreadyDismissed) {
+    document.getElementById('birddogPrompt').style.display = 'block';
+  }
+}, 3000);
+
+function birddogSignup() {
+  var name = document.getElementById('bd_name').value.trim();
+  var email = document.getElementById('bd_email').value.trim();
+  var phone = document.getElementById('bd_phone').value.trim();
+  if (!name || !phone) { alert('Please enter your name and phone.'); return; }
+  fetch('/api/birddog/signup', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({name: name, email: email, phone: phone, team_member_id: birddogTeamMemberId})
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.success) {
+      document.getElementById('birddogForm').style.display = 'none';
+      document.getElementById('birddogSuccess').style.display = 'block';
+      localStorage.setItem('bd_dismissed_' + birddogTeamMemberId, '1');
+      if (d.token) {
+        localStorage.setItem('bd_token_' + birddogTeamMemberId, d.token);
+      }
+      setTimeout(function() {
+        document.getElementById('birddogPrompt').style.display = 'none';
+      }, 4000);
+    }
+  });
+}
+</script>
 {% endblock %}

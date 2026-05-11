@@ -375,6 +375,157 @@ def careers():
         return render_template('careers.html', submitted=True)
     return render_template('careers.html', submitted=False)
 
+
+@main.route('/api/birddog/signup', methods=['POST'])
+def birddog_signup():
+    import sqlite3, secrets
+    data = request.get_json()
+    name = data.get('name','').strip()
+    email = data.get('email','').strip()
+    phone = data.get('phone','').strip()
+    team_member_id = data.get('team_member_id')
+    if not name or not team_member_id:
+        return jsonify({'error': 'Missing required fields'}), 400
+    token = secrets.token_urlsafe(16)
+    conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    conn.row_factory = sqlite3.Row
+    existing = conn.execute('SELECT id, token FROM birddogs WHERE phone=? AND team_member_id=?', (phone, team_member_id)).fetchone()
+    if existing:
+        conn.close()
+        return jsonify({'success': True, 'token': existing['token'], 'existing': True})
+    conn.execute('INSERT INTO birddogs (team_member_id, name, email, phone, token) VALUES (?,?,?,?,?)',
+                 (team_member_id, name, email, phone, token))
+    conn.commit()
+    rep = conn.execute('SELECT name, slug FROM dealership_team WHERE id=?', (team_member_id,)).fetchone()
+    conn.close()
+    if email:
+        try:
+            from app.utils.email import send_email as _se
+            rep_name = rep['name'] if rep else 'your rep'
+            tracking_url = 'https://carsinstock.com/track/' + token
+            _se(
+                to_email=email,
+                subject="You're in " + rep_name + "'s Referral Network — CarsInStock",
+                html_content='<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;"><div style="background:#1E293B;padding:20px;border-radius:12px 12px 0 0;text-align:center;"><h1 style="color:#00C851;margin:0;">Cars IN STOCK</h1></div><div style="background:#f8fafc;padding:30px;border-radius:0 0 12px 12px;"><h2 style="color:#1E293B;">You are in ' + rep_name + ' referral network!</h2><p style="color:#555;font-size:16px;line-height:1.6;">Every time someone you refer buys a car, you receive a Thank You gift.</p><div style="text-align:center;margin:30px 0;"><a href="' + tracking_url + '" style="background:#00C851;color:#1E293B;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:16px;">Track Your Referrals</a></div><p style="color:#888;font-size:13px;">Bookmark your tracking link: ' + tracking_url + '</p></div></div>'
+            )
+        except Exception as e:
+            print(f"Birddog email error: {e}")
+    return jsonify({'success': True, 'token': token, 'existing': False})
+
+
+@main.route('/track/<token>')
+def birddog_tracking(token):
+    import sqlite3
+    conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    conn.row_factory = sqlite3.Row
+    birddog = conn.execute('SELECT * FROM birddogs WHERE token=?', (token,)).fetchone()
+    if not birddog:
+        conn.close()
+        return render_template('404.html'), 404
+    rep = conn.execute('SELECT name, slug, profile_photo FROM dealership_team WHERE id=?', (birddog['team_member_id'],)).fetchone()
+    referrals = conn.execute('SELECT * FROM birddog_referrals WHERE birddog_id=? ORDER BY created_at DESC', (birddog['id'],)).fetchall()
+    conn.close()
+    total = len(referrals)
+    closed = sum(1 for r in referrals if r['status'] == 'sold')
+    pending = sum(1 for r in referrals if r['status'] in ('pending','submitted'))
+    return render_template('birddog_tracking.html',
+        birddog=dict(birddog),
+        rep=dict(rep) if rep else {},
+        referrals=[dict(r) for r in referrals],
+        total=total, closed=closed, pending=pending,
+        token=token)
+
+
+@main.route('/api/birddog/submit-referral', methods=['POST'])
+def birddog_submit_referral():
+    import sqlite3
+    from datetime import datetime
+    data = request.get_json()
+    token = data.get('token','').strip()
+    buyer_name = data.get('buyer_name','').strip()
+    buyer_phone = data.get('buyer_phone','').strip()
+    if not token or not buyer_name:
+        return jsonify({'error': 'Missing fields'}), 400
+    conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    conn.row_factory = sqlite3.Row
+    birddog = conn.execute('SELECT * FROM birddogs WHERE token=?', (token,)).fetchone()
+    if not birddog:
+        conn.close()
+        return jsonify({'error': 'Invalid token'}), 404
+    conn.execute('INSERT INTO birddog_referrals (birddog_id, team_member_id, buyer_name, buyer_phone, status) VALUES (?,?,?,?,?)',
+                 (birddog['id'], birddog['team_member_id'], buyer_name, buyer_phone, 'pending'))
+    conn.commit()
+    rep = conn.execute('SELECT name, email FROM dealership_team WHERE id=?', (birddog['team_member_id'],)).fetchone()
+    conn.close()
+    if rep and rep['email']:
+        try:
+            from app.utils.email import send_email as _se
+            _se(
+                to_email=rep['email'],
+                subject='New Birddog Referral — ' + buyer_name,
+                html_content='<p><strong>' + birddog['name'] + '</strong> just sent you a referral:</p><p><strong>Buyer:</strong> ' + buyer_name + '<br><strong>Phone:</strong> ' + buyer_phone + '</p><p>Log in to your dashboard to follow up.</p>'
+            )
+        except Exception as e:
+            print(f"Rep referral notify error: {e}")
+    return jsonify({'success': True})
+
+
+@main.route('/api/birddog/mark-sold/<int:referral_id>', methods=['POST'])
+def birddog_mark_sold(referral_id):
+    import sqlite3
+    from datetime import datetime
+    if 'team_member_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    conn.row_factory = sqlite3.Row
+    referral = conn.execute('SELECT * FROM birddog_referrals WHERE id=? AND team_member_id=?',
+                            (referral_id, session['team_member_id'])).fetchone()
+    if not referral:
+        conn.close()
+        return jsonify({'error': 'Not found'}), 404
+    conn.execute('UPDATE birddog_referrals SET status=?, closed_at=? WHERE id=?',
+                 ('sold', datetime.utcnow().isoformat(), referral_id))
+    conn.commit()
+    birddog = conn.execute('SELECT * FROM birddogs WHERE id=?', (referral['birddog_id'],)).fetchone()
+    rep = conn.execute('SELECT name FROM dealership_team WHERE id=?', (session['team_member_id'],)).fetchone()
+    conn.close()
+    if birddog and birddog['email']:
+        try:
+            from app.utils.email import send_email as _se
+            tracking_url = 'https://carsinstock.com/track/' + birddog['token']
+            rep_name = rep['name'] if rep else 'your rep'
+            buyer_name = referral['buyer_name'] if referral['buyer_name'] else 'your referral'
+            _se(
+                to_email=birddog['email'],
+                subject='Your referral closed!',
+                html_content='<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;"><div style="background:#1E293B;padding:20px;text-align:center;border-radius:12px 12px 0 0;"><h1 style="color:#00C851;margin:0;">Cars IN STOCK</h1></div><div style="background:#f0fdf4;padding:30px;border-radius:0 0 12px 12px;"><h2 style="color:#166534;">Your referral closed!</h2><p style="color:#555;font-size:16px;line-height:1.6;"><strong>' + buyer_name + '</strong> just bought a car through ' + rep_name + '. Your Thank You gift is being processed.</p><div style="text-align:center;margin:30px 0;"><a href="' + tracking_url + '" style="background:#00C851;color:#1E293B;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;">View Your Referrals</a></div></div></div>'
+            )
+        except Exception as e:
+            print(f"Birddog sold notify error: {e}")
+    return jsonify({'success': True})
+
+@main.route('/api/birddog/my-network', methods=['GET'])
+def birddog_my_network():
+    import sqlite3
+    if 'team_member_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    conn.row_factory = sqlite3.Row
+    birddogs = conn.execute('SELECT * FROM birddogs WHERE team_member_id=? ORDER BY created_at DESC', (session['team_member_id'],)).fetchall()
+    result = []
+    for b in birddogs:
+        referrals = conn.execute('SELECT * FROM birddog_referrals WHERE birddog_id=?', (b['id'],)).fetchall()
+        pending = [dict(r) for r in referrals if r['status'] in ('pending','submitted')]
+        sold = [dict(r) for r in referrals if r['status'] == 'sold']
+        result.append({
+            'id': b['id'], 'name': b['name'], 'email': b['email'],
+            'phone': b['phone'], 'token': b['token'],
+            'total': len(referrals), 'pending': len(pending), 'sold': len(sold),
+            'referrals': [dict(r) for r in referrals]
+        })
+    conn.close()
+    return jsonify({'birddogs': result})
+
 @main.route('/dealer-register', methods=['GET', 'POST'])
 def dealer_register():
     if request.method == 'POST':

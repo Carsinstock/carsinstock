@@ -219,6 +219,19 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
             <button onclick="generateProAd()" id="generateBtn" style="width:100%;background:#00C851;color:white;border:none;padding:15px;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer;letter-spacing:0.3px;margin-bottom:6px;">Generate My Pro Social Ad &#x2192;</button>
             <div style="text-align:center;font-size:11px;color:#94A3B8;margin-bottom:16px;">Takes ~8 seconds &middot; Image + caption ready to copy &amp; paste</div>
 
+            <!-- Birddog Network Panel -->
+            <div style="background:white;border-radius:16px;padding:20px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                    <div>
+                        <div style="font-size:14px;font-weight:800;color:#1E293B;">🐦 My Birddog Network</div>
+                        <div style="font-size:11px;color:#94A3B8;margin-top:2px;">People who refer buyers to you</div>
+                    </div>
+                </div>
+                <div id="birddogList">
+                    <div style="text-align:center;padding:20px;color:#94A3B8;font-size:13px;">Loading your network...</div>
+                </div>
+            </div>
+
             <!-- Ad preview section -->
             <div id="adPreviewWrap" style="display:none;">
                 <img id="adPreviewImg" src="" alt="Your Pro Social Ad" style="width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.12);display:block;">
@@ -1049,6 +1062,61 @@ function copyPost(id) {
         setTimeout(function(){ document.getElementById('postCopied').style.display='none'; }, 2500);
     });
 }
+
+function loadBirddogNetwork() {
+    fetch('/api/birddog/my-network')
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+        var el = document.getElementById('birddogList');
+        if (!el) return;
+        if (!d.birddogs || d.birddogs.length === 0) {
+            el.innerHTML = '<div style="text-align:center;padding:20px;color:#94A3B8;font-size:13px;">No birddogs yet. Share your referral templates to build your network.</div>';
+            return;
+        }
+        var html = '';
+        d.birddogs.forEach(function(b) {
+            html += '<div style="border:1px solid #F1F5F9;border-radius:10px;padding:14px;margin-bottom:10px;">';
+            html += '<div style="display:flex;justify-content:space-between;align-items:flex-start;">';
+            html += '<div><div style="font-size:13px;font-weight:700;color:#1E293B;">' + b.name + '</div>';
+            html += '<div style="font-size:11px;color:#94A3B8;margin-top:2px;">' + (b.phone || '') + '</div></div>';
+            html += '<div style="text-align:right;">';
+            html += '<span style="font-size:11px;background:#f0fdf4;color:#16a34a;padding:3px 8px;border-radius:20px;font-weight:700;">' + b.sold + ' closed</span> ';
+            html += '<span style="font-size:11px;background:#fefce8;color:#ca8a04;padding:3px 8px;border-radius:20px;font-weight:700;">' + b.pending + ' pending</span>';
+            html += '</div></div>';
+            if (b.referrals && b.referrals.length > 0) {
+                html += '<div style="margin-top:10px;">';
+                b.referrals.forEach(function(r) {
+                    var sc = r.status === "sold" ? "#16a34a" : "#ca8a04";
+                    var sl = r.status === "sold" ? "Closed" : "Pending";
+                    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid #F8FAFC;">';
+                    html += '<div style="font-size:12px;color:#475569;">' + (r.buyer_name || "Unknown Buyer") + '</div>';
+                    html += '<div style="display:flex;gap:8px;align-items:center;">';
+                    html += '<span style="font-size:11px;color:' + sc + ';font-weight:600;">' + sl + '</span>';
+                    if (r.status !== "sold") {
+                        html += '<button onclick="markSold(' + r.id + ',this)" style="font-size:10px;background:#1E293B;color:white;border:none;padding:4px 8px;border-radius:6px;cursor:pointer;">Mark Sold</button>';
+                    }
+                    html += '</div></div>';
+                });
+                html += '</div>';
+            }
+            html += '</div>';
+        });
+        el.innerHTML = html;
+    })
+    .catch(function() {
+        var el = document.getElementById('birddogList');
+        if (el) el.innerHTML = '<div style="text-align:center;padding:20px;color:#94A3B8;font-size:13px;">Unable to load network.</div>';
+    });
+}
+
+function markSold(referralId, btn) {
+    btn.disabled = true; btn.textContent = '...';
+    fetch('/api/birddog/mark-sold/' + referralId, {method:'POST'})
+    .then(function(r) { return r.json(); })
+    .then(function(d) { if (d.success) { loadBirddogNetwork(); } });
+}
+
+loadBirddogNetwork();
 </script>
 
 <!-- Edit Vehicle Modal -->
