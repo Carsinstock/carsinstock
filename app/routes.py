@@ -376,41 +376,7 @@ def careers():
     return render_template('careers.html', submitted=False)
 
 
-@main.route('/api/birddog/signup', methods=['POST'])
-def birddog_signup():
-    import sqlite3, secrets
-    data = request.get_json()
-    name = data.get('name','').strip()
-    email = data.get('email','').strip()
-    phone = data.get('phone','').strip()
-    team_member_id = data.get('team_member_id')
-    if not name or not team_member_id:
-        return jsonify({'error': 'Missing required fields'}), 400
-    token = secrets.token_urlsafe(16)
-    conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
-    conn.row_factory = sqlite3.Row
-    existing = conn.execute('SELECT id, token FROM birddogs WHERE phone=? AND team_member_id=?', (phone, team_member_id)).fetchone()
-    if existing:
-        conn.close()
-        return jsonify({'success': True, 'token': existing['token'], 'existing': True})
-    conn.execute('INSERT INTO birddogs (team_member_id, name, email, phone, token) VALUES (?,?,?,?,?)',
-                 (team_member_id, name, email, phone, token))
-    conn.commit()
-    rep = conn.execute('SELECT name, slug FROM dealership_team WHERE id=?', (team_member_id,)).fetchone()
-    conn.close()
-    if email:
-        try:
-            from app.utils.email import send_email as _se
-            rep_name = rep['name'] if rep else 'your rep'
-            tracking_url = 'https://carsinstock.com/track/' + token
-            _se(
-                to_email=email,
-                subject="You're in " + rep_name + "'s Referral Network — CarsInStock",
-                html_content='<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;"><div style="background:#1E293B;padding:20px;border-radius:12px 12px 0 0;text-align:center;"><h1 style="color:#00C851;margin:0;">Cars IN STOCK</h1></div><div style="background:#f8fafc;padding:30px;border-radius:0 0 12px 12px;"><h2 style="color:#1E293B;">You are in ' + rep_name + ' referral network!</h2><p style="color:#555;font-size:16px;line-height:1.6;">Every time someone you refer buys a car, you receive a Thank You gift.</p><div style="text-align:center;margin:30px 0;"><a href="' + tracking_url + '" style="background:#00C851;color:#1E293B;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:16px;">Track Your Referrals</a></div><p style="color:#888;font-size:13px;">Bookmark your tracking link: ' + tracking_url + '</p></div></div>'
-            )
-        except Exception as e:
-            print(f"Birddog email error: {e}")
-    return jsonify({'success': True, 'token': token, 'existing': False})
+
 
 
 @main.route('/track/<token>')
