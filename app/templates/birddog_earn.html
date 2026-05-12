@@ -61,6 +61,7 @@
         <input type="tel" id="earn_phone" placeholder="Your Phone Number *" style="width:100%;padding:13px 14px;border:2px solid #E2E8F0;border-radius:10px;font-size:15px;box-sizing:border-box;outline:none;" onfocus="this.style.borderColor='#00C851'" onblur="this.style.borderColor='#E2E8F0'">
       </div>
       <div id="earnErr" style="display:none;color:#ef4444;font-size:13px;text-align:center;margin-bottom:12px;"></div>
+      <div class="cf-turnstile" data-sitekey="0x4AAAAAACgqeOAo_1v9EOb3" style="margin-bottom:12px;"></div>
       <button onclick="earnSignup()" id="earnBtn" style="width:100%;background:#00C851;color:#1E293B;border:none;padding:16px;border-radius:12px;font-size:16px;font-weight:800;cursor:pointer;letter-spacing:0.3px;">Join the Referral Network →</button>
       <div style="text-align:center;font-size:11px;color:#94A3B8;margin-top:10px;">No spam. No fees. Just referrals and gifts.</div>
     </div>
@@ -84,6 +85,11 @@
 var earnTeamMemberId = {{ rep.id }};
 
 async function earnSignup() {
+  var token = document.querySelector('[name="cf-turnstile-response"]');
+  if (!token || !token.value) {
+    document.getElementById('earnErr').textContent = 'Please complete the security check.';
+    document.getElementById('earnErr').style.display = 'block'; return;
+  }
   var name = document.getElementById('earn_name').value.trim();
   var email = document.getElementById('earn_email').value.trim();
   var phone = document.getElementById('earn_phone').value.trim();
@@ -121,4 +127,5 @@ async function earnSignup() {
   }
 }
 </script>
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 {% endblock %}
