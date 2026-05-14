@@ -86,17 +86,25 @@ function submitReferral() {
     if (!name || !phone) { alert('Please enter the buyer name and phone.'); return; }
     fetch('/api/birddog/submit-referral', {
         method: 'POST',
+        credentials: 'same-origin',
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify({token: '{{ token }}', buyer_name: name, buyer_phone: phone})
     })
-    .then(function(r) { return r.json(); })
+    .then(function(r) {
+        if (!r.ok) { throw new Error('HTTP ' + r.status); }
+        return r.json();
+    })
     .then(function(d) {
         if (d.success) {
             document.getElementById('buyer_name').value = '';
             document.getElementById('buyer_phone').value = '';
             document.getElementById('referralMsg').style.display = 'block';
-            setTimeout(function() { location.reload(); }, 2000);
+            document.getElementById('referralMsg').textContent = '✅ Referral sent! Joe will follow up shortly.';
+            setTimeout(function() { location.reload(); }, 2500);
         }
+    })
+    .catch(function(err) {
+        alert('Error: ' + err.message + '. Please try again.');
     });
 }
 </script>
