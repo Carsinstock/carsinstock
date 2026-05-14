@@ -48,6 +48,40 @@ def sp_birddog_signup():
             print(f"Birddog email error: {e}")
     return jsonify({'success': True, 'token': token, 'existing': False})
 
+
+@salesperson_bp.route('/api/birddog/submit-referral', methods=['POST'])
+def sp_birddog_submit_referral():
+    import sqlite3
+    from flask import request, jsonify
+    data = request.get_json()
+    token = data.get('token','').strip()
+    buyer_name = data.get('buyer_name','').strip()
+    buyer_phone = data.get('buyer_phone','').strip()
+    if not token or not buyer_name:
+        return jsonify({'error': 'Missing fields'}), 400
+    conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    conn.row_factory = sqlite3.Row
+    birddog = conn.execute('SELECT * FROM birddogs WHERE token=?', (token,)).fetchone()
+    if not birddog:
+        conn.close()
+        return jsonify({'error': 'Invalid token'}), 404
+    conn.execute('INSERT INTO birddog_referrals (birddog_id, team_member_id, buyer_name, buyer_phone, status) VALUES (?,?,?,?,?)',
+                 (birddog['id'], birddog['team_member_id'], buyer_name, buyer_phone, 'pending'))
+    conn.commit()
+    rep = conn.execute('SELECT name, email FROM dealership_team WHERE id=?', (birddog['team_member_id'],)).fetchone()
+    conn.close()
+    if rep and rep['email']:
+        try:
+            from app.utils.email import send_email as _se
+            _se(
+                to_email=rep['email'],
+                subject='New Birddog Referral — ' + buyer_name,
+                html_content='<p><strong>' + birddog['name'] + '</strong> just sent you a referral:</p><p><strong>Buyer:</strong> ' + buyer_name + '<br><strong>Phone:</strong> ' + buyer_phone + '</p><p>Log in to your dashboard to follow up.</p>'
+            )
+        except Exception as e:
+            print(f"Rep referral notify error: {e}")
+    return jsonify({'success': True})
+
 @salesperson_bp.route('/api/birddog/my-network', methods=['GET'])
 def birddog_my_network():
     import sqlite3
