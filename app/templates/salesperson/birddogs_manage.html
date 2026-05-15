@@ -2,28 +2,152 @@
 {% block content %}
 <style>
 body { background:#0F172A; }
-.ph-nav { background:#1E293B; border-bottom:1px solid rgba(255,255,255,0.08); padding:16px 24px; display:flex; align-items:center; gap:8px; }
-.ph-nav a { color:rgba(255,255,255,0.6); text-decoration:none; font-size:14px; font-weight:600; }
-.ph-nav a:hover { color:white; }
-.ph-wrap { max-width: 600px; margin: 0 auto; padding: 56px 24px 48px; font-family: 'Inter', sans-serif; }
-.ph-card { background:#1E293B; border:1px solid rgba(0,200,81,0.35); border-radius:18px; padding:36px 28px; text-align:center; }
-.ph-icon { font-size:54px; margin-bottom:18px; }
-.ph-card h1 { color:white; font-size:26px; font-weight:800; margin:0 0 10px; letter-spacing:0.3px; }
-.ph-card p { color:rgba(255,255,255,0.65); font-size:15px; line-height:1.6; margin:0 0 28px; }
-.ph-card .btn { display:inline-block; background:#00C851; color:#0F172A; padding:14px 32px; border-radius:10px; text-decoration:none; font-weight:800; font-size:15px; letter-spacing:0.3px; }
-.ph-card .btn:hover { background:#00b248; }
-.ph-card .sub { color:rgba(255,255,255,0.4); font-size:12px; margin-top:22px; font-style:italic; }
+.bm-nav { background:#1E293B; border-bottom:1px solid rgba(255,255,255,0.08); padding:16px 24px; }
+.bm-nav a { color:rgba(255,255,255,0.6); text-decoration:none; font-size:14px; font-weight:600; }
+.bm-nav a:hover { color:white; }
+.bm-wrap { max-width:680px; margin:0 auto; padding:32px 20px 60px; font-family:'Inter',sans-serif; color:white; }
+.bm-hero { text-align:center; margin-bottom:24px; }
+.bm-hero-ic { width:64px; height:64px; border-radius:50%; background:rgba(0,200,81,0.15); display:flex; align-items:center; justify-content:center; font-size:32px; margin:0 auto 12px; }
+.bm-hero-t { font-size:24px; font-weight:800; margin-bottom:6px; letter-spacing:0.3px; }
+.bm-hero-s { color:rgba(255,255,255,0.65); font-size:14px; max-width:420px; margin:0 auto; line-height:1.5; }
+.bm-stats { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px; }
+.bm-stat { background:#1E293B; border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px; text-align:center; }
+.bm-stat .num { font-size:28px; font-weight:800; line-height:1; }
+.bm-stat .num.pending { color:#FBBF24; }
+.bm-stat .num.closed { color:#00C851; }
+.bm-stat .lbl { font-size:11px; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:1px; margin-top:6px; font-weight:700; }
+.bm-actions { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:24px; }
+.bm-cta { display:flex; align-items:center; justify-content:center; padding:14px; border-radius:12px; text-decoration:none; font-weight:700; font-size:14px; letter-spacing:0.2px; }
+.bm-cta.primary { background:#00C851; color:#0F172A; }
+.bm-cta.primary:hover { background:#00b248; }
+.bm-cta.secondary { background:#1E293B; color:white; border:1px solid rgba(255,255,255,0.1); }
+.bm-cta.secondary:hover { border-color:#00C851; }
+.bm-section-t { font-size:11px; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:1.5px; font-weight:700; margin:8px 0 12px; }
+.bm-bd-card { background:#1E293B; border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px; margin-bottom:10px; }
+.bm-bd-head { display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+.bm-bd-name { font-size:15px; font-weight:700; }
+.bm-bd-phone { font-size:12px; color:rgba(255,255,255,0.5); margin-top:2px; }
+.bm-bd-pills { display:flex; gap:6px; flex-shrink:0; flex-wrap:wrap; justify-content:flex-end; }
+.bm-pill { font-size:11px; font-weight:700; padding:3px 9px; border-radius:100px; white-space:nowrap; }
+.bm-pill.pending { background:rgba(251,191,36,0.15); color:#FBBF24; }
+.bm-pill.closed { background:rgba(0,200,81,0.15); color:#00C851; }
+.bm-ref-list { margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.06); }
+.bm-ref { display:flex; justify-content:space-between; align-items:center; padding:8px 0; gap:12px; }
+.bm-ref-name { font-size:13px; color:rgba(255,255,255,0.85); }
+.bm-ref-right { display:flex; gap:8px; align-items:center; flex-shrink:0; }
+.bm-ref-status { font-size:11px; font-weight:700; }
+.bm-ref-status.pending { color:#FBBF24; }
+.bm-ref-status.closed { color:#00C851; }
+.bm-mark-btn { font-size:11px; background:#00C851; color:#0F172A; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:700; font-family:inherit; }
+.bm-mark-btn:hover { background:#00b248; }
+.bm-mark-btn:disabled { background:#475569; color:#94A3B8; cursor:not-allowed; }
+.bm-empty { background:#1E293B; border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:32px 20px; text-align:center; color:rgba(255,255,255,0.55); font-size:14px; }
 </style>
-<div class="ph-nav">
+
+<div class="bm-nav">
   <a href="/sp-dashboard">← Back to dashboard</a>
 </div>
-<div class="ph-wrap">
-  <div class="ph-card">
-    <div class="ph-icon">🐦</div>
-    <h1>Manage Birddogs</h1>
-    <p>The full birddog list with Mark Sold is moving here in the next release. For now, scroll down on your dashboard to find your network and close referrals.</p>
-    <a href="/sp-dashboard" class="btn">Open it on the dashboard →</a>
-    <div class="sub">Coming soon — its own dedicated page.</div>
+
+<div class="bm-wrap">
+
+  <div class="bm-hero">
+    <div class="bm-hero-ic">🐦</div>
+    <div class="bm-hero-t">My Birddog Network</div>
+    <div class="bm-hero-s">People who refer buyers earn a $100 gift when the deal closes.</div>
   </div>
+
+  <div class="bm-stats">
+    <div class="bm-stat">
+      <div class="num pending" id="statPending">—</div>
+      <div class="lbl">Pending</div>
+    </div>
+    <div class="bm-stat">
+      <div class="num closed" id="statClosed">—</div>
+      <div class="lbl">Closed</div>
+    </div>
+  </div>
+
+  {% set rep_url = '/' + member.slug if member.slug else '/' + (dealership_sp.profile_url_slug if dealership_sp else '') %}
+  <div class="bm-actions">
+    <a href="{{ rep_url }}" target="_blank" class="bm-cta primary">📤 Share my Referral Page</a>
+    <a href="/sp-dashboard/birddog-how-it-works" class="bm-cta secondary">ℹ️ How it works</a>
+  </div>
+
+  <div class="bm-section-t">Your birddogs</div>
+  <div id="birddogList">
+    <div class="bm-empty">Loading your network...</div>
+  </div>
+
 </div>
+
+<script>
+function loadBirddogNetwork() {
+    fetch('/api/birddog/my-network', {credentials: 'same-origin'})
+    .then(function(r) {
+        if (!r.ok || r.status === 401) throw new Error('auth');
+        return r.json();
+    })
+    .then(function(d) {
+        var el = document.getElementById('birddogList');
+        if (!el) return;
+        var pending = 0, closed = 0;
+        if (d.birddogs) {
+            d.birddogs.forEach(function(b) {
+                pending += (b.pending || 0);
+                closed += (b.sold || 0);
+            });
+        }
+        document.getElementById('statPending').textContent = pending;
+        document.getElementById('statClosed').textContent = closed;
+        if (!d.birddogs || d.birddogs.length === 0) {
+            el.innerHTML = '<div class="bm-empty">No birddogs yet. Share your Referral Page to start building your network.</div>';
+            return;
+        }
+        var html = '';
+        d.birddogs.forEach(function(b) {
+            html += '<div class="bm-bd-card">';
+            html += '<div class="bm-bd-head">';
+            html += '<div><div class="bm-bd-name">' + b.name + '</div>';
+            html += '<div class="bm-bd-phone">' + (b.phone || '') + '</div></div>';
+            html += '<div class="bm-bd-pills">';
+            html += '<span class="bm-pill pending">' + b.pending + ' pending</span>';
+            html += '<span class="bm-pill closed">' + b.sold + ' closed</span>';
+            html += '</div></div>';
+            if (b.referrals && b.referrals.length > 0) {
+                html += '<div class="bm-ref-list">';
+                b.referrals.forEach(function(r) {
+                    var isPending = r.status !== 'sold';
+                    html += '<div class="bm-ref">';
+                    html += '<div class="bm-ref-name">' + (r.buyer_name || 'Unknown Buyer') + '</div>';
+                    html += '<div class="bm-ref-right">';
+                    html += '<span class="bm-ref-status ' + (isPending ? 'pending' : 'closed') + '">' + (isPending ? 'Pending' : 'Closed') + '</span>';
+                    if (isPending) {
+                        html += '<button class="bm-mark-btn" onclick="markSold(' + r.id + ', this)">Mark Sold</button>';
+                    }
+                    html += '</div></div>';
+                });
+                html += '</div>';
+            }
+            html += '</div>';
+        });
+        el.innerHTML = html;
+    })
+    .catch(function() {
+        var el = document.getElementById('birddogList');
+        if (el) el.innerHTML = '<div class="bm-empty">No birddogs yet. Share your Referral Page to start building your network.</div>';
+        document.getElementById('statPending').textContent = '0';
+        document.getElementById('statClosed').textContent = '0';
+    });
+}
+
+function markSold(referralId, btn) {
+    btn.disabled = true;
+    btn.textContent = '...';
+    fetch('/api/birddog/mark-sold/' + referralId, {method:'POST', headers:{'Content-Type':'application/json'}})
+    .then(function(r) { return r.json(); })
+    .then(function(d) { if (d.success) { loadBirddogNetwork(); } });
+}
+
+loadBirddogNetwork();
+</script>
 {% endblock %}

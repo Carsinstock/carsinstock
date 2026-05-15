@@ -1841,11 +1841,43 @@ Always guide the conversation toward signing up. Never be pushy - be like a frie
 
     @bp.route('/sp-dashboard/birddogs')
     def sp_birddogs_manage():
-        return render_template('salesperson/birddogs_manage.html')
+        # PR 2a context load
+        from flask import session, redirect
+        if 'team_member_id' not in session:
+            return redirect('/login')
+        import sqlite3
+        conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        conn.row_factory = sqlite3.Row
+        member = conn.execute("SELECT * FROM dealership_team WHERE id=?", (session['team_member_id'],)).fetchone()
+        if not member:
+            session.clear()
+            return redirect('/login')
+        from app.models.salesperson import Salesperson
+        dealership_sp = Salesperson.query.filter_by(salesperson_id=member['dealership_id']).first()
+        conn.close()
+        return render_template('salesperson/birddogs_manage.html',
+            member=dict(member),
+            dealership_sp=dealership_sp)
 
     @bp.route('/sp-dashboard/birddog-how-it-works')
     def sp_birddog_how_it_works():
-        return render_template('salesperson/birddog_how_it_works.html')
+        # PR 2a context load
+        from flask import session, redirect
+        if 'team_member_id' not in session:
+            return redirect('/login')
+        import sqlite3
+        conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        conn.row_factory = sqlite3.Row
+        member = conn.execute("SELECT * FROM dealership_team WHERE id=?", (session['team_member_id'],)).fetchone()
+        if not member:
+            session.clear()
+            return redirect('/login')
+        from app.models.salesperson import Salesperson
+        dealership_sp = Salesperson.query.filter_by(salesperson_id=member['dealership_id']).first()
+        conn.close()
+        return render_template('salesperson/birddog_how_it_works.html',
+            member=dict(member),
+            dealership_sp=dealership_sp)
 
     @bp.route('/sp-dashboard/inventory')
     def sp_inventory():

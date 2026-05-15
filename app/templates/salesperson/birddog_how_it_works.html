@@ -61,7 +61,8 @@ body { background:#0F172A; }
     </div>
   </div>
 
-  <a href="/sp-dashboard" class="bd-cta">Back to dashboard →</a>
+  {% set rep_url = '/' + member.slug if member.slug else '/' + (dealership_sp.profile_url_slug if dealership_sp else '') %}
+  <a href="{{ rep_url }}" target="_blank" class="bd-cta">📤 Share my Referral Page →</a>
   <div class="bd-tagline">No cold leads. Real people sent by real people.</div>
 </div>
 {% endblock %}
