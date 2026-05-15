@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+body { background:#0F172A; }
+.ph-nav { background:#1E293B; border-bottom:1px solid rgba(255,255,255,0.08); padding:16px 24px; display:flex; align-items:center; gap:8px; }
+.ph-nav a { color:rgba(255,255,255,0.6); text-decoration:none; font-size:14px; font-weight:600; }
+.ph-nav a:hover { color:white; }
+.ph-wrap { max-width: 600px; margin: 0 auto; padding: 56px 24px 48px; font-family: 'Inter', sans-serif; }
+.ph-card { background:#1E293B; border:1px solid rgba(0,200,81,0.35); border-radius:18px; padding:36px 28px; text-align:center; }
+.ph-icon { font-size:54px; margin-bottom:18px; }
+.ph-card h1 { color:white; font-size:26px; font-weight:800; margin:0 0 10px; letter-spacing:0.3px; }
+.ph-card p { color:rgba(255,255,255,0.65); font-size:15px; line-height:1.6; margin:0 0 28px; }
+.ph-card .btn { display:inline-block; background:#00C851; color:#0F172A; padding:14px 32px; border-radius:10px; text-decoration:none; font-weight:800; font-size:15px; letter-spacing:0.3px; }
+.ph-card .btn:hover { background:#00b248; }
+.ph-card .sub { color:rgba(255,255,255,0.4); font-size:12px; margin-top:22px; font-style:italic; }
+</style>
+<div class="ph-nav">
+  <a href="/sp-dashboard">← Back to dashboard</a>
+</div>
+<div class="ph-wrap">
+  <div class="ph-card">
+    <div class="ph-icon">🐦</div>
+    <h1>Manage Birddogs</h1>
+    <p>The full birddog list with Mark Sold is moving here in the next release. For now, scroll down on your dashboard to find your network and close referrals.</p>
+    <a href="/sp-dashboard" class="btn">Open it on the dashboard →</a>
+    <div class="sub">Coming soon — its own dedicated page.</div>
+  </div>
+</div>
+{% endblock %}

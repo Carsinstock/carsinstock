@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+body { background:#0F172A; }
+.bd-nav { background:#1E293B; border-bottom:1px solid rgba(255,255,255,0.08); padding:16px 24px; display:flex; align-items:center; gap:8px; }
+.bd-nav a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 14px; font-weight: 600; }
+.bd-nav a:hover { color: white; }
+.bd-wrap { max-width: 540px; margin: 0 auto; padding: 32px 20px 48px; font-family: 'Inter', sans-serif; }
+.bd-hero-ic { width:72px; height:72px; border-radius:50%; background:rgba(0,200,81,0.15); display:flex; align-items:center; justify-content:center; font-size:36px; margin:0 auto 18px; }
+.bd-hero-t { color:white; font-size:24px; font-weight:800; text-align:center; line-height:1.3; margin-bottom:10px; letter-spacing:0.3px; }
+.bd-hero-s { color:rgba(255,255,255,0.65); font-size:15px; line-height:1.55; text-align:center; max-width:400px; margin:0 auto 28px; }
+.bd-step { background:#1E293B; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:16px; display:flex; align-items:flex-start; gap:14px; }
+.bd-num { width:32px; height:32px; border-radius:50%; background:#00C851; color:#0F172A; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; flex-shrink:0; }
+.bd-sbd { flex:1; min-width:0; }
+.bd-stitle { color:white; font-size:15px; font-weight:700; margin-bottom:4px; }
+.bd-sdesc { color:rgba(255,255,255,0.65); font-size:13px; line-height:1.5; }
+.bd-conn { width:2px; height:18px; background:rgba(0,200,81,0.35); margin:0 auto; }
+.bd-cta { display:block; background:#00C851; color:#0F172A; font-size:15px; font-weight:800; text-align:center; padding:15px; border-radius:12px; margin-top:28px; text-decoration:none; letter-spacing:0.3px; }
+.bd-tagline { color:rgba(255,255,255,0.45); font-size:12px; text-align:center; margin-top:18px; font-style:italic; }
+</style>
+<div class="bd-nav">
+  <a href="/sp-dashboard">← Back to dashboard</a>
+</div>
+<div class="bd-wrap">
+  <div class="bd-hero-ic">🐦</div>
+  <div class="bd-hero-t">How the Birddog Program Works</div>
+  <div class="bd-hero-s">Your friends and customers earn a $100 gift when they send you a buyer who buys a car.</div>
+
+  <div class="bd-step">
+    <div class="bd-num">1</div>
+    <div class="bd-sbd">
+      <div class="bd-stitle">🔗 Share your Referral Page</div>
+      <div class="bd-sdesc">Send your link to anyone you know — friends, family, past customers.</div>
+    </div>
+  </div>
+  <div class="bd-conn"></div>
+
+  <div class="bd-step">
+    <div class="bd-num">2</div>
+    <div class="bd-sbd">
+      <div class="bd-stitle">👤 They send you a buyer</div>
+      <div class="bd-sdesc">When their friend wants a car, they submit the buyer's info through your page.</div>
+    </div>
+  </div>
+  <div class="bd-conn"></div>
+
+  <div class="bd-step">
+    <div class="bd-num">3</div>
+    <div class="bd-sbd">
+      <div class="bd-stitle">🚗 You sell the car</div>
+      <div class="bd-sdesc">The lead comes straight to you. Close it like any other deal.</div>
+    </div>
+  </div>
+  <div class="bd-conn"></div>
+
+  <div class="bd-step">
+    <div class="bd-num">4</div>
+    <div class="bd-sbd">
+      <div class="bd-stitle">🎁 They earn a $100 gift</div>
+      <div class="bd-sdesc">Tap "Mark Sold." Your birddog gets their thank-you gift in the mail.</div>
+    </div>
+  </div>
+
+  <a href="/sp-dashboard" class="bd-cta">Back to dashboard →</a>
+  <div class="bd-tagline">No cold leads. Real people sent by real people.</div>
+</div>
+{% endblock %}

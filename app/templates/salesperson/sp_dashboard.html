@@ -27,6 +27,30 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
 .lead-row .lname { font-size: 13px; font-weight: 700; color: #1E293B; }
 .lead-row .ldetail { font-size: 12px; color: #64748B; margin-top: 2px; }
 .copied { display: none; color: #00C851; font-size: 12px; font-weight: 600; margin-top: 8px; }
+
+/* ═══ NEW TILE HOME (PR 1) — power tools at a glance ═══ */
+.tile-home { background: #0F172A; border-radius: 16px; padding: 14px; margin-bottom: 20px; }
+.tile-home .tile { background: #1E293B; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; margin-top: 12px; text-decoration: none; display: block; color: inherit; transition: border-color 0.15s; }
+.tile-home .tile:first-child { margin-top: 0; }
+.tile-home .tile:hover { border-color: rgba(0,200,81,0.4); }
+.tile-home .tile.featured { border-color: rgba(0,200,81,0.5); }
+.tile-home .t-row { display: flex; align-items: flex-start; gap: 12px; }
+.tile-home .t-ic { width: 40px; height: 40px; border-radius: 10px; background: rgba(255,255,255,0.06); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
+.tile-home .t-ic.g { background: rgba(0,200,81,0.15); }
+.tile-home .t-bd { flex: 1; min-width: 0; }
+.tile-home .t-t { color: white; font-size: 15px; font-weight: 700; letter-spacing: 0.2px; }
+.tile-home .t-d { color: rgba(255,255,255,0.6); font-size: 13px; line-height: 1.45; margin-top: 4px; }
+.tile-home .t-cv { color: #00C851; font-size: 22px; flex-shrink: 0; align-self: center; font-weight: 700; }
+.tile-home .t-pill { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 100px; display: inline-flex; align-items: center; }
+.tile-home .t-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.tile-home .t-chip { background: #0F172A; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 10px; text-align: center; color: white; font-size: 12px; font-weight: 700; text-decoration: none; cursor: pointer; display: block; font-family: inherit; transition: border-color 0.15s; }
+.tile-home .t-chip:hover { border-color: #00C851; }
+.tile-home .t-chip.primary { background: #00C851; color: #0F172A; border: none; }
+.tile-home .t-chip.primary:hover { background: #00b248; }
+.tile-home .t-itemrow { display: flex; justify-content: space-between; align-items: center; background: #0F172A; border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 11px 12px; color: white; font-size: 12px; font-weight: 700; text-decoration: none; transition: border-color 0.15s; }
+.tile-home .t-itemrow:hover { border-color: #00C851; }
+.tile-home .t-itemrow .meta { color: rgba(255,255,255,0.5); font-size: 11px; font-weight: 500; }
+
 </style>
 
 <div class="sp-page">
@@ -43,6 +67,106 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
         </div>
         <a href="/sp-logout" class="logout">Sign Out</a>
     </div>
+
+    <!-- ═══ PR 1 TILE HOME — power tools at a glance ═══ -->
+    {% set rep_url = '/' + member.slug if member.slug else '/' + (dealership_sp.profile_url_slug if dealership_sp else '') %}
+    {% set rep_url_display = 'cardeals.autos/' + member.slug if member.slug else ('cardeals.autos/' + dealership_sp.profile_url_slug if dealership_sp else 'cardeals.autos') %}
+    <div class="tile-home">
+
+        <a href="/sp-dashboard/pro-social-ad" class="tile featured">
+            <div class="t-row">
+                <div class="t-ic g">✨</div>
+                <div class="t-bd">
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <span class="t-t">Pro Social Ad</span>
+                        <span class="t-pill" style="background:rgba(0,200,81,0.15);color:#00C851;">30 templates</span>
+                    </div>
+                    <div class="t-d">Make a social media ad in 8 seconds. Tap, share, sell.</div>
+                </div>
+                <span class="t-cv">→</span>
+            </div>
+        </a>
+
+        <div class="tile">
+            <div class="t-row" style="margin-bottom:12px;">
+                <div class="t-ic">📲</div>
+                <div class="t-bd">
+                    <span class="t-t">Quick Share</span>
+                    <div class="t-d">Get your store link out fast.</div>
+                </div>
+            </div>
+            <div class="t-grid2">
+                <button type="button" class="t-chip" onclick="copyLink()">🔗 Copy link</button>
+                <button type="button" class="t-chip" onclick="shareMyContact()">💼 Digital card</button>
+                <button type="button" class="t-chip" onclick="copyText()">💬 Text template</button>
+                <button type="button" class="t-chip" onclick="generateWeeklyPost()">📅 Weekly post</button>
+            </div>
+            <div id="tileToast" style="display:none;color:#00C851;font-size:12px;font-weight:700;margin-top:10px;text-align:center;"></div>
+        </div>
+
+        <div class="tile featured">
+            <div class="t-row" style="margin-bottom:12px;">
+                <div class="t-ic g">✉️</div>
+                <div class="t-bd">
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <span class="t-t">Pro Mailer Generator</span>
+                        <span class="t-pill" style="background:rgba(0,200,81,0.15);color:#00C851;">$500 offer</span>
+                        <span class="t-pill" style="background:rgba(0,200,81,0.15);color:#00C851;">Up to 20 letters</span>
+                    </div>
+                    <div class="t-d">Direct mail to past customers and neighbors of your last sale.</div>
+                </div>
+            </div>
+            <div class="t-grid2">
+                <a href="/sp-dashboard/toolbox/references" class="t-chip">📋 Reference letters</a>
+                <a href="/sp-dashboard/toolbox/neighbors" class="t-chip">🏠 Neighbor letters</a>
+            </div>
+        </div>
+
+        <div class="tile featured">
+            <div class="t-row" style="margin-bottom:12px;">
+                <div class="t-ic g">🐦</div>
+                <div class="t-bd">
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                        <span class="t-t">My Birddog Network</span>
+                        <span id="bdPending" class="t-pill" style="background:rgba(251,191,36,0.15);color:#FBBF24;">— pending</span>
+                        <span id="bdSold" class="t-pill" style="background:rgba(0,200,81,0.15);color:#00C851;">— closed</span>
+                    </div>
+                    <div class="t-d">People send you buyers. You sell. They earn a $100 gift.</div>
+                </div>
+            </div>
+            <div class="t-grid2">
+                <a href="{{ rep_url }}" target="_blank" class="t-chip primary">My referral page</a>
+                <a href="/sp-dashboard/birddogs" class="t-chip">Manage birddogs</a>
+            </div>
+            <a href="/sp-dashboard/birddog-how-it-works" class="t-chip" style="margin-top:8px;">ℹ️ How it works</a>
+        </div>
+
+        <div class="tile">
+            <div class="t-row" style="margin-bottom:12px;">
+                <div class="t-ic">🏪</div>
+                <div class="t-bd">
+                    <span class="t-t">My Store</span>
+                    <div class="t-d">Your storefront, vehicles, and leads.</div>
+                </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+                <a href="{{ rep_url }}" target="_blank" class="t-itemrow">
+                    <span>🔗 View my storefront</span>
+                    <span class="meta">{{ rep_url_display }}</span>
+                </a>
+                <a href="/sp-dashboard/inventory" class="t-itemrow">
+                    <span>🚗 My vehicles</span>
+                    <span class="meta">{{ all_my_vehicles|length }} live</span>
+                </a>
+                <a href="/sp-dashboard/inventory" class="t-itemrow">
+                    <span>📋 My leads</span>
+                    <span class="meta">{{ my_leads|length }} new</span>
+                </a>
+            </div>
+        </div>
+
+    </div>
+    <!-- ═══ END PR 1 TILE HOME ═══ -->
 
     <!-- Toolbox Button -->
     <a href="/sp-dashboard/toolbox" style="display:flex;align-items:center;justify-content:center;gap:10px;background:#00C851;color:#0F172A;padding:14px 20px;border-radius:10px;text-decoration:none;font-size:15px;font-weight:800;margin-bottom:16px;letter-spacing:0.3px;">
@@ -1124,7 +1248,37 @@ function markSold(referralId, btn) {
     .then(function(d) { if (d.success) { loadBirddogNetwork(); } });
 }
 
+
+// ═══ PR 1 — tile home helpers ═══
+function showTileToast(msg) {
+    var t = document.getElementById('tileToast');
+    if (!t) return;
+    t.textContent = msg;
+    t.style.display = 'block';
+    setTimeout(function(){ t.style.display = 'none'; }, 2500);
+}
+
+function loadBirddogCounts() {
+    fetch('/api/birddog/my-network', {credentials: 'same-origin'})
+    .then(function(r) { return r.ok ? r.json() : null; })
+    .then(function(d) {
+        if (!d || !d.birddogs) return;
+        var pending = 0, sold = 0;
+        d.birddogs.forEach(function(b) {
+            pending += (b.pending || 0);
+            sold += (b.sold || 0);
+        });
+        var p = document.getElementById('bdPending');
+        var s = document.getElementById('bdSold');
+        if (p) p.textContent = pending + ' pending';
+        if (s) s.textContent = sold + ' closed';
+    })
+    .catch(function() {});
+}
+// ═══ END PR 1 ═══
+
 loadBirddogNetwork();
+loadBirddogCounts();
 </script>
 
 <!-- Edit Vehicle Modal -->

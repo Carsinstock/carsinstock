@@ -1835,6 +1835,22 @@ Always guide the conversation toward signing up. Never be pushy - be like a frie
             return redirect('/login')
         return render_template('salesperson/toolbox_neighbors.html')
 
+    @bp.route('/sp-dashboard/pro-social-ad')
+    def sp_pro_social_ad():
+        return render_template('salesperson/pro_social_ad.html')
+
+    @bp.route('/sp-dashboard/birddogs')
+    def sp_birddogs_manage():
+        return render_template('salesperson/birddogs_manage.html')
+
+    @bp.route('/sp-dashboard/birddog-how-it-works')
+    def sp_birddog_how_it_works():
+        return render_template('salesperson/birddog_how_it_works.html')
+
+    @bp.route('/sp-dashboard/inventory')
+    def sp_inventory():
+        return render_template('salesperson/sp_inventory.html')
+
     @bp.route('/api/toolbox/scan-references', methods=['POST'])
     def toolbox_scan_references():
         if not session.get('team_member_id'):
