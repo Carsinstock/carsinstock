@@ -1837,7 +1837,23 @@ Always guide the conversation toward signing up. Never be pushy - be like a frie
 
     @bp.route('/sp-dashboard/pro-social-ad')
     def sp_pro_social_ad():
-        return render_template('salesperson/pro_social_ad.html')
+        # PR 2b.1 context load
+        from flask import session, redirect
+        if 'team_member_id' not in session:
+            return redirect('/login')
+        import sqlite3
+        conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        conn.row_factory = sqlite3.Row
+        member = conn.execute("SELECT * FROM dealership_team WHERE id=?", (session['team_member_id'],)).fetchone()
+        if not member:
+            session.clear()
+            return redirect('/login')
+        from app.models.salesperson import Salesperson
+        dealership_sp = Salesperson.query.filter_by(salesperson_id=member['dealership_id']).first()
+        conn.close()
+        return render_template('salesperson/pro_social_ad.html',
+            member=dict(member),
+            dealership_sp=dealership_sp)
 
     @bp.route('/sp-dashboard/birddogs')
     def sp_birddogs_manage():

@@ -2,28 +2,584 @@
 {% block content %}
 <style>
 body { background:#0F172A; }
-.ph-nav { background:#1E293B; border-bottom:1px solid rgba(255,255,255,0.08); padding:16px 24px; display:flex; align-items:center; gap:8px; }
-.ph-nav a { color:rgba(255,255,255,0.6); text-decoration:none; font-size:14px; font-weight:600; }
-.ph-nav a:hover { color:white; }
-.ph-wrap { max-width: 600px; margin: 0 auto; padding: 56px 24px 48px; font-family: 'Inter', sans-serif; }
-.ph-card { background:#1E293B; border:1px solid rgba(0,200,81,0.35); border-radius:18px; padding:36px 28px; text-align:center; }
-.ph-icon { font-size:54px; margin-bottom:18px; }
-.ph-card h1 { color:white; font-size:26px; font-weight:800; margin:0 0 10px; letter-spacing:0.3px; }
-.ph-card p { color:rgba(255,255,255,0.65); font-size:15px; line-height:1.6; margin:0 0 28px; }
-.ph-card .btn { display:inline-block; background:#00C851; color:#0F172A; padding:14px 32px; border-radius:10px; text-decoration:none; font-weight:800; font-size:15px; letter-spacing:0.3px; }
-.ph-card .btn:hover { background:#00b248; }
-.ph-card .sub { color:rgba(255,255,255,0.4); font-size:12px; margin-top:22px; font-style:italic; }
+.psa-nav { background:#1E293B; border-bottom:1px solid rgba(255,255,255,0.08); padding:16px 24px; }
+.psa-nav a { color:rgba(255,255,255,0.6); text-decoration:none; font-size:14px; font-weight:600; }
+.psa-nav a:hover { color:white; }
+.psa-wrap { max-width:540px; margin:24px auto; padding:0 12px 60px; font-family:'Inter',sans-serif; }
+.psa-hero { text-align:center; padding:24px 16px 18px; }
+.psa-hero-ic { width:64px; height:64px; border-radius:16px; background:rgba(0,200,81,0.15); display:flex; align-items:center; justify-content:center; font-size:32px; margin:0 auto 12px; }
+.psa-hero-t { color:white; font-size:24px; font-weight:800; letter-spacing:0.3px; margin-bottom:6px; }
+.psa-hero-s { color:rgba(255,255,255,0.65); font-size:14px; line-height:1.5; max-width:380px; margin:0 auto; }
+.psa-card { background:white; border-radius:16px; padding:18px; box-shadow:0 4px 16px rgba(0,0,0,0.18); }
+.tmpl-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:7px; margin-bottom:4px; }
+.tmpl-card { border:2px solid #E2E8F0; border-radius:10px; padding:9px 5px; background:white; cursor:pointer; text-align:center; transition:all 0.15s; }
+.tmpl-card:hover { border-color:#00C851; background:#f0fdf4; }
+.tmpl-card.active { border-color:#00C851; background:#f0fdf4; }
+.tmpl-card .ti { font-size:18px; margin-bottom:4px; }
+.tmpl-card .tn { font-size:10px; font-weight:700; color:#1E293B; margin-bottom:2px; line-height:1.2; }
+.tmpl-card.active .tn { color:#00C851; }
+.tmpl-card .tt { font-size:8px; color:#94A3B8; text-transform:uppercase; letter-spacing:0.5px; }
+.tmpl-section { font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:#94A3B8; margin:12px 0 6px; }
+.tmpl-divider { border:none; border-top:1px solid #F1F5F9; margin:10px 0; }
+.tmpl-desc { font-size:10px; color:#94A3B8; margin:-2px 0 8px; line-height:1.5; }
 </style>
-<div class="ph-nav">
+
+<div class="psa-nav">
   <a href="/sp-dashboard">← Back to dashboard</a>
 </div>
-<div class="ph-wrap">
-  <div class="ph-card">
-    <div class="ph-icon">✨</div>
-    <h1>Pro Social Ad</h1>
-    <p>The full template picker and ad generator is moving here in the next release. For now, scroll down on your dashboard to use it — same 30 templates, same one-tap workflow.</p>
-    <a href="/sp-dashboard" class="btn">Open it on the dashboard →</a>
-    <div class="sub">Coming soon — its own dedicated page.</div>
+
+<div class="psa-hero">
+  <div class="psa-hero-ic">✨</div>
+  <div class="psa-hero-t">Pro Social Ad</div>
+  <div class="psa-hero-s">Make a social media ad in 8 seconds. Tap, share, sell.</div>
+</div>
+
+<div class="psa-wrap">
+  <div class="psa-card">
+
+    <!-- How to Post Instructions -->
+    <div style="margin-bottom:16px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:12px;padding:14px;">
+        <div style="font-weight:800;color:#166534;font-size:13px;margin-bottom:8px;">&#128161; How to Post Your Ad</div>
+        <div style="font-size:12px;color:#166534;margin-bottom:4px;"><strong>1</strong> — Tap <em>Generate My Pro Social Ad</em></div>
+        <div style="font-size:12px;color:#166534;margin-bottom:4px;"><strong>2</strong> — Tap <em>Share My Ad</em> and pick your platform</div>
+        <div style="font-size:12px;color:#166534;margin-bottom:4px;"><strong>3</strong> — Image saves automatically + caption is copied</div>
+        <div style="font-size:12px;color:#166534;"><strong>4</strong> — Paste your caption and attach the image — done!</div>
+    </div>
+
+    <!-- Quote card -->
+    <div id="quoteCard" style="background:white;border:1.5px solid #E2E8F0;border-radius:10px;padding:14px;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <span style="font-size:10px;font-weight:800;color:#94A3B8;text-transform:uppercase;letter-spacing:0.8px;">Your Quote</span>
+            <span style="font-size:10px;font-weight:800;color:#00C851;">&#10024; AI Written</span>
+        </div>
+        <textarea id="adCaption" rows="3" style="width:100%;padding:0;border:none;outline:none;font-size:13px;font-family:inherit;resize:none;color:#1E293B;background:transparent;line-height:1.5;box-sizing:border-box;" placeholder="Tap Generate -- AI writes your quote from your real inventory..." readonly></textarea>
+        <div style="display:flex;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid #F1F5F9;">
+            <button onclick="regenerateQuote()" style="flex:1;padding:7px 4px;font-size:11px;font-weight:700;border:1.5px solid #E2E8F0;border-radius:6px;background:white;color:#475569;cursor:pointer;">&#10024; Regenerate</button>
+            <button onclick="editCaption()" style="flex:1;padding:7px 4px;font-size:11px;font-weight:700;border:1.5px solid #E2E8F0;border-radius:6px;background:white;color:#475569;cursor:pointer;">&#9999;&#65039; Edit</button>
+            <button onclick="clearCaption()" style="flex:1;padding:7px 4px;font-size:11px;font-weight:700;border:1.5px solid #E2E8F0;border-radius:6px;background:white;color:#475569;cursor:pointer;">&#128465;&#65039; Clear</button>
+        </div>
+    </div>
+
+    <!-- Referral toggle -->
+    <div style="display:flex;align-items:center;justify-content:space-between;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:12px 14px;margin-bottom:16px;">
+        <div>
+            <div style="font-size:13px;font-weight:700;color:#1E293B;">Include $100 Referral</div>
+            <div style="font-size:11px;color:#64748B;margin-top:2px;">Refer a friend &#x2192; they buy &#x2192; you'll receive a Thank You gift</div>
+        </div>
+        <label style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer;flex-shrink:0;" onclick="toggleReferral()">
+            <input type="checkbox" id="referralToggle" checked style="opacity:0;width:0;height:0;">
+            <span id="referralSlider" style="position:absolute;top:0;left:0;right:0;bottom:0;background:#00C851;border-radius:24px;transition:0.2s;"></span>
+            <span id="referralKnob" style="position:absolute;top:2px;left:22px;width:20px;height:20px;background:white;border-radius:50%;transition:left 0.2s;box-shadow:0 1px 4px rgba(0,0,0,0.2);"></span>
+        </label>
+    </div>
+
+    <!-- Template selector -->
+    <div style="margin-bottom:14px;">
+        <div class="tmpl-section">⚡ My Go-To Styles</div>
+        <div class="tmpl-grid">
+            <div class="tmpl-card active" onclick="selectTemplate('classic')"><div class="ti">⚡</div><div class="tn">Classic</div><div class="tt">All purpose</div></div>
+            <div class="tmpl-card" onclick="selectTemplate('just_listed')"><div class="ti">🏷️</div><div class="tn">Just Listed</div><div class="tt">New arrival</div></div>
+            <div class="tmpl-card" onclick="selectTemplate('urgency')"><div class="ti">🔥</div><div class="tn">Urgency</div><div class="tt">Days left</div></div>
+            <div class="tmpl-card" onclick="selectTemplate('personal')"><div class="ti">👤</div><div class="tn">My Brand</div><div class="tt">Personal</div></div>
+        </div>
+
+        <hr class="tmpl-divider">
+        <div class="tmpl-section">💰 Price & Value</div>
+        <div class="tmpl-grid">
+            <div class="tmpl-card" onclick="selectTemplate('pricedrop')"><div class="ti">🔻</div><div class="tn">Price Drop</div><div class="tt">Reduced</div></div>
+            <div class="tmpl-card" onclick="selectTemplate('under20k')"><div class="ti">💵</div><div class="tn">Under $20K</div><div class="tt">Budget buyers</div></div>
+            <div class="tmpl-card" onclick="selectTemplate('lotclearance')"><div class="ti">🏷️</div><div class="tn">Lot Clearance</div><div class="tt">Best deal</div></div>
+            <div class="tmpl-card" onclick="selectTemplate('dealsheet')"><div class="ti">📋</div><div class="tn">Deal Sheet</div><div class="tt">Full details</div></div>
+        </div>
+
+        <hr class="tmpl-divider">
+        <div class="tmpl-section">🤝 Finance & Credit</div>
+        <div class="tmpl-grid">
+            <div class="tmpl-card" onclick="selectTemplate('getapproved')"><div class="ti">✅</div><div class="tn">Get Approved</div><div class="tt">Finance ready</div></div>
+            <div class="tmpl-card" onclick="selectTemplate('allcredit')"><div class="ti">💳</div><div class="tn">All Credit</div><div class="tt">Bad/no credit</div></div>
+            <div class="tmpl-card" onclick="selectTemplate('firsttime')"><div class="ti">🌱</div><div class="tn">First Time</div><div class="tt">New buyers</div></div>
+            <div class="tmpl-card" onclick="selectTemplate('freshstart')"><div class="ti">🔄</div><div class="tn">Fresh Start</div><div class="tt">Rebuild credit</div></div>
+        </div>
+
+        <hr class="tmpl-divider">
+        <div class="tmpl-section">🚘 Vehicle Type</div>
+        <div class="tmpl-grid">
+            <div class="tmpl-card" onclick="selectTemplate('familyready')"><div class="ti">👨‍👩‍👧</div><div class="tn">Family Ready</div><div class="tt">SUV shoppers</div></div>
+            <div class="tmpl-card" onclick="selectTemplate('truckready')"><div class="ti">🛻</div><div class="tn">Truck Ready</div><div class="tt">Work trucks</div></div>
+            <div class="tmpl-card" onclick="selectTemplate('sporty')"><div class="ti">🏎️</div><div class="tn">Sporty</div><div class="tt">Fun drives</div></div>
+            <div class="tmpl-card" onclick="selectTemplate('weekendwarrior')"><div class="ti">🌄</div><div class="tn">Weekend</div><div class="tt">Lifestyle</div></div>
+        </div>
+
+        <hr class="tmpl-divider">
+        <div class="tmpl-section">🏆 Trust & Quality</div>
+        <div class="tmpl-grid">
+            <div class="tmpl-card" onclick="selectTemplate('certified')"><div class="ti">🏅</div><div class="tn">Certified</div><div class="tt">CPO feel</div></div>
+            <div class="tmpl-card" onclick="selectTemplate('cleancarfax')"><div class="ti">✅</div><div class="tn">Clean Carfax</div><div class="tt">No accidents</div></div>
+            <div class="tmpl-card" onclick="selectTemplate('oneowner')"><div class="ti">👤</div><div class="tn">One Owner</div><div class="tt">Single owner</div></div>
+            <div class="tmpl-card" onclick="selectTemplate('lowmiles')"><div class="ti">🔢</div><div class="tn">Low Miles</div><div class="tt">Mileage hero</div></div>
+        </div>
+
+        <hr class="tmpl-divider">
+        <div class="tmpl-section">🎨 Creative Styles</div>
+        <div class="tmpl-grid">
+            <div class="tmpl-card" onclick="selectTemplate('magazine')"><div class="ti">🎬</div><div class="tn">Magazine</div><div class="tt">Editorial</div></div>
+            <div class="tmpl-card" onclick="selectTemplate('boldstreet')"><div class="ti">🔥</div><div class="tn">Bold Street</div><div class="tt">High energy</div></div>
+            <div class="tmpl-card" onclick="selectTemplate('cleanstudio')"><div class="ti">✨</div><div class="tn">Clean Studio</div><div class="tt">White bg</div></div>
+            <div class="tmpl-card" onclick="selectTemplate('freshtraded')"><div class="ti">🚗</div><div class="tn">Fresh Trade</div><div class="tt">Just arrived</div></div>
+        </div>
+        <div class="tmpl-grid">
+            <div class="tmpl-card" onclick="selectTemplate('warranty')"><div class="ti">🏭</div><div class="tn">Warranty</div><div class="tt">Covered</div></div>
+            <div class="tmpl-card" onclick="selectTemplate('suvseason')"><div class="ti">🚙</div><div class="tn">SUV Season</div><div class="tt">SUV buyers</div></div>
+        </div>
+
+        <hr class="tmpl-divider">
+        <div class="tmpl-section">🌐 Your Network Sells For You</div>
+        <div class="tmpl-desc">Post → someone taps your link → lead captured → deal closes → you deliver the gift. Your platform does the rest.</div>
+        <div class="tmpl-grid">
+            <div class="tmpl-card" onclick="selectTemplate('referral')"><div class="ti">🎁</div><div class="tn">Referral</div><div class="tt">Send my way</div></div>
+            <div class="tmpl-card" onclick="selectTemplate('earngifts')"><div class="ti">🎀</div><div class="tn">Earn Gifts</div><div class="tt">Reward first</div></div>
+            <div class="tmpl-card" onclick="selectTemplate('helpme')"><div class="ti">🤝</div><div class="tn">Help Me Sell</div><div class="tt">Direct ask</div></div>
+            <div class="tmpl-card" onclick="selectTemplate('knowsomeone')"><div class="ti">👥</div><div class="tn">Know Someone?</div><div class="tt">Casual share</div></div>
+        </div>
+        <div class="tmpl-grid">
+            <div class="tmpl-card" onclick="selectTemplate('tagafriend')"><div class="ti">📲</div><div class="tn">Tag a Friend</div><div class="tt">Social engage</div></div>
+        </div>
+    </div>
+
+    <!-- Generate button -->
+    <button onclick="generateProAd()" id="generateBtn" style="width:100%;background:#00C851;color:white;border:none;padding:15px;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer;letter-spacing:0.3px;margin-bottom:6px;">Generate My Pro Social Ad &#x2192;</button>
+    <div style="text-align:center;font-size:11px;color:#94A3B8;margin-bottom:16px;">Takes ~8 seconds &middot; Image + caption ready to copy &amp; paste</div>
+
+    <!-- Ad preview section -->
+    <div id="adPreviewWrap" style="display:none;">
+        <img id="adPreviewImg" src="" alt="Your Pro Social Ad" style="width:100%;border-radius:12px;box-shadow:0 4px 20px rgba(0,0,0,0.12);display:block;">
+        <canvas id="adCanvas" style="display:none;"></canvas>
+        <div id="iosMsg" style="display:none;background:#FEF9C3;border:1px solid #FDE047;border-radius:8px;padding:10px 14px;margin-top:10px;font-size:12px;color:#854D0E;font-weight:600;">
+            &#128241; On iPhone: Long press the image &#x2192; tap <strong>Save to Photos</strong>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:12px;">
+            <button onclick="copyCaption()" style="flex:1;background:#1E293B;color:white;border:none;padding:12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">&#128203; Copy Caption</button>
+            <button onclick="shareAdImage()" id="shareBtn" style="flex:1;background:#00C851;color:white;border:none;padding:12px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">&#128279; Share My Ad</button>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:8px;">
+            <button onclick="saveAdImage()" id="saveBtn" style="width:100%;background:#64748B;color:white;border:none;padding:10px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">&#128190; Save Image to Device</button>
+        </div>
+
+        <!-- Share Modal Overlay -->
+        <div id="shareModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
+            <div style="background:white;border-radius:24px;padding:28px 24px;width:92%;max-width:380px;box-shadow:0 24px 60px rgba(0,0,0,0.3);">
+                <div style="font-weight:800;font-size:20px;color:#1E293B;margin-bottom:4px;text-align:center;">&#127881; Share Your Ad</div>
+                <div style="font-size:13px;color:#64748B;text-align:center;margin-bottom:12px;">Follow these 3 steps to post:</div>
+                <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:12px 14px;margin-bottom:16px;text-align:left;">
+                    <div style="font-size:13px;color:#065F46;margin-bottom:4px;"><strong>1</strong> — Tap <strong>Save Image</strong> below to save to your camera roll</div>
+                    <div style="font-size:13px;color:#065F46;margin-bottom:4px;"><strong>2</strong> — Your caption is already copied ✅</div>
+                    <div style="font-size:13px;color:#065F46;"><strong>3</strong> — Open Facebook → New Post → attach image → paste caption → Post</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:10px;">
+                    <a onclick="shareToFacebook()" style="display:flex;align-items:center;gap:14px;background:#1877F2;color:white;padding:14px 18px;border-radius:14px;font-weight:700;font-size:15px;cursor:pointer;text-decoration:none;">
+                        <span style="font-size:24px;">&#128216;</span> Post to Facebook
+                    </a>
+                    <a onclick="shareToInstagram()" style="display:flex;align-items:center;gap:14px;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:white;padding:14px 18px;border-radius:14px;font-weight:700;font-size:15px;cursor:pointer;text-decoration:none;">
+                        <span style="font-size:24px;">&#128247;</span> Post to Instagram
+                    </a>
+                    <a onclick="shareToWhatsApp()" style="display:flex;align-items:center;gap:14px;background:#25D366;color:white;padding:14px 18px;border-radius:14px;font-weight:700;font-size:15px;cursor:pointer;text-decoration:none;">
+                        <span style="font-size:24px;">&#128172;</span> Share on WhatsApp
+                    </a>
+                    <a onclick="shareViaSMS()" style="display:flex;align-items:center;gap:14px;background:#1E293B;color:white;padding:14px 18px;border-radius:14px;font-weight:700;font-size:15px;cursor:pointer;text-decoration:none;">
+                        <span style="font-size:24px;">&#9993;</span> Send as Text
+                    </a>
+                    <a onclick="copyStoreLink()" style="display:flex;align-items:center;gap:14px;background:#F1F5F9;color:#1E293B;padding:14px 18px;border-radius:14px;font-weight:700;font-size:15px;cursor:pointer;text-decoration:none;">
+                        <span style="font-size:24px;">&#128279;</span> Copy My Store Link
+                    </a>
+                </div>
+                <button onclick="closeShareModal()" style="width:100%;margin-top:14px;background:none;border:1px solid #E2E8F0;padding:11px;border-radius:12px;font-size:14px;color:#64748B;cursor:pointer;font-weight:600;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
   </div>
 </div>
+
+<script>
+var selectedPlatform = 'facebook';
+var serverAdUrl = null;
+var serverAdBlob = null;
+var selectedTemplate = 'classic';
+var generatedCaption = '';
+var generatedAdData = null;
+
+function selectTemplate(t) {
+    selectedTemplate = t;
+    document.querySelectorAll('.tmpl-card').forEach(function(c) {
+        c.classList.remove('active');
+    });
+    document.querySelectorAll('.tmpl-card').forEach(function(c) {
+        var oc = c.getAttribute('onclick') || '';
+        if (oc.indexOf("'" + t + "'") > -1) {
+            c.classList.add('active');
+        }
+    });
+}
+
+function closeShareModal() {
+    document.getElementById('shareModal').style.display = 'none';
+}
+
+function shareToFacebook() {
+    closeShareModal();
+    window.open('https://www.facebook.com', '_blank');
+}
+
+function shareToInstagram() {
+    closeShareModal();
+    var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile) {
+        window.open('instagram://app', '_blank');
+        setTimeout(function(){ window.open('https://www.instagram.com', '_blank'); }, 1500);
+    } else {
+        window.open('https://www.instagram.com', '_blank');
+    }
+}
+
+function shareToWhatsApp() {
+    closeShareModal();
+    var caption = generatedCaption || '';
+    var url = 'https://wa.me/?text=' + encodeURIComponent(caption);
+    window.open(url, '_blank');
+}
+
+function shareViaSMS() {
+    closeShareModal();
+    var caption = generatedCaption || '';
+    window.open('sms:?body=' + encodeURIComponent(caption), '_blank');
+}
+
+function copyStoreLink() {
+    closeShareModal();
+    var caption = generatedCaption || '';
+    navigator.clipboard.writeText(caption).then(function() {
+        alert('Caption copied! Open any app and paste it.');
+    }).catch(function() {
+        alert('Your caption:\n\n' + caption);
+    });
+}
+
+async function shareAdImage() {
+    if (!serverAdBlob && !serverAdUrl) { alert('Generate your ad first.'); return; }
+    var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    try {
+        var blob = serverAdBlob;
+        if (!blob && serverAdUrl) {
+            var response = await fetch(serverAdUrl);
+            blob = await response.blob();
+        }
+        var file = new File([blob], 'my-pro-ad.png', {type: 'image/png'});
+        var caption = generatedCaption || '';
+        if (isMobile && navigator.canShare && navigator.canShare({files: [file]})) {
+            await navigator.share({
+                files: [file],
+                title: 'My Pro Social Ad',
+                text: caption
+            });
+        } else {
+            var a = document.createElement('a');
+            a.href = serverAdUrl;
+            a.download = 'my-pro-ad.png';
+            a.click();
+            if (caption) {
+                navigator.clipboard.writeText(caption).catch(function(){});
+            }
+            var modal = document.getElementById('shareModal');
+            modal.style.display = 'flex';
+        }
+    } catch(e) {
+        if (e.name !== 'AbortError') alert('Share failed: ' + e.message);
+    }
+}
+
+function selectPlatform(p) {
+    selectedPlatform = p;
+    ['facebook','instagram','whatsapp','text'].forEach(function(pl) {
+        var btn = document.getElementById('plat-'+pl);
+        if(btn) { btn.className = pl===p ? 'plat-btn active-plat' : 'plat-btn'; }
+    });
+}
+
+function editCaption() {
+    var ta = document.getElementById('adCaption');
+    ta.readOnly = false;
+    ta.style.background = '#fff';
+    ta.focus();
+}
+function clearCaption() {
+    document.getElementById('adCaption').value = '';
+    generatedCaption = '';
+}
+function copyCaption() {
+    var text = document.getElementById('adCaption').value;
+    if (!text) { alert('Generate an ad first!'); return; }
+    navigator.clipboard.writeText(text).then(function() {
+        var btn = document.querySelector('button[onclick="copyCaption()"]');
+        btn.textContent = '✅ Copied!';
+        setTimeout(function(){ btn.textContent = '📋 Copy Caption'; }, 2000);
+    });
+}
+
+function toggleReferral() {
+    var cb = document.getElementById('referralToggle');
+    var knob = document.getElementById('referralKnob');
+    var slider = document.getElementById('referralSlider');
+    cb.checked = !cb.checked;
+    knob.style.left = cb.checked ? '22px' : '2px';
+    slider.style.background = cb.checked ? '#00C851' : '#CBD5E1';
+}
+
+async function regenerateQuote() {
+    var btn = event.target;
+    btn.textContent = '⏳...';
+    btn.disabled = true;
+    var includeReferral = document.getElementById('referralToggle').checked;
+    try {
+        var resp = await fetch('https://carsinstock.com/api/generate_social_ad', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({platform: selectedPlatform, include_referral: includeReferral})
+        });
+        var data = await resp.json();
+        if (data.error) { throw new Error(data.error); }
+        generatedAdData = data;
+        document.getElementById('adCaption').value = data.quote;
+        document.getElementById('adCaption').readOnly = false;
+    } catch(e) {
+        alert('Error: ' + e.message);
+    } finally {
+        btn.textContent = '✨ Regenerate';
+        btn.disabled = false;
+    }
+}
+
+async function generateProAd() {
+    var btn = document.getElementById('generateBtn');
+    btn.textContent = '⏳ Generating... (~8 seconds)';
+    btn.disabled = true;
+    var includeReferral = document.getElementById('referralToggle').checked;
+    try {
+        var resp = await fetch('https://carsinstock.com/api/generate_social_ad', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({platform: selectedPlatform, include_referral: includeReferral, template: selectedTemplate})
+        });
+        var data = await resp.json();
+        if (data.error) { throw new Error(data.error); }
+        if (data.no_inventory) { throw new Error('No active vehicles found. Add a vehicle first.'); }
+        generatedAdData = data;
+        var referralTemplates = ['referral','earngifts','helpme','knowsomeone','tagafriend'];
+        if (referralTemplates.indexOf(selectedTemplate) > -1) {
+            generatedCaption = data.quote + '\n\nEarn a gift when your referral buys → https://carsinstock.com/earn/' + data.slug + '\nSend this to anyone who knows someone buying a car.';
+        } else {
+            generatedCaption = data.quote + '\n\nSee my inventory → https://cardeals.autos/' + data.slug + '\nSave my contact → https://carsinstock.com/' + data.slug + '/contact';
+        }
+        document.getElementById('adCaption').value = generatedCaption;
+        document.getElementById('adCaption').readOnly = true;
+        await new Promise(r => setTimeout(r, 300));
+        await drawAdCanvas(data);
+        document.getElementById('adPreviewWrap').style.display = 'block';
+        setTimeout(function(){ document.getElementById('adPreviewImg').scrollIntoView({behavior:'smooth', block:'start'}); document.getElementById('adPreviewWrap').scrollTop = 0; }, 100);
+        var imgResp = await fetch('/api/generate_social_ad_image', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({...data, template: selectedTemplate})
+        });
+        if (imgResp.ok) {
+            var imgBlob = await imgResp.blob();
+            var imgUrl = URL.createObjectURL(imgBlob);
+            serverAdUrl = imgUrl;
+            serverAdBlob = imgBlob;
+            document.getElementById('adPreviewImg').src = imgUrl;
+            document.getElementById('saveBtn').onclick = function() {
+                var a = document.createElement('a');
+                a.download = 'my-pro-ad.png';
+                a.href = imgUrl;
+                a.click();
+            };
+        }
+        var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        document.getElementById('iosMsg').style.display = isIOS ? 'block' : 'none';
+    } catch(e) {
+        alert('Error: ' + e.message);
+    } finally {
+        btn.textContent = 'Generate My Pro Social Ad →';
+        btn.disabled = false;
+    }
+}
+
+function loadImg(src) {
+    return new Promise(function(resolve) {
+        if (!src) { resolve(null); return; }
+        fetch('/api/proxy-image?url=' + encodeURIComponent(src))
+            .then(function(r) { return r.blob(); })
+            .then(function(blob) {
+                var img = new Image();
+                img.onload = function() { resolve(img); };
+                img.onerror = function() { resolve(null); };
+                img.src = URL.createObjectURL(blob);
+            })
+            .catch(function() { resolve(null); });
+    });
+}
+
+function wrapText(ctx, text, x, y, maxW, lineH) {
+    var words = text.split(' ');
+    var line = '';
+    var lines = [];
+    for (var i=0; i<words.length; i++) {
+        var test = line + words[i] + ' ';
+        if (ctx.measureText(test).width > maxW && i > 0) {
+            lines.push(line.trim());
+            line = words[i] + ' ';
+        } else { line = test; }
+    }
+    lines.push(line.trim());
+    lines.forEach(function(l, idx){ ctx.fillText(l, x, y + idx*lineH); });
+    return lines.length;
+}
+
+async function drawAdCanvas(data) {
+    var images = await Promise.all([loadImg(data.profile_photo), loadImg(data.vehicle_photo)]);
+    var profileImg = images[0];
+    var carImg = images[1];
+    var canvas = document.getElementById('adCanvas');
+    var W = 1080, H = 1080;
+    canvas.width = W; canvas.height = H;
+    var ctx = canvas.getContext('2d');
+    var navy = '#1E293B', green = '#00C851', white = '#FFFFFF';
+    ctx.fillStyle = white; ctx.fillRect(0, 0, W, H);
+    var cx = 110, cy = 130, cr = 70;
+    ctx.save();
+    ctx.beginPath(); ctx.arc(cx, cy, cr, 0, Math.PI*2); ctx.clip();
+    if (profileImg) {
+        ctx.drawImage(profileImg, cx-cr, cy-cr, cr*2, cr*2);
+    } else {
+        ctx.fillStyle = green;
+        ctx.fillRect(cx-cr, cy-cr, cr*2, cr*2);
+        ctx.fillStyle = white;
+        ctx.font = 'bold 56px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText((data.name||'J')[0], cx, cy+20);
+    }
+    ctx.restore();
+    ctx.restore();
+    ctx.strokeStyle = green; ctx.lineWidth = 5;
+    ctx.beginPath(); ctx.arc(cx, cy, cr+6, 0, Math.PI*2); ctx.stroke();
+    var tx = cx + cr + 30;
+    ctx.fillStyle = navy; ctx.font = 'bold 52px Arial'; ctx.textAlign = 'left';
+    ctx.fillText(data.name || '', tx, 100);
+    ctx.fillStyle = '#64748B'; ctx.font = '30px Arial';
+    ctx.fillText((data.dealership || 'Pine Belt') + ' - ' + (data.city || 'NJ'), tx, 145);
+    ctx.fillStyle = green;
+    roundRect(ctx, W-260, 20, 230, 52, 26, true);
+    ctx.fillStyle = white; ctx.font = 'bold 24px Arial'; ctx.textAlign = 'center';
+    ctx.fillText('Fresh Inventory', W-145, 55);
+    ctx.strokeStyle = '#E2E8F0'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(40, 235); ctx.lineTo(W-40, 235); ctx.stroke();
+    var carY = 250, carH = 430;
+    if (carImg) {
+        var scale = Math.max(W / carImg.width, carH / carImg.height);
+        var dw = carImg.width * scale, dh = carImg.height * scale;
+        var dx = (W - dw) / 2, dy = carY + (carH - dh) / 2;
+        ctx.drawImage(carImg, dx, dy, dw, dh);
+    } else { ctx.fillStyle = '#E2E8F0'; ctx.fillRect(0, carY, W, carH); }
+    var grad = ctx.createLinearGradient(0, carY + carH/2, 0, carY + carH);
+    grad.addColorStop(0, 'rgba(0,0,0,0)'); grad.addColorStop(1, 'rgba(0,0,0,0.82)');
+    ctx.fillStyle = grad; ctx.fillRect(0, carY, W, carH);
+    if (data.days_left > 0) {
+        var dlColor = data.days_left <= 2 ? '#DC2626' : data.days_left <= 4 ? '#F97316' : '#00C851';
+        ctx.fillStyle = dlColor;
+        roundRect(ctx, 24, carY+20, 220, 56, 28, true);
+        ctx.fillStyle = white; ctx.font = 'bold 26px Arial'; ctx.textAlign = 'center';
+        ctx.fillText(data.days_left + ' Day' + (data.days_left !== 1 ? 's' : '') + ' Left', 134, carY+56);
+    }
+    ctx.fillStyle = white; ctx.font = 'bold 44px Arial'; ctx.textAlign = 'left';
+    ctx.fillText(data.vehicle_name || '', 30, carY + carH - 60);
+    ctx.fillStyle = green; ctx.font = 'bold 52px Arial'; ctx.textAlign = 'right';
+    ctx.fillText(data.price || '', W-30, carY + carH - 20);
+    var statsY = 680;
+    ctx.fillStyle = navy; ctx.fillRect(0, statsY, W, 100);
+    var statsData = [
+        {val: String(data.cars_live || 0), label: 'Cars Live'},
+        {val: data.starting_at || '$0k', label: 'Starting At'},
+        {val: (data.city ? data.city + ', NJ' : 'NJ'), label: 'Location'}
+    ];
+    statsData.forEach(function(s, i) {
+        var sx = (W/3)*i + (W/3)/2;
+        ctx.fillStyle = green; ctx.font = 'bold 42px Arial'; ctx.textAlign = 'center';
+        ctx.fillText(s.val, sx, statsY+52);
+        ctx.fillStyle = 'rgba(255,255,255,0.55)'; ctx.font = '22px Arial';
+        ctx.fillText(s.label, sx, statsY+82);
+        if (i < 2) {
+            ctx.strokeStyle = 'rgba(255,255,255,0.12)'; ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.moveTo((W/3)*(i+1), statsY+18); ctx.lineTo((W/3)*(i+1), statsY+88); ctx.stroke();
+        }
+    });
+    var nextY = 780;
+    if (data.include_referral) {
+        ctx.fillStyle = '#F0FDF4'; ctx.fillRect(0, nextY, W, 80);
+        ctx.strokeStyle = '#BBF7D0'; ctx.lineWidth = 2; ctx.strokeRect(0, nextY, W, 80);
+        ctx.fillStyle = '#065F46'; ctx.font = 'bold 26px Arial'; ctx.textAlign = 'center';
+        ctx.fillText('Know someone? Refer them -- they buy -- you receive a Thank You gift', W/2, nextY+48);
+        nextY += 80;
+    }
+    var urlY = nextY + 20;
+    ctx.fillStyle = '#F8FAFC'; ctx.fillRect(0, nextY, W, 120);
+    ctx.fillStyle = navy;
+    roundRect(ctx, W/2-260, urlY, 520, 60, 30, true);
+    ctx.fillStyle = green; ctx.font = 'bold 28px Arial'; ctx.textAlign = 'center';
+    ctx.fillText('cardeals.autos/' + (data.slug || ''), W/2, urlY+39);
+    ctx.fillStyle = '#94A3B8'; ctx.font = '22px Arial'; ctx.textAlign = 'center';
+    ctx.fillText((data.dealership || '') + ' - ' + (data.city || '') + ', NJ', W/2, urlY+75);
+    ctx.fillStyle = '#F1F5F9'; ctx.fillRect(0, 980, W, 100);
+    ctx.fillStyle = '#94A3B8'; ctx.font = '22px Arial'; ctx.textAlign = 'right';
+    ctx.fillText('Powered by CarsInStock', W-30, 1050);
+    canvas.style.width = '100%'; canvas.style.height = 'auto';
+}
+
+function roundRect(ctx, x, y, w, h, r, fill) {
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.lineTo(x+w-r, y);
+    ctx.quadraticCurveTo(x+w, y, x+w, y+r);
+    ctx.lineTo(x+w, y+h-r);
+    ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+    ctx.lineTo(x+r, y+h);
+    ctx.quadraticCurveTo(x, y+h, x, y+h-r);
+    ctx.lineTo(x, y+r);
+    ctx.quadraticCurveTo(x, y, x+r, y);
+    ctx.closePath();
+    if (fill) ctx.fill();
+}
+
+function saveAdImage() {
+    var canvas = document.getElementById('adCanvas');
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (isIOS) {
+        document.getElementById('iosMsg').style.display = 'block';
+        return;
+    }
+    if (serverAdUrl) {
+        var link = document.createElement('a');
+        link.download = 'my-pro-ad.png';
+        link.href = serverAdUrl;
+        link.click();
+        return;
+    }
+    canvas.toBlob(function(blob) {
+        var url = URL.createObjectURL(blob);
+        var link = document.createElement('a');
+        link.download = 'my-pro-ad.png';
+        link.href = url;
+        link.click();
+        setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+    }, 'image/png');
+}
+</script>
 {% endblock %}
