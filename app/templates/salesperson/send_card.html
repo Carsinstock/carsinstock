@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+body { background:#0F172A; }
+.sc-nav { background:#1E293B; border-bottom:1px solid rgba(255,255,255,0.08); padding:16px 24px; }
+.sc-nav a { color:rgba(255,255,255,0.6); text-decoration:none; font-size:14px; font-weight:600; }
+.sc-wrap { max-width:480px; margin:0 auto 60px; padding:0 16px; font-family:"Inter",sans-serif; }
+.sc-hero { text-align:center; padding:24px 0 18px; }
+.sc-hero-ic { width:64px; height:64px; border-radius:16px; background:rgba(0,200,81,0.15); display:flex; align-items:center; justify-content:center; font-size:32px; margin:0 auto 12px; }
+.sc-hero-t { color:white; font-size:24px; font-weight:800; letter-spacing:0.3px; }
+.sc-hero-s { color:rgba(255,255,255,0.65); font-size:14px; margin:6px auto 0; max-width:340px; line-height:1.5; }
+.sc-card { background:white; border-radius:16px; padding:24px; box-shadow:0 4px 16px rgba(0,0,0,0.2); }
+.sc-label { font-size:13px; font-weight:700; color:#1E293B; display:block; margin-bottom:6px; }
+.sc-optional { color:#94A3B8; font-weight:400; }
+.sc-input { width:100%; padding:14px; border:1.5px solid #CBD5E1; border-radius:10px; font-size:16px; box-sizing:border-box; font-family:inherit; transition:border-color 0.15s; }
+.sc-input:focus { outline:none; border-color:#00C851; }
+.sc-btn { width:100%; background:#00C851; color:#1E293B; border:none; padding:16px; border-radius:10px; font-size:16px; font-weight:800; cursor:pointer; margin-top:18px; letter-spacing:0.3px; transition:transform 0.1s; }
+.sc-btn:active { transform:scale(0.98); }
+.sc-toast { display:none; background:#D1FAE5; color:#065F46; border:1px solid #6EE7B7; padding:12px; border-radius:8px; font-size:13px; font-weight:600; margin-top:16px; text-align:center; }
+.sc-howto { background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:12px; padding:16px 20px; margin-top:20px; }
+.sc-howto-t { color:white; font-size:14px; font-weight:800; margin:0 0 8px; }
+.sc-howto-l { color:rgba(255,255,255,0.75); font-size:13px; line-height:1.7; }
+.sc-howto-l strong { color:#00C851; }
+.sc-preview { background:#F8FAFC; border:1px dashed #CBD5E1; border-radius:8px; padding:12px 14px; font-size:13px; color:#475569; margin-top:14px; font-style:italic; word-break:break-all; }
+</style>
+
+<div class="sc-nav">
+  <a href="/sp-dashboard">← Back to dashboard</a>
+</div>
+
+<div class="sc-wrap">
+  <div class="sc-hero">
+    <div class="sc-hero-ic">📲</div>
+    <div class="sc-hero-t">Send My Card</div>
+    <div class="sc-hero-s">Text your contact card to a customer in seconds. The message comes from your own phone — they get your real number.</div>
+  </div>
+
+  <div class="sc-card">
+    <label class="sc-label">Customer name <span class="sc-optional">(optional)</span></label>
+    <input type="text" id="custName" placeholder="John" class="sc-input">
+
+    <label class="sc-label" style="margin-top:14px;">Phone number</label>
+    <input type="tel" id="custPhone" placeholder="(732) 555-1234" class="sc-input" inputmode="tel" autofocus>
+
+    <div class="sc-preview" id="scPreview">Hi! Save my contact: https://carsinstock.com/{{ member.slug }}/contact</div>
+
+    <button onclick="sendCard()" class="sc-btn">📨 Send via Text</button>
+
+    <div id="scToast" class="sc-toast">✅ Opening your messages app...</div>
+  </div>
+
+  <div class="sc-howto">
+    <div class="sc-howto-t">⚡ Add to home screen for rapid fire</div>
+    <div class="sc-howto-l">
+      <strong>iPhone (Safari):</strong> Tap the share button (square with up arrow) → scroll down → <em>Add to Home Screen</em> → name it "Send Card" → Add.<br><br>
+      <strong>Android (Chrome):</strong> Tap the 3-dot menu → <em>Install app</em> or <em>Add to Home screen</em>.<br><br>
+      Now you can launch this in one tap from your home screen and rapid-fire your card all day.
+    </div>
+  </div>
+</div>
+
+<script>
+function updatePreview() {
+    var name = document.getElementById('custName').value.trim();
+    var greeting = name ? 'Hi ' + name + '!' : 'Hi!';
+    document.getElementById('scPreview').textContent = greeting + ' Save my contact: https://carsinstock.com/{{ member.slug }}/contact';
+}
+
+document.getElementById('custName').addEventListener('input', updatePreview);
+
+function sendCard() {
+    var name = document.getElementById('custName').value.trim();
+    var phone = document.getElementById('custPhone').value.trim();
+    if (!phone) {
+        document.getElementById('custPhone').focus();
+        document.getElementById('custPhone').style.borderColor = '#DC2626';
+        return;
+    }
+    var cleanPhone = phone.replace(/[^0-9+]/g, '');
+    var greeting = name ? 'Hi ' + name + '!' : 'Hi!';
+    var body = greeting + ' Save my contact: https://carsinstock.com/{{ member.slug }}/contact';
+    var smsUrl = 'sms:' + cleanPhone + '?&body=' + encodeURIComponent(body);
+    document.getElementById('scToast').style.display = 'block';
+    window.location.href = smsUrl;
+    setTimeout(function() {
+        document.getElementById('custName').value = '';
+        document.getElementById('custPhone').value = '';
+        document.getElementById('scToast').style.display = 'none';
+        document.getElementById('custPhone').style.borderColor = '#CBD5E1';
+        updatePreview();
+        document.getElementById('custPhone').focus();
+    }, 2500);
+}
+
+document.getElementById('custPhone').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') sendCard();
+});
+</script>
+{% endblock %}

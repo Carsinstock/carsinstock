@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>{{ name }} — {{ dealership_name }}</title>
+<style>
+* { box-sizing:border-box; }
+body { margin:0; font-family:-apple-system,BlinkMacSystemFont,"Inter",sans-serif; background:linear-gradient(180deg,#0F172A 0%,#1E293B 100%); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+.card { background:white; border-radius:24px; padding:36px 24px 24px; max-width:380px; width:100%; text-align:center; box-shadow:0 12px 48px rgba(0,0,0,0.4); }
+.photo { width:140px; height:140px; border-radius:70px; object-fit:cover; margin:0 auto 18px; display:block; border:4px solid #00C851; }
+.photo-fb { width:140px; height:140px; border-radius:70px; background:#00C851; color:#1E293B; font-size:56px; font-weight:800; display:flex; align-items:center; justify-content:center; margin:0 auto 18px; font-family:inherit; }
+.name { font-size:24px; font-weight:800; color:#1E293B; margin:0 0 4px; letter-spacing:0.3px; }
+.title { font-size:13px; color:#64748B; margin:0 0 10px; }
+.dealer { font-size:15px; color:#00C851; font-weight:800; margin:0 0 4px; letter-spacing:0.3px; }
+.location { font-size:13px; color:#94A3B8; margin:0 0 18px; }
+.phone-row { display:flex; align-items:center; justify-content:center; gap:6px; font-size:14px; color:#475569; margin:0 0 22px; }
+.phone-row a { color:#475569; text-decoration:none; font-weight:600; }
+.btn { display:block; width:100%; padding:16px; border-radius:12px; font-size:16px; font-weight:800; text-decoration:none; text-align:center; margin-bottom:10px; letter-spacing:0.3px; transition:transform 0.1s; }
+.btn:active { transform:scale(0.97); }
+.btn-primary { background:#00C851; color:#1E293B; }
+.btn-secondary { background:#1E293B; color:white; }
+.brand { font-size:11px; color:#94A3B8; margin-top:20px; }
+.brand-logo { color:#1E293B; font-weight:800; letter-spacing:0.5px; }
+.brand-logo .green { color:#00C851; }
+</style>
+</head>
+<body>
+<div class="card">
+    {% if profile_photo %}
+    <img src="{{ profile_photo }}" alt="{{ name }}" class="photo" onerror="this.style.display='none';">
+    {% else %}
+    <div class="photo-fb">{{ name[0] if name else '?' }}</div>
+    {% endif %}
+    <h1 class="name">{{ name }}</h1>
+    <p class="title">Sales Professional</p>
+    <p class="dealer">{{ dealership_name }}</p>
+    {% if dealership_city %}<p class="location">{{ dealership_city }}{% if dealership_state %}, {{ dealership_state }}{% endif %}</p>{% endif %}
+    {% if phone %}<div class="phone-row"><span>📞</span><a href="tel:{{ phone }}">{{ phone }}</a></div>{% endif %}
+    <a href="/v/{{ slug }}/contact.vcf" class="btn btn-primary">📇 Save my contact</a>
+    <a href="/{{ slug }}" class="btn btn-secondary">🚗 See my cars</a>
+    <div class="brand">Powered by <span class="brand-logo">Cars <span class="green">IN STOCK</span></span></div>
+</div>
+</body>
+</html>
