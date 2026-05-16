@@ -1897,7 +1897,55 @@ Always guide the conversation toward signing up. Never be pushy - be like a frie
 
     @bp.route('/sp-dashboard/inventory')
     def sp_inventory():
-        return render_template('salesperson/sp_inventory.html')
+        # PR 3.1 context load - mirrors the main /sp-dashboard handler
+        from flask import session, redirect
+        if 'team_member_id' not in session:
+            return redirect('/login')
+        import sqlite3
+        conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        conn.row_factory = sqlite3.Row
+        member = conn.execute("SELECT * FROM dealership_team WHERE id=?", (session['team_member_id'],)).fetchone()
+        if not member:
+            session.clear()
+            return redirect('/login')
+        from app.models.salesperson import Salesperson
+        from app.models.vehicle import Vehicle
+        from app.models.lead import Lead
+        dealership_sp = Salesperson.query.filter_by(salesperson_id=member['dealership_id']).first()
+        all_my_vehicles = Vehicle.query.filter_by(
+            salesperson_id=member['dealership_id'],
+            pick_user_id=member['id']
+        ).order_by(Vehicle.created_at.desc()).all()
+        my_vehicles = [v for v in all_my_vehicles if v.approval_status in ('approved', None) and v.status == 'available']
+        my_vehicle_ids = [v.id for v in my_vehicles]
+        _rep_slug_for_leads = member['slug'] if member['slug'] else ''
+        from sqlalchemy import or_ as _or2
+        if my_vehicle_ids and _rep_slug_for_leads:
+            my_leads = Lead.query.filter(
+                _or2(Lead.vehicle_id.in_(my_vehicle_ids), Lead.referred_by == _rep_slug_for_leads)
+            ).order_by(Lead.created_at.desc()).limit(50).all()
+        elif my_vehicle_ids:
+            my_leads = Lead.query.filter(Lead.vehicle_id.in_(my_vehicle_ids)).order_by(Lead.created_at.desc()).limit(50).all()
+        elif _rep_slug_for_leads:
+            my_leads = Lead.query.filter(Lead.referred_by == _rep_slug_for_leads).order_by(Lead.created_at.desc()).limit(50).all()
+        else:
+            my_leads = []
+        _rep_slug = member['slug'] if member['slug'] else ''
+        storefront_url = f"https://carsinstock.com/{_rep_slug}" if _rep_slug else (f"https://carsinstock.com/{dealership_sp.profile_url_slug}" if dealership_sp else "")
+        notifications = conn.execute(
+            "SELECT * FROM team_notifications WHERE team_member_id=? AND is_dismissed=0 ORDER BY created_at DESC",
+            (member['id'],)
+        ).fetchall()
+        notifications = [dict(n) for n in notifications]
+        conn.close()
+        return render_template('salesperson/sp_inventory.html',
+            member=dict(member),
+            my_vehicles=my_vehicles,
+            all_my_vehicles=all_my_vehicles,
+            my_leads=my_leads,
+            storefront_url=storefront_url,
+            dealership_sp=dealership_sp,
+            notifications=notifications)
 
     @bp.route('/api/toolbox/scan-references', methods=['POST'])
     def toolbox_scan_references():

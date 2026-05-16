@@ -2,28 +2,361 @@
 {% block content %}
 <style>
 body { background:#0F172A; }
-.ph-nav { background:#1E293B; border-bottom:1px solid rgba(255,255,255,0.08); padding:16px 24px; display:flex; align-items:center; gap:8px; }
-.ph-nav a { color:rgba(255,255,255,0.6); text-decoration:none; font-size:14px; font-weight:600; }
-.ph-nav a:hover { color:white; }
-.ph-wrap { max-width: 600px; margin: 0 auto; padding: 56px 24px 48px; font-family: 'Inter', sans-serif; }
-.ph-card { background:#1E293B; border:1px solid rgba(0,200,81,0.35); border-radius:18px; padding:36px 28px; text-align:center; }
-.ph-icon { font-size:54px; margin-bottom:18px; }
-.ph-card h1 { color:white; font-size:26px; font-weight:800; margin:0 0 10px; letter-spacing:0.3px; }
-.ph-card p { color:rgba(255,255,255,0.65); font-size:15px; line-height:1.6; margin:0 0 28px; }
-.ph-card .btn { display:inline-block; background:#00C851; color:#0F172A; padding:14px 32px; border-radius:10px; text-decoration:none; font-weight:800; font-size:15px; letter-spacing:0.3px; }
-.ph-card .btn:hover { background:#00b248; }
-.ph-card .sub { color:rgba(255,255,255,0.4); font-size:12px; margin-top:22px; font-style:italic; }
+.inv-nav { background:#1E293B; border-bottom:1px solid rgba(255,255,255,0.08); padding:16px 24px; }
+.inv-nav a { color:rgba(255,255,255,0.6); text-decoration:none; font-size:14px; font-weight:600; }
+.inv-nav a:hover { color:white; }
+.inv-hero { text-align:center; padding:24px 16px 18px; max-width:540px; margin:0 auto; }
+.inv-hero-ic { width:64px; height:64px; border-radius:16px; background:rgba(0,200,81,0.15); display:flex; align-items:center; justify-content:center; font-size:32px; margin:0 auto 12px; }
+.inv-hero-t { color:white; font-size:24px; font-weight:800; letter-spacing:0.3px; margin-bottom:6px; }
+.inv-hero-s { color:rgba(255,255,255,0.65); font-size:14px; line-height:1.5; max-width:380px; margin:0 auto; }
+.inv-wrap { max-width:540px; margin:0 auto 60px; padding:0 12px; font-family:'Inter',sans-serif; }
+.inv-card { background:white; border-radius:16px; padding:18px; margin-bottom:16px; box-shadow:0 4px 16px rgba(0,0,0,0.18); }
+.inv-card h3 { margin:0 0 14px; color:#1E293B; font-size:16px; font-weight:700; }
+.iv-row { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid #F1F5F9; }
+.iv-row:last-child { border-bottom:none; }
+.iv-row img { width:80px; height:60px; object-fit:cover; border-radius:6px; flex-shrink:0; }
+.iv-info { flex:1; min-width:0; }
+.iv-name { font-size:13px; font-weight:700; color:#1E293B; }
+.iv-price { font-size:14px; font-weight:800; color:#00C851; }
+.iv-days { font-size:11px; }
+.il-row { padding:10px 0; border-bottom:1px solid #F1F5F9; display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.il-row:last-child { border-bottom:none; }
+.il-name { font-size:13px; font-weight:700; color:#1E293B; }
+.il-detail { font-size:11px; color:#94A3B8; }
 </style>
-<div class="ph-nav">
+
+<div class="inv-nav">
   <a href="/sp-dashboard">← Back to dashboard</a>
 </div>
-<div class="ph-wrap">
-  <div class="ph-card">
-    <div class="ph-icon">🏪</div>
-    <h1>My Store</h1>
-    <p>Your vehicles, your leads, and the Add Vehicle form are moving here in the next release. For now, scroll down on your dashboard to manage your inventory and follow up on leads.</p>
-    <a href="/sp-dashboard" class="btn">Open it on the dashboard →</a>
-    <div class="sub">Coming soon — its own dedicated page.</div>
+
+<div class="inv-hero">
+  <div class="inv-hero-ic">🚗</div>
+  <div class="inv-hero-t">My Inventory</div>
+  <div class="inv-hero-s">Manage your vehicles, view your leads, add new cars.</div>
+</div>
+
+<div class="inv-wrap">
+
+  {% for notif in notifications %}
+  <div id="notif-{{ notif.id }}" style="border-radius:10px;padding:14px 18px;margin-bottom:12px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;{% if notif.type == 'approved' %}background:#D1FAE5;border:1px solid #6EE7B7;{% else %}background:#FEE2E2;border:1px solid #FCA5A5;{% endif %}">
+    <div style="font-size:14px;font-weight:600;color:{% if notif.type == 'approved' %}#065F46{% else %}#991B1B{% endif %};">
+      {% if notif.type == 'approved' %}✅{% else %}❌{% endif %} {{ notif.message }}
+    </div>
+    <button onclick="dismissNotif({{ notif.id }})" style="background:none;border:none;cursor:pointer;font-size:18px;color:#94A3B8;flex-shrink:0;line-height:1;">×</button>
+  </div>
+  {% endfor %}
+
+  <div style="margin-bottom:16px;">
+    <button onclick="toggleAddVehicle()" id="addVehicleBtn" style="width:100%;background:#00C851;color:white;border:none;padding:14px;border-radius:10px;font-size:15px;font-weight:800;cursor:pointer;letter-spacing:0.3px;">+ Add a Vehicle</button>
+  </div>
+
+  <div id="addVehicleSection" class="inv-card" style="display:none;">
+    <h3 style="color:#1E293B;font-size:16px;font-weight:700;margin:0 0 6px;">🚗 Submit a Vehicle</h3>
+    <p style="color:#64748B;font-size:13px;margin:0 0 20px;">Your manager will review and approve before it goes live.</p>
+    <form id="addVehicleForm" method="POST" action="/sp/vehicles/add" enctype="multipart/form-data">
+      <div style="margin-bottom:14px;">
+        <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:6px;">Photo *</label>
+        <input type="file" name="photo" accept="image/*" required style="font-size:13px;width:100%;">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div>
+          <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Year *</label>
+          <input type="text" id="spYear" name="year" placeholder="2022" maxlength="4" required style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+        </div>
+        <div>
+          <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Make *</label>
+          <input type="text" id="spMake" name="make" placeholder="Toyota" required style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+        </div>
+        <div>
+          <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Model *</label>
+          <input type="text" id="spModel" name="model" placeholder="Camry" required style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div>
+          <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Trim</label>
+          <input type="text" id="spTrim" name="trim" placeholder="LE, SE, XLE..." style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+        </div>
+        <div>
+          <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">VIN * <span style="color:#94A3B8;font-weight:400;">(17 chars - auto-fills details)</span></label>
+          <div style="display:flex;gap:6px;">
+            <input type="text" id="spVin" name="vin" maxlength="17" placeholder="1HGBH41JXMN109186" required style="flex:1;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:13px;font-family:monospace;text-transform:uppercase;">
+            <button type="button" id="spVinBtn" onclick="decodeSpVIN()" style="background:#1E293B;color:#00C851;border:none;padding:10px 14px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">🔍 Decode</button>
+          </div>
+          <div id="spVinResult" style="display:none;font-size:12px;margin-top:4px;"></div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div>
+          <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Price *</label>
+          <input type="text" name="price" placeholder="24995" required style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+        </div>
+        <div>
+          <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Mileage</label>
+          <input type="text" name="mileage" placeholder="34000" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+        <div>
+          <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Exterior Color</label>
+          <input type="text" name="exterior_color" placeholder="Pearl White" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+        </div>
+        <div>
+          <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Transmission</label>
+          <select id="spTransmission" name="transmission" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+            <option value="">Select...</option>
+            <option>Automatic</option>
+            <option>Manual</option>
+            <option>CVT</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Fuel Type</label>
+        <select id="spFuelType" name="fuel_type" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;">
+          <option value="">Select...</option>
+          <option>Gasoline</option>
+          <option>Hybrid</option>
+          <option>Electric</option>
+          <option>Diesel</option>
+        </select>
+      </div>
+      <div style="margin-bottom:20px;">
+        <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:4px;">Why are you picking this car? <span style="color:#94A3B8;font-weight:400;">(shows on storefront)</span></label>
+        <div style="display:flex;gap:8px;margin-bottom:6px;">
+          <textarea name="pick_blurb" id="spPickBlurb" maxlength="150" rows="2" style="flex:1;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:13px;resize:none;" placeholder="This Tahoe is spotless, one owner, priced right - my favorite on the lot right now..."></textarea>
+        </div>
+        <button type="button" onclick="generateSpBlurb()" style="background:#1E293B;color:#00C851;border:none;padding:8px 14px;border-radius:6px;font-size:12px;font-weight:700;cursor:pointer;">✨ AI Write</button>
+        <span id="spBlurbSpinner" style="display:none;font-size:12px;color:#64748B;margin-left:8px;">Writing...</span>
+      </div>
+      <input type="hidden" name="assigned_team_member_id" value="{{ member['id'] }}">
+      <button type="submit" style="width:100%;background:#1E293B;color:white;border:none;padding:13px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;">Submit for Approval →</button>
+    </form>
+  </div>
+
+  <div class="inv-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+      <h3 style="margin:0;">🚗 My Vehicles ({{ all_my_vehicles|length }})</h3>
+      <div style="display:flex;gap:6px;">
+        <button onclick="sortVehicles('low')" id="sortLowBtn" style="padding:5px 10px;font-size:11px;font-weight:700;border:1.5px solid #E2E8F0;border-radius:6px;background:#fff;color:#475569;cursor:pointer;">$ Low→High</button>
+        <button onclick="sortVehicles('high')" id="sortHighBtn" style="padding:5px 10px;font-size:11px;font-weight:700;border:1.5px solid #E2E8F0;border-radius:6px;background:#fff;color:#475569;cursor:pointer;">$ High→Low</button>
+      </div>
+    </div>
+    {% if all_my_vehicles %}
+    <div id="vehicleList">
+    {% for v in all_my_vehicles %}
+    <div class="iv-row" data-price="{{ v.price or 0 }}" data-id="{{ v.id }}">
+      {% if v.image_url %}<img src="{{ v.image_url }}" alt="{{ v.year }} {{ v.make }} {{ v.model }}">{% endif %}
+      <div class="iv-info">
+        <div class="iv-name">{{ v.year }} {{ v.make }} {{ v.model }}</div>
+        <div class="iv-price">${{ '{:,.0f}'.format(v.price) }}</div>
+        {% if v.approval_status == 'pending' %}
+        <div style="display:inline-block;background:#FEF9C3;border:1px solid #FDE047;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700;color:#854D0E;margin-top:4px;">🟡 Awaiting Approval</div>
+        {% elif v.approval_status == 'rejected' %}
+        <div style="display:inline-block;background:#FEE2E2;border:1px solid #FCA5A5;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700;color:#991B1B;margin-top:4px;">🔴 Not Approved{% if v.rejection_reason %} - {{ v.rejection_reason }}{% endif %}</div>
+        {% else %}
+        <div style="display:inline-block;background:#D1FAE5;border:1px solid #6EE7B7;border-radius:6px;padding:3px 10px;font-size:12px;font-weight:700;color:#065F46;margin-top:4px;">✅ Live</div>
+        {% if v.days_remaining %}<div class="iv-days" style="color:{{ '#DC2626' if v.days_remaining <= 2 else '#64748B' }};margin-top:2px;">{{ v.days_remaining }} days left</div>{% endif %}
+        {% endif %}
+      </div>
+      <div style="margin-left:auto;flex-shrink:0;display:flex;gap:4px;align-items:center;">
+        {% if v.approval_status == 'approved' or v.approval_status == None %}
+        <form method="POST" action="/sp/vehicles/{{ v.id }}/set-top-pick" style="display:inline;">
+          <button type="submit" style="background:none;border:none;cursor:pointer;font-size:18px;padding:4px;opacity:{% if v.is_team_pick %}1{% else %}0.35{% endif %};" title="{% if v.is_team_pick %}Current Top Pick{% else %}Set as Top Pick{% endif %}">⭐</button>
+        </form>
+        <button onclick="openEditModal({{ v.id }}, '{{ v.year }} {{ v.make }} {{ v.model }}', {{ v.price or 0 }}, {{ v.mileage or 0 }}, '{{ v.image_url or '' }}')" style="background:none;border:none;cursor:pointer;color:#00C851;font-size:18px;padding:4px;" title="Edit">✏️</button>
+        {% if v.days_remaining is not none and v.days_remaining <= 3 %}
+        <form method="POST" action="/sp/vehicles/renew/{{ v.id }}" onsubmit="return confirm('Renew this listing for 7 more days?')" style="display:inline;">
+          <button type="submit" style="background:#FEF9C3;border:1px solid #FDE047;border-radius:6px;cursor:pointer;color:#854D0E;font-size:11px;font-weight:700;padding:3px 8px;" title="Renew Listing">🔄 Renew</button>
+        </form>
+        {% endif %}
+        {% endif %}
+        <form method="POST" action="/sp/vehicles/delete/{{ v.id }}" onsubmit="return confirm('Remove this vehicle?')" style="display:inline;">
+          <button type="submit" style="background:none;border:none;cursor:pointer;color:#94A3B8;font-size:18px;padding:4px;" title="Delete">🗑</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+    </div>
+    {% else %}
+    <p style="color:#94A3B8;font-size:13px;margin:0;">No vehicles submitted yet. Tap <strong>+ Add a Vehicle</strong> above to submit your first one.</p>
+    {% endif %}
+  </div>
+
+  <div class="inv-card">
+    <h3>📋 My Leads ({{ my_leads|length }})</h3>
+    {% if my_leads %}
+    {% for lead in my_leads %}
+    <div class="il-row">
+      <div style="flex:1;min-width:0;">
+        <div class="il-name">{{ lead.customer_name }}{% if lead.referred_by == member.slug %} <span style="background:#D1FAE5;color:#065F46;font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;margin-left:4px;">YOUR REFERRAL</span>{% endif %}</div>
+        <div class="il-detail">{{ lead.customer_phone or '' }}{% if lead.customer_email %} · {{ lead.customer_email }}{% endif %}</div>
+        <div class="il-detail" style="color:#475569;margin-top:2px;">{{ lead.vehicle_name or '' }} · {{ lead.created_at.strftime('%b %d') if lead.created_at else '' }}</div>
+      </div>
+      <div style="flex-shrink:0;">
+        <form method="POST" action="/sp/leads/delete/{{ lead.lead_id }}" onsubmit="return confirm('Remove this lead?')" style="display:inline;">
+          <button type="submit" style="background:none;border:none;cursor:pointer;color:#94A3B8;font-size:18px;padding:4px;" title="Delete Lead">🗑</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p style="color:#94A3B8;font-size:13px;margin:0;">No leads yet. Share your store link to start getting inquiries.</p>
+    {% endif %}
+  </div>
+
+</div>
+
+<div id="editVehicleModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;overflow-y:auto;">
+  <div style="background:#fff;border-radius:16px;padding:24px;max-width:480px;width:92%;margin:20px auto;position:relative;">
+    <button onclick="closeEditModal()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:24px;color:#94A3B8;cursor:pointer;">×</button>
+    <h3 style="color:#1E293B;font-size:17px;font-weight:800;margin:0 0 4px;">✏️ Edit Vehicle</h3>
+    <p id="editVehicleTitle" style="color:#64748B;font-size:13px;margin:0 0 18px;"></p>
+    <form method="POST" id="editVehicleForm" enctype="multipart/form-data">
+      <input type="hidden" name="_method" value="POST">
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;font-weight:700;color:#1E293B;display:block;margin-bottom:4px;">New Photo <span style="color:#94A3B8;font-weight:400;">(leave blank to keep current)</span></label>
+        <img id="editCurrentPhoto" src="" style="width:80px;height:60px;object-fit:cover;border-radius:6px;margin-bottom:8px;display:none;">
+        <input type="file" name="photo" accept="image/*" style="font-size:13px;width:100%;">
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;font-weight:700;color:#1E293B;display:block;margin-bottom:4px;">Price *</label>
+        <input type="text" id="editPrice" name="price" required style="width:100%;padding:10px 12px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:14px;font-family:inherit;">
+      </div>
+      <div style="margin-bottom:14px;">
+        <label style="font-size:12px;font-weight:700;color:#1E293B;display:block;margin-bottom:4px;">Mileage</label>
+        <input type="text" id="editMileage" name="mileage" style="width:100%;padding:10px 12px;border:1.5px solid #E2E8F0;border-radius:8px;font-size:14px;font-family:inherit;">
+      </div>
+      <div style="margin-bottom:14px;background:#F5F3FF;border:1px solid #DDD6FE;border-radius:8px;padding:12px 14px;">
+        <label style="font-size:12px;font-weight:700;color:#7C3AED;display:block;margin-bottom:4px;">📹 Walk-Around Video <span style="color:#94A3B8;font-weight:400;">(Top Pick only · MP4 · Max 60s · Landscape)</span></label>
+        <input type="file" name="video" accept="video/mp4,video/*" style="font-size:13px;width:100%;margin-bottom:4px;">
+        <div style="font-size:11px;color:#94A3B8;">Video will be reviewed before going live on your page.</div>
+      </div>
+      <div style="margin-bottom:20px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:8px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-size:13px;font-weight:700;color:#1E293B;">Restart 7-day clock</div>
+          <div style="font-size:12px;color:#64748B;">Reset expiry to 7 days from now</div>
+        </div>
+        <label style="display:flex;align-items:center;cursor:pointer;">
+          <input type="checkbox" name="renew_dates" id="renewDates" style="width:18px;height:18px;accent-color:#00C851;">
+        </label>
+      </div>
+      <button type="submit" style="width:100%;background:#00C851;color:white;border:none;padding:13px;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;">Save Changes →</button>
+    </form>
   </div>
 </div>
+
+<script>
+function toggleAddVehicle() {
+    var el = document.getElementById('addVehicleSection');
+    el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function decodeSpVIN() {
+    const vin = document.getElementById('spVin').value.trim().toUpperCase();
+    document.getElementById('spVin').value = vin;
+    if (vin.length !== 17) {
+        document.getElementById('spVinResult').innerHTML = '<span style="color:#DC2626;">VIN must be 17 characters</span>';
+        document.getElementById('spVinResult').style.display = 'block';
+        return;
+    }
+    document.getElementById('spVinBtn').textContent = '⏳';
+    document.getElementById('spVinBtn').disabled = true;
+    fetch('/sp/api/vin-decode/' + vin)
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('spVinResult').innerHTML = '<span style="color:#DC2626;">' + data.error + '</span>';
+            } else {
+                if (data.year) document.getElementById('spYear').value = data.year;
+                if (data.make) document.getElementById('spMake').value = data.make;
+                if (data.model) document.getElementById('spModel').value = data.model;
+                if (data.trim) document.getElementById('spTrim').value = data.trim;
+                if (data.transmission) document.getElementById('spTransmission').value = data.transmission;
+                if (data.fuel_type) document.getElementById('spFuelType').value = data.fuel_type;
+                let info = (data.year||'') + ' ' + (data.make||'') + ' ' + (data.model||'');
+                if (data.trim) info += ' ' + data.trim;
+                document.getElementById('spVinResult').innerHTML = '<span style="color:#00C851;font-weight:600;">✅ ' + info.trim() + '</span>';
+            }
+            document.getElementById('spVinResult').style.display = 'block';
+            document.getElementById('spVinBtn').textContent = '🔍 Decode';
+            document.getElementById('spVinBtn').disabled = false;
+        })
+        .catch(() => {
+            document.getElementById('spVinResult').innerHTML = '<span style="color:#DC2626;">Network error. Try again.</span>';
+            document.getElementById('spVinResult').style.display = 'block';
+            document.getElementById('spVinBtn').textContent = '🔍 Decode';
+            document.getElementById('spVinBtn').disabled = false;
+        });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var vinEl = document.getElementById('spVin');
+    if (vinEl) vinEl.addEventListener('input', function() {
+        if (this.value.length === 17) decodeSpVIN();
+    });
+});
+
+async function generateSpBlurb() {
+    var year = document.querySelector('[name="year"]').value;
+    var make = document.querySelector('[name="make"]').value;
+    var model = document.querySelector('[name="model"]').value;
+    var trim = document.querySelector('[name="trim"]').value;
+    if (!year || !make || !model) {
+        alert('Enter Year, Make, and Model first.');
+        return;
+    }
+    document.getElementById('spBlurbSpinner').style.display = 'inline';
+    try {
+        var resp = await fetch('/api/generate-pick-blurb', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({year: year, make: make, model: model, trim: trim})
+        });
+        var data = await resp.json();
+        document.getElementById('spPickBlurb').value = data.blurb || '';
+    } catch(e) {
+        alert('Could not generate blurb. Try again.');
+    }
+    document.getElementById('spBlurbSpinner').style.display = 'none';
+}
+
+function openEditModal(id, name, price, mileage, imgUrl) {
+    document.getElementById('editVehicleTitle').textContent = name;
+    document.getElementById('editVehicleForm').action = '/sp/vehicles/edit/' + id;
+    document.getElementById('editPrice').value = price;
+    document.getElementById('editMileage').value = mileage || '';
+    document.getElementById('renewDates').checked = false;
+    var photo = document.getElementById('editCurrentPhoto');
+    if (imgUrl) { photo.src = imgUrl; photo.style.display = 'block'; }
+    else { photo.style.display = 'none'; }
+    document.getElementById('editVehicleModal').style.display = 'flex';
+}
+
+function closeEditModal() {
+    document.getElementById('editVehicleModal').style.display = 'none';
+}
+
+function sortVehicles(dir) {
+    var list = document.getElementById('vehicleList');
+    if (!list) return;
+    var rows = Array.from(list.querySelectorAll('.iv-row'));
+    rows.sort(function(a, b) {
+        var pa = parseFloat(a.dataset.price) || 0;
+        var pb = parseFloat(b.dataset.price) || 0;
+        return dir === 'low' ? pa - pb : pb - pa;
+    });
+    rows.forEach(function(r){ list.appendChild(r); });
+    document.getElementById('sortLowBtn').style.background = dir === 'low' ? '#1E293B' : '#fff';
+    document.getElementById('sortLowBtn').style.color = dir === 'low' ? '#fff' : '#475569';
+    document.getElementById('sortHighBtn').style.background = dir === 'high' ? '#1E293B' : '#fff';
+    document.getElementById('sortHighBtn').style.color = dir === 'high' ? '#fff' : '#475569';
+}
+
+function dismissNotif(id) {
+    fetch('/sp-notification/' + id + '/dismiss', {method:'POST'});
+    var el = document.getElementById('notif-' + id);
+    if (el) el.style.display = 'none';
+}
+</script>
 {% endblock %}
