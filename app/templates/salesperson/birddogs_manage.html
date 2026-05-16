@@ -67,9 +67,9 @@ body { background:#0F172A; }
     </div>
   </div>
 
-  {% set rep_url = '/' + member.slug if member.slug else '/' + (dealership_sp.profile_url_slug if dealership_sp else '') %}
+  {% set referral_url = '/earn/' + member.slug if member.slug else '/earn/' + (dealership_sp.profile_url_slug if dealership_sp else '') %}
   <div class="bm-actions">
-    <a href="{{ rep_url }}" target="_blank" class="bm-cta primary">📤 Share my Referral Page</a>
+    <a href="{{ referral_url }}" target="_blank" class="bm-cta primary">📤 Share my Referral Page</a>
     <a href="/sp-dashboard/birddog-how-it-works" class="bm-cta secondary">ℹ️ How it works</a>
   </div>
 

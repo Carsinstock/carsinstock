@@ -77,6 +77,7 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
 <!-- ═══ PR 1 TILE HOME — power tools at a glance ═══ -->
     {% set rep_url = '/' + member.slug if member.slug else '/' + (dealership_sp.profile_url_slug if dealership_sp else '') %}
     {% set rep_url_display = 'cardeals.autos/' + member.slug if member.slug else ('cardeals.autos/' + dealership_sp.profile_url_slug if dealership_sp else 'cardeals.autos') %}
+    {% set referral_url = '/earn/' + member.slug if member.slug else '/earn/' + (dealership_sp.profile_url_slug if dealership_sp else '') %}
     <div class="tile-home">
 
         <a href="/sp-dashboard/pro-social-ad" class="tile featured">
@@ -141,7 +142,7 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
                 </div>
             </div>
             <div class="t-grid2">
-                <a href="{{ rep_url }}" target="_blank" class="t-chip primary">My referral page</a>
+                <a href="{{ referral_url }}" target="_blank" class="t-chip primary">My referral page</a>
                 <a href="/sp-dashboard/birddogs" class="t-chip">Manage birddogs</a>
             </div>
             <a href="/sp-dashboard/birddog-how-it-works" class="t-chip" style="margin-top:8px;">ℹ️ How it works</a>
