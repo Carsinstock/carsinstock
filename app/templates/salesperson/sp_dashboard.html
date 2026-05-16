@@ -68,7 +68,13 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
         <a href="/sp-logout" class="logout">Sign Out</a>
     </div>
 
-    <!-- ═══ PR 1 TILE HOME — power tools at a glance ═══ -->
+    <style>
+.sp-tagline { text-align: center; font-size: 14px; color: #475569; font-style: italic; padding: 16px 20px 18px; letter-spacing: 0.2px; font-weight: 500; line-height: 1.45; }
+.sp-tagline .cta-pop { color: #00C851; font-weight: 800; font-style: normal; letter-spacing: 0.4px; }
+</style>
+<div class="sp-tagline">Tools that save you time, get you seen, and <span class="cta-pop">Sell More Cars</span>.</div>
+
+<!-- ═══ PR 1 TILE HOME — power tools at a glance ═══ -->
     {% set rep_url = '/' + member.slug if member.slug else '/' + (dealership_sp.profile_url_slug if dealership_sp else '') %}
     {% set rep_url_display = 'cardeals.autos/' + member.slug if member.slug else ('cardeals.autos/' + dealership_sp.profile_url_slug if dealership_sp else 'cardeals.autos') %}
     <div class="tile-home">
