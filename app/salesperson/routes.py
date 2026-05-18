@@ -1956,10 +1956,12 @@ Always guide the conversation toward signing up. Never be pushy - be like a frie
         conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
         conn.row_factory = sqlite3.Row
         member = conn.execute("SELECT * FROM dealership_team WHERE id=? AND is_active=1", (session['team_member_id'],)).fetchone()
-        conn.close()
         if not member:
+            conn.close()
             return redirect('/login')
-        return render_template('salesperson/send_card.html', member=dict(member))
+        dealership = conn.execute("SELECT * FROM dealerships WHERE id=?", (member['dealership_id'],)).fetchone()
+        conn.close()
+        return render_template('salesperson/send_card.html', member=dict(member), dealership=dict(dealership) if dealership else {})
 
     @bp.route('/api/toolbox/scan-references', methods=['POST'])
     def toolbox_scan_references():

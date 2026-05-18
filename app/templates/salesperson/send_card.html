@@ -42,7 +42,7 @@ body { background:#0F172A; }
     <label class="sc-label" style="margin-top:14px;">Phone number</label>
     <input type="tel" id="custPhone" placeholder="(732) 555-1234" class="sc-input" inputmode="tel" autofocus>
 
-    <div class="sc-preview" id="scPreview">Hi! Save my contact: https://carsinstock.com/{{ member.slug }}/contact</div>
+    <div class="sc-preview" id="scPreview">Hi! It's {{ member.name }}{% if dealership and dealership.name %} from {{ dealership.name }}{% endif %} — save my contact: https://carsinstock.com/{{ member.slug }}/contact</div>
 
     <button onclick="sendCard()" class="sc-btn">📨 Send via Text</button>
 
@@ -50,12 +50,7 @@ body { background:#0F172A; }
   </div>
 
   <div class="sc-howto">
-    <div class="sc-howto-t">⚡ Add to home screen for rapid fire</div>
-    <div class="sc-howto-l">
-      <strong>iPhone (Safari):</strong> Tap the share button (square with up arrow) → scroll down → <em>Add to Home Screen</em> → name it "Send Card" → Add.<br><br>
-      <strong>Android (Chrome):</strong> Tap the 3-dot menu → <em>Install app</em> or <em>Add to Home screen</em>.<br><br>
-      Now you can launch this in one tap from your home screen and rapid-fire your card all day.
-    </div>
+    <div style="color:rgba(255,255,255,0.75);font-size:13px;line-height:1.55;text-align:center;">💡 <strong>Tip:</strong> This tool lives on your dashboard. Tap <strong style="color:#00C851;">"📨 Send My Card"</strong> from the Quick Share tile anytime.</div>
   </div>
 </div>
 
@@ -63,7 +58,7 @@ body { background:#0F172A; }
 function updatePreview() {
     var name = document.getElementById('custName').value.trim();
     var greeting = name ? 'Hi ' + name + '!' : 'Hi!';
-    document.getElementById('scPreview').textContent = greeting + ' Save my contact: https://carsinstock.com/{{ member.slug }}/contact';
+    document.getElementById('scPreview').textContent = greeting + " It's {{ member.name }}{% if dealership and dealership.name %} from {{ dealership.name }}{% endif %} — save my contact: https://carsinstock.com/{{ member.slug }}/contact";
 }
 
 document.getElementById('custName').addEventListener('input', updatePreview);
@@ -78,7 +73,7 @@ function sendCard() {
     }
     var cleanPhone = phone.replace(/[^0-9+]/g, '');
     var greeting = name ? 'Hi ' + name + '!' : 'Hi!';
-    var body = greeting + ' Save my contact: https://carsinstock.com/{{ member.slug }}/contact';
+    var body = greeting + " It's {{ member.name }}{% if dealership and dealership.name %} from {{ dealership.name }}{% endif %} — save my contact: https://carsinstock.com/{{ member.slug }}/contact";
     var smsUrl = 'sms:' + cleanPhone + '?&body=' + encodeURIComponent(body);
     document.getElementById('scToast').style.display = 'block';
     window.location.href = smsUrl;
@@ -95,5 +90,57 @@ function sendCard() {
 document.getElementById('custPhone').addEventListener('keypress', function(e) {
     if (e.key === 'Enter') sendCard();
 });
+
+// ── Add to Home Screen — platform detection + PWA install ──
+(function() {
+    var ua = navigator.userAgent || '';
+    var isIos = /iPhone|iPad|iPod/.test(ua) && !window.MSStream;
+    var isAndroid = /Android/i.test(ua);
+    var isStandaloneIos = window.navigator.standalone === true;
+    var isStandaloneAndroid = window.matchMedia('(display-mode: standalone)').matches;
+    if (isStandaloneIos || isStandaloneAndroid) {
+        var el = document.getElementById('scInstalled');
+        if (el) el.style.display = 'block';
+        return;
+    }
+    if (isIos) {
+        var ios = document.getElementById('scIos');
+        if (ios) ios.style.display = 'block';
+    } else if (isAndroid) {
+        var android = document.getElementById('scAndroid');
+        if (android) android.style.display = 'block';
+    } else {
+        var desktop = document.getElementById('scDesktop');
+        if (desktop) desktop.style.display = 'block';
+    }
+})();
+
+var deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    var btn = document.getElementById('scInstallBtn');
+    if (btn) btn.style.display = 'block';
+});
+
+window.addEventListener('appinstalled', function() {
+    deferredInstallPrompt = null;
+    var btn = document.getElementById('scInstallBtn');
+    if (btn) btn.style.display = 'none';
+    var android = document.getElementById('scAndroid');
+    if (android) android.style.display = 'none';
+    var installed = document.getElementById('scInstalled');
+    if (installed) installed.style.display = 'block';
+});
+
+function installPwa() {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.then(function() {
+        deferredInstallPrompt = null;
+        var btn = document.getElementById('scInstallBtn');
+        if (btn) btn.style.display = 'none';
+    });
+}
 </script>
 {% endblock %}
