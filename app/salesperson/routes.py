@@ -534,21 +534,31 @@ END:VCARD"""
 
 
     @bp.route("/vehicles/delete/<int:vehicle_id>", methods=["POST"])
-    @login_required
     def delete_vehicle(vehicle_id):
         from app.models.vehicle import Vehicle
         from app.models.salesperson import Salesperson
         from app.models import db
-
-        sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
+        import sqlite3
+        # Resolve salesperson record from either direct salesperson login or team-member login
+        sp = None
+        if session.get("user_id"):
+            sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
+        elif session.get("team_member_id"):
+            conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+            conn.row_factory = sqlite3.Row
+            member = conn.execute("SELECT dealership_id FROM dealership_team WHERE id=? AND is_active=1", (session["team_member_id"],)).fetchone()
+            conn.close()
+            if member:
+                sp = Salesperson.query.filter_by(salesperson_id=member["dealership_id"]).first()
         if not sp:
-            flash("Set up your profile first.", "error")
-            return redirect(url_for("salesperson.profile_setup"))
+            return redirect(url_for("auth.login"))
 
         vehicle = Vehicle.query.get_or_404(vehicle_id)
 
         if vehicle.salesperson_id != sp.salesperson_id:
             flash("You don't have permission to delete this vehicle.", "error")
+            if session.get("team_member_id"):
+                return redirect("/sp-dashboard")
             return redirect(f"/{sp.profile_url_slug}")
 
         name = f"{vehicle.year} {vehicle.make} {vehicle.model}"
@@ -561,6 +571,8 @@ END:VCARD"""
             flash("Error deleting vehicle.", "error")
             print(f"Vehicle delete error: {e}")
 
+        if session.get("team_member_id"):
+            return redirect("/sp-dashboard")
         return redirect(f"/{sp.profile_url_slug}")
 
     @bp.route("/vehicles/share/<int:vehicle_id>", methods=["GET", "POST"])
@@ -1133,25 +1145,40 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
 
 
     @bp.route("/vehicles/renew/<int:vehicle_id>", methods=["POST"])
-    @login_required
     def renew_vehicle(vehicle_id):
         from app.models.salesperson import Salesperson
         from app.models.vehicle import Vehicle
         from app.models import db
         from datetime import datetime, timedelta
-        sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
-        if not sp:
-            flash("Set up your profile first.", "error")
-            return redirect(url_for("salesperson.profile_setup"))
-        vehicle = Vehicle.query.filter_by(id=vehicle_id, salesperson_id=sp.salesperson_id).first()
+        import sqlite3
+        # Resolve salesperson_id from either direct salesperson login or team-member login
+        salesperson_id = None
+        if session.get("user_id"):
+            sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
+            if sp:
+                salesperson_id = sp.salesperson_id
+        elif session.get("team_member_id"):
+            conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+            conn.row_factory = sqlite3.Row
+            member = conn.execute("SELECT dealership_id FROM dealership_team WHERE id=? AND is_active=1", (session["team_member_id"],)).fetchone()
+            conn.close()
+            if member:
+                salesperson_id = member["dealership_id"]
+        if not salesperson_id:
+            return redirect(url_for("auth.login"))
+        vehicle = Vehicle.query.filter_by(id=vehicle_id, salesperson_id=salesperson_id).first()
         if not vehicle:
             flash("Vehicle not found.", "error")
+            if session.get("team_member_id"):
+                return redirect("/sp-dashboard")
             return redirect(url_for("salesperson.dashboard"))
         vehicle.expires_at = datetime.utcnow() + timedelta(days=7)
         vehicle.created_at = datetime.utcnow()
         vehicle.expiration_warning_sent = False
         db.session.commit()
         flash(f"{vehicle.year} {vehicle.make} {vehicle.model} renewed for 7 days!", "success")
+        if session.get("team_member_id"):
+            return redirect("/sp-dashboard")
         return redirect(url_for("salesperson.dashboard"))
     @bp.route("/referrals", methods=["GET"])
     @login_required
