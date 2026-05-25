@@ -1,0 +1,9 @@
+{% extends "referral/base.html" %}
+{% block title %}MyCarReferral — Start your own car referral business{% endblock %}
+{% block content %}
+<div class="mcr-stub">
+  <h1>MyCarReferral — Public Homepage</h1>
+  <p>Route: <code>/mcr/</code> (renders at <code>mycarreferral.com/</code> after Round 3 host-header middleware).</p>
+  <div class="note">Round 1 scaffold confirmed. Round 2 builds full marketing homepage per Supplement §5.1.</div>
+</div>
+{% endblock %}

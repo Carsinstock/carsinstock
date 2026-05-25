@@ -1,0 +1,14 @@
+{% extends "referral/base.html" %}
+{% block title %}Log in — MyCarReferral{% endblock %}
+{% block content %}
+<div class="mcr-stub">
+  <h1>Log in</h1>
+  {% if error %}<div class="note" style="background: #FEE2E2; border-left-color: #DC2626;">{{ error }}</div>{% endif %}
+  <form method="POST" action="">
+    <label style="display:block; margin-bottom: 8px; font-size: 13px; color: #475569;">Phone number</label>
+    <input type="tel" name="phone" required style="width: 100%; padding: 12px; border: 0.5px solid #E2E8F0; border-radius: 8px; font-size: 14px; box-sizing: border-box; margin-bottom: 12px;">
+    <button type="submit" style="width: 100%; padding: 13px; background: #1E293B; color: #FFFFFF; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">Log in</button>
+  </form>
+  <div class="note">Round 1 scaffold. Round 2 styles per design system.</div>
+</div>
+{% endblock %}

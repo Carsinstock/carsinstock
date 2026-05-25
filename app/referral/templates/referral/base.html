@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}MyCarReferral — Start your own car referral business{% endblock %}</title>
+<link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" rel="stylesheet">
+<style>
+:root {
+  --navy: #1E293B;
+  --navy-deep: #0F172A;
+  --green: #00C851;
+  --green-dark: #065F46;
+  --green-bg: #E6F9EE;
+  --gold: #B8893F;
+  --gold-bg: #FFF8EC;
+  --bg: #FFFFFF;
+  --bg-soft: #F8FAFC;
+  --bg-step: #EEF2F7;
+  --bg-card: #F1F5F9;
+  --text-2: #475569;
+  --text-3: #64748B;
+  --text-4: #94A3B8;
+  --border: #E2E8F0;
+  --border-faint: rgba(15, 23, 42, 0.08);
+  --r-md: 8px;
+  --r-lg: 12px;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-serif: 'Fraunces', Georgia, serif;
+  --font-mono: 'Courier New', Menlo, monospace;
+}
+* { box-sizing: border-box; }
+body {
+  font-family: var(--font-sans);
+  background: var(--bg-soft);
+  color: var(--navy-deep);
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+.mcr-app {
+  max-width: 480px;
+  margin: 0 auto;
+  background: var(--bg);
+  min-height: 100vh;
+}
+@media (min-width: 600px) {
+  body { background: #E2E8F0; padding: 24px 16px; }
+  .mcr-app { border-radius: 16px; overflow: hidden; box-shadow: 0 10px 40px rgba(15, 23, 42, 0.08); min-height: calc(100vh - 48px); }
+}
+h1, h2, h3 { margin: 0; font-weight: 500; }
+p { margin: 0; }
+a { color: inherit; }
+button { font-family: inherit; }
+
+.mcr-serif { font-family: var(--font-serif); font-weight: 500; }
+.mcr-label { font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-2); }
+.mcr-label-navy { color: var(--navy); }
+.mcr-label-gold { color: var(--gold); }
+
+.mcr-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 16px; border-radius: var(--r-md); font-size: 14px; font-weight: 500; cursor: pointer; text-decoration: none; border: none; box-sizing: border-box; width: 100%; }
+.mcr-btn-primary { background: var(--navy); color: #FFFFFF; }
+.mcr-btn-primary-cta { background: var(--navy); color: #FFFFFF; border: 2px solid var(--gold); padding: 15px 16px; font-size: 15px; }
+.mcr-btn-secondary { background: var(--bg); color: var(--navy); border: 0.5px solid var(--navy); }
+.mcr-btn-ghost { background: transparent; color: var(--navy); padding: 8px 12px; font-size: 13px; }
+
+.mcr-card { background: var(--bg); border: 0.5px solid var(--border-faint); border-radius: var(--r-lg); padding: 14px 16px; }
+.mcr-card-soft { background: var(--bg-step); border-radius: var(--r-lg); padding: 18px 16px; }
+
+.mcr-step-num { width: 28px; height: 28px; border-radius: 50%; background: var(--bg-step); display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 13px; color: var(--navy); flex-shrink: 0; }
+
+.mcr-qr-frame { width: 92px; height: 92px; background: var(--bg); border-radius: var(--r-md); border: 2px solid var(--gold); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+.mcr-trust { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; background: var(--green-bg); border-radius: var(--r-md); }
+.mcr-trust i { font-size: 18px; color: var(--green); flex-shrink: 0; margin-top: 1px; }
+.mcr-trust-text { font-size: 12px; color: var(--green-dark); line-height: 1.4; }
+.mcr-trust-text strong { font-weight: 500; }
+
+.mcr-pill { display: inline-block; font-size: 10px; font-weight: 500; padding: 3px 8px; border-radius: 12px; letter-spacing: 0.04em; }
+.mcr-pill-pending { background: var(--bg-card); color: var(--text-2); }
+.mcr-pill-progress { background: var(--bg-step); color: var(--navy); }
+.mcr-pill-sold { background: var(--green-bg); color: var(--green-dark); }
+
+.mcr-input { width: 100%; padding: 12px 14px; border: 0.5px solid var(--border); border-radius: var(--r-md); font-family: var(--font-sans); font-size: 14px; color: var(--navy-deep); background: var(--bg); }
+.mcr-input:focus { outline: none; border-color: var(--navy); }
+.mcr-input::placeholder { color: var(--text-4); }
+
+.mcr-screen-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 18px; border-bottom: 0.5px solid var(--border); }
+.mcr-topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 0.5px solid var(--border); }
+.mcr-topbar-logo { font-family: var(--font-serif); font-size: 15px; font-weight: 500; color: var(--navy); }
+.mcr-topbar-link { font-size: 12px; color: var(--text-2); text-decoration: none; }
+.mcr-topbar-link strong { font-weight: 500; color: var(--navy); text-decoration: underline; }
+
+.mcr-footer { padding: 16px 20px 20px; background: var(--bg-soft); border-top: 0.5px solid var(--border); text-align: center; }
+.mcr-footer-disclaimer { font-size: 10px; color: var(--text-4); line-height: 1.5; margin-bottom: 8px; }
+.mcr-footer-powered { font-size: 10px; color: var(--text-2); font-weight: 500; }
+.mcr-footer-links { font-size: 10px; color: var(--text-3); margin-top: 6px; }
+.mcr-footer-links a { color: var(--text-3); text-decoration: none; margin: 0 6px; }
+</style>
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+<div class="mcr-app">
+{% block content %}{% endblock %}
+</div>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{% extends "referral/base.html" %}
+{% block title %}Your Referral Business — MyCarReferral{% endblock %}
+{% block content %}
+<div class="mcr-stub">
+  <h1>Your Referral Business</h1>
+  <p>Hi, {{ birddog.name }}</p>
+  <p>Your rep: {{ birddog.rep_name }} ({{ birddog.dealership_name }} · {{ birddog.dealership_city }})</p>
+  <p>Your link: <code>mycarreferral.com/pbu-{{ birddog.slug }}</code></p>
+  <p>Stats: {{ pending_count }} pending · {{ closed_count }} closed · {{ gifts_count }} gifts</p>
+  <p>Total referrals: {{ referrals|length }}</p>
+  <p><a href="{{ url_for('referral.logout') }}">Log out</a></p>
+  <div class="note">Round 1 scaffold. Round 3 builds first-60-seconds dashboard + active state per §5.3-5.4 + Mockup 2.</div>
+</div>
+{% endblock %}

@@ -40,6 +40,9 @@ def create_app():
     from app.billing.routes import billing_bp
     app.register_blueprint(billing_bp)
 
+    from app.referral import referral_bp
+    app.register_blueprint(referral_bp)
+
     @app.context_processor
     def inject_pending_count():
         try:

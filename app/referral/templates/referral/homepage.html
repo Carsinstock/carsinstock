@@ -1,0 +1,84 @@
+{% extends "referral/base.html" %}
+{% block title %}Start your own car referral business — MyCarReferral{% endblock %}
+{% block content %}
+
+<div class="mcr-topbar">
+  <div class="mcr-topbar-logo">MyCarReferral</div>
+  <a href="{{ url_for('referral.login') }}" class="mcr-topbar-link">Already have a link? <strong>Log in</strong></a>
+</div>
+
+<div style="padding: 36px 24px 28px; text-align: center;">
+  <h1 class="mcr-serif" style="font-size: 28px; color: var(--navy); line-height: 1.15; margin-bottom: 14px;">Start your own<br>car referral business</h1>
+  <p style="font-size: 14px; color: var(--text-2); line-height: 1.55; margin-bottom: 22px;">Know someone buying a car? Connect them to a rep you trust, get a thank-you gift when they buy. No license, no inventory, just your network.</p>
+  <a href="#start" class="mcr-btn mcr-btn-primary-cta" style="text-decoration: none; margin-bottom: 10px;">
+    Start My Referral Business
+    <i class="ti ti-arrow-right" style="font-size: 18px;"></i>
+  </a>
+  <a href="https://carsinstock.com/dealer-register" class="mcr-btn mcr-btn-ghost" style="text-decoration: none; font-size: 12px; color: var(--text-3);">I run a dealership →</a>
+</div>
+
+<div style="padding: 0 24px 28px;">
+  <div class="mcr-label mcr-label-navy" style="margin-bottom: 18px;">How it works</div>
+
+  <div style="display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start;">
+    <div class="mcr-step-num">1</div>
+    <div style="flex: 1; min-width: 0;">
+      <div style="font-size: 13px; font-weight: 500; margin-bottom: 2px;">Sign up free</div>
+      <div style="font-size: 12px; color: var(--text-2); line-height: 1.4;">60 seconds, just your phone number.</div>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start;">
+    <div class="mcr-step-num">2</div>
+    <div style="flex: 1; min-width: 0;">
+      <div style="font-size: 13px; font-weight: 500; margin-bottom: 2px;">Share your link</div>
+      <div style="font-size: 12px; color: var(--text-2); line-height: 1.4;">We give you the posts, texts, and QR code.</div>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start;">
+    <div class="mcr-step-num">3</div>
+    <div style="flex: 1; min-width: 0;">
+      <div style="font-size: 13px; font-weight: 500; margin-bottom: 2px;">Your person buys a car</div>
+      <div style="font-size: 12px; color: var(--text-2); line-height: 1.4;">From a CarsInStock rep in your network.</div>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 12px; margin-bottom: 0; align-items: flex-start;">
+    <div class="mcr-step-num">4</div>
+    <div style="flex: 1; min-width: 0;">
+      <div style="font-size: 13px; font-weight: 500; margin-bottom: 2px;">You get your thank-you gift</div>
+      <div style="font-size: 12px; color: var(--text-2); line-height: 1.4;">Sent by the dealership when the deal closes.</div>
+    </div>
+  </div>
+</div>
+
+<div style="padding: 24px; background: var(--bg-soft); border-top: 0.5px solid var(--border); border-bottom: 0.5px solid var(--border);">
+  <div class="mcr-label mcr-label-navy" style="margin-bottom: 16px;">Who this is for</div>
+  <div style="font-size: 13px; color: var(--navy-deep); line-height: 1.5; margin-bottom: 10px;"><i class="ti ti-users" style="color: var(--gold); margin-right: 6px;"></i>You're the one everyone asks for recommendations.</div>
+  <div style="font-size: 13px; color: var(--navy-deep); line-height: 1.5; margin-bottom: 10px;"><i class="ti ti-briefcase" style="color: var(--gold); margin-right: 6px;"></i>You already work with the public — hairdresser, gym, church, gig work.</div>
+  <div style="font-size: 13px; color: var(--navy-deep); line-height: 1.5;"><i class="ti ti-history" style="color: var(--gold); margin-right: 6px;"></i>You used to sell cars and you still know people who buy.</div>
+</div>
+
+<div style="padding: 24px; text-align: center;">
+  <div class="mcr-trust" style="text-align: left;">
+    <i class="ti ti-gift"></i>
+    <div class="mcr-trust-text">Thank-you gifts typically range <strong>$50 to $500</strong> per closed referral, set by each dealership. You're not paid by us — the dealership sends your gift directly when the deal closes.</div>
+  </div>
+</div>
+
+<div id="start" style="padding: 8px 24px 28px;">
+  <a href="{{ url_for('referral.login') }}" class="mcr-btn mcr-btn-primary-cta" style="text-decoration: none;">
+    Start My Referral Business
+    <i class="ti ti-arrow-right" style="font-size: 18px;"></i>
+  </a>
+  <div style="text-align: center; font-size: 11px; color: var(--text-3); margin-top: 10px;">60 seconds · just your phone number</div>
+</div>
+
+<div class="mcr-footer">
+  <div class="mcr-footer-disclaimer">Thank-you gifts at each dealership's discretion. Subject to applicable state laws. Not a paid finder's fee, brokerage commission, or licensed referral arrangement.</div>
+  <div class="mcr-footer-powered">Powered by CarsInStock</div>
+  <div class="mcr-footer-links"><a href="#">Privacy</a>·<a href="#">Terms</a>·<a href="#">Contact</a></div>
+</div>
+
+{% endblock %}

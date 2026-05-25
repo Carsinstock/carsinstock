@@ -1,0 +1,9 @@
+{% extends "referral/base.html" %}
+{% block title %}Not found — MyCarReferral{% endblock %}
+{% block content %}
+<div class="mcr-stub">
+  <h1>Page not found</h1>
+  <p>The link you followed doesn't lead anywhere. Check with the person who shared it.</p>
+  <p><a href="{{ url_for('referral.homepage') }}">Back to MyCarReferral</a></p>
+</div>
+{% endblock %}

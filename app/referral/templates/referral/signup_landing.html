@@ -1,0 +1,73 @@
+{% extends "referral/base.html" %}
+{% block title %}{{ rep.name }} invited you — Start your car referral business{% endblock %}
+{% block content %}
+
+{% set initials = rep.name.split()|map('first')|join('')|upper %}
+
+<div style="background: var(--navy); padding: 14px 18px; display: flex; align-items: center; gap: 12px;">
+  <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 15px; color: var(--navy); flex-shrink: 0; border: 2px solid var(--gold); box-sizing: border-box;">{{ initials[:2] }}</div>
+  <div style="flex: 1; min-width: 0; color: #FFFFFF;">
+    <div style="font-size: 11px; font-weight: 500; color: var(--gold); letter-spacing: 0.06em; margin-bottom: 2px;">YOU'RE INVITED</div>
+    <div style="font-size: 14px; font-weight: 500;">{{ rep.name }} invited you</div>
+    <div style="font-size: 11px; color: #94A3B8;">{{ rep.dealership_name }} · {{ rep.city }}, {{ rep.state }}</div>
+  </div>
+</div>
+
+<div style="padding: 24px 20px 18px; text-align: center;">
+  <h1 class="mcr-serif" style="font-size: 24px; color: var(--navy); line-height: 1.2; margin-bottom: 12px;">Start your own<br>car referral business</h1>
+  <p style="font-size: 13px; color: var(--text-2); line-height: 1.5;">Connect car buyers to a rep you trust. Get a thank-you gift when the deal closes. No license, no inventory, no upfront cost.</p>
+</div>
+
+<div style="padding: 0 20px 8px;">
+  <div class="mcr-label mcr-label-navy" style="margin-bottom: 12px;">How it works</div>
+
+  <div style="display: flex; gap: 12px; margin-bottom: 14px; align-items: flex-start;">
+    <div class="mcr-step-num">1</div>
+    <div style="flex: 1; min-width: 0;">
+      <div style="font-size: 13px; font-weight: 500; color: var(--navy-deep); margin-bottom: 2px;">Sign up free</div>
+      <div style="font-size: 12px; color: var(--text-2); line-height: 1.4;">60 seconds — just your phone number, no password.</div>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 12px; margin-bottom: 14px; align-items: flex-start;">
+    <div class="mcr-step-num">2</div>
+    <div style="flex: 1; min-width: 0;">
+      <div style="font-size: 13px; font-weight: 500; color: var(--navy-deep); margin-bottom: 2px;">Share your link</div>
+      <div style="font-size: 12px; color: var(--text-2); line-height: 1.4;">We give you the posts, texts, and QR code. Send to anyone you know who's shopping.</div>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start;">
+    <div class="mcr-step-num">3</div>
+    <div style="flex: 1; min-width: 0;">
+      <div style="font-size: 13px; font-weight: 500; color: var(--navy-deep); margin-bottom: 2px;">Get your thank-you gift</div>
+      <div style="font-size: 12px; color: var(--text-2); line-height: 1.4;">Sent directly by the dealership when your person buys a car.</div>
+    </div>
+  </div>
+</div>
+
+<div style="margin: 0 20px 18px;">
+  <div class="mcr-trust">
+    <i class="ti ti-gift"></i>
+    <div class="mcr-trust-text">Thank-you gifts typically range <strong>$50 to $500</strong> per closed referral, set by each dealership.</div>
+  </div>
+</div>
+
+<div style="padding: 0 20px 18px;">
+  <a href="{{ url_for('referral.login') }}" class="mcr-btn mcr-btn-primary-cta" style="text-decoration: none;">
+    Start my free account
+    <i class="ti ti-arrow-right" style="font-size: 18px;"></i>
+  </a>
+  <div style="text-align: center; font-size: 11px; color: var(--text-3); margin-top: 8px;">60 seconds · just your phone number</div>
+</div>
+
+<div style="padding: 0 20px 16px; text-align: center;">
+  <div style="font-size: 12px; color: var(--text-2);">Already have a link? <a href="{{ url_for('referral.login') }}" style="color: var(--navy); font-weight: 500; text-decoration: underline;">Log in</a></div>
+</div>
+
+<div class="mcr-footer">
+  <div class="mcr-footer-disclaimer">Thank-you gifts at each dealership's discretion. Subject to applicable state laws. Not a paid finder's fee, brokerage commission, or licensed referral arrangement.</div>
+  <div class="mcr-footer-powered">Powered by CarsInStock</div>
+</div>
+
+{% endblock %}
