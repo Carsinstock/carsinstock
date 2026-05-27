@@ -88,6 +88,13 @@ def logout():
     return redirect(url_for('referral.homepage'))
 
 
+@referral_bp.route('/signup')
+def signup_placeholder():
+    """Placeholder for organic homepage CTA. Redirects to login until CEO decides
+    the no-rep onboarding path (default rep? dealership picker? need-invite page?)."""
+    return redirect(url_for('referral.login'))
+
+
 # ============ Birddog portal ============
 
 @referral_bp.route('/me')

@@ -1,84 +1,631 @@
 {% extends "referral/base.html" %}
 {% block title %}Start your own car referral business — MyCarReferral{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ============ HERO ============ */
+.hero { padding: 56px 0 64px; position: relative; }
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse 800px 400px at 15% 0%, rgba(200, 155, 75, 0.08), transparent),
+    radial-gradient(ellipse 700px 400px at 100% 30%, rgba(25, 179, 107, 0.05), transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+.hero > .container { position: relative; z-index: 1; }
+.hero-inner { display: grid; grid-template-columns: 1fr; gap: 40px; align-items: center; }
+@media (min-width: 880px) {
+  .hero-inner { grid-template-columns: 1.15fr 1fr; gap: 56px; }
+  .hero { padding: 72px 0 88px; }
+}
+
+.hero h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(40px, 7vw, 64px);
+  font-weight: 500;
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  color: var(--text);
+  margin-top: 22px;
+}
+.hero h1 em { font-style: italic; color: var(--gold); font-weight: 500; }
+
+.hero .subhead {
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--text-muted);
+  margin-top: 22px;
+  max-width: 520px;
+}
+
+.cta-row { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+
+.hero-visual {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: var(--shadow-md);
+}
+.hero-visual-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--gold-dark);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+.hero-visual-header .live-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--green-dark);
+}
+.hero-visual-header .live-dot::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  background: var(--green);
+  border-radius: 50%;
+}
+.hero-link-block {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: var(--bg);
+  border-radius: 12px;
+  margin-bottom: 14px;
+}
+.hero-qr {
+  width: 88px;
+  height: 88px;
+  background: white;
+  border: 3px solid var(--gold);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.hero-qr .ti { font-size: 56px; color: var(--bg-dark); }
+.hero-link-info { min-width: 0; }
+.hero-link-info .label { font-size: 11px; font-weight: 500; color: var(--text-muted); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+.hero-link-info .url { font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 12px; color: var(--text); word-break: break-all; line-height: 1.4; }
+
+.hero-mini-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-light);
+}
+.hero-mini-stat { text-align: center; padding: 4px 0; }
+.hero-mini-stat .num { font-family: var(--font-serif); font-size: 24px; font-weight: 500; color: var(--text); line-height: 1; }
+.hero-mini-stat .num.gold { color: var(--gold-dark); }
+.hero-mini-stat .num.green { color: var(--green); }
+.hero-mini-stat .lbl { font-size: 10px; color: var(--text-muted); margin-top: 6px; }
+
+.trust-strip {
+  margin: 48px 0 0;
+  padding: 28px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+@media (min-width: 720px) {
+  .trust-strip { grid-template-columns: repeat(3, 1fr); gap: 24px; }
+}
+.trust-item { display: flex; align-items: center; gap: 12px; }
+.trust-icon {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.trust-icon.gold { background: var(--bg-gold-tint); color: var(--gold-dark); }
+.trust-icon.green { background: var(--bg-green-tint); color: var(--green-dark); }
+.trust-icon.coral { background: var(--bg-coral-tint); color: var(--coral-dark); }
+.trust-icon .ti { font-size: 19px; }
+.trust-text { font-size: 13.5px; line-height: 1.45; color: var(--text-muted); }
+.trust-text strong { color: var(--text); font-weight: 500; }
+
+/* ============ HOW IT WORKS ============ */
+.steps { display: grid; grid-template-columns: 1fr; gap: 18px; }
+@media (min-width: 760px) { .steps { grid-template-columns: repeat(3, 1fr); gap: 22px; } }
+.step-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 18px;
+  padding: 32px 28px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.step-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.step-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px; height: 48px;
+  border-radius: 14px;
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 500;
+  margin-bottom: 18px;
+}
+.step-badge.gold { background: var(--bg-gold-tint); color: var(--gold-dark); }
+.step-badge.green { background: var(--bg-green-tint); color: var(--green-dark); }
+.step-badge.coral { background: var(--bg-coral-tint); color: var(--coral-dark); }
+.step-title { font-family: var(--font-serif); font-size: 22px; font-weight: 500; line-height: 1.2; color: var(--text); margin-bottom: 10px; }
+.step-body { font-size: 15px; color: var(--text-muted); line-height: 1.55; }
+
+/* ============ PERSONAS ============ */
+.personas { display: grid; grid-template-columns: 1fr; gap: 18px; }
+@media (min-width: 760px) { .personas { grid-template-columns: repeat(3, 1fr); gap: 22px; } }
+.persona-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.persona-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.persona-avatar {
+  width: 58px; height: 58px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 500;
+  margin-bottom: 18px;
+  border: 2px solid;
+}
+.persona-avatar.gold { background: var(--bg-gold-tint); border-color: var(--gold); color: var(--gold-dark); }
+.persona-avatar.green { background: var(--bg-green-tint); border-color: var(--green); color: var(--green-dark); }
+.persona-avatar.coral { background: var(--bg-coral-tint); border-color: var(--coral); color: var(--coral-dark); }
+.persona-name { font-family: var(--font-serif); font-size: 20px; font-weight: 500; color: var(--text); }
+.persona-role { font-size: 13px; color: var(--text-muted); margin-top: 2px; margin-bottom: 16px; }
+.persona-quote { font-size: 15px; line-height: 1.55; color: var(--text); font-style: italic; padding-left: 16px; border-left: 3px solid; }
+.persona-card:nth-child(1) .persona-quote { border-left-color: var(--gold); }
+.persona-card:nth-child(2) .persona-quote { border-left-color: var(--green); }
+.persona-card:nth-child(3) .persona-quote { border-left-color: var(--coral); }
+
+/* ============ BENEFITS ============ */
+.benefits { display: grid; grid-template-columns: 1fr; gap: 16px; }
+@media (min-width: 600px) { .benefits { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 960px) { .benefits { grid-template-columns: repeat(3, 1fr); gap: 18px; } }
+.benefit-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 26px 24px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.benefit-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.benefit-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.benefit-icon.green { background: var(--bg-green-tint); color: var(--green-dark); }
+.benefit-icon.gold { background: var(--bg-gold-tint); color: var(--gold-dark); }
+.benefit-icon.coral { background: var(--bg-coral-tint); color: var(--coral-dark); }
+.benefit-icon .ti { font-size: 21px; }
+.benefit-body { min-width: 0; }
+.benefit-title { font-size: 15.5px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+.benefit-desc { font-size: 13.5px; line-height: 1.5; color: var(--text-muted); }
+
+/* ============ FAQ ============ */
+.faq-list { margin-top: 24px; }
+.faq-item { border-bottom: 1px solid var(--border); }
+.faq-q {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 22px 0;
+  cursor: pointer;
+  font-family: var(--font-serif);
+  font-size: 19px;
+  font-weight: 500;
+  color: var(--text);
+  gap: 24px;
+}
+.faq-q:hover { color: var(--green-dark); }
+.faq-q .ti { font-size: 24px; color: var(--text-muted); transition: transform 0.2s ease; flex-shrink: 0; }
+.faq-item[open] .faq-q { color: var(--green-dark); }
+.faq-item[open] .faq-q .ti { transform: rotate(45deg); color: var(--green); }
+.faq-a { padding: 0 0 22px; font-size: 15px; line-height: 1.6; color: var(--text-muted); max-width: 680px; }
+
+/* ============ FINAL CTA ============ */
+.final-cta-block {
+  background: var(--bg-dark);
+  border-radius: 24px;
+  padding: 64px 36px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 30px 60px rgba(11, 20, 33, 0.18);
+}
+.final-cta-block::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%; height: 200%;
+  background:
+    radial-gradient(ellipse 400px 200px at 20% 20%, rgba(200, 155, 75, 0.12), transparent),
+    radial-gradient(ellipse 400px 200px at 80% 80%, rgba(25, 179, 107, 0.10), transparent);
+  pointer-events: none;
+}
+.final-cta-block > * { position: relative; z-index: 1; }
+.final-cta-block .pill { background: rgba(255, 107, 90, 0.15); border-color: var(--coral); color: var(--coral); }
+.final-cta-block h2 {
+  font-family: var(--font-serif);
+  font-size: clamp(32px, 5vw, 48px);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--text-on-dark);
+  margin: 20px 0 16px;
+}
+.final-cta-block h2 em { font-style: italic; color: var(--gold); font-weight: 500; }
+.final-cta-block p { font-size: 17px; color: var(--text-on-dark-muted); max-width: 540px; margin: 0 auto 32px; line-height: 1.5; }
+
+/* ============ FOOTER ============ */
+.footer { background: var(--bg-darker); color: var(--text-on-dark-muted); padding: 56px 0 28px; }
+.footer-grid { display: grid; grid-template-columns: 1fr; gap: 32px; margin-bottom: 32px; }
+@media (min-width: 720px) { .footer-grid { grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; } }
+.footer-brand .logo { color: var(--text-on-dark); font-size: 24px; }
+.footer-brand p { font-size: 13.5px; color: var(--text-on-dark-muted); line-height: 1.6; margin-top: 12px; max-width: 320px; }
+.footer-col h4 { font-size: 12px; font-weight: 500; color: var(--text-on-dark); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 16px; }
+.footer-col ul { list-style: none; }
+.footer-col li { margin-bottom: 10px; }
+.footer-col a { font-size: 13.5px; color: var(--text-on-dark-muted); transition: color 0.15s; }
+.footer-col a:hover { color: var(--text-on-dark); }
+.footer-legal { border-top: 1px solid rgba(255,255,255,0.08); padding-top: 24px; display: flex; flex-direction: column; gap: 16px; }
+@media (min-width: 720px) { .footer-legal { flex-direction: row; justify-content: space-between; align-items: center; } }
+.footer-legal .powered { font-size: 12px; color: var(--text-on-dark); font-weight: 500; }
+.footer-legal .copyright { font-size: 12px; color: var(--text-on-dark-muted); }
+.footer-disclaimer { font-size: 11.5px; line-height: 1.55; color: var(--text-on-dark-muted); background: rgba(255,255,255,0.04); padding: 14px 16px; border-radius: 8px; margin-top: 20px; max-width: 920px; }
+</style>
+{% endblock %}
+
 {% block content %}
 
-<div class="mcr-topbar">
-  <div class="mcr-topbar-logo">MyCarReferral</div>
-  <a href="{{ url_for('referral.login') }}" class="mcr-topbar-link">Already have a link? <strong>Log in</strong></a>
-</div>
-
-<div style="padding: 36px 24px 28px; text-align: center;">
-  <h1 class="mcr-serif" style="font-size: 28px; color: var(--navy); line-height: 1.15; margin-bottom: 14px;">Start your own<br>car referral business</h1>
-  <p style="font-size: 14px; color: var(--text-2); line-height: 1.55; margin-bottom: 22px;">Know someone buying a car? Connect them to a rep you trust, get a thank-you gift when they buy. No license, no inventory, just your network.</p>
-  <a href="#start" class="mcr-btn mcr-btn-primary-cta" style="text-decoration: none; margin-bottom: 10px;">
-    Start My Referral Business
-    <i class="ti ti-arrow-right" style="font-size: 18px;"></i>
-  </a>
-  <a href="https://carsinstock.com/dealer-register" class="mcr-btn mcr-btn-ghost" style="text-decoration: none; font-size: 12px; color: var(--text-3);">I run a dealership →</a>
-</div>
-
-<div style="padding: 0 24px 28px;">
-  <div class="mcr-label mcr-label-navy" style="margin-bottom: 18px;">How it works</div>
-
-  <div style="display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start;">
-    <div class="mcr-step-num">1</div>
-    <div style="flex: 1; min-width: 0;">
-      <div style="font-size: 13px; font-weight: 500; margin-bottom: 2px;">Sign up free</div>
-      <div style="font-size: 12px; color: var(--text-2); line-height: 1.4;">60 seconds, just your phone number.</div>
+<!-- NAV -->
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="{{ url_for('referral.homepage') }}" class="logo-lockup">
+      <span class="logo">My<span class="logo-mark">Car</span>Referral</span>
+      <span class="logo-tagline">Car Connections Start Here</span>
+    </a>
+    <div class="nav-actions">
+      <a href="{{ url_for('referral.login') }}" class="nav-link">Log in</a>
+      <a href="#signup" class="nav-cta">Get my link</a>
     </div>
   </div>
+</nav>
 
-  <div style="display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start;">
-    <div class="mcr-step-num">2</div>
-    <div style="flex: 1; min-width: 0;">
-      <div style="font-size: 13px; font-weight: 500; margin-bottom: 2px;">Share your link</div>
-      <div style="font-size: 12px; color: var(--text-2); line-height: 1.4;">We give you the posts, texts, and QR code.</div>
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-inner">
+
+      <div>
+        <span class="pill">
+          <i class="ti ti-sparkles" aria-hidden="true"></i>
+          By invitation only
+        </span>
+
+        <h1>Start your <em>own</em><br>car referral<br>business.</h1>
+
+        <p class="subhead">Connect car shoppers to a rep you trust. Get a thank-you gift when the deal closes. No license. No inventory. Just your network.</p>
+
+        <div class="cta-row">
+          <a href="#signup" class="btn-primary">
+            Get my link
+            <i class="ti ti-arrow-right" aria-hidden="true"></i>
+          </a>
+          <a href="#how" class="btn-outline">See how it works</a>
+        </div>
+        <div class="cta-microcopy">No card. No password. Ready in 60 seconds.</div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="hero-visual-header">
+          <span>Your asset, ready to go</span>
+          <span class="live-dot">Live</span>
+        </div>
+        <div class="hero-link-block">
+          <div class="hero-qr">
+            <i class="ti ti-qrcode" aria-hidden="true"></i>
+          </div>
+          <div class="hero-link-info">
+            <div class="label">Your link</div>
+            <div class="url">mycarreferral.com/<br>pbu-sarahjones</div>
+          </div>
+        </div>
+        <div class="hero-mini-stats">
+          <div class="hero-mini-stat">
+            <div class="num">7</div>
+            <div class="lbl">Active</div>
+          </div>
+          <div class="hero-mini-stat">
+            <div class="num green">3</div>
+            <div class="lbl">Sold</div>
+          </div>
+          <div class="hero-mini-stat">
+            <div class="num gold">$650</div>
+            <div class="lbl">Earned</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="trust-strip">
+      <div class="trust-item">
+        <div class="trust-icon gold"><i class="ti ti-gift" aria-hidden="true"></i></div>
+        <div class="trust-text"><strong>$50–$500</strong> typical thank-you gifts per closed deal</div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon green"><i class="ti ti-shield-check" aria-hidden="true"></i></div>
+        <div class="trust-text"><strong>No license, no inventory.</strong> You're a connector, not a salesperson.</div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon coral"><i class="ti ti-bolt" aria-hidden="true"></i></div>
+        <div class="trust-text"><strong>Real tracking.</strong> See every step from share to sold.</div>
+      </div>
     </div>
   </div>
+</section>
 
-  <div style="display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start;">
-    <div class="mcr-step-num">3</div>
-    <div style="flex: 1; min-width: 0;">
-      <div style="font-size: 13px; font-weight: 500; margin-bottom: 2px;">Your person buys a car</div>
-      <div style="font-size: 12px; color: var(--text-2); line-height: 1.4;">From a CarsInStock rep in your network.</div>
+<!-- HOW IT WORKS -->
+<section class="section section-white" id="how">
+  <div class="container">
+    <span class="section-eyebrow gold">How it works</span>
+    <h2 class="section-title">Three steps. <em class="green">That's it.</em></h2>
+    <p class="section-subtitle">The simplest way to turn your network into income — without becoming a salesperson.</p>
+
+    <div class="steps">
+      <div class="step-card">
+        <div class="step-badge gold">01</div>
+        <h3 class="step-title">Sign up free</h3>
+        <p class="step-body">60 seconds. Just your phone number. No password. No card. We don't sell your info.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-badge green">02</div>
+        <h3 class="step-title">Share your business</h3>
+        <p class="step-body">Use our ready-to-post graphics, scripts, advertising templates, and QR code to easily share with anyone you know who may be in the market for a car.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-badge coral">03</div>
+        <h3 class="step-title">Get your gift</h3>
+        <p class="step-body">When your person buys a car, the dealership sends you a thank-you gift directly. We track every step.</p>
+      </div>
     </div>
   </div>
+</section>
 
-  <div style="display: flex; gap: 12px; margin-bottom: 0; align-items: flex-start;">
-    <div class="mcr-step-num">4</div>
-    <div style="flex: 1; min-width: 0;">
-      <div style="font-size: 13px; font-weight: 500; margin-bottom: 2px;">You get your thank-you gift</div>
-      <div style="font-size: 12px; color: var(--text-2); line-height: 1.4;">Sent by the dealership when the deal closes.</div>
+<!-- WHO THIS IS FOR -->
+<section class="section section-warm">
+  <div class="container">
+    <span class="section-eyebrow">Who this is for</span>
+    <h2 class="section-title">If people <em class="coral">already trust you</em>, this works.</h2>
+    <p class="section-subtitle">You don't need sales experience. You need a network — and most people have more of one than they think.</p>
+
+    <div class="personas">
+      <div class="persona-card">
+        <div class="persona-avatar gold">SC</div>
+        <div class="persona-name">Sarah, 38</div>
+        <div class="persona-role">Hairdresser · Toms River, NJ</div>
+        <p class="persona-quote">"Half my clients mention car shopping during their appointment. Now I have something useful to say back."</p>
+      </div>
+      <div class="persona-card">
+        <div class="persona-avatar green">MD</div>
+        <div class="persona-name">Marcus, 52</div>
+        <div class="persona-role">Retired sales · Brick, NJ</div>
+        <p class="persona-quote">"I still get asked for car advice every week. The thank-you gift is nice — but mostly I like staying in the game."</p>
+      </div>
+      <div class="persona-card">
+        <div class="persona-avatar coral">TR</div>
+        <div class="persona-name">Tina, 29</div>
+        <div class="persona-role">Detailer + parent · Lakewood, NJ</div>
+        <p class="persona-quote">"Anything that turns relationships I already have into income beats picking up another job."</p>
+      </div>
     </div>
   </div>
-</div>
+</section>
 
-<div style="padding: 24px; background: var(--bg-soft); border-top: 0.5px solid var(--border); border-bottom: 0.5px solid var(--border);">
-  <div class="mcr-label mcr-label-navy" style="margin-bottom: 16px;">Who this is for</div>
-  <div style="font-size: 13px; color: var(--navy-deep); line-height: 1.5; margin-bottom: 10px;"><i class="ti ti-users" style="color: var(--gold); margin-right: 6px;"></i>You're the one everyone asks for recommendations.</div>
-  <div style="font-size: 13px; color: var(--navy-deep); line-height: 1.5; margin-bottom: 10px;"><i class="ti ti-briefcase" style="color: var(--gold); margin-right: 6px;"></i>You already work with the public — hairdresser, gym, church, gig work.</div>
-  <div style="font-size: 13px; color: var(--navy-deep); line-height: 1.5;"><i class="ti ti-history" style="color: var(--gold); margin-right: 6px;"></i>You used to sell cars and you still know people who buy.</div>
-</div>
+<!-- WHY JOIN -->
+<section class="section section-white">
+  <div class="container">
+    <span class="section-eyebrow green">Why join</span>
+    <h2 class="section-title">Built for <em>connectors</em>, not salespeople.</h2>
+    <p class="section-subtitle">Everything you need to run a referral business. Nothing you don't.</p>
 
-<div style="padding: 24px; text-align: center;">
-  <div class="mcr-trust" style="text-align: left;">
-    <i class="ti ti-gift"></i>
-    <div class="mcr-trust-text">Thank-you gifts typically range <strong>$50 to $500</strong> per closed referral, set by each dealership. You're not paid by us — the dealership sends your gift directly when the deal closes.</div>
+    <div class="benefits">
+      <div class="benefit-card">
+        <div class="benefit-icon gold"><i class="ti ti-gift" aria-hidden="true"></i></div>
+        <div class="benefit-body">
+          <div class="benefit-title">Real thank-you gifts</div>
+          <div class="benefit-desc">$50–$500 per closed deal, set by each dealership. Sent directly to you.</div>
+        </div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon green"><i class="ti ti-id-badge" aria-hidden="true"></i></div>
+        <div class="benefit-body">
+          <div class="benefit-title">No license required</div>
+          <div class="benefit-desc">You're a connector, not a salesperson. No paperwork, no test, no quotas.</div>
+        </div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon coral"><i class="ti ti-clock" aria-hidden="true"></i></div>
+        <div class="benefit-body">
+          <div class="benefit-title">Work on your time</div>
+          <div class="benefit-desc">Share when it's natural. No targets. No managers. Your network, your pace.</div>
+        </div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon green"><i class="ti ti-template" aria-hidden="true"></i></div>
+        <div class="benefit-body">
+          <div class="benefit-title">We do the heavy lifting</div>
+          <div class="benefit-desc">Ready-to-post graphics, scripts, and a QR code. Tap-to-share anywhere.</div>
+        </div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon coral"><i class="ti ti-chart-dots" aria-hidden="true"></i></div>
+        <div class="benefit-body">
+          <div class="benefit-title">See every step</div>
+          <div class="benefit-desc">From share to sold. Track every referral in real time so you know what's working.</div>
+        </div>
+      </div>
+      <div class="benefit-card">
+        <div class="benefit-icon gold"><i class="ti ti-lock" aria-hidden="true"></i></div>
+        <div class="benefit-body">
+          <div class="benefit-title">Your people stay yours</div>
+          <div class="benefit-desc">Birddogs you sign up are yours for life — across every dealership you ever work with.</div>
+        </div>
+      </div>
+    </div>
   </div>
-</div>
+</section>
 
-<div id="start" style="padding: 8px 24px 28px;">
-  <a href="{{ url_for('referral.login') }}" class="mcr-btn mcr-btn-primary-cta" style="text-decoration: none;">
-    Start My Referral Business
-    <i class="ti ti-arrow-right" style="font-size: 18px;"></i>
-  </a>
-  <div style="text-align: center; font-size: 11px; color: var(--text-3); margin-top: 10px;">60 seconds · just your phone number</div>
-</div>
+<!-- FAQ -->
+<section class="section section-warm" id="faq">
+  <div class="container-narrow">
+    <span class="section-eyebrow gold">Questions</span>
+    <h2 class="section-title">Everything you're <em class="green">actually</em> wondering.</h2>
+    <p class="section-subtitle">If we missed one, ask us. We answer every question personally.</p>
 
-<div class="mcr-footer">
-  <div class="mcr-footer-disclaimer">Thank-you gifts at each dealership's discretion. Subject to applicable state laws. Not a paid finder's fee, brokerage commission, or licensed referral arrangement.</div>
-  <div class="mcr-footer-powered">Powered by CarsInStock</div>
-  <div class="mcr-footer-links"><a href="#">Privacy</a>·<a href="#">Terms</a>·<a href="#">Contact</a></div>
-</div>
+    <div class="faq-list">
+
+      <details class="faq-item" open>
+        <summary class="faq-q">Who actually sends the thank-you gift?<i class="ti ti-plus" aria-hidden="true"></i></summary>
+        <div class="faq-a">The dealership. Directly to you. We don't process the gift — the dealership mails the check, gift card, or store credit when the deal closes. We just track it and let you know it's on the way.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">Is this really free?<i class="ti ti-plus" aria-hidden="true"></i></summary>
+        <div class="faq-a">Yes. No signup fee. No subscription. No card needed. The dealership pays the thank-you gift out of their marketing budget when a referred deal closes. We're paid by the dealerships, not by you.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">Do I need a license to do this?<i class="ti ti-plus" aria-hidden="true"></i></summary>
+        <div class="faq-a">No. You're not selling cars. You're not a broker. You're a connector — same as if a friend recommended a doctor or a contractor. The thank-you gift is exactly that: a thank you, not a commission.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">When does the gift arrive?<i class="ti ti-plus" aria-hidden="true"></i></summary>
+        <div class="faq-a">Usually within 7–14 days of the deal closing, depending on the dealership's process. You'll see the gift confirmation in your dashboard the moment they mark it sent — with who sent it, the date, and how.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">What counts as a referral?<i class="ti ti-plus" aria-hidden="true"></i></summary>
+        <div class="faq-a">Anyone who buys a car through your tracking link or the rep you sent them to. Attribution lasts 90 days, so even if your friend takes their time deciding, you still get credit if they buy.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">What if my person doesn't buy?<i class="ti ti-plus" aria-hidden="true"></i></summary>
+        <div class="faq-a">No deal, no gift — but no cost to you either. You don't owe anyone anything. The system only pays when a real sale happens.</div>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">Can I work with more than one dealership?<i class="ti ti-plus" aria-hidden="true"></i></summary>
+        <div class="faq-a">Yes. MyCarReferral doesn't cap your opportunities, but you must be invited by a dealership to participate in its program.</div>
+      </details>
+
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="section" id="signup">
+  <div class="container-narrow">
+    <div class="final-cta-block">
+      <span class="pill">
+        <i class="ti ti-sparkles" aria-hidden="true"></i>
+        By invitation only
+      </span>
+      <h2>Your network is more valuable than <em>you think.</em></h2>
+      <p>Sign up free. Get your link in 60 seconds. Start Your Business Today!</p>
+      <a href="/signup" class="btn-primary">
+        Get my link
+        <i class="ti ti-arrow-right" aria-hidden="true"></i>
+      </a>
+      <div class="cta-microcopy" style="color: var(--text-on-dark-muted); margin-top: 14px;">No card. No password. Ready in 60 seconds.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="{{ url_for('referral.homepage') }}" class="logo-lockup">
+          <span class="logo">My<span class="logo-mark">Car</span>Referral</span>
+          <span class="logo-tagline">Car Connections Start Here</span>
+        </a>
+        <p>The first platform built for ordinary people to run their own car referral business. Built for connectors. Backed by real dealerships.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Platform</h4>
+        <ul>
+          <li><a href="#how">How it works</a></li>
+          <li><a href="{{ url_for('referral.login') }}">Log in</a></li>
+          <li><a href="/signup">Sign up</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="/about">About</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="https://carsinstock.com">For dealerships</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="/privacy">Privacy</a></li>
+          <li><a href="/terms">Terms</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-disclaimer">
+      Thank-you gifts at each dealership's discretion. Subject to applicable state laws. Not a paid finder's fee, brokerage commission, or licensed referral arrangement. CarsInStock LLC and MyCarReferral are technology platforms that facilitate communication and tracking only — they do not process, fund, or fulfill gifts.
+    </div>
+
+    <div class="footer-legal">
+      <div class="powered">Powered by CarsInStock</div>
+      <div class="copyright">© 2026 CarsInStock LLC. All rights reserved.</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+document.querySelectorAll('.faq-item').forEach(item => {
+  item.addEventListener('toggle', () => {
+    if (item.open) {
+      document.querySelectorAll('.faq-item').forEach(other => {
+        if (other !== item) other.open = false;
+      });
+    }
+  });
+});
+</script>
 
 {% endblock %}

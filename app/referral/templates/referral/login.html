@@ -1,14 +1,41 @@
 {% extends "referral/base.html" %}
 {% block title %}Log in — MyCarReferral{% endblock %}
 {% block content %}
-<div class="mcr-stub">
-  <h1>Log in</h1>
-  {% if error %}<div class="note" style="background: #FEE2E2; border-left-color: #DC2626;">{{ error }}</div>{% endif %}
-  <form method="POST" action="">
-    <label style="display:block; margin-bottom: 8px; font-size: 13px; color: #475569;">Phone number</label>
-    <input type="tel" name="phone" required style="width: 100%; padding: 12px; border: 0.5px solid #E2E8F0; border-radius: 8px; font-size: 14px; box-sizing: border-box; margin-bottom: 12px;">
-    <button type="submit" style="width: 100%; padding: 13px; background: #1E293B; color: #FFFFFF; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer;">Log in</button>
-  </form>
-  <div class="note">Round 1 scaffold. Round 2 styles per design system.</div>
+
+<div class="mcr-topbar">
+  <a href="{{ url_for('referral.homepage') }}" class="mcr-topbar-logo" style="text-decoration: none;">MyCarReferral</a>
+  <a href="{{ url_for('referral.homepage') }}" class="mcr-topbar-link">New here? <strong>Sign up</strong></a>
 </div>
+
+<div style="padding: 40px 24px 24px;">
+  <h1 class="mcr-serif" style="font-size: 28px; color: var(--navy); line-height: 1.15; margin-bottom: 10px;">Log in</h1>
+  <p style="font-size: 14px; color: var(--text-2); line-height: 1.5; margin-bottom: 28px;">Enter the phone number you used when you signed up. No password needed.</p>
+
+  {% if error %}
+  <div style="padding: 12px 14px; background: #FEE2E2; border-radius: var(--r-md); border-left: 3px solid #DC2626; margin-bottom: 18px;">
+    <div style="font-size: 13px; color: #991B1B; line-height: 1.4;">{{ error }}</div>
+  </div>
+  {% endif %}
+
+  <form method="POST" action="">
+    <label style="display:block; font-size: 11px; font-weight: 500; color: var(--text-2); margin-bottom: 8px; letter-spacing: 0.06em;">PHONE NUMBER</label>
+    <input type="tel" name="phone" required class="mcr-input" placeholder="(555) 123-4567" inputmode="tel" autofocus style="margin-bottom: 16px;">
+    <button type="submit" class="mcr-btn mcr-btn-primary">
+      Log in
+      <i class="ti ti-arrow-right" style="font-size: 18px;"></i>
+    </button>
+  </form>
+</div>
+
+<div style="padding: 0 24px 28px; text-align: center;">
+  <p style="font-size: 12px; color: var(--text-3);">
+    Don't have a referral link yet? <a href="{{ url_for('referral.homepage') }}" style="color: var(--navy); font-weight: 500; text-decoration: underline;">Get yours here</a>
+  </p>
+</div>
+
+<div class="mcr-footer">
+  <div class="mcr-footer-disclaimer">Thank-you gifts at each dealership's discretion. Subject to applicable state laws. Not a paid finder's fee, brokerage commission, or licensed referral arrangement.</div>
+  <div class="mcr-footer-powered">Powered by CarsInStock</div>
+</div>
+
 {% endblock %}
