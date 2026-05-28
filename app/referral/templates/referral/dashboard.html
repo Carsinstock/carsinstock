@@ -1,14 +1,616 @@
-{% extends "referral/base.html" %}
-{% block title %}Your Referral Business — MyCarReferral{% endblock %}
-{% block content %}
-<div class="mcr-stub">
-  <h1>Your Referral Business</h1>
-  <p>Hi, {{ birddog.name }}</p>
-  <p>Your rep: {{ birddog.rep_name }} ({{ birddog.dealership_name }} · {{ birddog.dealership_city }})</p>
-  <p>Your link: <code>mycarreferral.com/pbu-{{ birddog.slug }}</code></p>
-  <p>Stats: {{ pending_count }} pending · {{ closed_count }} closed · {{ gifts_count }} gifts</p>
-  <p>Total referrals: {{ referrals|length }}</p>
-  <p><a href="{{ url_for('referral.logout') }}">Log out</a></p>
-  <div class="note">Round 1 scaffold. Round 3 builds first-60-seconds dashboard + active state per §5.3-5.4 + Mockup 2.</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Dashboard · MyCarReferral</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" rel="stylesheet">
+
+<style>
+/* ============ RESET ============ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+img, svg { display: block; max-width: 100%; }
+button { font-family: inherit; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+
+/* ============ TOKENS (match homepage v4) ============ */
+:root {
+  --bg: #FAF7F2;
+  --bg-warm: #F5EFE3;
+  --bg-card: #FFFFFF;
+  --bg-dark: #162334;
+  --bg-darker: #0B1421;
+  --bg-gold-tint: #FBF1DD;
+  --bg-green-tint: #E6F6EE;
+  --bg-coral-tint: #FFEDEA;
+
+  --text: #0F172A;
+  --text-muted: #5B6474;
+  --text-light: #9AA1AE;
+  --text-on-dark: #FFFFFF;
+  --text-on-dark-muted: #94A3B8;
+
+  --gold: #C89B4B;
+  --gold-dark: #9A6F22;
+  --green: #19B36B;
+  --green-dark: #0E8A50;
+  --green-deep: #065F46;
+  --coral: #FF6B5A;
+  --coral-dark: #D04A3B;
+
+  --border: #E7DDCC;
+  --border-light: #EFE7D8;
+
+  --font-serif: 'Fraunces', Georgia, serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 2px 8px rgba(15, 23, 42, 0.03);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.05), 0 8px 32px rgba(15, 23, 42, 0.04);
+  --shadow-green: 0 6px 18px rgba(25, 179, 107, 0.30), 0 2px 4px rgba(25, 179, 107, 0.20);
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+.container { width: 100%; max-width: 760px; margin: 0 auto; padding: 0 24px; }
+
+/* ============ NAV ============ */
+.nav {
+  padding: 18px 0;
+  background: rgba(250, 247, 242, 0.85);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.nav-inner { display: flex; align-items: center; justify-content: space-between; }
+.nav-inner .container { display: flex; align-items: center; justify-content: space-between; }
+.logo-lockup { display: flex; flex-direction: column; gap: 2px; line-height: 1; }
+.logo {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+.logo .logo-mark { color: var(--gold); font-style: italic; }
+.logo-tagline {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--gold-dark);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+.nav-actions { display: flex; align-items: center; gap: 18px; font-size: 14px; }
+.nav-link { color: var(--text-muted); font-weight: 500; }
+.nav-link:hover { color: var(--text); }
+
+/* ============ DASHBOARD HEADER ============ */
+.dash-header { padding: 36px 0 24px; }
+.dash-greeting-eyebrow {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--gold-dark);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.dash-greeting {
+  font-family: var(--font-serif);
+  font-size: clamp(28px, 5vw, 38px);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+.dash-greeting em { font-style: italic; color: var(--gold); }
+.dash-rep-line {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-top: 8px;
+}
+.dash-rep-line strong { color: var(--text); font-weight: 500; }
+
+/* ============ TRACKING LINK CARD (the hero of this page) ============ */
+.link-card {
+  background: var(--bg-dark);
+  border-radius: 18px;
+  padding: 28px 24px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+.link-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 400px 200px at 15% 10%, rgba(200, 155, 75, 0.14), transparent),
+    radial-gradient(ellipse 400px 220px at 90% 90%, rgba(25, 179, 107, 0.12), transparent);
+  pointer-events: none;
+}
+.link-card > * { position: relative; z-index: 1; }
+.link-card-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--gold);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.link-card-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.link-card-qr {
+  width: 76px;
+  height: 76px;
+  background: white;
+  border: 3px solid var(--gold);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.link-card-qr .ti { font-size: 48px; color: var(--bg-dark); }
+.link-card-url-block { min-width: 0; flex: 1; }
+.link-card-url-sublabel {
+  font-size: 11px;
+  color: var(--text-on-dark-muted);
+  margin-bottom: 4px;
+}
+.link-card-url {
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-on-dark);
+  word-break: break-all;
+  line-height: 1.35;
+}
+.link-card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.link-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 13px 16px;
+  border-radius: 10px;
+  font-size: 14.5px;
+  font-weight: 500;
+  border: 0;
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+}
+.link-btn .ti { font-size: 17px; }
+.link-btn-primary {
+  background: var(--green);
+  color: var(--text-on-dark);
+  box-shadow: var(--shadow-green);
+}
+.link-btn-primary:hover { transform: translateY(-2px); }
+.link-btn-secondary {
+  background: rgba(255,255,255,0.10);
+  color: var(--text-on-dark);
+  border: 1px solid rgba(255,255,255,0.18);
+}
+.link-btn-secondary:hover { background: rgba(255,255,255,0.16); }
+
+/* ============ STATS ROW ============ */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 14px;
+  padding: 18px 16px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+.stat-num {
+  font-family: var(--font-serif);
+  font-size: 32px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--text);
+}
+.stat-num.green { color: var(--green); }
+.stat-num.gold { color: var(--gold-dark); }
+.stat-label {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin-top: 6px;
+  letter-spacing: 0.02em;
+}
+
+/* ============ SECTION HEADING ============ */
+.section-heading {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 16px;
+  margin-top: 8px;
+}
+
+/* ============ EMPTY STATE ============ */
+.empty-state {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 18px;
+  padding: 36px 28px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+}
+.empty-state-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--bg-green-tint);
+  color: var(--green-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+}
+.empty-state-icon .ti { font-size: 30px; }
+.empty-state-title {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.empty-state-body {
+  font-size: 14.5px;
+  color: var(--text-muted);
+  line-height: 1.55;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+/* ============ REFERRAL LIST ============ */
+.referral-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.referral-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 14px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  box-shadow: var(--shadow-sm);
+}
+.referral-info { min-width: 0; }
+.referral-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+}
+.referral-date {
+  font-size: 12.5px;
+  color: var(--text-light);
+  margin-top: 2px;
+}
+.referral-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.referral-status.pending {
+  background: var(--bg-gold-tint);
+  color: var(--gold-dark);
+}
+.referral-status.closed {
+  background: var(--bg-green-tint);
+  color: var(--green-deep);
+}
+.referral-status.gift {
+  background: var(--bg-coral-tint);
+  color: var(--coral-dark);
+}
+.referral-status .ti { font-size: 13px; }
+
+/* ============ SHARE TOOLS ============ */
+.share-tools {
+  background: var(--bg-warm);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 32px;
+}
+.share-tools-title {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.share-tools-sub {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+}
+.share-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+.share-link-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  transition: border-color 0.15s, transform 0.15s;
+}
+.share-link-btn:hover { border-color: var(--green); transform: translateY(-1px); }
+.share-link-btn .ti { font-size: 19px; color: var(--green-dark); }
+
+/* ============ TOAST ============ */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: var(--bg-dark);
+  color: var(--text-on-dark);
+  padding: 13px 22px;
+  border-radius: 100px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 10px 30px rgba(11,20,33,0.3);
+  opacity: 0;
+  transition: transform 0.3s, opacity 0.3s;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+.toast .ti { font-size: 18px; color: var(--green); }
+
+/* ============ FOOTER ============ */
+.footer {
+  background: var(--bg-darker);
+  color: var(--text-on-dark-muted);
+  padding: 32px 0 24px;
+  text-align: center;
+}
+.footer .logo { color: var(--text-on-dark); font-size: 20px; }
+.footer .logo-mark { color: var(--gold); font-style: italic; }
+.footer-legal { font-size: 12px; margin-top: 12px; }
+.footer-legal .powered { color: var(--text-on-dark); font-weight: 500; }
+.footer-disclaimer {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--text-on-dark-muted);
+  max-width: 620px;
+  margin: 14px auto 0;
+}
+
+/* ============ MOBILE ============ */
+@media (max-width: 600px) {
+  .nav { padding: 14px 0; }
+  .logo-tagline { display: none; }
+  .logo { font-size: 20px; }
+  .nav-actions { gap: 12px; }
+  .nav-link { font-size: 13px; white-space: nowrap; }
+  .link-card-actions { grid-template-columns: 1fr; }
+  .share-grid { grid-template-columns: 1fr; }
+  .stat-num { font-size: 26px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="/" class="logo-lockup">
+      <span class="logo">My<span class="logo-mark">Car</span>Referral</span>
+      <span class="logo-tagline">Car Connections Start Here</span>
+    </a>
+    <div class="nav-actions">
+      <a href="/logout" class="nav-link">Log out</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- ============ HEADER ============ -->
+  <header class="dash-header">
+    <div class="dash-greeting-eyebrow">Your dashboard</div>
+    <h1 class="dash-greeting">Welcome back, <em>{{ birddog.name.split()[0] }}</em>.</h1>
+    {% if birddog.rep_name %}
+    <p class="dash-rep-line">Referring through <strong>{{ birddog.rep_name }}</strong>{% if birddog.dealership_name %} at {{ birddog.dealership_name }}{% endif %}.</p>
+    {% endif %}
+  </header>
+
+  <!-- ============ TRACKING LINK CARD ============ -->
+  <div class="link-card">
+    <div class="link-card-label">Your referral link</div>
+    <div class="link-card-row">
+      <div class="link-card-qr">
+        <i class="ti ti-qrcode" aria-hidden="true"></i>
+      </div>
+      <div class="link-card-url-block">
+        <div class="link-card-url-sublabel">Share this anywhere</div>
+        <div class="link-card-url" id="tracking-url">mycarreferral.com/{{ birddog.tracking_slug }}</div>
+      </div>
+    </div>
+    <div class="link-card-actions">
+      <button class="link-btn link-btn-primary" onclick="copyLink()">
+        <i class="ti ti-copy" aria-hidden="true"></i>
+        Copy link
+      </button>
+      <a class="link-btn link-btn-secondary" href="sms:?&body=Looking for a car? I can connect you with someone I trust: https://mycarreferral.com/{{ birddog.tracking_slug }}">
+        <i class="ti ti-share" aria-hidden="true"></i>
+        Share
+      </a>
+    </div>
+  </div>
+
+  <!-- ============ STATS ROW ============ -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-num gold">{{ pending_count }}</div>
+      <div class="stat-label">Pending</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num green">{{ closed_count }}</div>
+      <div class="stat-label">Sold</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">{{ gifts_count }}</div>
+      <div class="stat-label">Gifts received</div>
+    </div>
+  </div>
+
+  {% if has_activity %}
+  <!-- ============ ACTIVE STATE: REFERRAL LIST ============ -->
+  <h2 class="section-heading">Your referrals</h2>
+  <div class="referral-list">
+    {% for r in referrals %}
+    <div class="referral-item">
+      <div class="referral-info">
+        <div class="referral-name">{{ r.name }}</div>
+        <div class="referral-date">Referred {{ r.created_display }}</div>
+      </div>
+      {% if r.status == 'gift_sent' %}
+        <span class="referral-status gift"><i class="ti ti-gift" aria-hidden="true"></i> Gift sent</span>
+      {% elif r.status == 'closed' or r.status == 'sold' %}
+        <span class="referral-status closed"><i class="ti ti-circle-check" aria-hidden="true"></i> Sold</span>
+      {% else %}
+        <span class="referral-status pending"><i class="ti ti-clock" aria-hidden="true"></i> Pending</span>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <!-- ============ EMPTY STATE ============ -->
+  <div class="empty-state">
+    <div class="empty-state-icon">
+      <i class="ti ti-send" aria-hidden="true"></i>
+    </div>
+    <div class="empty-state-title">Your business is ready. Time to share.</div>
+    <div class="empty-state-body">
+      Send your link to the first person you know who's shopping for a car. The moment they connect, you'll see them show up right here — and you'll get a thank-you gift when the deal closes.
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ============ SHARE TOOLS ============ -->
+  <div class="share-tools">
+    <div class="share-tools-title">Share your link</div>
+    <div class="share-tools-sub">The more people you reach, the more gifts you earn.</div>
+    <div class="share-grid">
+      <a class="share-link-btn" href="sms:?&body=Looking for a car? I can connect you with someone I trust: https://mycarreferral.com/{{ birddog.tracking_slug }}">
+        <i class="ti ti-message" aria-hidden="true"></i>
+        Text a friend
+      </a>
+      <a class="share-link-btn" href="https://www.facebook.com/sharer/sharer.php?u=https://mycarreferral.com/{{ birddog.tracking_slug }}" target="_blank" rel="noopener">
+        <i class="ti ti-brand-facebook" aria-hidden="true"></i>
+        Post to Facebook
+      </a>
+      <button class="share-link-btn" onclick="copyLink()">
+        <i class="ti ti-copy" aria-hidden="true"></i>
+        Copy link
+      </button>
+      <a class="share-link-btn" href="mailto:?subject=Car shopping?&body=I can connect you with someone I trust: https://mycarreferral.com/{{ birddog.tracking_slug }}">
+        <i class="ti ti-mail" aria-hidden="true"></i>
+        Email it
+      </a>
+    </div>
+  </div>
+
 </div>
-{% endblock %}
+
+<!-- ============ TOAST ============ -->
+<div class="toast" id="toast">
+  <i class="ti ti-check" aria-hidden="true"></i>
+  <span>Link copied</span>
+</div>
+
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="container">
+    <a href="/" class="logo">My<span class="logo-mark">Car</span>Referral</a>
+    <div class="footer-disclaimer">
+      Thank-you gifts at each dealership's discretion. Subject to applicable state laws. Not a paid finder's fee, brokerage commission, or licensed referral arrangement.
+    </div>
+    <div class="footer-legal">
+      <span class="powered">Powered by CarsInStock</span> · © 2026 CarsInStock LLC.
+    </div>
+  </div>
+</footer>
+
+<script>
+function copyLink() {
+  const url = 'https://mycarreferral.com/{{ birddog.tracking_slug }}';
+  navigator.clipboard.writeText(url).then(() => {
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2200);
+  }).catch(() => {
+    // Fallback for older browsers
+    const tmp = document.createElement('textarea');
+    tmp.value = url;
+    document.body.appendChild(tmp);
+    tmp.select();
+    document.execCommand('copy');
+    document.body.removeChild(tmp);
+    const toast = document.getElementById('toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2200);
+  });
+}
+</script>
+
+</body>
+</html>

@@ -8,6 +8,7 @@ Pine Belt pilot: dealership_id=1, brand_prefix='pbu'.
 import re
 import secrets
 import sqlite3
+from datetime import datetime
 from flask import Blueprint, render_template, request, session, redirect, url_for
 
 referral_bp = Blueprint(
@@ -212,13 +213,33 @@ def portal_home():
         "SELECT * FROM birddog_referrals WHERE birddog_id = ? ORDER BY created_at DESC",
         (bd['id'],)
     ).fetchall()
+    prog = conn.execute(
+        "SELECT brand_prefix FROM referral_programs "
+        "WHERE dealership_id = ? AND active = 1 LIMIT 1",
+        (bd['dealership_id'],)
+    ).fetchone()
     conn.close()
-    referrals = [dict(r) for r in refs]
+
+    prefix = prog['brand_prefix'] if prog else 'pbu'
+    birddog = dict(bd)
+    birddog['tracking_slug'] = f"{prefix}-{birddog['slug']}"
+
+    referrals = []
+    for r in refs:
+        d = dict(r)
+        d['name'] = d.get('buyer_name') or 'Someone'
+        raw = str(d.get('created_at') or '').split('.')[0]
+        try:
+            d['created_display'] = datetime.strptime(raw, '%Y-%m-%d %H:%M:%S').strftime('%b %-d')
+        except ValueError:
+            d['created_display'] = ''
+        referrals.append(d)
+
     pending_count = sum(1 for r in referrals if r['status'] in ('pending', 'submitted'))
     closed_count = sum(1 for r in referrals if r['status'] == 'sold')
     return render_template(
         'referral/dashboard.html',
-        birddog=dict(bd),
+        birddog=birddog,
         referrals=referrals,
         pending_count=pending_count,
         closed_count=closed_count,
