@@ -279,7 +279,8 @@
   margin: 20px 0 16px;
 }
 .final-cta-block h2 em { font-style: italic; color: var(--gold); font-weight: 500; }
-.final-cta-block p { font-size: 17px; color: var(--text-on-dark-muted); max-width: 540px; margin: 0 auto 32px; line-height: 1.5; }
+.final-cta-block p { font-size: 17px; color: var(--text-on-dark-muted); max-width: 540px; margin: 0 auto 8px; line-height: 1.5; }
+.final-cta-block .final-cta-rally { color: var(--text-on-dark); font-weight: 600; margin-bottom: 32px; }
 
 /* ============ FOOTER ============ */
 .footer { background: var(--bg-darker); color: var(--text-on-dark-muted); padding: 56px 0 28px; }
@@ -297,6 +298,18 @@
 .footer-legal .powered { font-size: 12px; color: var(--text-on-dark); font-weight: 500; }
 .footer-legal .copyright { font-size: 12px; color: var(--text-on-dark-muted); }
 .footer-disclaimer { font-size: 11.5px; line-height: 1.55; color: var(--text-on-dark-muted); background: rgba(255,255,255,0.04); padding: 14px 16px; border-radius: 8px; margin-top: 20px; max-width: 920px; }
+
+/* MOBILE NAV FIXES (<=600px) */
+@media (max-width: 600px) {
+  .nav { padding: 14px 0; }
+  .nav .container { padding: 0 16px; }
+  .logo-tagline { display: none; }
+  .logo { font-size: 20px; }
+  .nav-actions { gap: 12px; }
+  .nav-link, .nav-cta { white-space: nowrap; }
+  .nav-link { font-size: 13px; }
+  .nav-cta { padding: 9px 14px; font-size: 13px; }
+}
 </style>
 {% endblock %}
 
@@ -305,12 +318,12 @@
 <!-- NAV -->
 <nav class="nav">
   <div class="container nav-inner">
-    <a href="{{ url_for('referral.homepage') }}" class="logo-lockup">
+    <a href="/" class="logo-lockup">
       <span class="logo">My<span class="logo-mark">Car</span>Referral</span>
       <span class="logo-tagline">Car Connections Start Here</span>
     </a>
     <div class="nav-actions">
-      <a href="{{ url_for('referral.login') }}" class="nav-link">Log in</a>
+      <a href="/login" class="nav-link">Log in</a>
       <a href="#signup" class="nav-cta">Get my link</a>
     </div>
   </div>
@@ -558,7 +571,8 @@
         By invitation only
       </span>
       <h2>Your network is more valuable than <em>you think.</em></h2>
-      <p>Sign up free. Get your link in 60 seconds. Start Your Business Today!</p>
+      <p>Sign up free. Get your link in 60 seconds.</p>
+        <p class="final-cta-rally">Start Your Business Today!</p>
       <a href="/signup" class="btn-primary">
         Get my link
         <i class="ti ti-arrow-right" aria-hidden="true"></i>
@@ -573,7 +587,7 @@
   <div class="container">
     <div class="footer-grid">
       <div class="footer-brand">
-        <a href="{{ url_for('referral.homepage') }}" class="logo-lockup">
+        <a href="/" class="logo-lockup">
           <span class="logo">My<span class="logo-mark">Car</span>Referral</span>
           <span class="logo-tagline">Car Connections Start Here</span>
         </a>
@@ -583,7 +597,7 @@
         <h4>Platform</h4>
         <ul>
           <li><a href="#how">How it works</a></li>
-          <li><a href="{{ url_for('referral.login') }}">Log in</a></li>
+          <li><a href="/login">Log in</a></li>
           <li><a href="/signup">Sign up</a></li>
           <li><a href="#faq">FAQ</a></li>
         </ul>
