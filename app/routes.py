@@ -753,6 +753,36 @@ def rep_submit_lead(team_slug):
     except Exception as e:
         db.session.rollback()
         print(f"rep lead error: {e}")
+    # Cookie-based birddog attribution: if this visitor arrived via a birddog's
+    # tracking link (mycarreferral.com/<prefix>-<slug>), credit the birddog with
+    # this lead by inserting a birddog_referrals row.
+    try:
+        mcr_attr = request.cookies.get('mcr_attr', '')
+        if mcr_attr and '-' in mcr_attr:
+            _prefix, _slug = mcr_attr.split('-', 1)
+            import re as _re_attr
+            if _re_attr.match(r'^[a-z0-9]+$', _prefix) and _re_attr.match(r'^[a-z0-9]+$', _slug):
+                _conn_attr = _sq.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+                _conn_attr.row_factory = _sq.Row
+                _program = _conn_attr.execute(
+                    "SELECT dealership_id FROM referral_programs WHERE brand_prefix=? AND active=1",
+                    (_prefix,)
+                ).fetchone()
+                if _program:
+                    _bd = _conn_attr.execute(
+                        "SELECT id, team_member_id FROM birddogs WHERE slug=? AND dealership_id=?",
+                        (_slug, _program['dealership_id'])
+                    ).fetchone()
+                    # Cross-rep protection: only attribute when birddog belongs to this storefront's rep
+                    if _bd and _bd['team_member_id'] == member['id']:
+                        _conn_attr.execute(
+                            "INSERT INTO birddog_referrals (birddog_id, team_member_id, buyer_name, buyer_phone, status) VALUES (?,?,?,?,?)",
+                            (_bd['id'], _bd['team_member_id'], customer_name, customer_phone, 'pending')
+                        )
+                        _conn_attr.commit()
+                _conn_attr.close()
+    except Exception as _e_attr:
+        print(f"Birddog cookie attribution error: {_e_attr}")
     flash("Thanks! We'll be in touch shortly.", "success")
     return redirect(f'/{team_slug}')
 
@@ -813,31 +843,25 @@ def referral_submit(slug):
             send_email(sp_user.email, f"New Referral: {referrer_name} referred {friend_name}", admin_html)
     except Exception as e:
         print(f"Referral admin email error: {e}")
-    # Hook into birddog system
+    # Hook into birddog system (uses shared create_birddog for slug + multi-tenancy)
     try:
-        import secrets as _sec
+        from app.utils.birddog import create_birddog
         _conn2 = _sq.connect('/home/eddie/carsinstock/instance/carsinstock.db')
         _conn2.row_factory = _sq.Row
-        team_member = _conn2.execute("SELECT id FROM dealership_team WHERE slug=? AND is_active=1", (slug,)).fetchone()
+        team_member = _conn2.execute("SELECT id, dealership_id FROM dealership_team WHERE slug=? AND is_active=1", (slug,)).fetchone()
         if team_member:
-            tm_id = team_member['id']
-            existing_bd = _conn2.execute("SELECT id, token FROM birddogs WHERE phone=? AND team_member_id=?", (referrer_phone, tm_id)).fetchone()
-            if existing_bd:
-                bd_id = existing_bd['id']
-                bd_token = existing_bd['token']
-            else:
-                bd_token = _sec.token_urlsafe(16)
-                _conn2.execute("INSERT INTO birddogs (team_member_id, name, email, phone, token) VALUES (?,?,?,?,?)", (tm_id, referrer_name, referrer_email, referrer_phone, bd_token))
-                _conn2.commit()
-                bd_id = _conn2.execute("SELECT last_insert_rowid()").fetchone()[0]
-                if referrer_email:
-                    try:
-                        from app.utils.email import send_email as _se2
-                        tracking_url = 'https://carsinstock.com/track/' + bd_token
-                        _se2(to_email=referrer_email, subject='Track your referral — CarsInStock', html_content='<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;"><div style="background:#1E293B;padding:20px;text-align:center;border-radius:12px 12px 0 0;"><h1 style="color:#00C851;margin:0;">Cars IN STOCK</h1></div><div style="background:#f8fafc;padding:30px;border-radius:0 0 12px 12px;"><h2 style="color:#1E293B;">Track your referral</h2><p style="color:#555;">Bookmark this link to track your referral and gift status.</p><div style="text-align:center;margin:24px 0;"><a href="' + tracking_url + '" style="background:#00C851;color:#1E293B;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;">Track My Referral</a></div></div></div>')
-                    except Exception as _e3:
-                        print(f"Tracking email error: {_e3}")
-            _conn2.execute("INSERT INTO birddog_referrals (birddog_id, team_member_id, buyer_name, buyer_phone, status) VALUES (?,?,?,?,?)", (bd_id, tm_id, friend_name, friend_phone, 'pending'))
+            bd = create_birddog(
+                _conn2,
+                team_member_id=team_member['id'],
+                name=referrer_name,
+                phone=referrer_phone,
+                email=referrer_email,
+                dealership_id=team_member['dealership_id'],
+            )
+            _conn2.execute(
+                "INSERT INTO birddog_referrals (birddog_id, team_member_id, buyer_name, buyer_phone, status) VALUES (?,?,?,?,?)",
+                (bd['id'], team_member['id'], friend_name, friend_phone, 'pending')
+            )
             _conn2.commit()
         _conn2.close()
     except Exception as _e2:
