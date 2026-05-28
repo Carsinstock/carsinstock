@@ -34,15 +34,18 @@ def sp_birddog_signup():
         email=email,
         dealership_id=dealership_id,
     )
+    # Look up brand_prefix for the canonical tracking URL while conn is open
+    prog = conn.execute(
+        "SELECT brand_prefix FROM referral_programs "
+        "WHERE dealership_id = ? AND active = 1 LIMIT 1",
+        (bd['dealership_id'],)
+    ).fetchone()
     conn.close()
+    brand_prefix = prog['brand_prefix'] if prog else 'pbu'
     if email and not bd['existing']:
         try:
             from app.utils.email import send_email as _se
-            # NOTE: legacy carsinstock.com/track URL preserved to keep this
-            # refactor scoped. Canonical link is mycarreferral.com/{prefix}-{slug}
-            # (shown on the birddog dashboard). Email body migration is a
-            # separate follow-up.
-            tracking_url = 'https://carsinstock.com/track/' + bd['token']
+            tracking_url = 'https://mycarreferral.com/' + brand_prefix + '-' + bd['slug']
             body = '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">'
             body += '<div style="background:#1E293B;padding:20px;text-align:center;border-radius:12px 12px 0 0;">'
             body += '<h1 style="color:#00C851;margin:0;">Cars IN STOCK</h1></div>'
@@ -134,12 +137,18 @@ def sp_birddog_mark_sold(referral_id):
     conn.commit()
     birddog = conn.execute('SELECT * FROM birddogs WHERE id=?', (referral['birddog_id'],)).fetchone()
     rep = conn.execute('SELECT name FROM dealership_team WHERE id=?', (session['team_member_id'],)).fetchone()
+    prog = conn.execute(
+        "SELECT brand_prefix FROM referral_programs "
+        "WHERE dealership_id = ? AND active = 1 LIMIT 1",
+        (birddog['dealership_id'] if birddog else 1,)
+    ).fetchone()
     conn.close()
+    brand_prefix = prog['brand_prefix'] if prog else 'pbu'
     if birddog and birddog['email']:
         try:
             import requests as _req2
             from app.utils.email import send_email as _se
-            tracking_url = 'https://carsinstock.com/track/' + birddog['token']
+            tracking_url = 'https://mycarreferral.com/' + brand_prefix + '-' + birddog['slug']
             rep_name = rep['name'] if rep else 'your rep'
             buyer_name = referral['buyer_name'] if referral['buyer_name'] else 'your referral'
             _se(
