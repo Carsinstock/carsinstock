@@ -163,7 +163,7 @@ def login():
         if not bd:
             return render_template(
                 'referral/login.html',
-                error='No account found with that phone number. Sign up through a referral link first.'
+                error='No account found for that number. Ask the rep who invited you for your signup link.'
             )
         session['birddog_phone'] = phone
         session['birddog_name'] = bd['name']
