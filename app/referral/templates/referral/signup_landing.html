@@ -1,73 +1,651 @@
-{% extends "referral/base.html" %}
-{% block title %}{{ rep.name }} invited you — Start your car referral business{% endblock %}
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ rep_first_name }} {{ rep_last_name }} invited you to MyCarReferral</title>
+<meta name="description" content="{{ rep_first_name }} {{ rep_last_name }} at {{ dealership_name }} invited you to start your own car referral business. Sign up free in 60 seconds.">
 
-{% set initials = rep.name.split()|map('first')|join('')|upper %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" rel="stylesheet">
 
-<div style="background: var(--navy); padding: 14px 18px; display: flex; align-items: center; gap: 12px;">
-  <div style="width: 44px; height: 44px; border-radius: 50%; background: var(--gold); display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 15px; color: var(--navy); flex-shrink: 0; border: 2px solid var(--gold); box-sizing: border-box;">{{ initials[:2] }}</div>
-  <div style="flex: 1; min-width: 0; color: #FFFFFF;">
-    <div style="font-size: 11px; font-weight: 500; color: var(--gold); letter-spacing: 0.06em; margin-bottom: 2px;">YOU'RE INVITED</div>
-    <div style="font-size: 14px; font-weight: 500;">{{ rep.name }} invited you</div>
-    <div style="font-size: 11px; color: #94A3B8;">{{ rep.dealership_name }} · {{ rep.city }}, {{ rep.state }}</div>
-  </div>
-</div>
+<style>
+/* ============ RESET ============ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+img, svg { display: block; max-width: 100%; }
+button { font-family: inherit; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+input, textarea, button { font-family: inherit; }
 
-<div style="padding: 24px 20px 18px; text-align: center;">
-  <h1 class="mcr-serif" style="font-size: 24px; color: var(--navy); line-height: 1.2; margin-bottom: 12px;">Start your own<br>car referral business</h1>
-  <p style="font-size: 13px; color: var(--text-2); line-height: 1.5;">Connect car buyers to a rep you trust. Get a thank-you gift when the deal closes. No license, no inventory, no upfront cost.</p>
-</div>
+/* ============ TOKENS (must match homepage v4) ============ */
+:root {
+  --bg: #FAF7F2;
+  --bg-warm: #F5EFE3;
+  --bg-card: #FFFFFF;
+  --bg-dark: #162334;
+  --bg-darker: #0B1421;
+  --bg-gold-tint: #FBF1DD;
+  --bg-green-tint: #E6F6EE;
+  --bg-coral-tint: #FFEDEA;
 
-<div style="padding: 0 20px 8px;">
-  <div class="mcr-label mcr-label-navy" style="margin-bottom: 12px;">How it works</div>
+  --text: #0F172A;
+  --text-muted: #5B6474;
+  --text-light: #9AA1AE;
+  --text-on-dark: #FFFFFF;
+  --text-on-dark-muted: #94A3B8;
 
-  <div style="display: flex; gap: 12px; margin-bottom: 14px; align-items: flex-start;">
-    <div class="mcr-step-num">1</div>
-    <div style="flex: 1; min-width: 0;">
-      <div style="font-size: 13px; font-weight: 500; color: var(--navy-deep); margin-bottom: 2px;">Sign up free</div>
-      <div style="font-size: 12px; color: var(--text-2); line-height: 1.4;">60 seconds — just your phone number, no password.</div>
+  --gold: #C89B4B;
+  --gold-dark: #9A6F22;
+  --green: #19B36B;
+  --green-dark: #0E8A50;
+  --green-deep: #065F46;
+  --coral: #FF6B5A;
+  --coral-dark: #D04A3B;
+
+  --border: #E7DDCC;
+  --border-light: #EFE7D8;
+
+  --font-serif: 'Fraunces', Georgia, serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 2px 8px rgba(15, 23, 42, 0.03);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.05), 0 8px 32px rgba(15, 23, 42, 0.04);
+  --shadow-green: 0 6px 18px rgba(25, 179, 107, 0.30), 0 2px 4px rgba(25, 179, 107, 0.20);
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  font-size: 16px;
+}
+
+.container { width: 100%; max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+.container-narrow { width: 100%; max-width: 760px; margin: 0 auto; padding: 0 24px; }
+
+/* ============ NAV ============ */
+.nav {
+  padding: 18px 0;
+  background: rgba(250, 247, 242, 0.85);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.nav-inner { display: flex; align-items: center; justify-content: space-between; }
+.logo-lockup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1;
+}
+.logo {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+.logo .logo-mark { color: var(--gold); font-style: italic; }
+.logo-tagline {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--gold-dark);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+.nav-actions { display: flex; align-items: center; gap: 18px; font-size: 14px; }
+.nav-link { color: var(--text-muted); font-weight: 500; }
+.nav-link:hover { color: var(--text); }
+
+/* ============ REP INVITATION BANNER (THE CONVERSION ANCHOR) ============ */
+.invite-banner {
+  background: var(--bg-dark);
+  color: var(--text-on-dark);
+  padding: 22px 0;
+}
+.invite-banner-inner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.invite-banner-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--gold);
+  border: 3px solid var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: 22px;
+  color: var(--bg-dark);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.invite-banner-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.invite-banner-content {
+  flex: 1;
+  min-width: 0;
+}
+.invite-banner-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--gold);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.invite-banner-name {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.2;
+  margin-bottom: 3px;
+}
+.invite-banner-dealership {
+  font-size: 13px;
+  color: var(--text-on-dark-muted);
+}
+
+/* ============ HERO ============ */
+.hero { padding: 56px 0 32px; position: relative; }
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse 800px 400px at 15% 0%, rgba(200, 155, 75, 0.08), transparent),
+    radial-gradient(ellipse 700px 400px at 100% 30%, rgba(25, 179, 107, 0.05), transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+.hero > .container { position: relative; z-index: 1; }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 13px;
+  background: var(--bg-green-tint);
+  border: 1px solid var(--green);
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--green-deep);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(36px, 6.5vw, 56px);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  color: var(--text);
+  margin-top: 22px;
+  max-width: 640px;
+}
+.hero h1 em { font-style: italic; color: var(--gold); font-weight: 500; }
+
+.hero .subhead {
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--text-muted);
+  margin-top: 18px;
+  max-width: 560px;
+}
+
+/* ============ SIGNUP FORM ============ */
+.signup-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 28px 24px;
+  max-width: 480px;
+  margin: 32px 0 0;
+  box-shadow: var(--shadow-md);
+}
+.signup-card-eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--gold-dark);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.signup-card-title {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--text);
+  margin-bottom: 20px;
+}
+.form-field { margin-bottom: 14px; }
+.form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.form-label .optional {
+  color: var(--text-light);
+  font-weight: 400;
+}
+.form-input {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 15px;
+  color: var(--text);
+  transition: border-color 0.15s, background 0.15s;
+}
+.form-input:focus {
+  outline: none;
+  border-color: var(--green);
+  background: var(--bg-card);
+}
+.btn-primary-full {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 15px 24px;
+  background: var(--green);
+  color: var(--text-on-dark);
+  border: 0;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 500;
+  box-shadow: var(--shadow-green);
+  transition: transform 0.15s, box-shadow 0.15s;
+  margin-top: 4px;
+}
+.btn-primary-full:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(25, 179, 107, 0.38); }
+.btn-primary-full .ti { font-size: 18px; }
+
+.form-microcopy {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-light);
+  margin-top: 12px;
+}
+
+/* ============ TRUST STRIP ============ */
+.trust-strip {
+  margin: 0;
+  padding: 32px 0;
+  border-top: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+@media (min-width: 720px) {
+  .trust-strip { grid-template-columns: repeat(3, 1fr); gap: 24px; }
+}
+.trust-item { display: flex; align-items: center; gap: 12px; }
+.trust-icon {
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.trust-icon.gold { background: var(--bg-gold-tint); color: var(--gold-dark); }
+.trust-icon.green { background: var(--bg-green-tint); color: var(--green-dark); }
+.trust-icon.coral { background: var(--bg-coral-tint); color: var(--coral-dark); }
+.trust-icon .ti { font-size: 19px; }
+.trust-text { font-size: 13.5px; line-height: 1.45; color: var(--text-muted); }
+.trust-text strong { color: var(--text); font-weight: 500; }
+
+/* ============ HOW IT WORKS (condensed) ============ */
+.section { padding: 72px 0; position: relative; }
+.section-warm { background: var(--bg-warm); }
+.section-dark { background: var(--bg-dark); color: var(--text-on-dark); }
+
+.section-eyebrow {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--gold-dark);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.section-title {
+  font-family: var(--font-serif);
+  font-size: clamp(28px, 4.5vw, 38px);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 14px;
+  max-width: 720px;
+}
+.section-title em { font-style: italic; color: var(--gold); font-weight: 500; }
+.section-title em.green { color: var(--green); }
+.section-subtitle {
+  font-size: 17px;
+  color: var(--text-muted);
+  max-width: 620px;
+  line-height: 1.5;
+  margin-bottom: 40px;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+@media (min-width: 760px) {
+  .steps { grid-template-columns: repeat(3, 1fr); gap: 20px; }
+}
+.step-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 16px;
+  padding: 28px 24px;
+  box-shadow: var(--shadow-sm);
+}
+.step-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+.step-badge.gold { background: var(--bg-gold-tint); color: var(--gold-dark); }
+.step-badge.green { background: var(--bg-green-tint); color: var(--green-dark); }
+.step-badge.coral { background: var(--bg-coral-tint); color: var(--coral-dark); }
+.step-title {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--text);
+  margin-bottom: 8px;
+}
+.step-body {
+  font-size: 14.5px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ============ REP NOTE ============ */
+.rep-note {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--gold);
+  border-radius: 12px;
+  padding: 24px 26px;
+  max-width: 640px;
+  margin: 0 auto;
+  box-shadow: var(--shadow-sm);
+}
+.rep-note-eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--gold-dark);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.rep-note-body {
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-style: italic;
+  line-height: 1.5;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+.rep-note-sig {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+.rep-note-sig strong { color: var(--text); font-weight: 500; }
+
+/* ============ FOOTER ============ */
+.footer {
+  background: var(--bg-darker);
+  color: var(--text-on-dark-muted);
+  padding: 48px 0 28px;
+}
+.footer-brand .logo { color: var(--text-on-dark); font-size: 22px; }
+.footer-brand .logo-tagline {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--gold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 2px;
+  display: block;
+}
+.footer-brand p {
+  font-size: 13.5px;
+  color: var(--text-on-dark-muted);
+  line-height: 1.6;
+  margin-top: 12px;
+  max-width: 520px;
+}
+.footer-disclaimer {
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--text-on-dark-muted);
+  background: rgba(255,255,255,0.04);
+  padding: 14px 16px;
+  border-radius: 8px;
+  margin-top: 28px;
+  max-width: 920px;
+}
+.footer-legal {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 24px;
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 12px;
+}
+@media (min-width: 720px) {
+  .footer-legal { flex-direction: row; justify-content: space-between; align-items: center; }
+}
+.footer-legal .powered { color: var(--text-on-dark); font-weight: 500; }
+
+/* ============ MOBILE BREAKPOINT (must match homepage v4) ============ */
+@media (max-width: 600px) {
+  .nav { padding: 14px 0; }
+  .nav .container { padding: 0 16px; }
+  .logo-tagline { display: none; }
+  .logo { font-size: 20px; }
+  .nav-actions { gap: 12px; }
+  .nav-link { font-size: 13px; white-space: nowrap; }
+  .hero { padding: 40px 0 24px; }
+  .invite-banner { padding: 18px 0; }
+  .invite-banner-avatar { width: 52px; height: 52px; font-size: 19px; }
+  .invite-banner-name { font-size: 18px; }
+  .signup-card { padding: 24px 20px; }
+  .section { padding: 56px 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="/" class="logo-lockup">
+      <span class="logo">My<span class="logo-mark">Car</span>Referral</span>
+      <span class="logo-tagline">Car Connections Start Here</span>
+    </a>
+    <div class="nav-actions">
+      <a href="/login" class="nav-link">Log in</a>
     </div>
   </div>
+</nav>
 
-  <div style="display: flex; gap: 12px; margin-bottom: 14px; align-items: flex-start;">
-    <div class="mcr-step-num">2</div>
-    <div style="flex: 1; min-width: 0;">
-      <div style="font-size: 13px; font-weight: 500; color: var(--navy-deep); margin-bottom: 2px;">Share your link</div>
-      <div style="font-size: 12px; color: var(--text-2); line-height: 1.4;">We give you the posts, texts, and QR code. Send to anyone you know who's shopping.</div>
+<!-- ============ REP INVITATION BANNER ============ -->
+<section class="invite-banner">
+  <div class="container">
+    <div class="invite-banner-inner">
+      <div class="invite-banner-avatar">
+        {% if rep_photo_url %}
+          <img src="{{ rep_photo_url }}" alt="{{ rep_first_name }} {{ rep_last_name }}">
+        {% else %}
+          {{ rep_initials }}
+        {% endif %}
+      </div>
+      <div class="invite-banner-content">
+        <div class="invite-banner-label">You're invited</div>
+        <div class="invite-banner-name">{{ rep_first_name }} {{ rep_last_name }} invited you</div>
+        <div class="invite-banner-dealership">{{ dealership_name }} · {{ dealership_city }}, {{ dealership_state }}</div>
+      </div>
     </div>
   </div>
+</section>
 
-  <div style="display: flex; gap: 12px; margin-bottom: 16px; align-items: flex-start;">
-    <div class="mcr-step-num">3</div>
-    <div style="flex: 1; min-width: 0;">
-      <div style="font-size: 13px; font-weight: 500; color: var(--navy-deep); margin-bottom: 2px;">Get your thank-you gift</div>
-      <div style="font-size: 12px; color: var(--text-2); line-height: 1.4;">Sent directly by the dealership when your person buys a car.</div>
+<!-- ============ HERO + SIGNUP ============ -->
+<section class="hero">
+  <div class="container">
+
+    <span class="pill">
+      <i class="ti ti-sparkles" aria-hidden="true"></i>
+      You've been invited
+    </span>
+
+    <h1>Start your <em>own</em> car referral business.</h1>
+
+    <p class="subhead">{{ rep_first_name }} thinks you'd be great at this. Sign up free, share your link with anyone in your network shopping for a car, and get a thank-you gift when the deal closes.</p>
+
+    <form class="signup-card" action="/join/{{ rep_slug }}/submit" method="POST">
+      <div class="signup-card-eyebrow">Quick signup</div>
+      <h2 class="signup-card-title">Get my link</h2>
+
+      <div class="form-field">
+        <label class="form-label" for="signup-name">Your name</label>
+        <input class="form-input" type="text" id="signup-name" name="name" required placeholder="First and last name">
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="signup-phone">Phone number</label>
+        <input class="form-input" type="tel" id="signup-phone" name="phone" required placeholder="(555) 555-1234">
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="signup-email">Email <span class="optional">(optional)</span></label>
+        <input class="form-input" type="email" id="signup-email" name="email" placeholder="you@example.com">
+      </div>
+
+      <button type="submit" class="btn-primary-full">
+        Get my link
+        <i class="ti ti-arrow-right" aria-hidden="true"></i>
+      </button>
+
+      <div class="form-microcopy">No card. No password. Ready in 60 seconds.</div>
+    </form>
+
+    <div class="trust-strip">
+      <div class="trust-item">
+        <div class="trust-icon gold"><i class="ti ti-gift" aria-hidden="true"></i></div>
+        <div class="trust-text"><strong>$50–$500</strong> typical thank-you gifts per closed deal</div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon green"><i class="ti ti-shield-check" aria-hidden="true"></i></div>
+        <div class="trust-text"><strong>No license, no inventory.</strong> You're a connector, not a salesperson.</div>
+      </div>
+      <div class="trust-item">
+        <div class="trust-icon coral"><i class="ti ti-bolt" aria-hidden="true"></i></div>
+        <div class="trust-text"><strong>Real tracking.</strong> See every step from share to sold.</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="section section-warm">
+  <div class="container">
+    <span class="section-eyebrow">How it works</span>
+    <h2 class="section-title">Three steps. <em class="green">That's it.</em></h2>
+    <p class="section-subtitle">From signup to thank-you gift, the simplest way to turn your network into income.</p>
+
+    <div class="steps">
+      <div class="step-card">
+        <div class="step-badge gold">01</div>
+        <h3 class="step-title">Sign up free</h3>
+        <p class="step-body">60 seconds. Just your phone number. No password. No card. We don't sell your info.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-badge green">02</div>
+        <h3 class="step-title">Share your business</h3>
+        <p class="step-body">Use our ready-to-post graphics, scripts, advertising templates, and QR code to easily share with anyone you know who may be in the market for a car.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-badge coral">03</div>
+        <h3 class="step-title">Get your gift</h3>
+        <p class="step-body">When your person buys a car from {{ rep_first_name }}, the dealership sends you a thank-you gift directly. We track every step.</p>
+      </div>
     </div>
   </div>
-</div>
+</section>
 
-<div style="margin: 0 20px 18px;">
-  <div class="mcr-trust">
-    <i class="ti ti-gift"></i>
-    <div class="mcr-trust-text">Thank-you gifts typically range <strong>$50 to $500</strong> per closed referral, set by each dealership.</div>
+<!-- ============ NOTE FROM REP ============ -->
+<section class="section">
+  <div class="container">
+    <div class="rep-note">
+      <div class="rep-note-eyebrow">A note from your rep</div>
+      <p class="rep-note-body">"I've worked with you and I think you'd be a great connector. If you know anyone in the market for a car, I'd love to help them — and the dealership will send you a thank-you gift when the deal closes."</p>
+      <p class="rep-note-sig">— <strong>{{ rep_first_name }} {{ rep_last_name }}</strong>, {{ dealership_name }}</p>
+    </div>
   </div>
-</div>
+</section>
 
-<div style="padding: 0 20px 18px;">
-  <a href="{{ url_for('referral.login') }}" class="mcr-btn mcr-btn-primary-cta" style="text-decoration: none;">
-    Start my free account
-    <i class="ti ti-arrow-right" style="font-size: 18px;"></i>
-  </a>
-  <div style="text-align: center; font-size: 11px; color: var(--text-3); margin-top: 8px;">60 seconds · just your phone number</div>
-</div>
+<!-- ============ FOOTER ============ -->
+<footer class="footer">
+  <div class="container">
 
-<div style="padding: 0 20px 16px; text-align: center;">
-  <div style="font-size: 12px; color: var(--text-2);">Already have a link? <a href="{{ url_for('referral.login') }}" style="color: var(--navy); font-weight: 500; text-decoration: underline;">Log in</a></div>
-</div>
+    <div class="footer-brand">
+      <a href="/" class="logo">My<span class="logo-mark" style="color: var(--gold); font-style: italic;">Car</span>Referral</a>
+      <span class="logo-tagline">Car Connections Start Here</span>
+      <p>The first platform built for ordinary people to run their own car referral business. Built for connectors. Backed by real dealerships.</p>
+    </div>
 
-<div class="mcr-footer">
-  <div class="mcr-footer-disclaimer">Thank-you gifts at each dealership's discretion. Subject to applicable state laws. Not a paid finder's fee, brokerage commission, or licensed referral arrangement.</div>
-  <div class="mcr-footer-powered">Powered by CarsInStock</div>
-</div>
+    <div class="footer-disclaimer">
+      Thank-you gifts at each dealership's discretion. Subject to applicable state laws. Not a paid finder's fee, brokerage commission, or licensed referral arrangement. CarsInStock LLC and MyCarReferral are technology platforms that facilitate communication and tracking only — they do not process, fund, or fulfill gifts.
+    </div>
 
-{% endblock %}
+    <div class="footer-legal">
+      <div class="powered">Powered by CarsInStock</div>
+      <div>© 2026 CarsInStock LLC. All rights reserved.</div>
+    </div>
+
+  </div>
+</footer>
+
+</body>
+</html>

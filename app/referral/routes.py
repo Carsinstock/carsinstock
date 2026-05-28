@@ -6,6 +6,7 @@ Mounted internally at /mcr. Users on mycarreferral.com see clean paths
 Pine Belt pilot: dealership_id=1, brand_prefix='pbu'.
 """
 import re
+import secrets
 import sqlite3
 from flask import Blueprint, render_template, request, session, redirect, url_for
 
@@ -52,7 +53,96 @@ def signup_landing(rep_slug):
     conn.close()
     if not rep:
         return render_template('referral/not_found.html'), 404
-    return render_template('referral/signup_landing.html', rep=dict(rep))
+
+    name_parts = (rep['name'] or '').strip().split()
+    rep_first_name = name_parts[0] if name_parts else ''
+    rep_last_name = ' '.join(name_parts[1:]) if len(name_parts) > 1 else ''
+    rep_initials = ''.join(p[0].upper() for p in name_parts[:2]) if name_parts else '?'
+
+    return render_template(
+        'referral/signup_landing.html',
+        rep_first_name=rep_first_name,
+        rep_last_name=rep_last_name,
+        rep_initials=rep_initials,
+        rep_photo_url=rep['profile_photo'],
+        rep_slug=rep['slug'],
+        dealership_name=rep['dealership_name'],
+        dealership_city=rep['city'],
+        dealership_state=rep['state'],
+    )
+
+
+def _slugify(name):
+    """Lowercase-alphanumeric slug from a name. 'John Smith' -> 'johnsmith'."""
+    base = re.sub(r'[^a-z0-9]', '', (name or '').lower())
+    return base or 'birddog'
+
+
+def _unique_birddog_slug(conn, base, dealership_id):
+    """Dedup within a dealership: johnsmith -> johnsmith2 -> johnsmith3..."""
+    slug = base
+    n = 1
+    while conn.execute(
+        "SELECT 1 FROM birddogs WHERE slug = ? AND dealership_id = ?",
+        (slug, dealership_id)
+    ).fetchone():
+        n += 1
+        slug = f"{base}{n}"
+    return slug
+
+
+@referral_bp.route('/join/<rep_slug>/submit', methods=['POST'])
+def signup_submit(rep_slug):
+    """Public birddog signup. Creates a real birddog under the rep matched by
+    rep_slug, logs them in via phone-session, redirects to their portal.
+    No password (phone-based auth, email-only per v1)."""
+    name = request.form.get('name', '').strip()
+    phone = request.form.get('phone', '').strip()
+    email = request.form.get('email', '').strip()
+
+    conn = _db()
+    rep = conn.execute(
+        "SELECT id, dealership_id FROM dealership_team "
+        "WHERE slug = ? AND is_active = 1",
+        (rep_slug,)
+    ).fetchone()
+    if not rep:
+        conn.close()
+        return render_template('referral/not_found.html'), 404
+
+    if not name or not phone:
+        conn.close()
+        return redirect(url_for('referral.signup_landing', rep_slug=rep_slug))
+
+    team_member_id = rep['id']
+    dealership_id = rep['dealership_id']
+
+    # Dedupe by phone+rep (matches sp_birddog_signup). Existing -> just log in.
+    existing = conn.execute(
+        "SELECT id, name FROM birddogs WHERE phone = ? AND team_member_id = ?",
+        (phone, team_member_id)
+    ).fetchone()
+    if existing:
+        conn.close()
+        session['birddog_phone'] = phone
+        session['birddog_name'] = existing['name']
+        return redirect(url_for('referral.portal_home'))
+
+    # New birddog: generate unique slug + token, insert with slug + dealership_id
+    slug = _unique_birddog_slug(conn, _slugify(name), dealership_id)
+    token = secrets.token_urlsafe(16)
+    conn.execute(
+        "INSERT INTO birddogs "
+        "(team_member_id, name, email, phone, token, slug, dealership_id) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (team_member_id, name, email, phone, token, slug, dealership_id)
+    )
+    conn.commit()
+    conn.close()
+
+    session['birddog_phone'] = phone
+    session['birddog_name'] = name
+    return redirect(url_for('referral.portal_home'))
 
 
 # ============ Birddog auth ============
