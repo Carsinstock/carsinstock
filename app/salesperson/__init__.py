@@ -8,8 +8,12 @@ from datetime import datetime
 
 @salesperson_bp.route('/api/birddog/signup', methods=['POST'])
 def sp_birddog_signup():
-    import sqlite3, secrets
+    # Rep-initiated birddog add. Uses shared create_birddog() so a birddog
+    # created from the rep dashboard is identical to one from the public
+    # /join/<rep_slug>/submit flow (real slug, multi-tenant dealership_id).
+    import sqlite3
     from flask import request, jsonify
+    from app.utils.birddog import create_birddog
     data = request.get_json()
     name = data.get('name','').strip()
     email = data.get('email','').strip()
@@ -17,23 +21,28 @@ def sp_birddog_signup():
     team_member_id = data.get('team_member_id')
     if not name or not team_member_id:
         return jsonify({'error': 'Missing required fields'}), 400
-    token = secrets.token_urlsafe(16)
     conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
     conn.row_factory = sqlite3.Row
-    existing = conn.execute('SELECT id, token FROM birddogs WHERE phone=? AND team_member_id=?', (phone, team_member_id)).fetchone()
-    if existing:
-        conn.close()
-        return jsonify({'success': True, 'token': existing['token'], 'existing': True})
-    conn.execute('INSERT INTO birddogs (team_member_id, name, email, phone, token) VALUES (?,?,?,?,?)',
-                 (team_member_id, name, email, phone, token))
-    conn.commit()
-    rep = conn.execute('SELECT name FROM dealership_team WHERE id=?', (team_member_id,)).fetchone()
+    rep = conn.execute('SELECT name, dealership_id FROM dealership_team WHERE id=?', (team_member_id,)).fetchone()
+    dealership_id = rep['dealership_id'] if rep else 1
+    rep_name = rep['name'] if rep else 'your rep'
+    bd = create_birddog(
+        conn,
+        team_member_id=team_member_id,
+        name=name,
+        phone=phone,
+        email=email,
+        dealership_id=dealership_id,
+    )
     conn.close()
-    if email:
+    if email and not bd['existing']:
         try:
             from app.utils.email import send_email as _se
-            rep_name = rep['name'] if rep else 'your rep'
-            tracking_url = 'https://carsinstock.com/track/' + token
+            # NOTE: legacy carsinstock.com/track URL preserved to keep this
+            # refactor scoped. Canonical link is mycarreferral.com/{prefix}-{slug}
+            # (shown on the birddog dashboard). Email body migration is a
+            # separate follow-up.
+            tracking_url = 'https://carsinstock.com/track/' + bd['token']
             body = '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">'
             body += '<div style="background:#1E293B;padding:20px;text-align:center;border-radius:12px 12px 0 0;">'
             body += '<h1 style="color:#00C851;margin:0;">Cars IN STOCK</h1></div>'
@@ -46,7 +55,7 @@ def sp_birddog_signup():
             _se(to_email=email, subject="You are in " + rep_name + " Referral Network", html_content=body)
         except Exception as e:
             print(f"Birddog email error: {e}")
-    return jsonify({'success': True, 'token': token, 'existing': False})
+    return jsonify({'success': True, 'token': bd['token'], 'existing': bd['existing']})
 
 
 @salesperson_bp.route('/api/birddog/submit-referral', methods=['POST'])
