@@ -1079,7 +1079,7 @@ def generate_social_ad_image():
         except:
             font_script=font_bold_lg
         rf_draw.text((W//2,620),'Send them my way.',font=font_script,fill=GREEN,anchor='mm')
-        # $100 badge — full width with padding
+        # Gift badge — full width with padding
         rf_draw.rounded_rectangle([60,670,W-60,740],radius=35,fill=GREEN)
         rf_draw.text((W//2,705),'They buy — You receive a Thank You gift',font=font_bold_md,fill=NAVY,anchor='mm')
         # Referral link

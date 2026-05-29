@@ -218,6 +218,16 @@ def portal_home():
 # Catches /<prefix>-<slug> e.g. /pbu-peterfranco
 # Registered LAST so explicit routes (/login, /me, /join/...) take precedence
 
+@referral_bp.route('/for-reps')
+def for_reps():
+    return render_template('referral/for_reps.html')
+
+
+@referral_bp.route('/grow')
+def grow():
+    return render_template('referral/grow.html')
+
+
 @referral_bp.route('/<token>')
 def short_link(token):
     """Public tracking redirect. Sets attribution cookie, forwards to storefront."""

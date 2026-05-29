@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+<link rel="shortcut icon" href="/static/favicon.ico">
+<title>For salespeople · MyCarReferral</title>
+<meta name="description" content="MyCarReferral turns your repeat customers into a paid referral network. They send you buyers. You close more deals. Zero cost to you.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" rel="stylesheet">
+
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+img, svg { display: block; max-width: 100%; }
+button { font-family: inherit; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+
+:root {
+  --bg: #FAF7F2;
+  --bg-warm: #F5EFE3;
+  --bg-card: #FFFFFF;
+  --bg-dark: #162334;
+  --bg-darker: #0B1421;
+  --bg-gold-tint: #FBF1DD;
+  --bg-green-tint: #E6F6EE;
+  --bg-coral-tint: #FFEDEA;
+  --text: #0F172A;
+  --text-muted: #5B6474;
+  --text-light: #9AA1AE;
+  --text-on-dark: #FFFFFF;
+  --text-on-dark-muted: #94A3B8;
+  --gold: #C89B4B;
+  --gold-dark: #9A6F22;
+  --green: #19B36B;
+  --green-dark: #0E8A50;
+  --green-deep: #065F46;
+  --coral: #FF6B5A;
+  --coral-dark: #D04A3B;
+  --border: #E7DDCC;
+  --border-light: #EFE7D8;
+  --font-serif: 'Fraunces', Georgia, serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 2px 8px rgba(15, 23, 42, 0.03);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.05), 0 8px 32px rgba(15, 23, 42, 0.04);
+  --shadow-green: 0 6px 18px rgba(25, 179, 107, 0.30), 0 2px 4px rgba(25, 179, 107, 0.20);
+}
+
+body { font-family: var(--font-sans); background: var(--bg); color: var(--text); line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden; font-size: 16px; }
+.container { width: 100%; max-width: 920px; margin: 0 auto; padding: 0 24px; }
+.container-narrow { width: 100%; max-width: 720px; margin: 0 auto; padding: 0 24px; }
+
+/* NAV */
+.nav { padding: 18px 0; background: rgba(250, 247, 242, 0.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+.nav-inner { display: flex; align-items: center; justify-content: space-between; }
+.logo-lockup { display: flex; flex-direction: column; gap: 2px; line-height: 1; }
+.logo { font-family: var(--font-serif); font-size: 22px; font-weight: 500; color: var(--text); letter-spacing: -0.01em; line-height: 1; }
+.logo .logo-mark { color: var(--gold); font-style: italic; }
+.logo-tagline { font-family: var(--font-sans); font-size: 10px; font-weight: 500; color: var(--gold-dark); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
+.nav-actions { display: flex; align-items: center; gap: 18px; font-size: 14px; }
+.nav-link { color: var(--text-muted); font-weight: 500; }
+.nav-link:hover { color: var(--text); }
+
+/* HERO */
+.hero { padding: 64px 0 32px; position: relative; }
+.hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 700px 400px at 15% 0%, rgba(200, 155, 75, 0.10), transparent), radial-gradient(ellipse 600px 400px at 100% 30%, rgba(25, 179, 107, 0.06), transparent); pointer-events: none; z-index: 0; }
+.hero > .container { position: relative; z-index: 1; }
+
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 13px; background: var(--bg-gold-tint); border: 1px solid var(--gold); border-radius: 100px; font-size: 11px; font-weight: 500; color: var(--gold-dark); letter-spacing: 0.10em; text-transform: uppercase; }
+
+.hero h1 { font-family: var(--font-serif); font-size: clamp(36px, 6.5vw, 54px); font-weight: 500; line-height: 1.05; letter-spacing: -0.025em; color: var(--text); margin-top: 22px; max-width: 720px; }
+.hero h1 em { font-style: italic; color: var(--gold); font-weight: 500; }
+.hero h1 em.green { color: var(--green-dark); }
+
+.hero .subhead { font-size: 18px; line-height: 1.55; color: var(--text-muted); margin-top: 22px; max-width: 620px; }
+
+.cta-row { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+.btn-primary { display: inline-flex; align-items: center; gap: 8px; padding: 14px 24px; background: var(--green); color: var(--text-on-dark); border: 0; border-radius: 10px; font-size: 15px; font-weight: 500; box-shadow: var(--shadow-green); transition: transform 0.15s, box-shadow 0.15s; }
+.btn-primary:hover { transform: translateY(-2px); }
+.btn-primary .ti { font-size: 17px; }
+.btn-outline { display: inline-flex; align-items: center; gap: 8px; padding: 14px 22px; background: transparent; color: var(--text); border: 1.5px solid var(--border); border-radius: 10px; font-size: 15px; font-weight: 500; transition: border-color 0.15s, background 0.15s; }
+.btn-outline:hover { border-color: var(--text); background: var(--bg-card); }
+
+/* SECTIONS */
+.section { padding: 72px 0; position: relative; }
+.section-warm { background: var(--bg-warm); }
+.section-white { background: var(--bg-card); }
+.section-dark { background: var(--bg-dark); color: var(--text-on-dark); }
+
+.section-eyebrow { display: inline-block; font-size: 12px; font-weight: 500; color: var(--gold-dark); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 14px; }
+.section-eyebrow.green { color: var(--green-dark); }
+.section-eyebrow.coral { color: var(--coral-dark); }
+
+.section-title { font-family: var(--font-serif); font-size: clamp(28px, 4.5vw, 38px); font-weight: 500; line-height: 1.1; letter-spacing: -0.02em; color: var(--text); margin-bottom: 14px; max-width: 720px; }
+.section-title em { font-style: italic; color: var(--gold); font-weight: 500; }
+.section-title em.green { color: var(--green-dark); }
+.section-subtitle { font-size: 17px; color: var(--text-muted); max-width: 620px; line-height: 1.5; margin-bottom: 40px; }
+.section-dark .section-title { color: var(--text-on-dark); }
+.section-dark .section-subtitle { color: var(--text-on-dark-muted); }
+.section-dark .section-eyebrow { color: var(--gold); }
+
+/* HOW IT WORKS — 3 STEPS */
+.steps { display: grid; grid-template-columns: 1fr; gap: 18px; }
+@media (min-width: 760px) { .steps { grid-template-columns: repeat(3, 1fr); gap: 20px; } }
+
+.step-card { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 18px; padding: 28px 24px; box-shadow: var(--shadow-sm); }
+.step-badge { display: inline-flex; align-items: center; justify-content: center; width: 46px; height: 46px; border-radius: 13px; font-family: var(--font-serif); font-size: 21px; font-weight: 500; margin-bottom: 16px; }
+.step-badge.gold { background: var(--bg-gold-tint); color: var(--gold-dark); }
+.step-badge.green { background: var(--bg-green-tint); color: var(--green-dark); }
+.step-badge.coral { background: var(--bg-coral-tint); color: var(--coral-dark); }
+.step-title { font-family: var(--font-serif); font-size: 21px; font-weight: 500; line-height: 1.2; color: var(--text); margin-bottom: 8px; }
+.step-body { font-size: 15px; color: var(--text-muted); line-height: 1.5; }
+
+/* SCRIPT QUOTE BOX */
+.script-card { background: var(--bg-dark); color: var(--text-on-dark); border-radius: 18px; padding: 36px 32px; position: relative; overflow: hidden; box-shadow: var(--shadow-md); }
+.script-card::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 400px 200px at 15% 10%, rgba(200, 155, 75, 0.14), transparent), radial-gradient(ellipse 400px 220px at 90% 90%, rgba(25, 179, 107, 0.10), transparent); pointer-events: none; }
+.script-card > * { position: relative; z-index: 1; }
+.script-card-label { font-size: 11px; font-weight: 500; color: var(--gold); letter-spacing: 0.10em; text-transform: uppercase; margin-bottom: 14px; }
+.script-card-quote { font-family: var(--font-serif); font-size: 22px; font-style: italic; font-weight: 500; line-height: 1.45; color: var(--text-on-dark); }
+.script-card-quote::before { content: '"'; color: var(--gold); }
+.script-card-quote::after { content: '"'; color: var(--gold); }
+.script-card-attribution { margin-top: 16px; font-size: 13px; color: var(--text-on-dark-muted); }
+
+/* MOCKUP CARDS */
+.mockup-grid { display: grid; grid-template-columns: 1fr; gap: 20px; align-items: start; }
+@media (min-width: 860px) { .mockup-grid { grid-template-columns: 1fr 1fr; gap: 32px; } }
+.mockup-block { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 16px; padding: 28px 24px; box-shadow: var(--shadow-sm); }
+.mockup-block-eyebrow { font-size: 11px; font-weight: 500; color: var(--gold-dark); letter-spacing: 0.10em; text-transform: uppercase; margin-bottom: 12px; }
+.mockup-block-title { font-family: var(--font-serif); font-size: 20px; font-weight: 500; color: var(--text); margin-bottom: 16px; }
+.mockup-block-body { font-size: 14.5px; color: var(--text-muted); line-height: 1.55; }
+
+/* GIFT MECHANICS */
+.gift-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+@media (min-width: 760px) { .gift-grid { grid-template-columns: repeat(2, 1fr); gap: 18px; } }
+.gift-card { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 14px; padding: 22px 22px; display: flex; gap: 14px; align-items: flex-start; box-shadow: var(--shadow-sm); }
+.gift-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.gift-icon.gold { background: var(--bg-gold-tint); color: var(--gold-dark); }
+.gift-icon.green { background: var(--bg-green-tint); color: var(--green-dark); }
+.gift-icon.coral { background: var(--bg-coral-tint); color: var(--coral-dark); }
+.gift-icon .ti { font-size: 21px; }
+.gift-body { min-width: 0; }
+.gift-title { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+.gift-desc { font-size: 14px; line-height: 1.5; color: var(--text-muted); }
+
+/* TIPS LIST */
+.tips-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+.tip-item { display: flex; gap: 14px; align-items: flex-start; padding: 18px 20px; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 14px; box-shadow: var(--shadow-sm); }
+.tip-bullet { width: 30px; height: 30px; border-radius: 50%; background: var(--bg-green-tint); color: var(--green-dark); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: var(--font-serif); font-size: 15px; font-weight: 500; }
+.tip-content { font-size: 14.5px; line-height: 1.5; color: var(--text); }
+.tip-content strong { font-weight: 600; }
+
+/* FAQ */
+.faq-list { margin-top: 8px; }
+.faq-item { border-bottom: 1px solid var(--border); }
+.faq-q { display: flex; justify-content: space-between; align-items: center; padding: 22px 0; cursor: pointer; font-family: var(--font-serif); font-size: 18px; font-weight: 500; color: var(--text); gap: 24px; }
+.faq-q:hover { color: var(--green-dark); }
+.faq-q .ti { font-size: 22px; color: var(--text-muted); transition: transform 0.2s ease; flex-shrink: 0; }
+.faq-item[open] .faq-q { color: var(--green-dark); }
+.faq-item[open] .faq-q .ti { transform: rotate(45deg); color: var(--green); }
+.faq-a { padding: 0 0 22px; font-size: 15px; line-height: 1.6; color: var(--text-muted); max-width: 680px; }
+
+/* FINAL CTA */
+.final-cta-block { background: var(--bg-dark); border-radius: 22px; padding: 56px 32px; text-align: center; position: relative; overflow: hidden; box-shadow: 0 24px 50px rgba(11, 20, 33, 0.15); }
+.final-cta-block::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 400px 200px at 20% 20%, rgba(200, 155, 75, 0.12), transparent), radial-gradient(ellipse 400px 200px at 80% 80%, rgba(25, 179, 107, 0.10), transparent); pointer-events: none; }
+.final-cta-block > * { position: relative; z-index: 1; }
+.final-cta-block h2 { font-family: var(--font-serif); font-size: clamp(28px, 4.5vw, 40px); font-weight: 500; line-height: 1.1; letter-spacing: -0.02em; color: var(--text-on-dark); margin-bottom: 14px; }
+.final-cta-block h2 em { font-style: italic; color: var(--gold); font-weight: 500; }
+.final-cta-block p { font-size: 16px; color: var(--text-on-dark-muted); max-width: 540px; margin: 0 auto 28px; line-height: 1.5; }
+
+/* FOOTER */
+.footer { background: var(--bg-darker); color: var(--text-on-dark-muted); padding: 48px 0 28px; }
+.footer-inner { display: flex; flex-direction: column; gap: 14px; align-items: center; text-align: center; }
+.footer .logo { color: var(--text-on-dark); font-size: 20px; }
+.footer .logo-mark { color: var(--gold); font-style: italic; }
+.footer-disclaimer { font-size: 11px; line-height: 1.5; max-width: 680px; }
+.footer-legal { font-size: 12px; margin-top: 10px; }
+.footer-legal .powered { color: var(--text-on-dark); font-weight: 500; }
+
+/* MOBILE */
+@media (max-width: 600px) {
+  .nav { padding: 14px 0; }
+  .logo-tagline { display: none; }
+  .logo { font-size: 20px; }
+  .nav-actions { gap: 12px; }
+  .nav-link { font-size: 13px; white-space: nowrap; }
+  .section { padding: 56px 0; }
+  .hero { padding: 40px 0 24px; }
+  .script-card { padding: 28px 24px; }
+  .script-card-quote { font-size: 18px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="/" class="logo-lockup">
+      <span class="logo">My<span class="logo-mark">Car</span>Referral</span>
+      <span class="logo-tagline">Car Connections Start Here</span>
+    </a>
+    <div class="nav-actions">
+      <a href="https://carsinstock.com/dashboard" class="nav-link">Back to dashboard</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <span class="pill">
+      <i class="ti ti-briefcase" aria-hidden="true"></i>
+      For salespeople
+    </span>
+    <h1>Your customers already refer friends.<br><em class="green">Now they get paid for it.</em></h1>
+    <p class="subhead">MyCarReferral turns your repeat customers into a paid referral network. They send you buyers. You close more deals. The dealership sends them a thank-you gift. Costs you nothing.</p>
+    <div class="cta-row">
+      <a href="https://carsinstock.com/dashboard" class="btn-primary">
+        Back to my dashboard
+        <i class="ti ti-arrow-right" aria-hidden="true"></i>
+      </a>
+      <a href="#how" class="btn-outline">See how it works</a>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section section-white" id="how">
+  <div class="container">
+    <span class="section-eyebrow">How it works</span>
+    <h2 class="section-title">Three steps. <em class="green">60 seconds at delivery.</em></h2>
+    <p class="section-subtitle">Built to fit inside the conversation you're already having when a customer takes the keys.</p>
+    <div class="steps">
+      <div class="step-card">
+        <div class="step-badge gold">01</div>
+        <h3 class="step-title">Invite at delivery</h3>
+        <p class="step-body">Pull up your invite link on your phone. Show the QR code or text it. Takes 30 seconds. They sign up right there or save it for later — your call.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-badge green">02</div>
+        <h3 class="step-title">They become a Bird Dog</h3>
+        <p class="step-body">Free signup. No card, no password, just their phone number. They get their own tracking link to share with anyone they know shopping for a car.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-badge coral">03</div>
+        <h3 class="step-title">You close the deals</h3>
+        <p class="step-body">Their referrals show up on YOUR storefront, tagged to YOU. You sell the car like normal. The dealership sends a thank-you gift to the Bird Dog. Everyone wins.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- THE SCRIPT -->
+<section class="section section-warm">
+  <div class="container-narrow">
+    <span class="section-eyebrow coral">The script</span>
+    <h2 class="section-title">What to <em>say</em> at delivery.</h2>
+    <p class="section-subtitle">30 seconds. Casual. The same energy as offering them a business card.</p>
+    <div class="script-card">
+      <div class="script-card-label">Say this at delivery</div>
+      <p class="script-card-quote">Hey, before you head out — quick thing. We've got a referral program. If you know anyone shopping for a car, you can send them my way and the dealership will send you a thank-you gift when the deal closes. Just scan this real quick and sign up — takes a minute, no card, no cost.</p>
+      <p class="script-card-attribution">— Pull up your phone, show the QR code or text them the link.</p>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT THEY SEE / WHAT YOU SEE -->
+<section class="section section-white">
+  <div class="container">
+    <span class="section-eyebrow green">Two views</span>
+    <h2 class="section-title">What your <em>customer</em> sees. What <em class="green">you</em> see.</h2>
+    <p class="section-subtitle">Both sides of the same handshake.</p>
+    <div class="mockup-grid">
+      <div class="mockup-block">
+        <div class="mockup-block-eyebrow">Customer view</div>
+        <h3 class="mockup-block-title">A personalized signup page with your name on it.</h3>
+        <p class="mockup-block-body">Your customer scans your QR code or clicks your link. They land on a page that says <strong>"[Your name] invited you"</strong> with your dealership name and city. Looks legit. Feels personal. They sign up in 60 seconds — phone number only, no card, no password.</p>
+      </div>
+      <div class="mockup-block">
+        <div class="mockup-block-eyebrow">Your view</div>
+        <h3 class="mockup-block-title">Your Bird Dog Network on your dashboard.</h3>
+        <p class="mockup-block-body">Every Bird Dog you sign up shows up on your existing carsinstock.com dashboard — same place you manage your inventory and leads. You see who's referred whom, what's pending, what's closed, and what gifts are out the door. <strong>One platform. Zero new logins.</strong></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GIFT MECHANICS -->
+<section class="section section-warm">
+  <div class="container">
+    <span class="section-eyebrow">The gift</span>
+    <h2 class="section-title">How the <em>thank-you gift</em> works.</h2>
+    <p class="section-subtitle">Costs you nothing. Comes from the dealership marketing budget.</p>
+    <div class="gift-grid">
+      <div class="gift-card">
+        <div class="gift-icon gold"><i class="ti ti-building-store" aria-hidden="true"></i></div>
+        <div class="gift-body">
+          <div class="gift-title">The dealership pays</div>
+          <div class="gift-desc">Comes from the dealer's marketing budget — same place they'd pay for a Facebook ad or radio spot. Not from your commission.</div>
+        </div>
+      </div>
+      <div class="gift-card">
+        <div class="gift-icon green"><i class="ti ti-coin" aria-hidden="true"></i></div>
+        <div class="gift-body">
+          <div class="gift-title">The dealer sets the gift</div>
+          <div class="gift-desc">Each dealer decides their own thank-you gift amount based on what works for their business. Bird Dogs see "a thank-you gift" — actual amount confirmed when the deal closes.</div>
+        </div>
+      </div>
+      <div class="gift-card">
+        <div class="gift-icon coral"><i class="ti ti-truck-delivery" aria-hidden="true"></i></div>
+        <div class="gift-body">
+          <div class="gift-title">Sent 7–14 days after sale</div>
+          <div class="gift-desc">Once you mark the deal closed, the dealership sends the Bird Dog their gift — check, gift card, or store credit. The Bird Dog gets a notification automatically.</div>
+        </div>
+      </div>
+      <div class="gift-card">
+        <div class="gift-icon green"><i class="ti ti-shield-check" aria-hidden="true"></i></div>
+        <div class="gift-body">
+          <div class="gift-title">Zero paperwork for you</div>
+          <div class="gift-desc">No 1099. No tax forms on your end. No commission split. The system tracks everything; your job is closing deals.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIPS -->
+<section class="section section-white">
+  <div class="container-narrow">
+    <span class="section-eyebrow">Real-world tips</span>
+    <h2 class="section-title">What the <em>top reps</em> do.</h2>
+    <p class="section-subtitle">A few things that separate the reps who build a real Bird Dog Network from the ones who try it once and forget.</p>
+    <ul class="tips-list">
+      <li class="tip-item">
+        <div class="tip-bullet">1</div>
+        <div class="tip-content"><strong>Be consistent.</strong> Ask every customer you'd be happy to do business with again — not just the ones you think will say yes. You're not selling them; you're handing them a tool.</div>
+      </li>
+      <li class="tip-item">
+        <div class="tip-bullet">2</div>
+        <div class="tip-content"><strong>Use their phone, not yours.</strong> They scan the QR or you text them the link. Signup happens on their device so the account is theirs and they have it forever.</div>
+      </li>
+      <li class="tip-item">
+        <div class="tip-bullet">3</div>
+        <div class="tip-content"><strong>Soft sell only.</strong> "If you ever know someone..." not "I need referrals." It's an offer, not an ask. The thank-you gift does the selling for you.</div>
+      </li>
+      <li class="tip-item">
+        <div class="tip-bullet">4</div>
+        <div class="tip-content"><strong>Follow up after 30 days.</strong> Text your Bird Dogs: "Hey, anyone in your circle car shopping?" Gentle reminder that they have your link. Builds the muscle.</div>
+      </li>
+      <li class="tip-item">
+        <div class="tip-bullet">5</div>
+        <div class="tip-content"><strong>Compounds over time.</strong> A rep with 20 active Bird Dogs gets a steady drip of referrals every month. The customer you sign up today might send three buyers in the next year.</div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section section-warm">
+  <div class="container-narrow">
+    <span class="section-eyebrow gold">Common questions</span>
+    <h2 class="section-title">The stuff every rep asks <em>before</em> trying it.</h2>
+    <div class="faq-list">
+      <details class="faq-item" open>
+        <summary class="faq-q">Will these referrals compete with my dealership leads?<i class="ti ti-plus" aria-hidden="true"></i></summary>
+        <div class="faq-a">No. Bird Dog referrals come back to YOU specifically — tagged to your name, on your storefront, in your CRM. They never enter the general dealership lead pool. This is additive to whatever the dealership sends you, not a replacement.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Do I have to track anything manually?<i class="ti ti-plus" aria-hidden="true"></i></summary>
+        <div class="faq-a">No. Your dashboard shows everything automatically — who's signed up as a Bird Dog under you, what referrals have come in, what's pending, what's closed, and what gifts have been sent. You just close deals like normal.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">What if my customers say no?<i class="ti ti-plus" aria-hidden="true"></i></summary>
+        <div class="faq-a">Most won't sign up — and that's fine. The math works on volume. If you invite 10 customers and 3 sign up, those 3 might send 1-2 friends each over the next year. That's real, additive lead flow you didn't have before.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">How quickly will I see results?<i class="ti ti-plus" aria-hidden="true"></i></summary>
+        <div class="faq-a">First Bird Dog signups happen the day you start asking. First referrals usually arrive within 30 days. First closed deal from a Bird Dog referral typically lands in month 2-3. The system compounds — month 6 is way more than month 1.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">What if I leave the dealership?<i class="ti ti-plus" aria-hidden="true"></i></summary>
+        <div class="faq-a">Your Bird Dogs are tied to you, not to the dealership. If you move, you take your network with you. (Specifics depend on your employment agreement — but the system is designed around rep-owned relationships, not dealership-owned ones.)</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Is this just for senior reps?<i class="ti ti-plus" aria-hidden="true"></i></summary>
+        <div class="faq-a">No — works for any rep at any tenure. Senior reps have an advantage because they have more past customers to invite, but a new rep building their book can use this to grow faster than they would otherwise.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="section">
+  <div class="container-narrow">
+    <div class="final-cta-block">
+      <span class="pill" style="background: rgba(200, 155, 75, 0.18); border-color: var(--gold); color: var(--gold);">
+        <i class="ti ti-target" aria-hidden="true"></i>
+        Try it this week
+      </span>
+      <h2 style="margin-top: 18px;">Three customers. <em>One Bird Dog.</em></h2>
+      <p>That's the goal for your first week. Ask three customers at delivery. One signs up. They send a friend in 30 days. The mechanic proves itself.</p>
+      <a href="https://carsinstock.com/dashboard" class="btn-primary">
+        Back to my dashboard
+        <i class="ti ti-arrow-right" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <a href="/" class="logo">My<span class="logo-mark">Car</span>Referral</a>
+      <div class="footer-disclaimer">
+        Thank-you gifts at each dealership's discretion. Subject to applicable state laws. Not a paid finder's fee, brokerage commission, or licensed referral arrangement. CarsInStock LLC and MyCarReferral are technology platforms that facilitate communication and tracking only — they do not process, fund, or fulfill gifts.
+      </div>
+      <div class="footer-legal">
+        <span class="powered">Powered by CarsInStock</span> · © 2026 CarsInStock LLC. All rights reserved.
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+document.querySelectorAll('.faq-item').forEach(item => {
+  item.addEventListener('toggle', () => {
+    if (item.open) {
+      document.querySelectorAll('.faq-item').forEach(other => {
+        if (other !== item) other.open = false;
+      });
+    }
+  });
+});
+</script>
+
+</body>
+</html>

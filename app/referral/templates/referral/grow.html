@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+<link rel="shortcut icon" href="/static/favicon.ico">
+<title>Grow your business · MyCarReferral</title>
+<meta name="description" content="Your birddog playbook. How to share your link, what to say, and how to know it's working.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" rel="stylesheet">
+
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+img, svg { display: block; max-width: 100%; }
+button { font-family: inherit; cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+
+:root {
+  --bg: #FAF7F2; --bg-warm: #F5EFE3; --bg-card: #FFFFFF;
+  --bg-dark: #162334; --bg-darker: #0B1421;
+  --bg-gold-tint: #FBF1DD; --bg-green-tint: #E6F6EE; --bg-coral-tint: #FFEDEA;
+  --text: #0F172A; --text-muted: #5B6474; --text-light: #9AA1AE;
+  --text-on-dark: #FFFFFF; --text-on-dark-muted: #94A3B8;
+  --gold: #C89B4B; --gold-dark: #9A6F22;
+  --green: #19B36B; --green-dark: #0E8A50; --green-deep: #065F46;
+  --coral: #FF6B5A; --coral-dark: #D04A3B;
+  --border: #E7DDCC; --border-light: #EFE7D8;
+  --font-serif: 'Fraunces', Georgia, serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04), 0 2px 8px rgba(15, 23, 42, 0.03);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.05), 0 8px 32px rgba(15, 23, 42, 0.04);
+  --shadow-green: 0 6px 18px rgba(25, 179, 107, 0.30), 0 2px 4px rgba(25, 179, 107, 0.20);
+}
+
+body { font-family: var(--font-sans); background: var(--bg); color: var(--text); line-height: 1.6; -webkit-font-smoothing: antialiased; overflow-x: hidden; font-size: 16px; }
+.container { width: 100%; max-width: 920px; margin: 0 auto; padding: 0 24px; }
+.container-narrow { width: 100%; max-width: 720px; margin: 0 auto; padding: 0 24px; }
+
+/* NAV */
+.nav { padding: 18px 0; background: rgba(250, 247, 242, 0.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+.nav-inner { display: flex; align-items: center; justify-content: space-between; }
+.logo-lockup { display: flex; flex-direction: column; gap: 2px; line-height: 1; }
+.logo { font-family: var(--font-serif); font-size: 22px; font-weight: 500; color: var(--text); letter-spacing: -0.01em; line-height: 1; }
+.logo .logo-mark { color: var(--gold); font-style: italic; }
+.logo-tagline { font-family: var(--font-sans); font-size: 10px; font-weight: 500; color: var(--gold-dark); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 2px; }
+.nav-actions { display: flex; align-items: center; gap: 18px; font-size: 14px; }
+.nav-link { color: var(--text-muted); font-weight: 500; }
+.nav-link:hover { color: var(--text); }
+
+/* HERO */
+.hero { padding: 64px 0 32px; position: relative; }
+.hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 700px 400px at 15% 0%, rgba(200, 155, 75, 0.10), transparent), radial-gradient(ellipse 600px 400px at 100% 30%, rgba(25, 179, 107, 0.06), transparent); pointer-events: none; z-index: 0; }
+.hero > .container { position: relative; z-index: 1; }
+
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 13px; background: var(--bg-green-tint); border: 1px solid var(--green); border-radius: 100px; font-size: 11px; font-weight: 500; color: var(--green-deep); letter-spacing: 0.10em; text-transform: uppercase; }
+
+.hero h1 { font-family: var(--font-serif); font-size: clamp(36px, 6.5vw, 54px); font-weight: 500; line-height: 1.05; letter-spacing: -0.025em; color: var(--text); margin-top: 22px; max-width: 720px; }
+.hero h1 em { font-style: italic; color: var(--gold); font-weight: 500; }
+.hero h1 em.green { color: var(--green-dark); }
+
+.hero .subhead { font-size: 18px; line-height: 1.55; color: var(--text-muted); margin-top: 22px; max-width: 620px; }
+
+.cta-row { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+.btn-primary { display: inline-flex; align-items: center; gap: 8px; padding: 14px 24px; background: var(--green); color: var(--text-on-dark); border: 0; border-radius: 10px; font-size: 15px; font-weight: 500; box-shadow: var(--shadow-green); transition: transform 0.15s, box-shadow 0.15s; }
+.btn-primary:hover { transform: translateY(-2px); }
+.btn-primary .ti { font-size: 17px; }
+.btn-outline { display: inline-flex; align-items: center; gap: 8px; padding: 14px 22px; background: transparent; color: var(--text); border: 1.5px solid var(--border); border-radius: 10px; font-size: 15px; font-weight: 500; transition: border-color 0.15s, background 0.15s; }
+.btn-outline:hover { border-color: var(--text); background: var(--bg-card); }
+
+/* SECTIONS */
+.section { padding: 72px 0; position: relative; }
+.section-warm { background: var(--bg-warm); }
+.section-white { background: var(--bg-card); }
+.section-dark { background: var(--bg-dark); color: var(--text-on-dark); }
+
+.section-eyebrow { display: inline-block; font-size: 12px; font-weight: 500; color: var(--gold-dark); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 14px; }
+.section-eyebrow.green { color: var(--green-dark); }
+.section-eyebrow.coral { color: var(--coral-dark); }
+
+.section-title { font-family: var(--font-serif); font-size: clamp(28px, 4.5vw, 38px); font-weight: 500; line-height: 1.1; letter-spacing: -0.02em; color: var(--text); margin-bottom: 14px; max-width: 720px; }
+.section-title em { font-style: italic; color: var(--gold); font-weight: 500; }
+.section-title em.green { color: var(--green-dark); }
+.section-subtitle { font-size: 17px; color: var(--text-muted); max-width: 620px; line-height: 1.5; margin-bottom: 40px; }
+
+/* 5 WAYS TO SHARE */
+.share-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+@media (min-width: 760px) { .share-grid { grid-template-columns: repeat(2, 1fr); gap: 18px; } }
+.share-card { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 16px; padding: 24px; display: flex; gap: 16px; align-items: flex-start; box-shadow: var(--shadow-sm); transition: transform 0.2s, box-shadow 0.2s; }
+.share-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.share-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.share-icon.gold { background: var(--bg-gold-tint); color: var(--gold-dark); }
+.share-icon.green { background: var(--bg-green-tint); color: var(--green-dark); }
+.share-icon.coral { background: var(--bg-coral-tint); color: var(--coral-dark); }
+.share-icon .ti { font-size: 24px; }
+.share-content { min-width: 0; }
+.share-title { font-family: var(--font-serif); font-size: 19px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+.share-desc { font-size: 14px; line-height: 1.5; color: var(--text-muted); }
+
+/* MESSAGE TEMPLATES */
+.template-list { display: flex; flex-direction: column; gap: 18px; }
+.template-card { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 16px; padding: 24px 24px 18px; box-shadow: var(--shadow-sm); }
+.template-context { font-size: 11px; font-weight: 500; color: var(--gold-dark); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
+.template-message { background: var(--bg-warm); border-left: 3px solid var(--gold); padding: 16px 18px; border-radius: 8px; font-size: 14.5px; line-height: 1.55; color: var(--text); margin-bottom: 12px; }
+.template-message strong { font-weight: 600; color: var(--gold-dark); }
+.template-note { font-size: 12.5px; color: var(--text-light); font-style: italic; }
+
+/* SCRIPT QUOTE */
+.script-card { background: var(--bg-dark); color: var(--text-on-dark); border-radius: 18px; padding: 36px 32px; position: relative; overflow: hidden; box-shadow: var(--shadow-md); }
+.script-card::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 400px 200px at 15% 10%, rgba(200, 155, 75, 0.14), transparent), radial-gradient(ellipse 400px 220px at 90% 90%, rgba(25, 179, 107, 0.10), transparent); pointer-events: none; }
+.script-card > * { position: relative; z-index: 1; }
+.script-card-label { font-size: 11px; font-weight: 500; color: var(--gold); letter-spacing: 0.10em; text-transform: uppercase; margin-bottom: 14px; }
+.script-card-quote { font-family: var(--font-serif); font-size: 22px; font-style: italic; font-weight: 500; line-height: 1.45; color: var(--text-on-dark); }
+.script-card-quote::before { content: '"'; color: var(--gold); }
+.script-card-quote::after { content: '"'; color: var(--gold); }
+
+/* TRACKING TILES */
+.tracking-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+@media (min-width: 760px) { .tracking-grid { grid-template-columns: repeat(3, 1fr); gap: 18px; } }
+.tracking-tile { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 14px; padding: 22px 20px; box-shadow: var(--shadow-sm); }
+.tracking-badge { display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: 100px; font-size: 11px; font-weight: 500; margin-bottom: 12px; }
+.tracking-badge .ti { font-size: 13px; }
+.tracking-badge.pending { background: var(--bg-gold-tint); color: var(--gold-dark); }
+.tracking-badge.closed { background: var(--bg-green-tint); color: var(--green-deep); }
+.tracking-badge.gift { background: var(--bg-coral-tint); color: var(--coral-dark); }
+.tracking-title { font-family: var(--font-serif); font-size: 18px; font-weight: 500; color: var(--text); margin-bottom: 6px; }
+.tracking-body { font-size: 13.5px; line-height: 1.5; color: var(--text-muted); }
+
+/* TIPS */
+.tips-list { list-style: none; display: flex; flex-direction: column; gap: 14px; }
+.tip-item { display: flex; gap: 14px; align-items: flex-start; padding: 18px 20px; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 14px; box-shadow: var(--shadow-sm); }
+.tip-bullet { width: 30px; height: 30px; border-radius: 50%; background: var(--bg-green-tint); color: var(--green-dark); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: var(--font-serif); font-size: 15px; font-weight: 500; }
+.tip-content { font-size: 14.5px; line-height: 1.5; color: var(--text); }
+.tip-content strong { font-weight: 600; }
+
+/* FAQ */
+.faq-list { margin-top: 8px; }
+.faq-item { border-bottom: 1px solid var(--border); }
+.faq-q { display: flex; justify-content: space-between; align-items: center; padding: 22px 0; cursor: pointer; font-family: var(--font-serif); font-size: 18px; font-weight: 500; color: var(--text); gap: 24px; }
+.faq-q:hover { color: var(--green-dark); }
+.faq-q .ti { font-size: 22px; color: var(--text-muted); transition: transform 0.2s ease; flex-shrink: 0; }
+.faq-item[open] .faq-q { color: var(--green-dark); }
+.faq-item[open] .faq-q .ti { transform: rotate(45deg); color: var(--green); }
+.faq-a { padding: 0 0 22px; font-size: 15px; line-height: 1.6; color: var(--text-muted); max-width: 680px; }
+
+/* FINAL CTA */
+.final-cta-block { background: var(--bg-dark); border-radius: 22px; padding: 56px 32px; text-align: center; position: relative; overflow: hidden; box-shadow: 0 24px 50px rgba(11, 20, 33, 0.15); }
+.final-cta-block::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 400px 200px at 20% 20%, rgba(200, 155, 75, 0.12), transparent), radial-gradient(ellipse 400px 200px at 80% 80%, rgba(25, 179, 107, 0.10), transparent); pointer-events: none; }
+.final-cta-block > * { position: relative; z-index: 1; }
+.final-cta-block h2 { font-family: var(--font-serif); font-size: clamp(28px, 4.5vw, 40px); font-weight: 500; line-height: 1.1; letter-spacing: -0.02em; color: var(--text-on-dark); margin-bottom: 14px; }
+.final-cta-block h2 em { font-style: italic; color: var(--gold); font-weight: 500; }
+.final-cta-block p { font-size: 16px; color: var(--text-on-dark-muted); max-width: 540px; margin: 0 auto 28px; line-height: 1.5; }
+
+/* FOOTER */
+.footer { background: var(--bg-darker); color: var(--text-on-dark-muted); padding: 48px 0 28px; }
+.footer-inner { display: flex; flex-direction: column; gap: 14px; align-items: center; text-align: center; }
+.footer .logo { color: var(--text-on-dark); font-size: 20px; }
+.footer .logo-mark { color: var(--gold); font-style: italic; }
+.footer-disclaimer { font-size: 11px; line-height: 1.5; max-width: 680px; }
+.footer-legal { font-size: 12px; margin-top: 10px; }
+.footer-legal .powered { color: var(--text-on-dark); font-weight: 500; }
+
+/* MOBILE */
+@media (max-width: 600px) {
+  .nav { padding: 14px 0; }
+  .logo-tagline { display: none; }
+  .logo { font-size: 20px; }
+  .nav-actions { gap: 12px; }
+  .nav-link { font-size: 13px; white-space: nowrap; }
+  .section { padding: 56px 0; }
+  .hero { padding: 40px 0 24px; }
+  .script-card { padding: 28px 24px; }
+  .script-card-quote { font-size: 18px; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="container nav-inner">
+    <a href="/" class="logo-lockup">
+      <span class="logo">My<span class="logo-mark">Car</span>Referral</span>
+      <span class="logo-tagline">Car Connections Start Here</span>
+    </a>
+    <div class="nav-actions">
+      <a href="/me" class="nav-link">My dashboard</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <span class="pill">
+      <i class="ti ti-sparkles" aria-hidden="true"></i>
+      Your playbook
+    </span>
+    <h1>Your network is <em>your business.</em><br>Here's how to grow it.</h1>
+    <p class="subhead">You've got your link. Now let's get you earning. Most Bird Dogs see their first referral in 30 days — but the ones who share consistently see real momentum by month two.</p>
+    <div class="cta-row">
+      <a href="/me" class="btn-primary">
+        Go to my dashboard
+        <i class="ti ti-arrow-right" aria-hidden="true"></i>
+      </a>
+      <a href="#how-to-share" class="btn-outline">5 ways to share</a>
+    </div>
+  </div>
+</section>
+
+<!-- 5 WAYS TO SHARE -->
+<section class="section section-white" id="how-to-share">
+  <div class="container">
+    <span class="section-eyebrow">Step one</span>
+    <h2 class="section-title">5 ways to <em class="green">share your link.</em></h2>
+    <p class="section-subtitle">Pick the one that fits your style. Most Bird Dogs use 2 or 3 of these regularly.</p>
+    <div class="share-grid">
+      <div class="share-card">
+        <div class="share-icon gold"><i class="ti ti-message" aria-hidden="true"></i></div>
+        <div class="share-content">
+          <div class="share-title">Text it directly</div>
+          <div class="share-desc">When someone in your phone mentions car shopping — even in passing — send them your link with a short note. The most natural and the highest converting.</div>
+        </div>
+      </div>
+      <div class="share-card">
+        <div class="share-icon green"><i class="ti ti-brand-facebook" aria-hidden="true"></i></div>
+        <div class="share-content">
+          <div class="share-title">Post on Facebook</div>
+          <div class="share-desc">A weekly post — "If you're car shopping, hit me up. I can connect you with someone I trust" — keeps your link in front of your full network without being pushy.</div>
+        </div>
+      </div>
+      <div class="share-card">
+        <div class="share-icon coral"><i class="ti ti-users" aria-hidden="true"></i></div>
+        <div class="share-content">
+          <div class="share-title">Drop in group chats</div>
+          <div class="share-desc">Work group chats, family threads, neighborhood groups — anywhere people might mention car trouble or shopping. Quiet hand-raise, not a sales pitch.</div>
+        </div>
+      </div>
+      <div class="share-card">
+        <div class="share-icon gold"><i class="ti ti-qrcode" aria-hidden="true"></i></div>
+        <div class="share-content">
+          <div class="share-title">Show your QR in person</div>
+          <div class="share-desc">Your dashboard has a QR code — pull it up when you're at work or socializing. People can scan it in seconds. Great for service-business owners (hair, nails, mechanics, real estate).</div>
+        </div>
+      </div>
+      <div class="share-card">
+        <div class="share-icon green"><i class="ti ti-mail" aria-hidden="true"></i></div>
+        <div class="share-content">
+          <div class="share-title">Add to your email signature</div>
+          <div class="share-desc">A single line at the bottom: "Know anyone car shopping? Send them my way → mycarreferral.com/your-slug." Passive, persistent, costs you zero effort.</div>
+        </div>
+      </div>
+      <div class="share-card">
+        <div class="share-icon coral"><i class="ti ti-share" aria-hidden="true"></i></div>
+        <div class="share-content">
+          <div class="share-title">Share with a story</div>
+          <div class="share-desc">When you next buy or service a car, share the experience and add your link. Real stories convert better than cold pitches every single time.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- READY-TO-COPY MESSAGES -->
+<section class="section section-warm">
+  <div class="container-narrow">
+    <span class="section-eyebrow coral">Step two</span>
+    <h2 class="section-title">Ready-to-copy <em>messages.</em></h2>
+    <p class="section-subtitle">Stop thinking about what to say. Copy one of these, swap in your link, send.</p>
+
+    <div class="template-list">
+
+      <div class="template-card">
+        <div class="template-context">When someone mentions car shopping</div>
+        <div class="template-message">Hey — I actually just got into something for this. If you're looking, I can connect you with a rep I trust who'll take care of you. Here's my link: <strong>mycarreferral.com/your-slug</strong>. Costs you nothing — you just sign up and I get a thank-you gift when the deal closes.</div>
+        <div class="template-note">Highest conversion. Use when the conversation is already happening.</div>
+      </div>
+
+      <div class="template-card">
+        <div class="template-context">Casual Facebook post (use weekly)</div>
+        <div class="template-message">Friendly reminder — if anyone in my network is car shopping, hit me up. I can connect you with a rep I trust and you'll be in good hands. <strong>mycarreferral.com/your-slug</strong></div>
+        <div class="template-note">Soft hand-raise. Doesn't feel like marketing because it isn't.</div>
+      </div>
+
+      <div class="template-card">
+        <div class="template-context">Group chat drop (work, family, neighborhood)</div>
+        <div class="template-message">If anyone here is car shopping or knows someone, I have a connection. They'll take care of you and I get a small thank-you gift when the deal closes. Win-win. <strong>mycarreferral.com/your-slug</strong></div>
+        <div class="template-note">Best for groups where you have established trust already.</div>
+      </div>
+
+      <div class="template-card">
+        <div class="template-context">Email signature (set once, forget about it)</div>
+        <div class="template-message">Know anyone car shopping? Send them my way →<br><strong>mycarreferral.com/your-slug</strong></div>
+        <div class="template-note">Set this once. It works for you on every email you send for the rest of forever.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- IN-PERSON SCRIPT -->
+<section class="section section-white">
+  <div class="container-narrow">
+    <span class="section-eyebrow green">Step three</span>
+    <h2 class="section-title">What to <em>say in person.</em></h2>
+    <p class="section-subtitle">When you're face to face and someone mentions cars, here's the soft pitch. 30 seconds, no pressure.</p>
+    <div class="script-card">
+      <div class="script-card-label">Say this in person</div>
+      <p class="script-card-quote">You know what — I actually got into something for this. There's a rep I work with who's really solid. If you give me your number, I'll text you my link. You sign up, browse what they have, and if you end up buying I get a thank-you gift. No commitment — just save my link in case you know someone else who's looking too.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW TO KNOW IT'S WORKING -->
+<section class="section section-warm">
+  <div class="container">
+    <span class="section-eyebrow">Step four</span>
+    <h2 class="section-title">How to know <em class="green">it's working.</em></h2>
+    <p class="section-subtitle">Check your dashboard. These three statuses tell the whole story.</p>
+    <div class="tracking-grid">
+      <div class="tracking-tile">
+        <div class="tracking-badge pending"><i class="ti ti-clock" aria-hidden="true"></i> Pending</div>
+        <div class="tracking-title">Someone clicked your link</div>
+        <div class="tracking-body">They came in, looked around, may be shopping. The deal isn't done yet — but you're in their journey. Most pending referrals close within 60 days.</div>
+      </div>
+      <div class="tracking-tile">
+        <div class="tracking-badge closed"><i class="ti ti-circle-check" aria-hidden="true"></i> Sold</div>
+        <div class="tracking-title">Your referral bought a car</div>
+        <div class="tracking-body">The rep closed the deal. Your gift is on the way — usually within 7–14 days. You'll get a confirmation email when it's sent.</div>
+      </div>
+      <div class="tracking-tile">
+        <div class="tracking-badge gift"><i class="ti ti-gift" aria-hidden="true"></i> Gift sent</div>
+        <div class="tracking-title">Your thank-you is out the door</div>
+        <div class="tracking-body">Check, gift card, or store credit — depends on the dealership. You'll get an email with the details and arrival window.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIPS -->
+<section class="section section-white">
+  <div class="container-narrow">
+    <span class="section-eyebrow gold">Real talk</span>
+    <h2 class="section-title">What makes a <em>top Bird Dog.</em></h2>
+    <p class="section-subtitle">The folks who actually earn aren't doing anything magical. They're doing a few small things consistently.</p>
+    <ul class="tips-list">
+      <li class="tip-item">
+        <div class="tip-bullet">1</div>
+        <div class="tip-content"><strong>Be patient.</strong> Most car buyers take 30-90 days to actually buy. Don't worry if your dashboard is empty in week one — it's normal.</div>
+      </li>
+      <li class="tip-item">
+        <div class="tip-bullet">2</div>
+        <div class="tip-content"><strong>Quality over quantity.</strong> Sending your link to 5 people who are actually shopping beats blasting it to 500 who aren't. Pay attention to who's mentioned cars lately.</div>
+      </li>
+      <li class="tip-item">
+        <div class="tip-bullet">3</div>
+        <div class="tip-content"><strong>Follow up casually.</strong> A week or two after you send your link: "Hey, did you get a chance to check out that rep I told you about?" Gentle nudge. No pressure.</div>
+      </li>
+      <li class="tip-item">
+        <div class="tip-bullet">4</div>
+        <div class="tip-content"><strong>Don't oversell.</strong> You're not a salesperson — you're a connector. The rep does the selling. Your job is just to make the introduction.</div>
+      </li>
+      <li class="tip-item">
+        <div class="tip-bullet">5</div>
+        <div class="tip-content"><strong>Build the habit.</strong> Mention it in one conversation a week. Post on Facebook once a month. Add it to your email signature. Small, consistent inputs compound fast.</div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section section-warm">
+  <div class="container-narrow">
+    <span class="section-eyebrow gold">Questions</span>
+    <h2 class="section-title">What everyone wants to know <em>by week two.</em></h2>
+    <div class="faq-list">
+      <details class="faq-item" open>
+        <summary class="faq-q">When do I get my thank-you gift?<i class="ti ti-plus" aria-hidden="true"></i></summary>
+        <div class="faq-a">Usually 7–14 days after the deal closes. The dealership handles it — they'll send a check, gift card, or store credit depending on their setup. You'll see the gift confirmation in your dashboard the moment they mark it sent.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">What if my friend doesn't buy?<i class="ti ti-plus" aria-hidden="true"></i></summary>
+        <div class="faq-a">No deal, no gift — but no cost or hassle for you either. The system only pays when an actual sale happens. You don't owe anyone anything, and they don't owe you anything.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">How long does my referral stay attached to me?<i class="ti ti-plus" aria-hidden="true"></i></summary>
+        <div class="faq-a">90 days from the first click. So if your friend takes a few weeks to think it over, you still get credit when they buy. Just make sure they use your link the first time they reach out.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">How much will the gift be?<i class="ti ti-plus" aria-hidden="true"></i></summary>
+        <div class="faq-a">Each dealership sets their own thank-you gift amount based on what works for their business. The exact amount is confirmed when the deal closes — you'll see it in your dashboard and in the confirmation email.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Can I refer more than one person?<i class="ti ti-plus" aria-hidden="true"></i></summary>
+        <div class="faq-a">Absolutely. There's no limit. Every closed deal earns its own thank-you gift. Some Bird Dogs send 2-3 referrals a year; some send 20. It's your network, your pace.</div>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">What if I want to stop?<i class="ti ti-plus" aria-hidden="true"></i></summary>
+        <div class="faq-a">Easy. Just stop sharing your link. Your account stays open in case you change your mind, but nothing happens unless you actively share. No fees, no obligations, no contracts.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="section">
+  <div class="container-narrow">
+    <div class="final-cta-block">
+      <span class="pill" style="background: rgba(255, 107, 90, 0.15); border-color: var(--coral); color: var(--coral);">
+        <i class="ti ti-sparkles" aria-hidden="true"></i>
+        Start this week
+      </span>
+      <h2 style="margin-top: 18px;">Send your link <em>to one person.</em></h2>
+      <p>That's all it takes to start. One text. One person. Open your dashboard, copy your link, send it to someone you know who's car shopping. Everything else builds from there.</p>
+      <a href="/me" class="btn-primary">
+        Go to my dashboard
+        <i class="ti ti-arrow-right" aria-hidden="true"></i>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <a href="/" class="logo">My<span class="logo-mark">Car</span>Referral</a>
+      <div class="footer-disclaimer">
+        Thank-you gifts at each dealership's discretion. Subject to applicable state laws. Not a paid finder's fee, brokerage commission, or licensed referral arrangement. CarsInStock LLC and MyCarReferral are technology platforms that facilitate communication and tracking only — they do not process, fund, or fulfill gifts.
+      </div>
+      <div class="footer-legal">
+        <span class="powered">Powered by CarsInStock</span> · © 2026 CarsInStock LLC.
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+document.querySelectorAll('.faq-item').forEach(item => {
+  item.addEventListener('toggle', () => {
+    if (item.open) {
+      document.querySelectorAll('.faq-item').forEach(other => {
+        if (other !== item) other.open = false;
+      });
+    }
+  });
+});
+</script>
+
+</body>
+</html>
