@@ -480,9 +480,7 @@ body {
   <div class="link-card">
     <div class="link-card-label">Your referral link</div>
     <div class="link-card-row">
-      <div class="link-card-qr">
-        <i class="ti ti-qrcode" aria-hidden="true"></i>
-      </div>
+      <div class="link-card-qr" id="bdQrInline" onclick="openBdQrModal()" style="cursor:pointer;" title="Tap to expand"></div>
       <div class="link-card-url-block">
         <div class="link-card-url-sublabel">Share this anywhere</div>
         <div class="link-card-url" id="tracking-url">mycarreferral.com/{{ birddog.tracking_slug }}</div>
@@ -620,5 +618,54 @@ function copyLink() {
   <div style="text-align:center;margin:24px 16px 32px;font-size:13.5px;color:var(--text-muted);">
     New here? <a href="/grow" style="color:var(--green-dark);font-weight:500;">Read the playbook →</a>
   </div>
+
+<!-- Real QR + full-screen modal for birddog referral link -->
+<div id="bdQrModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)closeBdQrModal()">
+  <div style="background:#fff;border-radius:16px;padding:24px;max-width:340px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <div style="font-family:'Fraunces',Georgia,serif;font-size:18px;font-weight:600;color:#162334;margin-bottom:6px;">Your Referral QR</div>
+    <div style="font-size:13px;color:#5B6474;margin-bottom:16px;">Have buyers scan to send you their info</div>
+    <div id="bdQrContainerLarge" style="display:flex;justify-content:center;padding:12px;background:#fff;border:2px solid #C89B4B;border-radius:12px;"></div>
+    <div style="font-size:11px;color:#5B6474;margin-top:12px;word-break:break-all;">mycarreferral.com/{{ birddog.tracking_slug }}</div>
+    <button onclick="closeBdQrModal()" style="margin-top:16px;background:#162334;color:#fff;border:0;border-radius:8px;padding:10px 24px;font-weight:600;cursor:pointer;">Close</button>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+function initBdInlineQr() {
+  var inline = document.getElementById('bdQrInline');
+  if (inline && !inline.hasChildNodes()) {
+    new QRCode(inline, {
+      text: "https://mycarreferral.com/{{ birddog.tracking_slug }}",
+      width: 64, height: 64,
+      colorDark: "#162334", colorLight: "#FFFFFF",
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  }
+}
+function openBdQrModal() {
+  var modal = document.getElementById('bdQrModal');
+  var container = document.getElementById('bdQrContainerLarge');
+  if (!modal || !container) return;
+  if (!container.hasChildNodes()) {
+    new QRCode(container, {
+      text: "https://mycarreferral.com/{{ birddog.tracking_slug }}",
+      width: 280, height: 280,
+      colorDark: "#162334", colorLight: "#FFFFFF",
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  }
+  modal.style.display = 'flex';
+}
+function closeBdQrModal() {
+  var m = document.getElementById('bdQrModal');
+  if (m) m.style.display = 'none';
+}
+if (document.readyState !== 'loading') {
+  initBdInlineQr();
+} else {
+  document.addEventListener('DOMContentLoaded', initBdInlineQr);
+}
+</script>
+
 </body>
 </html>

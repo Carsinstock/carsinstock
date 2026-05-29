@@ -97,12 +97,16 @@ def sp_birddog_submit_referral():
 @salesperson_bp.route('/api/birddog/my-network', methods=['GET'])
 def birddog_my_network():
     import sqlite3
-    from flask import session, jsonify
+    from flask import session, jsonify, request
     if 'team_member_id' not in session:
         return jsonify({'error': 'Unauthorized'}), 401
     conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
     conn.row_factory = sqlite3.Row
-    birddogs = conn.execute('SELECT * FROM birddogs WHERE team_member_id=? ORDER BY created_at DESC', (session['team_member_id'],)).fetchall()
+    include_inactive = request.args.get('include_inactive') == '1'
+    if include_inactive:
+        birddogs = conn.execute('SELECT * FROM birddogs WHERE team_member_id=? AND is_active=0 ORDER BY created_at DESC', (session['team_member_id'],)).fetchall()
+    else:
+        birddogs = conn.execute('SELECT * FROM birddogs WHERE team_member_id=? AND (is_active=1 OR is_active IS NULL) ORDER BY created_at DESC', (session['team_member_id'],)).fetchall()
     result = []
     for b in birddogs:
         referrals = conn.execute('SELECT * FROM birddog_referrals WHERE birddog_id=?', (b['id'],)).fetchall()
@@ -159,6 +163,64 @@ def sp_birddog_mark_sold(referral_id):
         except Exception as e:
             print(f"Birddog sold notify error: {e}")
     return jsonify({'success': True})
+
+@salesperson_bp.route('/api/birddog/<int:birddog_id>/inactive', methods=['POST'])
+def sp_birddog_mark_inactive(birddog_id):
+    import sqlite3
+    from flask import session, jsonify
+    if 'team_member_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    conn.row_factory = sqlite3.Row
+    bd = conn.execute('SELECT id FROM birddogs WHERE id=? AND team_member_id=?',
+                      (birddog_id, session['team_member_id'])).fetchone()
+    if not bd:
+        conn.close()
+        return jsonify({'error': 'Not found'}), 404
+    conn.execute('UPDATE birddogs SET is_active=0 WHERE id=?', (birddog_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
+
+
+@salesperson_bp.route('/api/birddog/<int:birddog_id>/reactivate', methods=['POST'])
+def sp_birddog_reactivate(birddog_id):
+    import sqlite3
+    from flask import session, jsonify
+    if 'team_member_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    conn.row_factory = sqlite3.Row
+    bd = conn.execute('SELECT id FROM birddogs WHERE id=? AND team_member_id=?',
+                      (birddog_id, session['team_member_id'])).fetchone()
+    if not bd:
+        conn.close()
+        return jsonify({'error': 'Not found'}), 404
+    conn.execute('UPDATE birddogs SET is_active=1 WHERE id=?', (birddog_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
+
+
+@salesperson_bp.route('/api/birddog/<int:birddog_id>/delete', methods=['POST'])
+def sp_birddog_hard_delete(birddog_id):
+    import sqlite3
+    from flask import session, jsonify
+    if 'team_member_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    conn.row_factory = sqlite3.Row
+    bd = conn.execute('SELECT id FROM birddogs WHERE id=? AND team_member_id=?',
+                      (birddog_id, session['team_member_id'])).fetchone()
+    if not bd:
+        conn.close()
+        return jsonify({'error': 'Not found'}), 404
+    conn.execute('DELETE FROM birddog_referrals WHERE birddog_id=?', (birddog_id,))
+    conn.execute('DELETE FROM birddogs WHERE id=?', (birddog_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'success': True})
+
 
 @salesperson_bp.route('/api/generate_social_ad', methods=['POST'])
 def generate_social_ad():

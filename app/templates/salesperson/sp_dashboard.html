@@ -143,9 +143,11 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
                     <div class="t-d">People send you buyers. You sell and send them a gift.</div>
                 </div>
             </div>
-            <div class="t-grid2">
-                <a href="{{ referral_url }}" target="_blank" class="t-chip primary">My referral page</a>
-                <a href="/sp-dashboard/birddogs" class="t-chip">Manage birddogs</a>
+            <a href="sms:?&body={{ mcr_sms_body|urlencode }}" class="t-chip primary" style="display:block;text-align:center;margin-top:10px;">📤 Send via Text</a>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px;">
+                <a href="{{ referral_url }}" target="_blank" class="t-chip" style="text-align:center;">My link</a>
+                <button type="button" onclick="showRepQR()" class="t-chip" style="border:0;cursor:pointer;font:inherit;color:inherit;background:rgba(255,255,255,0.06);text-align:center;">📱 Show QR</button>
+                <a href="/sp-dashboard/birddogs" class="t-chip" style="text-align:center;">Manage</a>
             </div>
             <a href="https://mycarreferral.com/for-reps" target="_blank" rel="noopener" class="t-chip" style="margin-top:8px;">ℹ️ How it works</a>
         </div>
@@ -663,4 +665,37 @@ loadBirddogCounts();
         <a href="/business-card" download target="_blank" style="display:block;width:100%;background:#1E293B;color:white;padding:12px;border-radius:8px;font-size:13px;font-weight:700;text-decoration:none;text-align:center;box-sizing:border-box;">🖼 Download Card Image</a>
     </div>
 </div>
+
+<!-- QR Modal for Bird Dog Network (separate from storefront qrModal above) -->
+<div id="repQrModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;padding:20px;" onclick="if(event.target===this)closeRepQR()">
+  <div style="background:#fff;border-radius:16px;padding:24px;max-width:340px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <div style="font-family:'Fraunces',Georgia,serif;font-size:18px;font-weight:600;color:#162334;margin-bottom:6px;">Your Bird Dog QR</div>
+    <div style="font-size:13px;color:#5B6474;margin-bottom:16px;">Customers scan to start earning</div>
+    <div id="repQrContainer" style="display:flex;justify-content:center;padding:12px;background:#fff;border:2px solid #C89B4B;border-radius:12px;"></div>
+    <div style="font-size:11px;color:#5B6474;margin-top:12px;word-break:break-all;">mycarreferral.com/join/{{ member.slug }}</div>
+    <button onclick="closeRepQR()" style="margin-top:16px;background:#162334;color:#fff;border:0;border-radius:8px;padding:10px 24px;font-weight:600;cursor:pointer;">Close</button>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+function showRepQR() {
+  var modal = document.getElementById('repQrModal');
+  var container = document.getElementById('repQrContainer');
+  if (!modal || !container) return;
+  if (!container.hasChildNodes()) {
+    new QRCode(container, {
+      text: "https://mycarreferral.com/join/{{ member.slug }}",
+      width: 240, height: 240,
+      colorDark: "#162334", colorLight: "#FFFFFF",
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  }
+  modal.style.display = 'flex';
+}
+function closeRepQR() {
+  var m = document.getElementById('repQrModal');
+  if (m) m.style.display = 'none';
+}
+</script>
+
 {% endblock %}

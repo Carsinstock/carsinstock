@@ -53,8 +53,14 @@ def sp_dashboard():
     ).fetchall()
     notifications = [dict(n) for n in notifications]
     conn.close()
+    _rep_slug_for_mcr = member['slug'] if member['slug'] else ''
+    mcr_sms_body = (
+        "Thanks again for your business! Here's how to earn with our referral program.\n"
+        f"https://mycarreferral.com/join/{_rep_slug_for_mcr}"
+    )
     return render_template('salesperson/sp_dashboard.html',
         member=dict(member),
+        mcr_sms_body=mcr_sms_body,
         my_vehicles=my_vehicles,
         all_my_vehicles=all_my_vehicles,
         my_leads=my_leads,

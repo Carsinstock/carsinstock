@@ -73,7 +73,10 @@ body { background:#0F172A; }
     <a href="/sp-dashboard/birddog-how-it-works" class="bm-cta secondary">ℹ️ How it works</a>
   </div>
 
-  <div class="bm-section-t">Your birddogs</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+    <div class="bm-section-t" style="margin-bottom:0;">Your birddogs</div>
+    <button id="toggleInactiveBtn" onclick="toggleInactiveView()" style="font-size:12px;padding:6px 12px;background:transparent;color:#5B6474;border:1px solid #E2E8F0;border-radius:6px;cursor:pointer;">Show inactive</button>
+  </div>
   <div id="birddogList">
     <div class="bm-empty">Loading your network...</div>
   </div>
@@ -81,8 +84,43 @@ body { background:#0F172A; }
 </div>
 
 <script>
+var showingInactive = false;
+
+function toggleInactiveView() {
+  showingInactive = !showingInactive;
+  var btn = document.getElementById('toggleInactiveBtn');
+  if (btn) btn.textContent = showingInactive ? 'Show active' : 'Show inactive';
+  loadBirddogNetwork();
+}
+
+function markBdInactive(btn) {
+  var id = btn.getAttribute('data-bd-id');
+  btn.disabled = true;
+  fetch('/api/birddog/' + id + '/inactive', {method: 'POST'})
+    .then(function(r) { return r.json(); })
+    .then(function(d) { if (d.success) loadBirddogNetwork(); });
+}
+
+function reactivateBd(btn) {
+  var id = btn.getAttribute('data-bd-id');
+  btn.disabled = true;
+  fetch('/api/birddog/' + id + '/reactivate', {method: 'POST'})
+    .then(function(r) { return r.json(); })
+    .then(function(d) { if (d.success) loadBirddogNetwork(); });
+}
+
+function confirmDeleteBd(btn) {
+  var id = btn.getAttribute('data-bd-id');
+  var name = btn.getAttribute('data-bd-name') || 'this birddog';
+  if (confirm('Permanently delete ' + name + '? This removes them and all their referrals from your dashboard. This cannot be undone.')) {
+    fetch('/api/birddog/' + id + '/delete', {method: 'POST'})
+      .then(function(r) { return r.json(); })
+      .then(function(d) { if (d.success) loadBirddogNetwork(); });
+  }
+}
+
 function loadBirddogNetwork() {
-    fetch('/api/birddog/my-network', {credentials: 'same-origin'})
+    fetch('/api/birddog/my-network' + (showingInactive ? '?include_inactive=1' : ''), {credentials: 'same-origin'})
     .then(function(r) {
         if (!r.ok || r.status === 401) throw new Error('auth');
         return r.json();
@@ -113,6 +151,15 @@ function loadBirddogNetwork() {
             html += '<span class="bm-pill pending">' + b.pending + ' pending</span>';
             html += '<span class="bm-pill closed">' + b.sold + ' closed</span>';
             html += '</div></div>';
+            var safeName = (b.name || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+            html += '<div style="display:flex;gap:6px;justify-content:flex-end;margin-top:8px;padding-top:8px;border-top:1px solid #F1F5F9;">';
+            if (showingInactive) {
+                html += '<button onclick="reactivateBd(this)" data-bd-id="' + b.id + '" style="font-size:11px;padding:4px 10px;background:#D1FAE5;color:#065F46;border:0;border-radius:6px;cursor:pointer;font-weight:600;">↺ Reactivate</button>';
+            } else {
+                html += '<button onclick="markBdInactive(this)" data-bd-id="' + b.id + '" style="font-size:11px;padding:4px 10px;background:#F1F5F9;color:#475569;border:0;border-radius:6px;cursor:pointer;">📥 Mark inactive</button>';
+            }
+            html += '<button onclick="confirmDeleteBd(this)" data-bd-id="' + b.id + '" data-bd-name="' + safeName + '" style="font-size:11px;padding:4px 8px;background:#FEE2E2;color:#B91C1C;border:0;border-radius:6px;cursor:pointer;" title="Delete permanently">🗑</button>';
+            html += '</div>';
             if (b.referrals && b.referrals.length > 0) {
                 html += '<div class="bm-ref-list">';
                 b.referrals.forEach(function(r) {
