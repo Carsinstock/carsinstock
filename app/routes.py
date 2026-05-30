@@ -776,7 +776,7 @@ def rep_submit_lead(team_slug):
                 ).fetchone()
                 if _program:
                     _bd = _conn_attr.execute(
-                        "SELECT id, team_member_id FROM birddogs WHERE slug=? AND dealership_id=?",
+                        "SELECT id, name, team_member_id FROM birddogs WHERE slug=? AND dealership_id=?",
                         (_slug, _program['dealership_id'])
                     ).fetchone()
                     # Cross-rep protection: only attribute when birddog belongs to this storefront's rep
@@ -786,6 +786,11 @@ def rep_submit_lead(team_slug):
                             (_bd['id'], _bd['team_member_id'], customer_name, customer_phone, 'pending')
                         )
                         _conn_attr.commit()
+                        try:
+                            from app.utils.email import notify_rep_new_referral
+                            _r = _conn_attr.execute("SELECT name, email FROM dealership_team WHERE id=?", (_bd['team_member_id'],)).fetchone()
+                            if _r and _r['email']: notify_rep_new_referral(_r['email'], _r['name'], _bd['name'], customer_name, customer_phone)
+                        except Exception as _e_n: print(f"Rep referral notify error: {_e_n}")
                 _conn_attr.close()
     except Exception as _e_attr:
         print(f"Birddog cookie attribution error: {_e_attr}")
@@ -869,6 +874,11 @@ def referral_submit(slug):
                 (bd['id'], team_member['id'], friend_name, friend_phone, 'pending')
             )
             _conn2.commit()
+            try:
+                from app.utils.email import notify_rep_new_referral
+                _r2 = _conn2.execute("SELECT name, email FROM dealership_team WHERE id=?", (team_member['id'],)).fetchone()
+                if _r2 and _r2['email']: notify_rep_new_referral(_r2['email'], _r2['name'], bd['name'], friend_name, friend_phone)
+            except Exception as _e_n2: print(f"Rep referral notify error: {_e_n2}")
         _conn2.close()
     except Exception as _e2:
         print(f"Birddog hook error: {_e2}")

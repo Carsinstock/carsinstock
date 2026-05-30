@@ -85,7 +85,7 @@ def signup_submit(rep_slug):
 
     conn = _db()
     rep = conn.execute(
-        "SELECT id, dealership_id FROM dealership_team "
+        "SELECT id, name, email, dealership_id FROM dealership_team "
         "WHERE slug = ? AND is_active = 1",
         (rep_slug,)
     ).fetchone()
@@ -109,6 +109,12 @@ def signup_submit(rep_slug):
 
     session['birddog_phone'] = bd['phone']
     session['birddog_name'] = bd['name']
+    if not bd['existing']:
+        try:
+            from app.utils.email import notify_rep_new_birddog
+            notify_rep_new_birddog(rep['email'], rep['name'], name, phone, email)
+        except Exception as _e_rep:
+            print(f"Rep notification error: {_e_rep}")
     return redirect(url_for('referral.portal_home'))
 
 

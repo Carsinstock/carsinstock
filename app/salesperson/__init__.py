@@ -23,9 +23,10 @@ def sp_birddog_signup():
         return jsonify({'error': 'Missing required fields'}), 400
     conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
     conn.row_factory = sqlite3.Row
-    rep = conn.execute('SELECT name, dealership_id FROM dealership_team WHERE id=?', (team_member_id,)).fetchone()
+    rep = conn.execute('SELECT name, email, dealership_id FROM dealership_team WHERE id=?', (team_member_id,)).fetchone()
     dealership_id = rep['dealership_id'] if rep else 1
     rep_name = rep['name'] if rep else 'your rep'
+    rep_email = rep['email'] if rep else None
     bd = create_birddog(
         conn,
         team_member_id=team_member_id,
@@ -58,6 +59,12 @@ def sp_birddog_signup():
             _se(to_email=email, subject="You are in " + rep_name + " Referral Network", html_content=body)
         except Exception as e:
             print(f"Birddog email error: {e}")
+    if not bd['existing']:
+        try:
+            from app.utils.email import notify_rep_new_birddog
+            notify_rep_new_birddog(rep_email, rep_name, name, phone, email)
+        except Exception as _e_rep:
+            print(f"Rep notification error: {_e_rep}")
     return jsonify({'success': True, 'token': bd['token'], 'existing': bd['existing']})
 
 

@@ -200,3 +200,36 @@ def send_vehicle_email(to_emails, vehicle, salesperson, personal_message="", cus
             errors += 1
 
     return sent, errors
+
+def notify_rep_new_birddog(rep_email, rep_name, birddog_name, birddog_phone, birddog_email):
+    """Notify rep via email when a new birddog joins their network (Issue 1)."""
+    if not rep_email: return False
+    try:
+        contact = birddog_phone + (" · " + birddog_email if birddog_email else "")
+        body = (f'<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">'
+                f'<div style="background:#162334;padding:20px;text-align:center;border-radius:12px 12px 0 0;"><h1 style="color:#C89B4B;font-family:Georgia,serif;font-style:italic;margin:0;">CarsInStock</h1></div>'
+                f'<div style="background:#f8fafc;padding:30px;border-radius:0 0 12px 12px;"><h2 style="color:#1E293B;">🎉 New Bird Dog joined your network</h2>'
+                f'<p style="color:#555;font-size:16px;"><strong>{birddog_name}</strong> just signed up under you.</p>'
+                f'<p style="color:#555;font-size:14px;">{contact}</p>'
+                f'<p style="text-align:center;margin:24px 0;"><a href="https://carsinstock.com/sp-dashboard/birddogs" style="background:#00C851;color:#1E293B;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;">View Your Bird Dog Network</a></p></div></div>')
+        send_email(to_email=rep_email, subject=f"🎉 New Bird Dog joined your network: {birddog_name}", html_content=body)
+        return True
+    except Exception as e:
+        print(f"notify_rep_new_birddog error: {e}")
+        return False
+
+def notify_rep_new_referral(rep_email, rep_name, birddog_name, buyer_name, buyer_phone):
+    """Notify rep via email when a new referral is submitted in their birddog network (Issue 2)."""
+    if not rep_email: return False
+    try:
+        body = (f'<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">'
+                f'<div style="background:#162334;padding:20px;text-align:center;border-radius:12px 12px 0 0;"><h1 style="color:#C89B4B;font-family:Georgia,serif;font-style:italic;margin:0;">CarsInStock</h1></div>'
+                f'<div style="background:#f8fafc;padding:30px;border-radius:0 0 12px 12px;"><h2 style="color:#1E293B;">🚗 New referral in your network</h2>'
+                f'<p style="color:#555;font-size:16px;"><strong>{birddog_name}</strong> just sent you a referral.</p>'
+                f'<p style="color:#555;font-size:14px;">Buyer: {buyer_name}<br>Phone: {buyer_phone}</p>'
+                f'<p style="text-align:center;margin:24px 0;"><a href="https://carsinstock.com/sp-dashboard/birddogs" style="background:#00C851;color:#1E293B;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;">View Referrals</a></p></div></div>')
+        send_email(to_email=rep_email, subject=f"🚗 New referral from your Bird Dog network: {buyer_name} sent by {birddog_name}", html_content=body)
+        return True
+    except Exception as e:
+        print(f"notify_rep_new_referral error: {e}")
+        return False

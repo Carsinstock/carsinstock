@@ -475,6 +475,14 @@ body {
     <p class="dash-rep-line">Referring through <strong>{{ birddog.rep_name }}</strong>{% if birddog.dealership_name %} at {{ birddog.dealership_name }}{% endif %}.</p>
     {% endif %}
   </header>
+  <!-- ============ ORIENTATION BANNER (Issue 3c) ============ -->
+  <div style="background:linear-gradient(135deg,#162334 0%,#1e2f47 100%);color:#FFFFFF;border-radius:16px;padding:20px 24px;margin:20px 0 24px;display:flex;align-items:flex-start;gap:16px;box-shadow:0 4px 16px rgba(22,35,52,0.15);">
+    <div style="font-size:28px;flex-shrink:0;line-height:1;">👋</div>
+    <div style="flex:1;">
+      <div style="font-weight:600;font-size:16px;margin-bottom:4px;color:#C89B4B;">You're a Bird Dog{% if birddog.rep_name %} under {{ birddog.rep_name }}{% endif %}.</div>
+      <div style="font-size:14px;line-height:1.5;color:#FFFFFF;opacity:0.92;">Bookmark <strong>mycarreferral.com</strong> to come back and track your referrals anytime.</div>
+    </div>
+  </div>
 
   <!-- ============ TRACKING LINK CARD ============ -->
   <div class="link-card">
