@@ -269,6 +269,5 @@ def short_link(token):
     conn.close()
     if not target_slug:
         return render_template('referral/not_found.html'), 404
-    response = redirect(f"https://carsinstock.com/{target_slug}")
-    response.set_cookie('mcr_attr', f"{prefix}-{slug}", max_age=90 * 24 * 60 * 60)
-    return response
+    # Cookie planted on carsinstock.com via /_mcr_attr handler (cross-domain bounce)
+    return redirect(f"https://carsinstock.com/_mcr_attr?ref={prefix}-{slug}&to={target_slug}")

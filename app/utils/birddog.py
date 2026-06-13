@@ -67,3 +67,23 @@ def create_birddog(conn, *, team_member_id, name, phone, email='', dealership_id
         'dealership_id': dealership_id,
         'existing': False,
     }
+
+def attribute_lead_to_birddog(lead_id, customer_name, customer_email, customer_phone, member, mcr_attr_cookie):
+    """Issue 2 fix: read mcr_attr cookie, insert birddog_referrals row. Returns birddog dict if attributed (rep-owned), else None."""
+    if not mcr_attr_cookie or '-' not in mcr_attr_cookie: return None
+    import sqlite3
+    try:
+        bd_slug = mcr_attr_cookie.partition('-')[2]
+        conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        conn.row_factory = sqlite3.Row
+        bd = conn.execute("SELECT id, name, team_member_id FROM birddogs WHERE slug=? AND dealership_id=?", (bd_slug, member['dealership_id'])).fetchone()
+        result = None
+        if bd and bd['team_member_id'] == member['id']:
+            conn.execute("INSERT INTO birddog_referrals (birddog_id, team_member_id, buyer_name, buyer_phone, buyer_email, lead_id, status, dealership_id, attribution_source) VALUES (?, ?, ?, ?, ?, ?, 'pending', ?, 'cookie')", (bd['id'], bd['team_member_id'], customer_name, customer_phone, customer_email, lead_id, member['dealership_id']))
+            conn.commit()
+            result = dict(bd)
+        conn.close()
+        return result
+    except Exception as e:
+        print(f"attribute_lead_to_birddog error: {e}")
+        return None

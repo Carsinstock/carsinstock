@@ -680,6 +680,18 @@ def sendgrid_webhook():
     conn.close()
     return '', 200
 
+@main.route('/_mcr_attr')
+def mcr_attr_plant():
+    """Plant mcr_attr cookie on carsinstock.com after cross-domain bounce from mycarreferral.com."""
+    ref = request.args.get('ref', '').strip()
+    to = request.args.get('to', '').strip()
+    if not to or not all(c.isalnum() or c == '-' for c in to):
+        return redirect('https://carsinstock.com/')
+    response = redirect(f"/{to}")
+    if ref and '-' in ref and all(c.isalnum() or c == '-' for c in ref):
+        response.set_cookie('mcr_attr', ref, max_age=90 * 24 * 60 * 60, samesite='Lax')
+    return response
+
 @main.route('/<team_slug>/leads', methods=['POST'])
 def rep_submit_lead(team_slug):
     """Handle lead submission from a rep personal page."""
@@ -715,6 +727,14 @@ def rep_submit_lead(team_slug):
     try:
         db.session.add(lead)
         db.session.commit()
+        # Birddog attribution (Issue 2 fix)
+        try:
+            from app.utils.birddog import attribute_lead_to_birddog
+            _bd_attr = attribute_lead_to_birddog(lead.lead_id, customer_name, customer_email, customer_phone, member, request.cookies.get('mcr_attr'))
+            if _bd_attr:
+                from app.utils.email import notify_rep_new_referral
+                notify_rep_new_referral(member['email'], member['name'], _bd_attr['name'], customer_name, customer_phone)
+        except Exception as _e_bd: print(f"Birddog attribution wrapper error: {_e_bd}")
         # Fire emails for rep personal page lead
         from app.utils.email import send_email as _se
         vehicle_obj = None
@@ -759,41 +779,6 @@ def rep_submit_lead(team_slug):
     except Exception as e:
         db.session.rollback()
         print(f"rep lead error: {e}")
-    # Cookie-based birddog attribution: if this visitor arrived via a birddog's
-    # tracking link (mycarreferral.com/<prefix>-<slug>), credit the birddog with
-    # this lead by inserting a birddog_referrals row.
-    try:
-        mcr_attr = request.cookies.get('mcr_attr', '')
-        if mcr_attr and '-' in mcr_attr:
-            _prefix, _slug = mcr_attr.split('-', 1)
-            import re as _re_attr
-            if _re_attr.match(r'^[a-z0-9]+$', _prefix) and _re_attr.match(r'^[a-z0-9]+$', _slug):
-                _conn_attr = _sq.connect('/home/eddie/carsinstock/instance/carsinstock.db')
-                _conn_attr.row_factory = _sq.Row
-                _program = _conn_attr.execute(
-                    "SELECT dealership_id FROM referral_programs WHERE brand_prefix=? AND active=1",
-                    (_prefix,)
-                ).fetchone()
-                if _program:
-                    _bd = _conn_attr.execute(
-                        "SELECT id, name, team_member_id FROM birddogs WHERE slug=? AND dealership_id=?",
-                        (_slug, _program['dealership_id'])
-                    ).fetchone()
-                    # Cross-rep protection: only attribute when birddog belongs to this storefront's rep
-                    if _bd and _bd['team_member_id'] == member['id']:
-                        _conn_attr.execute(
-                            "INSERT INTO birddog_referrals (birddog_id, team_member_id, buyer_name, buyer_phone, status) VALUES (?,?,?,?,?)",
-                            (_bd['id'], _bd['team_member_id'], customer_name, customer_phone, 'pending')
-                        )
-                        _conn_attr.commit()
-                        try:
-                            from app.utils.email import notify_rep_new_referral
-                            _r = _conn_attr.execute("SELECT name, email FROM dealership_team WHERE id=?", (_bd['team_member_id'],)).fetchone()
-                            if _r and _r['email']: notify_rep_new_referral(_r['email'], _r['name'], _bd['name'], customer_name, customer_phone)
-                        except Exception as _e_n: print(f"Rep referral notify error: {_e_n}")
-                _conn_attr.close()
-    except Exception as _e_attr:
-        print(f"Birddog cookie attribution error: {_e_attr}")
     flash("Thanks! We'll be in touch shortly.", "success")
     return redirect(f'/{team_slug}')
 
