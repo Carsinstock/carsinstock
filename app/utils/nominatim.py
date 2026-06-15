@@ -41,16 +41,21 @@ def _save_cache(query_address, lat, lon, formatted, neighbors):
 def _geocode_address(address):
     time.sleep(1)
     headers = {'User-Agent': USER_AGENT}
-    params = {'q': address, 'format': 'json', 'limit': 1, 'countrycodes': 'us'}
+    params = {'q': address, 'format': 'json', 'limit': 1, 'countrycodes': 'us', 'addressdetails': 1}
     r = requests.get(NOMINATIM_URL, params=params, headers=headers, timeout=10)
     r.raise_for_status()
     results = r.json()
     if not results:
         raise ValueError(f"Could not geocode address: {address}")
     result = results[0]
-    return float(result['lat']), float(result['lon']), result.get('display_name', address)
+    ad = result.get('address', {})
+    default_zip = (ad.get('postcode') or '').strip()
+    default_state = (ad.get('state') or '').strip()
+    STATE_ABBR = {'New Jersey':'NJ','New York':'NY','Pennsylvania':'PA','Connecticut':'CT','Massachusetts':'MA','Delaware':'DE','Maryland':'MD','California':'CA','Texas':'TX','Florida':'FL','Illinois':'IL','Ohio':'OH','Georgia':'GA','North Carolina':'NC','Virginia':'VA','Washington':'WA','Arizona':'AZ','Michigan':'MI','Indiana':'IN','Tennessee':'TN','Missouri':'MO','Wisconsin':'WI','Colorado':'CO','Minnesota':'MN','South Carolina':'SC','Alabama':'AL','Louisiana':'LA','Kentucky':'KY','Oregon':'OR','Oklahoma':'OK','Arkansas':'AR','Mississippi':'MS','Kansas':'KS','Nevada':'NV','Utah':'UT','Iowa':'IA','Nebraska':'NE','West Virginia':'WV','Idaho':'ID','Hawaii':'HI','Maine':'ME','New Hampshire':'NH','Rhode Island':'RI','Montana':'MT','South Dakota':'SD','North Dakota':'ND','Alaska':'AK','Vermont':'VT','Wyoming':'WY','New Mexico':'NM','District of Columbia':'DC'}
+    default_state = STATE_ABBR.get(default_state, default_state)
+    return float(result['lat']), float(result['lon']), result.get('display_name', address), default_zip, default_state
 
-def _get_overpass_addresses(lat, lon, radius=RADIUS_METERS):
+def _get_overpass_addresses(lat, lon, radius=RADIUS_METERS, default_zip='', default_state=''):
     time.sleep(1)
     query = f"""[out:json][timeout:25];
 (
@@ -70,15 +75,17 @@ out center 30;"""
             house = tags.get('addr:housenumber', '').strip()
             street = tags.get('addr:street', '').strip()
             city = tags.get('addr:city', '').strip()
-            state = tags.get('addr:state', '').strip()
-            zipcode = tags.get('addr:postcode', '').strip()
+            state = tags.get('addr:state', '').strip() or default_state
+            zipcode = tags.get('addr:postcode', '').strip() or default_zip
             if not house or not street:
                 continue
-            parts = [f"{house} {street}"]
-            if city: parts.append(city)
-            if state: parts.append(state)
-            if zipcode: parts.append(zipcode)
-            addr_str = ', '.join(parts)
+            csz = []
+            if city: csz.append(city)
+            if state and zipcode:
+                csz.append(f"{state} {zipcode}")
+            elif state: csz.append(state)
+            elif zipcode: csz.append(zipcode)
+            addr_str = f"{house} {street}" + (("\n" + ", ".join(csz)) if csz else "")
             if addr_str.lower() not in seen:
                 seen.add(addr_str.lower())
                 addresses.append(addr_str)
@@ -88,15 +95,23 @@ out center 30;"""
     except Exception:
         return []
 
-def _generate_street_addresses(input_address, count=15):
+def _generate_street_addresses(input_address, count=15, default_zip='', default_state=''):
     match = re.match(r'^(\d+)\s+(.+?)(?:,\s*(.+))?$', input_address.strip())
     if not match:
         return []
     base_number = int(match.group(1))
     street_name = match.group(2).strip()
     street_only = street_name.split(',')[0].strip()
-    addr_parts = input_address.split(',')
-    location_suffix = ', '.join(addr_parts[1:]).strip() if len(addr_parts) >= 2 else ''
+    addr_parts = [p.strip() for p in input_address.split(',') if p.strip()]
+    city = addr_parts[1] if len(addr_parts) > 1 else ''
+    if city and (default_state or default_zip):
+        line2 = f"{city}, {default_state} {default_zip}".strip().rstrip(',').strip()
+    elif city:
+        line2 = city
+    elif default_state or default_zip:
+        line2 = f"{default_state} {default_zip}".strip()
+    else:
+        line2 = ''
     addresses = []
     seen = set()
     step = 2
@@ -109,7 +124,8 @@ def _generate_street_addresses(input_address, count=15):
         num = base_number + offset
         if num <= 0:
             continue
-        addr = f"{num} {street_only}, {location_suffix}" if location_suffix else f"{num} {street_only}"
+        line1 = f"{num} {street_only}"
+        addr = f"{line1}\n{line2}" if line2 else line1
         key = addr.lower()
         if key not in seen:
             seen.add(key)
@@ -123,12 +139,12 @@ def get_neighbor_addresses(query_address):
     if cached:
         return cached
     try:
-        lat, lon, formatted = _geocode_address(query_address)
+        lat, lon, formatted, default_zip, default_state = _geocode_address(query_address)
     except ValueError as e:
         raise ValueError(str(e))
-    neighbors = _get_overpass_addresses(lat, lon)
+    neighbors = _get_overpass_addresses(lat, lon, default_zip=default_zip, default_state=default_state)
     if len(neighbors) < 5:
-        street_addresses = _generate_street_addresses(query_address)
+        street_addresses = _generate_street_addresses(query_address, default_zip=default_zip, default_state=default_state)
         seen = set(a.lower() for a in neighbors)
         for addr in street_addresses:
             if addr.lower() not in seen:

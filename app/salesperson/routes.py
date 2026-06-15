@@ -2216,7 +2216,7 @@ Always guide the conversation toward signing up. Never be pushy - be like a frie
         addresses = data.get('addresses', [])
         if not addresses:
             return jsonify({'error': 'No addresses provided'}), 400
-        pdf_bytes = generate_avery_5160_labels(addresses)
+        pdf_bytes = generate_avery_5160_labels(addresses, prefix='Current Resident')
         from flask import Response
         return Response(pdf_bytes, mimetype='application/pdf',
             headers={'Content-Disposition': 'attachment; filename="neighbor-mailing-labels.pdf"'})

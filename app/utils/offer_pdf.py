@@ -132,7 +132,7 @@ def generate_neighbor_pdf(letters):
     return buffer.getvalue(), offer_codes
 
 
-def generate_avery_5160_labels(addresses, return_address=None):
+def generate_avery_5160_labels(addresses, return_address=None, prefix=None):
     """
     Generates a printable Avery 5160 label sheet PDF.
     30 labels per page, 3 columns x 10 rows.
@@ -182,13 +182,18 @@ def generate_avery_5160_labels(addresses, return_address=None):
                 c.rect(x, y, LABEL_W, LABEL_H)
 
                 # Address text
-                lines = [l.strip() for l in addr.split(',') if l.strip()]
+                if '\n' in addr:
+                    lines = [l.strip() for l in addr.split('\n') if l.strip()]
+                else:
+                    lines = [l.strip() for l in addr.split(',') if l.strip()]
+                if prefix:
+                    lines = [prefix] + lines
                 text_x = x + 0.12 * inch
                 text_y = y + LABEL_H - 0.22 * inch
 
                 c.setFont('Helvetica', 9)
                 c.setFillColor(NAVY)
-                for line in lines[:3]:
+                for line in lines[:4]:
                     c.drawString(text_x, text_y, line)
                     text_y -= 13
 
