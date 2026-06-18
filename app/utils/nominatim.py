@@ -114,7 +114,7 @@ def _generate_street_addresses(input_address, count=15, default_zip='', default_
         line2 = ''
     addresses = []
     seen = set()
-    step = 2
+    step = 1  # cover both sides of street (was 2 = same-parity only)
     offsets = []
     for i in range(1, 20):
         offsets.append(i * step)
@@ -134,6 +134,21 @@ def _generate_street_addresses(input_address, count=15, default_zip='', default_
             break
     return addresses
 
+def _is_likely_commercial(addr_str):
+    """Heuristic filter: skip highway/commercial addresses unsuitable for residential neighbor mailings."""
+    lower = addr_str.lower()
+    patterns = [
+        r'\bstate route\b',
+        r'\bus[-\s]?\d{1,3}\b',
+        r'\bus highway\b',
+        r'\broute\s+\d{1,3}\b',
+        r'\b(rt|rte)\.?\s+\d',
+        r'\bturnpike\b',
+        r'\bparkway\b',
+        r'\bnj[-\s]\d{1,3}\b',
+    ]
+    return any(re.search(p, lower) for p in patterns)
+
 def get_neighbor_addresses(query_address):
     cached = _check_cache(query_address)
     if cached:
@@ -142,15 +157,20 @@ def get_neighbor_addresses(query_address):
         lat, lon, formatted, default_zip, default_state = _geocode_address(query_address)
     except ValueError as e:
         raise ValueError(str(e))
-    neighbors = _get_overpass_addresses(lat, lon, default_zip=default_zip, default_state=default_state)
-    if len(neighbors) < 5:
-        street_addresses = _generate_street_addresses(query_address, default_zip=default_zip, default_state=default_state)
-        seen = set(a.lower() for a in neighbors)
-        for addr in street_addresses:
-            if addr.lower() not in seen:
+    # Synthetic first: same-street neighbors are most relevant for residential mailings
+    neighbors = _generate_street_addresses(query_address, default_zip=default_zip, default_state=default_state)
+    seen = set(a.lower() for a in neighbors)
+    # Augment with Overpass, filtered to skip highway/commercial noise
+    if len(neighbors) < 15:
+        overpass_addrs = _get_overpass_addresses(lat, lon, default_zip=default_zip, default_state=default_state)
+        for addr in overpass_addrs:
+            if addr.lower() not in seen and not _is_likely_commercial(addr):
                 neighbors.append(addr)
                 seen.add(addr.lower())
             if len(neighbors) >= 15:
                 break
+    # Final safety net: if both methods returned nothing, fall back to raw Overpass
+    if not neighbors:
+        neighbors = _get_overpass_addresses(lat, lon, default_zip=default_zip, default_state=default_state)
     _save_cache(query_address, lat, lon, formatted, neighbors)
     return neighbors
