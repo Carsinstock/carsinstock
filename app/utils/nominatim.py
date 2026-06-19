@@ -53,9 +53,15 @@ def _geocode_address(address):
     default_state = (ad.get('state') or '').strip()
     STATE_ABBR = {'New Jersey':'NJ','New York':'NY','Pennsylvania':'PA','Connecticut':'CT','Massachusetts':'MA','Delaware':'DE','Maryland':'MD','California':'CA','Texas':'TX','Florida':'FL','Illinois':'IL','Ohio':'OH','Georgia':'GA','North Carolina':'NC','Virginia':'VA','Washington':'WA','Arizona':'AZ','Michigan':'MI','Indiana':'IN','Tennessee':'TN','Missouri':'MO','Wisconsin':'WI','Colorado':'CO','Minnesota':'MN','South Carolina':'SC','Alabama':'AL','Louisiana':'LA','Kentucky':'KY','Oregon':'OR','Oklahoma':'OK','Arkansas':'AR','Mississippi':'MS','Kansas':'KS','Nevada':'NV','Utah':'UT','Iowa':'IA','Nebraska':'NE','West Virginia':'WV','Idaho':'ID','Hawaii':'HI','Maine':'ME','New Hampshire':'NH','Rhode Island':'RI','Montana':'MT','South Dakota':'SD','North Dakota':'ND','Alaska':'AK','Vermont':'VT','Wyoming':'WY','New Mexico':'NM','District of Columbia':'DC'}
     default_state = STATE_ABBR.get(default_state, default_state)
-    return float(result['lat']), float(result['lon']), result.get('display_name', address), default_zip, default_state
+    default_city = ''
+    for _ck in ('city', 'town', 'village', 'hamlet', 'suburb'):
+        _cv = (ad.get(_ck) or '').strip()
+        if _cv:
+            default_city = _cv
+            break
+    return float(result['lat']), float(result['lon']), result.get('display_name', address), default_zip, default_state, default_city
 
-def _get_overpass_addresses(lat, lon, radius=RADIUS_METERS, default_zip='', default_state=''):
+def _get_overpass_addresses(lat, lon, radius=RADIUS_METERS, default_zip='', default_state='', default_city=''):
     time.sleep(1)
     query = f"""[out:json][timeout:25];
 (
@@ -74,7 +80,7 @@ out center 30;"""
             tags = element.get('tags', {})
             house = tags.get('addr:housenumber', '').strip()
             street = tags.get('addr:street', '').strip()
-            city = tags.get('addr:city', '').strip()
+            city = tags.get('addr:city', '').strip() or default_city
             state = tags.get('addr:state', '').strip() or default_state
             zipcode = tags.get('addr:postcode', '').strip() or default_zip
             if not house or not street:
@@ -95,15 +101,22 @@ out center 30;"""
     except Exception:
         return []
 
-def _generate_street_addresses(input_address, count=15, default_zip='', default_state=''):
+def _generate_street_addresses(input_address, count=15, default_zip='', default_state='', default_city=''):
     match = re.match(r'^(\d+)\s+(.+?)(?:,\s*(.+))?$', input_address.strip())
     if not match:
         return []
     base_number = int(match.group(1))
     street_name = match.group(2).strip()
     street_only = street_name.split(',')[0].strip()
-    addr_parts = [p.strip() for p in input_address.split(',') if p.strip()]
-    city = addr_parts[1] if len(addr_parts) > 1 else ''
+    # Prefer geocoder city; strip trailing city/state/zip tokens that bled into the parsed street
+    if default_city:
+        city = default_city
+        for _tok in (default_zip, default_state, default_city):
+            if _tok:
+                street_only = re.sub(r'[\s,]+' + re.escape(_tok) + r'$', '', street_only, flags=re.IGNORECASE).strip()
+    else:
+        addr_parts = [p.strip() for p in input_address.split(',') if p.strip()]
+        city = addr_parts[1] if len(addr_parts) > 1 else ''
     if city and (default_state or default_zip):
         line2 = f"{city}, {default_state} {default_zip}".strip().rstrip(',').strip()
     elif city:
@@ -154,15 +167,15 @@ def get_neighbor_addresses(query_address):
     if cached:
         return cached
     try:
-        lat, lon, formatted, default_zip, default_state = _geocode_address(query_address)
+        lat, lon, formatted, default_zip, default_state, default_city = _geocode_address(query_address)
     except ValueError as e:
         raise ValueError(str(e))
     # Synthetic first: same-street neighbors are most relevant for residential mailings
-    neighbors = _generate_street_addresses(query_address, default_zip=default_zip, default_state=default_state)
+    neighbors = _generate_street_addresses(query_address, default_zip=default_zip, default_state=default_state, default_city=default_city)
     seen = set(a.lower() for a in neighbors)
     # Augment with Overpass, filtered to skip highway/commercial noise
     if len(neighbors) < 15:
-        overpass_addrs = _get_overpass_addresses(lat, lon, default_zip=default_zip, default_state=default_state)
+        overpass_addrs = _get_overpass_addresses(lat, lon, default_zip=default_zip, default_state=default_state, default_city=default_city)
         for addr in overpass_addrs:
             if addr.lower() not in seen and not _is_likely_commercial(addr):
                 neighbors.append(addr)
