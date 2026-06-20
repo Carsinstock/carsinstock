@@ -321,6 +321,13 @@
     .cis-steps { flex-direction: column; gap: 8px; }
     .cis-arrow { transform: rotate(90deg); }
   }
+
+  /* MOBILE_HERO_TUNING */
+  @media (max-width: 640px) {
+    .cis-btn-register { display: none !important; }
+    .cis-hero h1 { font-size: 44px !important; line-height: 1.05 !important; margin-bottom: 10px !important; }
+    .cis-hero-tagline { font-size: 16px !important; margin: 8px auto 20px !important; line-height: 1.45 !important; max-width: 92% !important; }
+  }
 </style>
 
 <div class="cis-home">
@@ -339,11 +346,12 @@
     <div class="cis-hero">
       <div class="cis-hero-tag">Sell More Cars</div>
       <h1>Stop Waiting<br>for <em>Ups.</em><br>Start Generating<br><em>Leads.</em></h1>
-      <p class="cis-hero-sub">Built by a car salesman, for car salespeople and the dealerships that run them.</p>
+      <p class="cis-hero-tagline" style="text-align:center;color:#00C851;font-size:18px;font-style:italic;margin:12px auto 28px;max-width:640px;">Salespeople using these tools sell 6–10 more cars a month. It's simple math.</p>
       <div class="cis-hero-btns">
         <a href="/register" class="cis-hero-btn-primary">I'm a Salesperson</a>
         <a href="/dealer-register" class="cis-hero-btn-secondary">I Run a Sales Team</a>
       </div>
+      <p style="text-align:center;font-size:15px;color:rgba(255,255,255,0.95);letter-spacing:0.5px;margin:0 0 12px;">From $39/mo per rep</p>
       <p class="cis-hero-sub2" style="font-size:15px; color:rgba(255,255,255,0.5); letter-spacing:1px;">Free 14-day trial &nbsp;·&nbsp; No credit card required &nbsp;·&nbsp; Setup in 5 minutes</p>
     </div>
   </section>
@@ -404,7 +412,7 @@
     <div class="cis-dealer-inner">
       <div class="cis-section-label">For Dealerships</div>
       <h2 class="cis-section-title">Your Brand.<br>Their Hustle.</h2>
-      <p style="text-align:center;color:#00C851;font-size:16px;font-style:italic;max-width:700px;margin:0 auto 48px;line-height:1.7;">Technical software with AI-powered tools and pre-built templates that save your salespeople hours of prep — so they spend their day selling, not designing.</p>
+      <p style="text-align:center;color:#00C851;font-size:16px;font-style:italic;max-width:700px;margin:0 auto 48px;line-height:1.7;">AI-powered tools your reps use in minutes — branded to your dealership, controlled by you. They sell more cars. You keep your brand.</p>
       <div class="cis-dealer-grid">
         <div class="cis-dealer-card">
           <div class="cis-feature-icon">📸</div>
