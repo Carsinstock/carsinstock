@@ -21,7 +21,7 @@ def generate_offer_code(prefix='REF'):
 def expiry_date(days=30):
     return (datetime.now() + timedelta(days=days)).strftime('%B %d, %Y')
 
-def _build_letter(story, heading, subheading, salutation, body_paragraphs, rep_name, rep_title, dealership_name, rep_phone, offer_code, expires, first=True):
+def _build_letter(story, heading, subheading, salutation, body_paragraphs, rep_name, rep_title, dealership_name, rep_phone, offer_code, expires, first=True, rep_slug=''):
     if not first:
         story.append(PageBreak())
 
@@ -44,10 +44,31 @@ def _build_letter(story, heading, subheading, salutation, body_paragraphs, rep_n
     story.append(Spacer(1, 0.3*inch))
     story.append(Paragraph('Sincerely,', body_style))
     story.append(Spacer(1, 0.4*inch))
-    story.append(Paragraph(f'<b>{rep_name}</b>', ParagraphStyle('Sig', fontSize=11, fontName='Helvetica-Bold', textColor=NAVY, spaceAfter=2)))
-    story.append(Paragraph(rep_title, ParagraphStyle('SigTitle', fontSize=10, fontName='Helvetica', textColor=GRAY, spaceAfter=2)))
-    story.append(Paragraph(dealership_name, ParagraphStyle('SigDeal', fontSize=10, fontName='Helvetica', textColor=NAVY, spaceAfter=2)))
-    story.append(Paragraph(rep_phone, ParagraphStyle('SigPhone', fontSize=10, fontName='Helvetica', textColor=NAVY, spaceAfter=0)))
+    sig_col = [
+        Paragraph(f'<b>{rep_name}</b>', ParagraphStyle('Sig', fontSize=11, fontName='Helvetica-Bold', textColor=NAVY, spaceAfter=2)),
+        Paragraph(rep_title, ParagraphStyle('SigTitle', fontSize=10, fontName='Helvetica', textColor=GRAY, spaceAfter=2)),
+        Paragraph(dealership_name, ParagraphStyle('SigDeal', fontSize=10, fontName='Helvetica', textColor=NAVY, spaceAfter=2)),
+        Paragraph(rep_phone, ParagraphStyle('SigPhone', fontSize=10, fontName='Helvetica', textColor=NAVY, spaceAfter=0)),
+    ]
+    qr_col = ''
+    if rep_slug:
+        import qrcode as _qrlib
+        from reportlab.platypus import Image as _RLImage
+        _qr = _qrlib.QRCode(version=1, box_size=8, border=2, error_correction=_qrlib.constants.ERROR_CORRECT_M)
+        _qr.add_data(f'https://cardeals.autos/{rep_slug}'); _qr.make(fit=True)
+        _qr_img = _qr.make_image(fill_color='#1E293B', back_color='white')
+        _qr_buf = BytesIO(); _qr_img.save(_qr_buf, format='PNG'); _qr_buf.seek(0)
+        _qr_flow = _RLImage(_qr_buf, width=0.95*inch, height=0.95*inch); _qr_flow.hAlign='RIGHT'
+        qr_col = [
+            Paragraph('<b>View My Inventory</b>', ParagraphStyle('QRCap', fontSize=8, fontName='Helvetica-Bold', textColor=NAVY, alignment=2, spaceAfter=3)),
+            _qr_flow,
+            Paragraph(f'cardeals.autos/{rep_slug}', ParagraphStyle('QRUrl', fontSize=7, fontName='Helvetica', textColor=GRAY, alignment=2, spaceAfter=0)),
+        ]
+    from reportlab.platypus import Table, TableStyle
+    _t = Table([[sig_col, qr_col]], colWidths=[3.6*inch, 2.5*inch])
+    _t.setStyle(TableStyle([('VALIGN',(0,0),(-1,-1),'TOP'),('LEFTPADDING',(0,0),(-1,-1),0),('RIGHTPADDING',(0,0),(-1,-1),0),('TOPPADDING',(0,0),(-1,-1),0),('BOTTOMPADDING',(0,0),(-1,-1),0),('ALIGN',(1,0),(1,0),'RIGHT')]))
+    story.append(_t)
+
 
     story.append(Spacer(1, 0.4*inch))
     story.append(HRFlowable(width='100%', thickness=0.5, color=colors.HexColor('#E2E8F0'), spaceAfter=10))
@@ -86,7 +107,8 @@ def generate_reference_pdf(letters):
             rep_phone=l.get('rep_phone', ''),
             offer_code=code,
             expires=expires,
-            first=(i == 0)
+            first=(i == 0),
+            rep_slug=l.get('rep_slug', '')
         )
 
     doc.build(story)
@@ -125,7 +147,8 @@ def generate_neighbor_pdf(letters):
             rep_phone=l.get('rep_phone', ''),
             offer_code=code,
             expires=expires,
-            first=(i == 0)
+            first=(i == 0),
+            rep_slug=l.get('rep_slug', '')
         )
 
     doc.build(story)
