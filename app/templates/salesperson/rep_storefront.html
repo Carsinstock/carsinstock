@@ -424,7 +424,8 @@ async function submitReferral() {
     referrer_email: document.getElementById('ref_your_email').value.trim(),
     friend_name: document.getElementById('ref_friend_name').value.trim(),
     friend_phone: document.getElementById('ref_friend_phone').value.trim(),
-    message: document.getElementById('ref_message').value.trim()
+    message: document.getElementById('ref_message').value.trim(),
+    rep_slug: repSlug
   };
   if (!data.referrer_name||!data.referrer_phone||!data.referrer_email||!data.friend_name||!data.friend_phone){
     alert('Please fill in all required fields.'); return;

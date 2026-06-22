@@ -844,7 +844,8 @@ def referral_submit(slug):
         from app.utils.birddog import create_birddog
         _conn2 = _sq.connect('/home/eddie/carsinstock/instance/carsinstock.db')
         _conn2.row_factory = _sq.Row
-        team_member = _conn2.execute("SELECT id, dealership_id FROM dealership_team WHERE slug=? AND is_active=1", (slug,)).fetchone()
+        _rep_slug = data.get('rep_slug') or slug
+        team_member = _conn2.execute("SELECT id, dealership_id FROM dealership_team WHERE slug=? AND is_active=1", (_rep_slug,)).fetchone()
         if team_member:
             bd = create_birddog(
                 _conn2,
