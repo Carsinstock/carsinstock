@@ -245,7 +245,7 @@ textarea.f-input{height:80px;resize:none}
       </video>
       <div id="muteIcon" style="position:absolute;top:12px;right:12px;background:rgba(0,0,0,0.5);color:white;border-radius:20px;padding:4px 10px;font-size:12px;cursor:pointer;z-index:3;"
         onclick="var v=document.getElementById('featVideo');v.muted=!v.muted;this.textContent=v.muted?'🔇':'🔊'">🔇</div>
-      {% elif featured.image_url %}<img src="{{ featured.image_url }}" class="feat-img" alt="">
+      {% elif featured.image_url %}<img src="{{ featured_img or featured.image_url }}" class="feat-img" alt="" loading="eager" style="background:linear-gradient(135deg,#1E293B,#0f172a)">
       {% else %}<div class="feat-img-ph">🚙</div>{% endif %}
       {% if featured.days_remaining %}
       <div class="days-badge-feat {% if featured.days_remaining <= 2 %}red{% elif featured.days_remaining <= 4 %}amber{% else %}green{% endif %}">🔥 {{ featured.days_remaining }} Day{{ 's' if featured.days_remaining != 1 else '' }} Left</div>

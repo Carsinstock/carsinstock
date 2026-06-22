@@ -871,6 +871,22 @@ def referral_submit(slug):
     return jsonify({"success": True})
 
 
+BACKDROP_PRESETS = {
+    'coastal':  'luxury vehicle parked on a wide empty asphalt road on a grassy coastal headland at golden hour with the ocean far away on the horizon professional automotive photography',
+    'mountain': 'premium vehicle on a scenic mountain highway clear blue sky distant snowy peaks crisp daylight',
+    'driveway': 'luxury vehicle parked in the driveway of a beautiful suburban home at golden hour warm inviting',
+    'city':     'premium vehicle on a city street at dusk with glowing skyline lights cinematic reflections on wet pavement',
+    'autumn':   'premium vehicle on a tree lined road with warm autumn foliage soft natural light',
+}
+
+def backdrop_segment(preset_key, subject):
+    scene = BACKDROP_PRESETS.get(preset_key or '')
+    if not scene:
+        return ''
+    from urllib.parse import quote
+    return f'e_extract:prompt_{quote((subject or "the vehicle"), safe="")}/e_dropshadow/e_gen_background_replace:prompt_{quote(scene, safe="")}/c_pad,w_1600,h_900,b_gen_fill/q_auto:good,f_auto,fl_progressive/'
+
+
 def rep_storefront(member):
     """Render a dealership team member's personal storefront page."""
     import sqlite3 as _sq
@@ -915,7 +931,27 @@ def rep_storefront(member):
         if url and 'cloudinary.com' in url:
             return url.replace('/upload/', '/upload/w_1200,h_630,c_fill,g_auto,f_jpg,q_80/')
         return url
-    og_image = _cld(featured.image_url if featured and featured.image_url else (member['profile_photo'] or _fallback))
+    # Storefront Backdrops - enhance Top Pick image + share card when a preset is set
+    _bp = None
+    try:
+        _bpc = _sq.connect('/home/eddie/carsinstock/instance/carsinstock.db'); _bpc.row_factory = _sq.Row
+        _bpr = _bpc.execute("SELECT backdrop_preset FROM dealership_team WHERE id=?", (member['id'],)).fetchone()
+        _bpc.close()
+        _bp = _bpr['backdrop_preset'] if _bpr else None
+    except Exception:
+        _bp = None
+    _subject = (f"the {featured.make} {featured.model}" if (featured and getattr(featured, 'make', None)) else "the vehicle")
+    _bd = backdrop_segment(_bp, _subject)
+    featured_img = featured.image_url if featured else None
+    if featured and featured.image_url and _bd and 'cloudinary.com' in featured.image_url:
+        featured_img = featured.image_url.replace('/upload/', '/upload/' + _bd, 1)
+    if featured and featured.image_url:
+        if _bd and 'cloudinary.com' in featured.image_url:
+            og_image = featured.image_url.replace('/upload/', '/upload/' + _bd + 'w_1200,h_630,c_fill,g_auto,f_jpg,q_80/', 1)
+        else:
+            og_image = _cld(featured.image_url)
+    else:
+        og_image = _cld(member['profile_photo'] or _fallback)
     og_title = f"{member['name']} — This Week's Top Picks"
     if live_count and min_price:
         og_description = f"{live_count} car{'s' if live_count != 1 else ''} available · From ${min_price:,.0f} · Updated daily · Tap to browse"
@@ -936,6 +972,7 @@ def rep_storefront(member):
         dealership_sp=dealership_sp,
         vehicles=vehicles,
         featured=featured,
+        featured_img=featured_img,
         live_count=live_count,
         avg_days=avg_days,
         leads_this_month=leads_this_month,
