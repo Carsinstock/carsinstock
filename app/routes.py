@@ -60,6 +60,9 @@ def sp_dashboard():
     )
     return render_template('salesperson/sp_dashboard.html',
         member=dict(member),
+        backdrop_menu=BACKDROP_MENU,
+        backdrop_sample_seg={k: backdrop_segment(k, 'the Acura RDX') for k,_ in BACKDROP_MENU},
+        backdrop_current=(member['backdrop_preset'] if 'backdrop_preset' in member.keys() else None),
         mcr_sms_body=mcr_sms_body,
         my_vehicles=my_vehicles,
         all_my_vehicles=all_my_vehicles,
@@ -67,6 +70,43 @@ def sp_dashboard():
         storefront_url=storefront_url,
         dealership_sp=dealership_sp,
         notifications=notifications)
+
+@main.route('/sp-dashboard/backdrop', methods=['POST'])
+def set_backdrop():
+    from flask import session, redirect, request
+    if 'team_member_id' not in session:
+        return redirect('/login')
+    import sqlite3, threading, urllib.request
+    choice = (request.form.get('backdrop_preset') or '').strip()
+    valid = set(BACKDROP_PRESETS.keys())
+    # empty = remove backdrop (kill switch); otherwise must be a known preset
+    if choice and choice not in valid:
+        return redirect('/sp-dashboard')
+    conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    conn.row_factory = sqlite3.Row
+    conn.execute("UPDATE dealership_team SET backdrop_preset=? WHERE id=?",
+                 (choice or None, session['team_member_id']))
+    conn.commit()
+    # Pre-warm this rep's Top Pick render so the customer never waits on a cold generation
+    if choice:
+        v = conn.execute("SELECT make, model, image_url FROM vehicles WHERE pick_user_id=? AND is_team_pick=1 AND status='available' AND image_url LIKE '%cloudinary%' LIMIT 1",
+                         (session['team_member_id'],)).fetchone()
+        if v and v['image_url']:
+            subj = f"the {v['make']} {v['model']}" if v['make'] else 'the vehicle'
+            seg = backdrop_segment(choice, subj)
+            if seg and '/upload/' in v['image_url']:
+                hero = v['image_url'].replace('/upload/', '/upload/' + seg, 1)
+                og = v['image_url'].replace('/upload/', '/upload/' + seg + 'w_1200,h_630,c_fill,g_auto,f_jpg,q_80/', 1)
+                def _warm(urls):
+                    for u in urls:
+                        try:
+                            req = urllib.request.Request(u, headers={'User-Agent': 'cis-prewarm'})
+                            urllib.request.urlopen(req, timeout=90).read(2048)
+                        except Exception:
+                            pass
+                threading.Thread(target=_warm, args=([hero, og],), daemon=True).start()
+    conn.close()
+    return redirect('/sp-dashboard')
 
 @main.route('/sp-notification/<int:notif_id>/dismiss', methods=['POST'])
 def dismiss_notification(notif_id):
@@ -871,20 +911,43 @@ def referral_submit(slug):
     return jsonify({"success": True})
 
 
+# (scene prompt, grounding mode)  mode: 'shadow' = drop shadow for outdoor ground; 'reflect' = no shadow, let AI reflect on polished floor
 BACKDROP_PRESETS = {
-    'coastal':  'luxury vehicle parked on a wide empty asphalt road on a grassy coastal headland at golden hour with the ocean far away on the horizon professional automotive photography',
-    'mountain': 'premium vehicle on a scenic mountain highway clear blue sky distant snowy peaks crisp daylight',
-    'driveway': 'luxury vehicle parked in the driveway of a beautiful suburban home at golden hour warm inviting',
-    'city':     'premium vehicle on a city street at dusk with glowing skyline lights cinematic reflections on wet pavement',
-    'autumn':   'premium vehicle on a tree lined road with warm autumn foliage soft natural light',
+    'coastal':   ('luxury vehicle parked on a wide empty asphalt road on a grassy coastal headland at golden hour with the ocean far away on the horizon professional automotive photography', 'shadow'),
+    'driveway':  ('Elegant mansion driveway with luxury cars and manicured gardens', 'shadow'),
+    'mountain':  ('luxury vehicle parked on a wide open mountain road at golden hour with distant snowy peaks and pine forest under a clear sky professional automotive photography', 'shadow'),
+    'farmroad':  ('luxury vehicle parked on a quiet country road beside a wooden split rail fence with open green fields and a red barn in the distance at golden hour warm inviting professional automotive photography', 'shadow'),
+    'offroad':   ('Rugged off-road trail with dirt paths rocks and surrounding forest', 'shadow'),
+    'downtown':  ('Busy downtown intersection with traffic lights and pedestrians', 'shadow'),
+    'highway':   ('Highway overpass with concrete structures graffiti and urban textures', 'shadow'),
+    'riverside': ('Riverside drive with a city skyline in the distance and reflections on the water', 'shadow'),
+    'showroom':  ('Modern sleek car showroom with polished marble floors and bright lighting', 'reflect'),
 }
 
+# Display order + labels for the rep dropdown
+BACKDROP_MENU = [
+    ('riverside', 'Riverside Skyline'),
+    ('driveway',  'Mansion Driveway'),
+    ('coastal',   'Coastal'),
+    ('showroom',  'Showroom'),
+    ('mountain',  'Mountain Road'),
+    ('downtown',  'Downtown'),
+    ('highway',   'Highway Skyline'),
+    ('farmroad',  'Country Road'),
+    ('offroad',   'Off-Road Trail'),
+]
+
 def backdrop_segment(preset_key, subject):
-    scene = BACKDROP_PRESETS.get(preset_key or '')
-    if not scene:
+    entry = BACKDROP_PRESETS.get(preset_key or '')
+    if not entry:
         return ''
+    scene, mode = entry
     from urllib.parse import quote
-    return f'e_extract:prompt_{quote((subject or "the vehicle"), safe="")}/e_dropshadow/e_gen_background_replace:prompt_{quote(scene, safe="")}/c_pad,w_1600,h_900,b_gen_fill/q_auto:good,f_auto,fl_progressive/'
+    subj = quote((subject or "the vehicle"), safe="")
+    ground = '' if mode == 'reflect' else 'e_dropshadow/'
+    return (f'e_extract:prompt_{subj}/{ground}'
+            f'e_gen_background_replace:prompt_{quote(scene, safe="")}/'
+            f'c_pad,w_1600,h_900,b_gen_fill/q_auto:good,f_auto,fl_progressive/')
 
 
 def rep_storefront(member):

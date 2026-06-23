@@ -165,6 +165,10 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
                     <span>🔗 View my storefront</span>
                     <span class="meta">{{ rep_url_display }}</span>
                 </a>
+                <button type="button" class="t-itemrow" style="border:none;background:none;width:100%;cursor:pointer;font:inherit;text-align:left;" onclick="openBackdrop()">
+                    <span>🖼️ Storefront backdrop</span>
+                    <span class="meta">{% if backdrop_current %}{% for k,l in backdrop_menu %}{% if k==backdrop_current %}{{ l }}{% endif %}{% endfor %}{% else %}None{% endif %} &rsaquo;</span>
+                </button>
                 <a href="/sp-dashboard/inventory" class="t-itemrow">
                     <span>🚗 My vehicles</span>
                     <span class="meta">{{ all_my_vehicles|length }} live</span>
@@ -695,6 +699,50 @@ function showRepQR() {
 function closeRepQR() {
   var m = document.getElementById('repQrModal');
   if (m) m.style.display = 'none';
+}
+</script>
+
+
+<div id="backdropModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:1000;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#fff;border-radius:16px;max-width:420px;width:100%;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+    <div style="padding:18px 20px;border-bottom:1px solid #EEF2F6;">
+      <div style="font-size:17px;font-weight:800;color:#1E293B;">Storefront backdrop</div>
+      <div style="font-size:13px;color:#64748B;margin-top:2px;">Give your Top Pick photo a pro background.</div>
+    </div>
+    <div style="padding:18px 20px;">
+      <div style="aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,#1E293B,#0B1220);margin-bottom:14px;display:flex;align-items:center;justify-content:center;">
+        <img id="bdPreview" style="width:100%;height:100%;object-fit:cover;display:none;" alt="">
+        <span id="bdPreviewMsg" style="color:#94A3B8;font-size:13px;">Pick a backdrop to preview</span>
+      </div>
+      <select id="bdSelect" onchange="bdPreviewSwap()" style="width:100%;padding:11px 12px;border:1px solid #CBD5E1;border-radius:10px;font-size:15px;color:#1E293B;background:#fff;">
+        <option value="">None (original photo)</option>
+        {% for k,l in backdrop_menu %}
+        <option value="{{ k }}" {% if k==backdrop_current %}selected{% endif %}>{{ l }}</option>
+        {% endfor %}
+      </select>
+      <div style="font-size:13px;color:#64748B;margin-top:12px;">Apply this backdrop to your storefront photo?</div>
+    </div>
+    <div style="padding:14px 20px;border-top:1px solid #EEF2F6;display:flex;gap:10px;justify-content:flex-end;">
+      <button type="button" onclick="closeBackdrop()" style="padding:10px 16px;border:1px solid #CBD5E1;background:#fff;border-radius:10px;font-weight:600;color:#475569;cursor:pointer;">Cancel</button>
+      <form method="POST" action="/sp-dashboard/backdrop" style="margin:0;">
+        <input type="hidden" name="backdrop_preset" id="bdHidden" value="{{ backdrop_current or '' }}">
+        <button type="submit" style="padding:10px 18px;border:none;background:#00C851;color:#04210f;border-radius:10px;font-weight:700;cursor:pointer;">Apply</button>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+var BD_SAMPLES = {
+{% for k,l in backdrop_menu %}  "{{ k }}": "https://res.cloudinary.com/dbpa9qqtb/image/upload/{{ backdrop_sample_seg[k] }}v1778189743/carsinstock/1/biic4mesnewpz5fazhzh.jpg"{% if not loop.last %},{% endif %}
+{% endfor %}};
+function openBackdrop(){ document.getElementById('backdropModal').style.display='flex'; bdPreviewSwap(); }
+function closeBackdrop(){ document.getElementById('backdropModal').style.display='none'; }
+function bdPreviewSwap(){
+  var v=document.getElementById('bdSelect').value;
+  document.getElementById('bdHidden').value=v;
+  var img=document.getElementById('bdPreview'), msg=document.getElementById('bdPreviewMsg');
+  if(v && BD_SAMPLES[v]){ img.src=BD_SAMPLES[v]; img.style.display='block'; msg.style.display='none'; }
+  else { img.style.display='none'; msg.style.display='block'; msg.textContent='Original photo (no backdrop)'; }
 }
 </script>
 
