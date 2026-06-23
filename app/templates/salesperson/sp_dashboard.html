@@ -93,6 +93,19 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
                 <span class="t-cv">→</span>
             </div>
         </a>
+        <button type="button" class="tile featured" onclick="openBackdrop()" style="border:none;width:100%;text-align:left;cursor:pointer;font:inherit;display:block;">
+            <div class="t-row">
+                <div class="t-ic g">🖼️</div>
+                <div class="t-bd">
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <span class="t-t">Storefront Backdrop</span>
+                        <span class="t-pill" style="background:rgba(0,200,81,0.15);color:#00C851;">{% if backdrop_current %}{% for k,l in backdrop_menu %}{% if k==backdrop_current %}{{ l }}{% endif %}{% endfor %}{% else %}New{% endif %}</span>
+                    </div>
+                    <div class="t-d">Give your Top Pick a pro background. Tap to choose.</div>
+                </div>
+                <span class="t-cv">&rarr;</span>
+            </div>
+        </button>
 
         <div class="tile">
             <div class="t-row" style="margin-bottom:12px;">
