@@ -2,554 +2,608 @@
 {% block header %}{% endblock %}
 {% block meta %}
 <link rel="canonical" href="https://carsinstock.com/">
-<meta property="og:title" content="CarsInStock — Stop Waiting for Ups. Start Generating Leads.">
-<meta property="og:description" content="The only platform built by a car salesman, for car salespeople. Your storefront. Your leads. Your brand.">
+<meta property="og:title" content="CarsInStock — More eyes on your cars. More cars sold.">
+<meta property="og:description" content="The tools top salespeople use to put their inventory everywhere buyers are looking — storefront, social, and mail.">
 <meta property="og:url" content="https://carsinstock.com">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="CarsInStock — Stop Waiting for Ups. Start Generating Leads.">
-<meta name="twitter:description" content="The only platform built by a car salesman, for car salespeople.">
+<meta name="twitter:title" content="CarsInStock — More eyes on your cars. More cars sold.">
+<meta name="twitter:description" content="Put your inventory everywhere buyers are looking. Storefront, social, mail, referrals.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 {% endblock %}
 {% block content %}
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;600;700;800&display=swap');
-  .cis-home * { box-sizing: border-box; margin: 0; padding: 0; }
-  .cis-home { font-family: 'DM Sans', sans-serif; background: #0F172A; color: white; }
+.cis-home2{width:100vw;position:relative;left:50%;right:50%;margin-left:-50vw;margin-right:-50vw}
 
-  /* NAV */
-  .cis-nav {
-    background: rgba(15,23,42,0.97);
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    padding: 0 24px;
-    height: 64px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    backdrop-filter: blur(12px);
-  }
-  .cis-logo {
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 800;
-    font-size: 18px;
-    color: white;
-    text-decoration: none;
-  }
-  .cis-logo span { color: #00C851; }
-  .cis-nav-links { display: flex; align-items: center; gap: 12px; }
-  .cis-btn-login {
-    padding: 8px 20px;
-    border: 1.5px solid rgba(255,255,255,0.25);
-    border-radius: 8px;
-    color: white;
-    font-size: 14px;
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.2s;
-  }
-  .cis-btn-login:hover { border-color: white; background: rgba(255,255,255,0.05); }
-  .cis-btn-register {
-    padding: 8px 20px;
-    background: #00C851;
-    border-radius: 8px;
-    color: #0F172A;
-    font-size: 14px;
-    font-weight: 800;
-    text-decoration: none;
-    transition: all 0.2s;
-  }
-  .cis-btn-register:hover { background: #00a844; }
+.cis-home2{
+  --bg:#0B1220; --panel:#131C2E; --raised:#1A2438; --border:#25324A;
+  --green:#00C851; --green-soft:rgba(0,200,81,.12); --green-line:rgba(0,200,81,.35);
+  --hi:#F1F5F9; --mid:#94A3B8; --dim:#64748B;
+  --disp:'Space Grotesk',sans-serif; --body:'Inter',sans-serif;
+}
+.cis-home2 *{margin:0;padding:0;box-sizing:border-box}
+.cis-home2{scroll-behavior:smooth}
+.cis-home2{background:var(--bg);color:var(--hi);font-family:var(--body);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden;display:block}
+.cis-home2 a{color:inherit;text-decoration:none}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px}
 
-  /* HERO */
-  .cis-hero {
-    padding: 80px 24px 90px;
-    text-align: center;
-    max-width: 800px;
-    margin: 0 auto;
-  }
-  .cis-hero-tag {
-    display: inline-block;
-    background: rgba(0,200,81,0.12);
-    border: 1px solid rgba(0,200,81,0.3);
-    color: #00C851;
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    padding: 6px 18px;
-    border-radius: 100px;
-    margin-bottom: 28px;
-  }
-  .cis-hero h1 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(42px, 7vw, 70px);
-    line-height: 0.95;
-    color: white;
-    letter-spacing: 1px;
-    margin-bottom: 24px;
-  }
-  .cis-hero h1 em { color: #00C851; font-style: normal; }
-  .cis-hero-sub {
-    font-size: 18px;
-    color: rgba(255,255,255,0.55);
-    line-height: 1.7;
-    margin-bottom: 40px;
-    font-weight: 300;
-    max-width: 520px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-  .cis-hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
-  .cis-hero-btn-primary {
-    padding: 16px 36px;
-    background: #00C851;
-    border-radius: 10px;
-    color: #0F172A;
-    font-size: 16px;
-    font-weight: 800;
-    text-decoration: none;
-  }
-  .cis-hero-btn-secondary {
-    padding: 16px 36px;
-    border: 2px solid rgba(255,255,255,0.2);
-    border-radius: 10px;
-    color: white;
-    font-size: 16px;
-    font-weight: 700;
-    text-decoration: none;
-  }
-  .cis-hero-sub2 {
-    font-size: 13px;
-    color: rgba(255,255,255,0.3);
-    margin-top: 12px;
-  }
+/* NAV */
+.cis-home2 nav{position:sticky;top:0;z-index:100;background:rgba(11,18,32,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:68px;max-width:1200px;margin:0 auto;padding:0 24px}
+.logo{font-family:var(--disp);font-weight:700;font-size:20px;letter-spacing:-.02em}
+.logo b{color:var(--green)}
+.nav-links{display:flex;align-items:center;gap:4px}
+.nav-item{position:relative}
+.nav-item>button{font-family:var(--body);font-size:15px;color:var(--mid);background:none;border:none;cursor:pointer;padding:10px 14px;border-radius:8px;display:flex;align-items:center;gap:5px;transition:color .15s}
+.nav-item>button:hover{color:var(--hi)}
+.nav-item>button svg{width:12px;height:12px;opacity:.6;transition:transform .2s}
+.nav-item:hover>button svg{transform:rotate(180deg)}
+.drop{position:absolute;top:calc(100% + 8px);left:0;background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:8px;min-width:300px;opacity:0;visibility:hidden;transform:translateY(-6px);transition:all .18s;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.nav-item:hover .drop{opacity:1;visibility:visible;transform:translateY(0)}
+.drop a{display:flex;gap:12px;padding:11px 12px;border-radius:10px;transition:background .14s}
+.drop a:hover{background:var(--raised)}
+.drop .di{width:34px;height:34px;border-radius:9px;background:var(--green-soft);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.drop .dt{font-size:14px;font-weight:600;color:var(--hi);font-family:var(--disp)}
+.drop .dd{font-size:12.5px;color:var(--dim);line-height:1.45}
+.nav-cta{display:flex;align-items:center;gap:10px}
+.btn{font-family:var(--body);font-weight:600;font-size:15px;border-radius:10px;cursor:pointer;transition:all .16s;display:inline-flex;align-items:center;gap:8px;border:none}
+.btn-ghost{background:none;color:var(--hi);padding:10px 16px;border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--mid)}
+.btn-green{background:var(--green);color:#04210f;padding:10px 18px}
+.btn-green:hover{background:#00e25c;transform:translateY(-1px)}
 
-  /* PROBLEM */
-  .cis-problem {
-    background: #1E293B;
-    padding: 64px 24px;
-  }
-  .cis-problem-inner { max-width: 900px; margin: 0 auto; }
-  .cis-section-label {
-    text-align: center;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: #00C851;
-    margin-bottom: 16px;
-  }
-  .cis-section-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(36px, 5vw, 56px);
-    text-align: center;
-    color: white;
-    letter-spacing: 0.5px;
-    margin-bottom: 48px;
-  }
-  .cis-pain-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin-bottom: 32px;
-  }
-  .cis-pain-card {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 16px;
-    padding: 24px;
-  }
-  .cis-pain-icon { font-size: 28px; margin-bottom: 12px; }
-  .cis-pain-text { font-size: 15px; color: rgba(255,255,255,0.7); line-height: 1.6; }
-  .cis-fix-line {
-    text-align: center;
-    font-size: 18px;
-    font-weight: 700;
-    color: white;
-  }
-  .cis-fix-line span { color: #00C851; }
+/* HERO */
+.hero{position:relative;padding:90px 0 70px;text-align:center;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:900px;height:600px;background:radial-gradient(ellipse,rgba(0,200,81,.10),transparent 65%);pointer-events:none}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;letter-spacing:.04em;color:var(--green);background:var(--green-soft);border:1px solid var(--green-line);padding:7px 15px;border-radius:100px;margin-bottom:26px}
+.eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 0 0 rgba(0,200,81,.6);animation:pulse 2s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 7px rgba(0,200,81,0)}100%{box-shadow:0 0 0 0 rgba(0,200,81,0)}}
+.cis-home2 h1{font-family:var(--disp);font-weight:700;font-size:clamp(40px,6.4vw,76px);line-height:1.02;letter-spacing:-.03em;margin-bottom:22px}
+h1 .g{color:var(--green)}
+.sub{font-size:clamp(17px,2vw,20px);color:var(--mid);max-width:600px;margin:0 auto 34px;line-height:1.5}
+.hero-cta{display:flex;gap:13px;justify-content:center;flex-wrap:wrap;margin-bottom:18px}
+.btn-lg{padding:15px 28px;font-size:16px;border-radius:12px}
+.trust{font-size:14px;color:var(--dim)}
+.trust b{color:var(--mid);font-weight:500}
 
-  /* FEATURES */
-  .cis-features { padding: 72px 24px; max-width: 1100px; margin: 0 auto; }
-  .cis-feature-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 16px;
-    margin-top: 40px;
-  }
-  .cis-feature-card {
-    background: #1E293B;
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 16px;
-    padding: 24px;
-    transition: border-color 0.2s;
-  }
-  .cis-feature-card:hover { border-color: rgba(0,200,81,0.4); }
-  .cis-feature-icon {
-    width: 42px; height: 42px;
-    background: rgba(0,200,81,0.12);
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
-    margin-bottom: 14px;
-  }
-  .cis-feature-title { font-size: 15px; font-weight: 700; color: white; margin-bottom: 6px; }
-  .cis-feature-desc { font-size: 13px; color: rgba(255,255,255,0.5); line-height: 1.6; }
+/* hero alt options */
+.heroalts{max-width:1200px;margin:54px auto 0;padding:0 24px}
+.heroalts .lbl{font-size:12px;letter-spacing:.12em;color:var(--dim);text-transform:uppercase;text-align:center;margin-bottom:16px}
+.altgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.alt{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:26px 22px;text-align:center;transition:all .16s;cursor:pointer}
+.alt:hover{border-color:var(--green-line);transform:translateY(-3px)}
+.alt .an{font-size:11px;color:var(--green);font-weight:600;letter-spacing:.08em;margin-bottom:12px}
+.alt h3{font-family:var(--disp);font-weight:700;font-size:23px;line-height:1.1;letter-spacing:-.02em;color:var(--hi)}
 
-  /* DEALER */
-  .cis-dealer {
-    background: #1E293B;
-    padding: 72px 24px;
-  }
-  .cis-dealer-inner { max-width: 1100px; margin: 0 auto; }
-  .cis-dealer-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-    margin-top: 40px;
-  }
-  .cis-dealer-card {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 16px;
-    padding: 22px;
-  }
-  .cis-dealer-card .cis-feature-icon { background: rgba(30,41,59,0.8); border: 1px solid rgba(255,255,255,0.1); }
+/* EXPOSURE STRIP - signature */
+.expo{padding:80px 0 30px;text-align:center}
+.expo .kick{font-size:13px;letter-spacing:.1em;color:var(--green);text-transform:uppercase;font-weight:600;margin-bottom:14px}
+.expo h2{font-family:var(--disp);font-weight:700;font-size:clamp(26px,3.6vw,40px);letter-spacing:-.02em;max-width:760px;margin:0 auto 18px;line-height:1.15}
+.expo p{color:var(--mid);max-width:560px;margin:0 auto;font-size:16px}
+.radiate{display:flex;align-items:center;justify-content:center;gap:0;margin:48px auto 0;max-width:840px;flex-wrap:nowrap}
+.rad-src{width:128px;height:88px;border-radius:12px;background:linear-gradient(135deg,#1e3a5f,#0f2236);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:30px;position:relative;flex-shrink:0;z-index:2}
+.rad-arm{flex:1;height:1px;background:linear-gradient(90deg,var(--green-line),transparent);position:relative;min-width:30px}
+.rad-out{display:flex;flex-direction:column;gap:11px}
+.rad-chip{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:11px 15px;font-size:14px;font-weight:500;font-family:var(--disp);opacity:0;transform:translateX(-12px);animation:slidein .5s forwards}
+.rad-chip:nth-child(1){animation-delay:.1s}.rad-chip:nth-child(2){animation-delay:.25s}.rad-chip:nth-child(3){animation-delay:.4s}.rad-chip:nth-child(4){animation-delay:.55s}
+.rad-chip span.ic{font-size:16px}
+@keyframes slidein{to{opacity:1;transform:translateX(0)}}
 
-  /* HOW IT WORKS */
-  .cis-how { padding: 72px 24px; max-width: 900px; margin: 0 auto; text-align: center; }
-  .cis-steps {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0;
-    margin-top: 48px;
-    flex-wrap: wrap;
-  }
-  .cis-step { text-align: center; max-width: 180px; padding: 0 8px; }
-  .cis-step-num {
-    width: 48px; height: 48px;
-    background: #00C851;
-    color: #0F172A;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 800; font-size: 18px;
-    margin: 0 auto 14px;
-  }
-  .cis-step-title { font-size: 14px; font-weight: 700; color: white; margin-bottom: 6px; }
-  .cis-step-desc { font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.5; }
-  .cis-arrow { font-size: 24px; color: #00C851; padding: 0 8px; margin-bottom: 28px; }
+/* SECTION SHELL */
+.sec{padding:80px 0}
+.sec-head{text-align:center;margin-bottom:50px}
+.sec-head .kick{font-size:13px;letter-spacing:.1em;color:var(--green);text-transform:uppercase;font-weight:600;margin-bottom:14px}
+.sec-head h2{font-family:var(--disp);font-weight:700;font-size:clamp(28px,4vw,46px);letter-spacing:-.025em;line-height:1.05;margin-bottom:14px}
+.sec-head p{color:var(--mid);font-size:17px;max-width:520px;margin:0 auto}
 
-  /* PRICING */
-  .cis-pricing { background: #1E293B; padding: 72px 24px; }
-  .cis-pricing-inner { max-width: 1100px; margin: 0 auto; }
-  .cis-pricing-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 16px;
-    margin-top: 40px;
-  }
-  .cis-price-card {
-    background: rgba(255,255,255,0.04);
-    border: 1.5px solid rgba(255,255,255,0.1);
-    border-radius: 20px;
-    padding: 28px 20px;
-    text-align: center;
-    position: relative;
-  }
-  .cis-price-card.featured {
-    border-color: #00C851;
-    background: rgba(0,200,81,0.06);
-  }
-  .cis-price-badge {
-    position: absolute;
-    top: -13px; left: 50%;
-    transform: translateX(-50%);
-    background: #00C851;
-    color: #0F172A;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 3px 14px;
-    border-radius: 100px;
-    white-space: nowrap;
-  }
-  .cis-price-name { font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.5); margin-bottom: 12px; }
-  .cis-price-amount { font-family: 'Bebas Neue', sans-serif; font-size: 48px; color: white; line-height: 1; }
-  .cis-price-card.featured .cis-price-amount { color: #00C851; }
-  .cis-price-mo { font-size: 13px; color: rgba(255,255,255,0.4); margin-bottom: 16px; }
-  .cis-price-detail { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 4px; }
+/* TOOL CARDS w/ demos */
+.tools{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.tool{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:28px;transition:all .18s;position:relative;overflow:hidden}
+.tool:hover{border-color:var(--green-line);transform:translateY(-3px)}
+.tool-top{display:flex;align-items:center;gap:13px;margin-bottom:8px}
+.tool-ic{width:44px;height:44px;border-radius:11px;background:var(--green-soft);display:flex;align-items:center;justify-content:center;font-size:21px}
+.tool h3{font-family:var(--disp);font-weight:600;font-size:20px;letter-spacing:-.01em}
+.tool .what{color:var(--mid);font-size:14.5px;margin-bottom:20px;min-height:42px}
+/* demo: storefront mini */
+.demo{border-radius:12px;border:1px solid var(--border);background:var(--bg);overflow:hidden;height:170px;position:relative}
+/* backdrop reveal demo */
+.bd-demo{height:170px;position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--border)}
+.bd-demo .layer{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:46px;transition:opacity 1s}
+.bd-l1{background:linear-gradient(135deg,#0f1825,#1a2438)}
+.bd-l2{background:linear-gradient(135deg,#3a2f1a,#5f4a2a);opacity:0;animation:bdcycle 6s infinite}
+.bd-l3{background:linear-gradient(135deg,#1a3a3f,#0f2a3a);opacity:0;animation:bdcycle2 6s infinite}
+@keyframes bdcycle{0%,15%{opacity:0}25%,40%{opacity:1}50%,100%{opacity:0}}
+@keyframes bdcycle2{0%,50%{opacity:0}60%,80%{opacity:1}90%,100%{opacity:0}}
+.bd-tag{position:absolute;bottom:10px;left:10px;z-index:5;font-size:11px;font-weight:600;background:rgba(0,0,0,.6);padding:5px 10px;border-radius:6px;font-family:var(--disp)}
+/* ad builder demo */
+.ad-demo{height:170px;display:flex;align-items:center;justify-content:center;gap:14px;background:var(--bg);padding:16px}
+.ad-raw{width:80px;height:80px;border-radius:9px;background:linear-gradient(135deg,#1e3a5f,#0f2236);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0}
+.ad-arrow{color:var(--green);font-size:22px;animation:nudge 1.4s infinite}
+@keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(4px)}}
+.ad-out{width:108px;height:108px;border-radius:9px;background:linear-gradient(160deg,#16233a,#0c1626);border:1px solid var(--green-line);padding:9px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden}
+.ad-out::after{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(0,200,81,.14),transparent);animation:shine 2.8s infinite}
+@keyframes shine{0%{left:-100%}50%,100%{left:130%}}
+.ad-out .car{font-size:24px;text-align:center;margin-top:6px}
+.ad-out .price{font-size:15px;font-weight:700;color:var(--green);font-family:var(--disp)}
+.ad-out .badge{position:absolute;top:7px;right:7px;font-size:8px;background:var(--green);color:#04210f;padding:2px 5px;border-radius:4px;font-weight:700}
+/* mail demo */
+.mail-demo{height:170px;background:var(--bg);padding:18px;display:flex;align-items:center;justify-content:center;gap:9px}
+.envelope{width:60px;height:80px;background:var(--raised);border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:22px;opacity:0;transform:translateY(14px);animation:mailpop .5s forwards}
+.envelope:nth-child(1){animation-delay:.1s}.envelope:nth-child(2){animation-delay:.22s}.envelope:nth-child(3){animation-delay:.34s}
+.mail-plus{font-family:var(--disp);font-weight:700;color:var(--green);font-size:15px;opacity:0;animation:mailpop .5s .5s forwards}
+@keyframes mailpop{to{opacity:1;transform:translateY(0)}}
+/* referral demo */
+.ref-demo{height:170px;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:16px;position:relative}
+.ref-node{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--raised);border:1px solid var(--border);z-index:2}
+.ref-line{width:42px;height:2px;background:repeating-linear-gradient(90deg,var(--green-line) 0 5px,transparent 5px 10px);position:relative}
+.ref-line::after{content:'';position:absolute;top:-3px;left:0;width:8px;height:8px;border-radius:50%;background:var(--green);animation:travel 2s infinite}
+@keyframes travel{0%{left:0;opacity:1}100%{left:38px;opacity:0}}
+.ref-gift{background:var(--green-soft);border-color:var(--green-line)!important}
+/* dashboard demo */
+.dash-demo{height:170px;background:var(--bg);padding:16px;display:flex;flex-direction:column;gap:8px}
+.dash-row{display:flex;gap:8px;align-items:center}
+.dash-bar{height:9px;border-radius:5px;background:var(--raised)}
+.dash-stat{display:flex;gap:8px;margin-bottom:4px}
+.dash-pill{flex:1;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center}
+.dash-pill .n{font-family:var(--disp);font-weight:700;font-size:18px;color:var(--green)}
+.dash-pill .l{font-size:9px;color:var(--dim);text-transform:uppercase;letter-spacing:.05em}
+/* assistant demo */
+.bot-demo{height:170px;background:var(--bg);padding:16px;display:flex;flex-direction:column;justify-content:center;gap:9px}
+.bubble{max-width:78%;padding:9px 13px;border-radius:13px;font-size:12.5px;line-height:1.4}
+.bubble.q{align-self:flex-end;background:var(--raised);border-bottom-right-radius:4px}
+.bubble.a{align-self:flex-start;background:var(--green-soft);border:1px solid var(--green-line);border-bottom-left-radius:4px}
+.typing{display:inline-flex;gap:3px}
+.typing span{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,60%,100%{opacity:.3}30%{opacity:1}}
 
-  /* CTA */
-  .cis-cta { padding: 80px 24px; text-align: center; }
-  .cis-cta h2 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(44px, 7vw, 80px);
-    color: white;
-    line-height: 1;
-    margin-bottom: 16px;
-  }
-  .cis-cta h2 em { color: #00C851; font-style: normal; }
-  .cis-cta p { font-size: 17px; color: rgba(255,255,255,0.5); margin-bottom: 36px; font-weight: 300; }
-  .cis-cta-btn {
-    display: inline-block;
-    background: #00C851;
-    color: #0F172A;
-    font-size: 17px;
-    font-weight: 800;
-    padding: 18px 52px;
-    border-radius: 12px;
-    text-decoration: none;
-  }
-  .cis-cta-note { font-size: 13px; color: rgba(255,255,255,0.3); margin-top: 14px; }
+/* DEALERSHIP TURN */
+.dealer{background:linear-gradient(180deg,var(--panel),var(--bg));border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.dealer-in{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center}
+.dealer-copy .kick{font-size:13px;letter-spacing:.1em;color:var(--green);text-transform:uppercase;font-weight:600;margin-bottom:16px}
+.dealer-copy h2{font-family:var(--disp);font-weight:700;font-size:clamp(30px,3.6vw,44px);letter-spacing:-.025em;line-height:1.06;margin-bottom:18px}
+.dealer-copy p{color:var(--mid);font-size:16px;margin-bottom:26px}
+.dealer-list{list-style:none;display:flex;flex-direction:column;gap:13px}
+.dealer-list li{display:flex;gap:11px;align-items:flex-start;font-size:15px;color:var(--hi)}
+.dealer-list .ck{color:var(--green);flex-shrink:0;margin-top:2px}
+.dealer-vis{background:var(--bg);border:1px solid var(--border);border-radius:16px;padding:22px;position:relative}
+.dv-head{font-size:12px;color:var(--dim);margin-bottom:14px;font-family:var(--disp);letter-spacing:.04em}
+.dv-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.dv-rep{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:13px;display:flex;align-items:center;gap:10px}
+.dv-rep .av{width:30px;height:30px;border-radius:50%;background:var(--green-soft);display:flex;align-items:center;justify-content:center;font-size:14px}
+.dv-rep .nm{font-size:12.5px;font-weight:600}
+.dv-rep .st{font-size:10px;color:var(--green)}
 
-  /* FOOTER */
-  .cis-footer {
-    background: #0F172A;
-    border-top: 1px solid rgba(255,255,255,0.06);
-    padding: 28px 24px;
-    text-align: center;
-  }
-  .cis-footer p { font-size: 13px; color: rgba(255,255,255,0.3); }
-  .cis-footer strong { color: #00C851; }
+/* PRICING */
+.price-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:900px;margin:0 auto}
+.pcard{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:34px}
+.pcard.feat{border-color:var(--green-line);position:relative}
+.pcard.feat::before{content:'Most popular';position:absolute;top:-11px;left:34px;background:var(--green);color:#04210f;font-size:11px;font-weight:700;padding:4px 11px;border-radius:6px;font-family:var(--body)}
+.pcard .pfor{font-size:13px;letter-spacing:.08em;color:var(--green);text-transform:uppercase;font-weight:600;margin-bottom:14px}
+.pcard .amt{font-family:var(--disp);font-weight:700;font-size:46px;letter-spacing:-.02em}
+.pcard .amt span{font-size:17px;color:var(--mid);font-weight:400}
+.pcard .pnote{color:var(--dim);font-size:13.5px;margin:6px 0 22px}
+.pcard ul{list-style:none;display:flex;flex-direction:column;gap:12px;margin-bottom:26px}
+.pcard li{display:flex;gap:10px;font-size:14.5px;color:var(--hi)}
+.pcard li .ck{color:var(--green);flex-shrink:0}
+.pcard .btn{width:100%;justify-content:center}
 
-  @media (max-width: 600px) {
-    .cis-hero { padding: 56px 20px 64px; }
-    .cis-steps { flex-direction: column; gap: 8px; }
-    .cis-arrow { transform: rotate(90deg); }
-  }
+/* FINAL CTA */
+.final{text-align:center;padding:90px 0}
+.final h2{font-family:var(--disp);font-weight:700;font-size:clamp(30px,4.4vw,52px);letter-spacing:-.025em;margin-bottom:18px;line-height:1.05}
+.final p{color:var(--mid);font-size:18px;margin-bottom:30px}
 
-  /* MOBILE_HERO_TUNING */
-  @media (max-width: 640px) {
-    .cis-btn-register { display: none !important; }
-    .cis-hero h1 { font-size: 44px !important; line-height: 1.05 !important; margin-bottom: 10px !important; }
-    .cis-hero-tagline { font-size: 16px !important; margin: 8px auto 20px !important; line-height: 1.45 !important; max-width: 92% !important; }
-  }
+/* FOOTER */
+.cis-home2 footer{border-top:1px solid var(--border);padding:50px 0 40px}
+.foot-in{display:flex;justify-content:space-between;flex-wrap:wrap;gap:30px}
+.foot-brand{max-width:280px}
+.foot-brand .logo{margin-bottom:12px;display:inline-block}
+.foot-brand p{color:var(--dim);font-size:13.5px}
+.foot-cols{display:flex;gap:56px;flex-wrap:wrap}
+.foot-col h4{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:14px;font-weight:600}
+.foot-col a{display:block;color:var(--mid);font-size:14px;padding:5px 0;transition:color .14s}
+.foot-col a:hover{color:var(--hi)}
+.foot-bot{max-width:1200px;margin:40px auto 0;padding:22px 24px 0;border-top:1px solid var(--border);display:flex;justify-content:space-between;color:var(--dim);font-size:13px;flex-wrap:wrap;gap:10px}
+
+@media(max-width:880px){
+  .nav-links{display:none}
+  .altgrid{grid-template-columns:1fr}
+  .tools{grid-template-columns:1fr}
+  .dealer-in{grid-template-columns:1fr;gap:30px}
+  .price-grid{grid-template-columns:1fr}
+  .radiate{flex-direction:column;gap:18px}
+  .rad-arm{width:1px;height:24px;background:linear-gradient(180deg,var(--green-line),transparent)}
+}
+
+/* FAQ */
+.faq{max-width:760px;margin:0 auto}
+.faq-item{border:1px solid var(--border);border-radius:14px;margin-bottom:12px;background:var(--panel);overflow:hidden;transition:border-color .16s}
+.faq-item:hover{border-color:var(--green-line)}
+.faq-q{width:100%;text-align:left;background:none;border:none;color:var(--hi);font-family:var(--disp);font-weight:600;font-size:16.5px;padding:20px 22px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:16px}
+.faq-q .pm{color:var(--green);font-size:22px;flex-shrink:0;transition:transform .2s;line-height:1}
+.faq-item.open .faq-q .pm{transform:rotate(45deg)}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease;color:var(--mid);font-size:15px;line-height:1.6}
+.faq-a div{padding:0 22px 20px}
+.faq-item.open .faq-a{max-height:240px}
+
+/* before/after slider */
+.ba-slider{position:relative;height:200px;border-radius:12px;overflow:hidden;border:1px solid var(--border);user-select:none;cursor:ew-resize;background:#0a0f1a}
+.ba-slider img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.ba-before-wrap{position:absolute;top:0;left:0;height:100%;width:50%;overflow:hidden;border-right:2px solid var(--green)}
+.ba-before-wrap .ba-before{height:100%;max-width:none;object-fit:cover}
+.ba-handle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:34px;height:34px;border-radius:50%;background:var(--green);color:#04210f;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;box-shadow:0 2px 12px rgba(0,0,0,.4);z-index:3;pointer-events:none}
+.ba-lbl{position:absolute;bottom:10px;font-size:10px;font-weight:700;letter-spacing:.04em;padding:4px 9px;border-radius:5px;background:rgba(0,0,0,.55);font-family:var(--disp);z-index:2}
+.ba-lbl-l{left:10px;color:var(--mid)}
+.ba-lbl-r{right:10px;color:var(--green)}
+
+/* Instant Ads - real ad card */
+.ad-demo2{height:200px;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:14px}
+.adcard{width:210px;background:#0e1726;border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.adcard-top{display:flex;justify-content:space-between;align-items:center;padding:8px 11px;background:#0b1220}
+.adcard-brand{font-family:var(--disp);font-size:11px;font-weight:700;color:#fff}
+.adcard-brand b{color:var(--green)}
+.adcard-badge{font-size:8px;font-weight:700;background:var(--green);color:#04210f;padding:3px 6px;border-radius:4px}
+.adcard-photo{height:88px;background:linear-gradient(135deg,#16314f,#0c1d33);position:relative;overflow:hidden}
+.adcard-photo::after{content:'';position:absolute;top:0;left:-100%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);animation:shine 3.2s infinite}
+.adcard-car{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);width:130px;height:46px;background:linear-gradient(180deg,#3b6ea5,#274b73);border-radius:8px 10px 6px 6px;box-shadow:0 6px 10px rgba(0,0,0,.4)}
+.adcard-car::before{content:'';position:absolute;top:-9px;left:24px;right:24px;height:18px;background:inherit;border-radius:9px 9px 0 0}
+.adcard-car::after{content:'';position:absolute;bottom:-6px;left:14px;width:14px;height:14px;background:#11161f;border-radius:50%;box-shadow:78px 0 0 #11161f}
+.adcard-info{padding:9px 11px 11px}
+.adcard-title{font-family:var(--disp);font-size:13px;font-weight:600;color:#fff}
+.adcard-meta{font-size:10px;color:var(--dim);margin:1px 0 5px}
+.adcard-price{font-family:var(--disp);font-size:18px;font-weight:700;color:var(--green)}
+
+/* Direct Mail - letter stack */
+.mail-demo2{height:200px;background:var(--bg);position:relative;display:flex;align-items:center;justify-content:center}
+.letter{position:absolute;width:118px;height:150px;background:#fff;border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.letter.l3{transform:rotate(-8deg) translateX(-26px);background:#dfe6ee}
+.letter.l2{transform:rotate(-3deg) translateX(-13px);background:#eef2f6}
+.letter.l1{position:relative;transform:rotate(2deg);padding:16px 14px;display:flex;flex-direction:column;gap:6px}
+.letter-line{height:5px;border-radius:3px;background:#c7d2dd}
+.letter-line.w90{width:90%}.letter-line.w80{width:80%}.letter-line.w70{width:70%}.letter-line.w60{width:60%}.letter-line.w50{width:50%}
+.letter-gap{height:5px}
+.letter-sig{width:42px;height:14px;margin-top:6px;border-radius:3px;background:var(--green);opacity:.7}
+.mail-count{position:absolute;right:24px;bottom:30px;font-family:var(--disp);font-weight:700;font-size:15px;color:#fff;text-align:right;z-index:5}
+.mail-count span{font-size:11px;font-weight:500;color:var(--green)}
+
+/* Referrals - node flow with avatars */
+.ref-node2{display:flex;flex-direction:column;align-items:center;gap:7px;z-index:2}
+.ref-av{width:46px;height:46px;border-radius:50%;background:var(--raised);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-family:var(--disp);font-weight:700;font-size:13px;color:var(--mid)}
+.ref-av.ref-you{background:var(--green-soft);border-color:var(--green-line);color:var(--green)}
+.ref-av.ref-giftav{background:var(--green);border-color:var(--green);color:#04210f}
+.ref-cap{font-size:10px;color:var(--dim);font-weight:500}
+
 </style>
-
-<div class="cis-home">
-
-  <!-- NAV -->
-  <nav class="cis-nav">
-    <a href="/" class="cis-logo">Cars <span>IN STOCK</span></a>
-    <div class="cis-nav-links">
-      <a href="/login" class="cis-btn-login">Login</a>
-      <a href="/register" class="cis-btn-register">Get Started Free</a>
-    </div>
-  </nav>
-
-  <!-- HERO -->
-  <section style="background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%);">
-    <div class="cis-hero">
-      <div class="cis-hero-tag">Sell More Cars</div>
-      <h1>Stop Waiting<br>for <em>Ups.</em><br>Start Generating<br><em>Leads.</em></h1>
-      <p class="cis-hero-tagline" style="text-align:center;color:#00C851;font-size:18px;font-style:italic;margin:12px auto 28px;max-width:640px;">Salespeople using these tools sell 6–10 more cars a month. It's simple math.</p>
-      <div class="cis-hero-btns">
-        <a href="/register" class="cis-hero-btn-primary">I'm a Salesperson</a>
-        <a href="/dealer-register" class="cis-hero-btn-secondary">I Run a Sales Team</a>
-      </div>
-      <p style="text-align:center;font-size:15px;color:rgba(255,255,255,0.95);letter-spacing:0.5px;margin:0 0 12px;">From $39/mo per rep</p>
-      <p class="cis-hero-sub2" style="font-size:15px; color:rgba(255,255,255,0.5); letter-spacing:1px;">Free 14-day trial &nbsp;·&nbsp; No credit card required &nbsp;·&nbsp; Setup in 5 minutes</p>
-    </div>
-  </section>
+<div class="cis-home2">
 
 
-
-  <!-- SALESPERSON TOOLS -->
-  <section class="cis-features">
-    <div class="cis-section-label">For Salespeople</div>
-    <h2 class="cis-section-title" style="margin-bottom:8px;">Your Daily Sales Toolbox</h2>
-    <p style="text-align:center;color:#00C851;font-size:16px;font-weight:600;margin-bottom:48px;display:block;">Your Personal Assistant That Sells With You</p>
-    <div class="cis-feature-grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr));">
-      <div class="cis-feature-card">
-        <div class="cis-feature-icon">🏪</div>
-        <div class="cis-feature-title">Your Own Storefront</div>
-        <div class="cis-feature-desc">A personal page at carsinstock.com/[yourname] with your photo, your name, your selected inventory, and a direct contact button. Comes with a short branded link (cardeals.autos/[yourname]) built for texting and social.</div>
-      </div>
-      <div class="cis-feature-card">
-        <div class="cis-feature-icon">📸</div>
-        <div class="cis-feature-title">Pro Social Ad Generator</div>
-        <div class="cis-feature-desc">Pick from multiple 1080×1080 ad templates. Each one builds an image with your photo, your selected car, the price, and the 7-day urgency badge — ready to post on Facebook, Instagram, or text to a buyer. Every ad includes your personal short link.</div>
-      </div>
-      <div class="cis-feature-card">
-        <div class="cis-feature-icon">✉️</div>
-        <div class="cis-feature-title">Pro Mailer Generator</div>
-        <div class="cis-feature-desc">Two Mailer tools. Scan a handwritten reference sheet with your phone — the system reads the handwriting and pulls names and addresses automatically. Or enter a buyer's address and the system finds the 15 closest neighbors. And you are ready to print letters and labels in seconds.</div>
-      </div>
-      <div class="cis-feature-card">
-        <div class="cis-feature-icon">📲</div>
-        <div class="cis-feature-title">Share My Store In One Tap</div>
-        <div class="cis-feature-desc">Copy your storefront link, download your digital contact card (vCard) to save into a customer's phone, or let AI draft a weekly social post based on your live inventory. Includes a referral page link and a copy-ready text template.</div>
-      </div>
-      <div class="cis-feature-card">
-        <div class="cis-feature-icon">📊</div>
-        <div class="cis-feature-title">Your Sales Dashboard</div>
-        <div class="cis-feature-desc">One screen at carsinstock.com/sp-dashboard. See leads from your storefront, manage which cars you feature, renew expiring inventory, and review walk-around videos. Includes an AI chatbot on your storefront that answers buyer questions in your voice.</div>
-      </div>
-      <div class="cis-feature-card">
-        <div class="cis-feature-icon">🚀</div>
-        <div class="cis-feature-title">Your Personal Sales Assistant</div>
-        <div class="cis-feature-desc">CarsInStock gives you a personal storefront and acts as your personal assistant, cutting hours of manual work. One closed deal can turn into 25 personalized letters going out in the mail. Your weekly inventory turns into 6 ready-to-post social ads. Your storefront works 24/7. The platform puts you in front of hundreds of potential buyers a month — in just minutes a day.</div>
-      </div>
-      <div class="cis-feature-card">
-        <div class="cis-feature-icon">⭐</div>
-        <div class="cis-feature-title">Your Dealership's Google Rating — On Your Page</div>
-        <div class="cis-feature-desc">Your dealership's live Google rating and review count appears automatically on your storefront — a verified trust signal right under your name. Customers see your dealership's star rating before they ever contact you. Updated daily. No setup required.</div>
-      </div>
-    </div>
-    <div style="text-align:center;padding:56px 24px 16px;">
-      <div style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#00C851;margin-bottom:16px;">SEE IT IN ACTION</div>
-      <p style="font-size:20px;color:white;margin-bottom:24px;">Explore the tools and features before you sign up.</p>
-      <a href="/demo" style="display:inline-block;padding:16px 36px;border:2px solid #00C851;border-radius:10px;color:#00C851;font-size:16px;font-weight:700;text-decoration:none;transition:background 0.2s,color 0.2s;" onmouseover="this.style.background='#00C851';this.style.color='#1E293B'" onmouseout="this.style.background='transparent';this.style.color='#00C851'">See a Sample Storefront →</a>
-    </div>
-  </section>
-
-  <!-- DEALERSHIP TOOLS -->
-  <section class="cis-dealer">
-    <div class="cis-dealer-inner">
-      <div class="cis-section-label">For Dealerships</div>
-      <h2 class="cis-section-title">Your Brand.<br>Their Hustle.</h2>
-      <p style="text-align:center;color:#00C851;font-size:16px;font-style:italic;max-width:700px;margin:0 auto 48px;line-height:1.7;">AI-powered tools your reps use in minutes — branded to your dealership, controlled by you. They sell more cars. You keep your brand.</p>
-      <div class="cis-dealer-grid">
-        <div class="cis-dealer-card">
-          <div class="cis-feature-icon">📸</div>
-          <div class="cis-feature-title">Pro Social Ads — In 60 Seconds</div>
-          <div class="cis-feature-desc">AI-powered ad generator with 10 pre-built templates. Every salesperson on your team produces dealership-branded social media ads from their phone, on the lot, in under a minute. Built for the floor, not the back office. No designer. No marketing department. No outsourced agency. Just your inventory, posted everywhere, by the people who know it best.</div>
-        </div>
-        <div class="cis-dealer-card">
-          <div class="cis-feature-icon">🏬</div>
-          <div class="cis-feature-title">One Dealership Page + One For Every Rep</div>
-          <div class="cis-feature-desc">Your full inventory lives on a unified dealership storefront — and every salesperson gets their own personal storefront layered on top. Built-in AI chatbot, QR code, lead capture, vCard download. More pages, more eyeballs, more shots on goal for every car you stock.</div>
-        </div>
-        <div class="cis-dealer-card">
-          <div class="cis-feature-icon">✉️</div>
-          <div class="cis-feature-title">Pro Mailer Generator — 25 Letters in 2 Minutes</div>
-          <div class="cis-feature-desc">AI-powered letter engine with personalized merge fields and print-ready output. Your reps generate 25 dealership-branded direct mail pieces in under 2 minutes. That's 500 pieces of mail working your market every week, while your competitors are still writing.</div>
-        </div>
-        <div class="cis-dealer-card">
-          <div class="cis-feature-icon">📧</div>
-          <div class="cis-feature-title">Auto Email Blast — Preset Templates, Auto-Pilot Crons</div>
-          <div class="cis-feature-desc">Pre-built campaign templates wired to automated weekly cron jobs with full SendGrid integration and deliverability tracking. Load your customer database once. The system blasts on schedule, every Saturday and Sunday, without you lifting a finger.</div>
+<!-- NAV -->
+<nav>
+  <div class="nav-in">
+    <a href="/" class="logo">Cars<b>InStock</b></a>
+    <div class="nav-links">
+      <div class="nav-item">
+        <button>Product <svg viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></button>
+        <div class="drop">
+          <a href="#"><div class="di">🏪</div><div><div class="dt">Storefront</div><div class="dd">Your own page — your cars, your face, your link</div></div></a>
+          <a href="#"><div class="di">📸</div><div><div class="dt">Instant Ads</div><div class="dd">A post-ready ad for any car, in seconds</div></div></a>
+          <a href="#"><div class="di">✉️</div><div><div class="dt">Direct Mail</div><div class="dd">Print-ready letters from a photo or address</div></div></a>
+          <a href="#"><div class="di">🤝</div><div><div class="dt">Referrals</div><div class="dd">Past buyers send you friends — they get a gift</div></div></a>
+          <a href="#"><div class="di">📊</div><div><div class="dt">Dashboard</div><div class="dd">Leads, inventory, and videos on one screen</div></div></a>
         </div>
       </div>
-      <div class="cis-dealer-card">
-        <div class="cis-feature-icon">⭐</div>
-        <div class="cis-feature-title">Live Google Reviews — On Every Rep's Page and Every Ad</div>
-        <div class="cis-feature-desc">Your dealership's Google rating displays automatically on every salesperson's personal storefront and on every Pro Social Ad they generate. One verified rating. Multiplied across every rep, every post, every piece of content your team produces. Updated daily from Google — zero maintenance.</div>
-      </div>
-      <div style="margin-top:32px;background:rgba(0,200,81,0.06);border:1px solid rgba(0,200,81,0.2);border-radius:16px;padding:40px 36px;">
-        <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-          <span style="font-size:28px;">🚀</span>
-          <h3 style="color:white;font-size:22px;font-weight:700;margin:0;">The Sales Floor's New Best Friend</h3>
+      <div class="nav-item">
+        <button>Solutions <svg viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></button>
+        <div class="drop">
+          <a href="#"><div class="di">🧑‍💼</div><div><div class="dt">For Salespeople</div><div class="dd">Build your own pipeline, on your phone</div></div></a>
+          <a href="#"><div class="di">🏢</div><div><div class="dt">For Dealerships</div><div class="dd">Arm your whole team — your brand on top</div></div></a>
         </div>
-        <p style="color:rgba(255,255,255,0.7);font-size:16px;line-height:1.8;margin-bottom:20px;">Serious technology, built for the people who actually sell cars. CarsInStock pairs AI-driven content generation, automated workflows, and pre-built templates with the dealership branding and oversight you require. The result: your salespeople save hours every week and use that time to actually sell.</p>
-        <p style="color:rgba(255,255,255,0.7);font-size:16px;line-height:1.8;margin-bottom:20px;">A team of 5 salespeople using these tools produces:</p>
-        <ul style="list-style:none;padding:0;margin:0 0 20px;display:grid;gap:12px;">
-          <li style="display:flex;gap:12px;align-items:flex-start;"><span style="color:#00C851;font-weight:700;flex-shrink:0;">→</span><span style="color:rgba(255,255,255,0.75);font-size:15px;line-height:1.7;"><strong style="color:white;">5 personal storefronts working 24/7</strong> — every rep has their own website with their own inventory, their own AI chatbot, their own QR code, capturing leads while they sleep</span></li>
-          <li style="display:flex;gap:12px;align-items:flex-start;"><span style="color:#00C851;font-weight:700;flex-shrink:0;">→</span><span style="color:rgba(255,255,255,0.75);font-size:15px;line-height:1.7;"><strong style="color:white;">150+ social media posts per month</strong> — dealership-branded ads on Facebook, Instagram, and WhatsApp from 5 different accounts, hitting 5 different networks of friends, family, and past customers</span></li>
-          <li style="display:flex;gap:12px;align-items:flex-start;"><span style="color:#00C851;font-weight:700;flex-shrink:0;">→</span><span style="color:rgba(255,255,255,0.75);font-size:15px;line-height:1.7;"><strong style="color:white;">2,500+ pieces of direct mail per month</strong> — neighbor letters, owner mailers, and prospecting campaigns flooding your market in dealership-branded envelopes</span></li>
-          <li style="display:flex;gap:12px;align-items:flex-start;"><span style="color:#00C851;font-weight:700;flex-shrink:0;">→</span><span style="color:rgba(255,255,255,0.75);font-size:15px;line-height:1.7;"><strong style="color:white;">Unlimited rep-driven referrals</strong> — every closed deal becomes a built-in referral engine through each rep's personal page</span></li>
-        </ul>
-        <p style="color:rgba(255,255,255,0.6);font-size:15px;line-height:1.8;margin:0;font-style:italic;">That's the equivalent of 5 mini-marketing departments inside your dealership — running on your brand, powered by your team, with zero added headcount.</p>
+      </div>
+      <div class="nav-item"><a href="#pricing"><button>Pricing</button></a></div>
+      
+    </div>
+    <div class="nav-cta">
+      <a href="/login" class="btn btn-ghost">Login</a>
+      <a href="/register" class="btn btn-green">Get started free</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow"><span class="dot"></span>EXPOSURE SELLS CARS</div>
+    <h1>More eyes on your cars.<br><span class="g">More cars sold.</span></h1>
+    <p class="sub">The tools top salespeople use to put their inventory everywhere buyers are looking — storefront, social, and mail — in minutes a day.</p>
+    <div class="hero-cta">
+      <button class="btn btn-green btn-lg">I'm a salesperson →</button>
+      <a href="#pricing" class="btn btn-ghost btn-lg">I run a sales team</a>
+    </div>
+    <p class="trust"><b>Free 14-day trial</b> · No credit card · Setup in 5 minutes</p>
+    <p style="margin-top:18px"><a href="#" style="color:var(--green);font-size:15px;font-weight:600;border-bottom:1px solid var(--green-line);padding-bottom:2px">See a sample storefront →</a></p>
+  </div>
+  </header>
+
+<!-- EXPOSURE SIGNATURE -->
+<section class="expo wrap">
+  <div class="kick">The whole idea</div>
+  <h2>Selling cars has always been about exposure.<br>We just made it automatic.</h2>
+  <p>One car, posted everywhere at once. The salespeople who get seen the most, sell the most — that's never changed. The tools just caught up.</p>
+  <div class="radiate">
+    <div class="rad-src">🚗</div>
+    <div class="rad-arm"></div>
+    <div class="rad-out">
+      <div class="rad-chip"><span class="ic">🏪</span> Your storefront</div>
+      <div class="rad-chip"><span class="ic">📸</span> Social media</div>
+      <div class="rad-chip"><span class="ic">✉️</span> Direct mail</div>
+      <div class="rad-chip"><span class="ic">🤝</span> Referrals</div>
+    </div>
+  </div>
+</section>
+
+<!-- SALESPEOPLE TOOLS -->
+<section class="sec wrap" id="salespeople">
+  <div class="sec-head">
+    <div class="kick">For salespeople</div>
+    <h2>Your daily toolbox</h2>
+    <p>Everything you need to build your own pipeline — without waiting for the lot to hand you a lead.</p>
+  </div>
+  <div class="tools">
+
+    <div class="tool">
+      <div class="tool-top"><div class="tool-ic">🏪</div><h3>Storefront</h3></div>
+      <div class="what">Your own page at carsinstock.com/yourname — your photo, your cars, your contact button. Pro AI backdrops on your top pick, and your dealership’s live Google rating right under your name.</div>
+      <div class="ba-slider" id="baSlider">
+        <img class="ba-after" src="https://res.cloudinary.com/dbpa9qqtb/image/upload/e_extract:prompt_the%20Toyota%20RAV4/e_gen_background_replace:prompt_Modern%20sleek%20car%20showroom%20with%20polished%20marble%20floors%20and%20bright%20lighting/c_pad,w_1200,h_750,b_gen_fill/q_auto:good,f_auto/v1772161090/demo/2023_toyota_rav4.jpg" alt="Showroom backdrop applied" draggable="false">
+        <div class="ba-before-wrap" id="baBeforeWrap">
+          <img class="ba-before" src="https://res.cloudinary.com/dbpa9qqtb/image/upload/c_pad,w_1200,h_750,b_auto/q_auto:good,f_auto/v1772161090/demo/2023_toyota_rav4.jpg" alt="Original photo" draggable="false">
+        </div>
+        <div class="ba-handle" id="baHandle"><span>‹ ›</span></div>
+        <div class="ba-lbl ba-lbl-l">Before</div>
+        <div class="ba-lbl ba-lbl-r">Backdrop</div>
       </div>
     </div>
-  </section>
 
-  <!-- PRICING -->
-  <section style="padding:80px 24px;max-width:1100px;margin:0 auto;">
-    <div class="cis-section-label">Pricing</div>
-    <h2 class="cis-section-title" style="margin-bottom:48px;">Simple, Transparent Pricing</h2>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px;align-items:start;">
-
-      <!-- Salesperson Box -->
-      <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:36px 32px;">
-        <div style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#00C851;margin-bottom:16px;">For Salespeople</div>
-        <div style="font-size:48px;font-weight:800;color:white;line-height:1;">$39<span style="font-size:18px;font-weight:400;color:rgba(255,255,255,0.5);">/month</span></div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.4);margin:8px 0 28px;font-style:italic;">Per salesperson. Cancel anytime.</div>
-        <ul style="list-style:none;padding:0;margin:0 0 32px;display:grid;gap:10px;">
-          <li style="display:flex;gap:10px;align-items:flex-start;"><span style="color:#00C851;font-weight:700;flex-shrink:0;">✓</span><span style="color:rgba(255,255,255,0.75);font-size:14px;">Your own storefront at carsinstock.com/yourname</span></li>
-          <li style="display:flex;gap:10px;align-items:flex-start;"><span style="color:#00C851;font-weight:700;flex-shrink:0;">✓</span><span style="color:rgba(255,255,255,0.75);font-size:14px;">Short branded link (cardeals.autos/yourname)</span></li>
-          <li style="display:flex;gap:10px;align-items:flex-start;"><span style="color:#00C851;font-weight:700;flex-shrink:0;">✓</span><span style="color:rgba(255,255,255,0.75);font-size:14px;">Pro Social Ad Generator — 10 templates, dealership-branded</span></li>
-          <li style="display:flex;gap:10px;align-items:flex-start;"><span style="color:#00C851;font-weight:700;flex-shrink:0;">✓</span><span style="color:rgba(255,255,255,0.75);font-size:14px;">Pro Mailer Generator — reference + neighbor letters + Avery 5160 labels</span></li>
-          <li style="display:flex;gap:10px;align-items:flex-start;"><span style="color:#00C851;font-weight:700;flex-shrink:0;">✓</span><span style="color:rgba(255,255,255,0.75);font-size:14px;">Share My Store — vCard, QR code, weekly post generator, referral page</span></li>
-          <li style="display:flex;gap:10px;align-items:flex-start;"><span style="color:#00C851;font-weight:700;flex-shrink:0;">✓</span><span style="color:rgba(255,255,255,0.75);font-size:14px;">AI chatbot on your storefront</span></li>
-          <li style="display:flex;gap:10px;align-items:flex-start;"><span style="color:#00C851;font-weight:700;flex-shrink:0;">✓</span><span style="color:rgba(255,255,255,0.75);font-size:14px;">Lead capture and CRM</span></li>
-          <li style="display:flex;gap:10px;align-items:flex-start;"><span style="color:#00C851;font-weight:700;flex-shrink:0;">✓</span><span style="color:rgba(255,255,255,0.75);font-size:14px;">14-day free trial</span></li>
-        </ul>
-        <a href="/register" style="display:block;width:100%;text-align:center;padding:16px;background:#00C851;color:#1E293B;font-size:16px;font-weight:700;border-radius:10px;text-decoration:none;box-sizing:border-box;">Start Free Trial →</a>
-      </div>
-
-      <!-- Dealership Box -->
-      <div style="background:rgba(0,200,81,0.06);border:1px solid rgba(0,200,81,0.3);border-radius:16px;padding:36px 32px;position:relative;">
-        <div style="font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#00C851;margin-bottom:16px;">For Dealerships</div>
-        <div style="font-size:48px;font-weight:800;color:white;line-height:1;">$75<span style="font-size:18px;font-weight:400;color:rgba(255,255,255,0.5);">/seat/month</span></div>
-        <div style="font-size:14px;color:#00C851;font-weight:600;margin:6px 0 4px;">+ $200/month dealership dashboard</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.4);margin:4px 0 8px;font-style:italic;">Minimum 3 seats. Billed monthly.</div>
-        <div style="font-size:13px;color:rgba(255,255,255,0.35);margin:0 0 28px;font-style:italic;">Example: 5 reps = $375 + $200 = $575/month</div>
-        <ul style="list-style:none;padding:0;margin:0 0 32px;display:grid;gap:10px;">
-          <li style="display:flex;gap:10px;align-items:flex-start;"><span style="color:#00C851;font-weight:700;flex-shrink:0;">✓</span><span style="color:rgba(255,255,255,0.75);font-size:14px;">Everything in the salesperson plan for every rep</span></li>
-          <li style="display:flex;gap:10px;align-items:flex-start;"><span style="color:#00C851;font-weight:700;flex-shrink:0;">✓</span><span style="color:rgba(255,255,255,0.75);font-size:14px;">Unified dealership storefront — all team inventory in one place</span></li>
-          <li style="display:flex;gap:10px;align-items:flex-start;"><span style="color:#00C851;font-weight:700;flex-shrink:0;">✓</span><span style="color:rgba(255,255,255,0.75);font-size:14px;">Vehicle approval controls — nothing goes live without you</span></li>
-          <li style="display:flex;gap:10px;align-items:flex-start;"><span style="color:#00C851;font-weight:700;flex-shrink:0;">✓</span><span style="color:rgba(255,255,255,0.75);font-size:14px;">Team management — add, edit, and manage all reps</span></li>
-          <li style="display:flex;gap:10px;align-items:flex-start;"><span style="color:#00C851;font-weight:700;flex-shrink:0;">✓</span><span style="color:rgba(255,255,255,0.75);font-size:14px;">Auto email blast — weekly cron to your full customer database</span></li>
-          <li style="display:flex;gap:10px;align-items:flex-start;"><span style="color:#00C851;font-weight:700;flex-shrink:0;">✓</span><span style="color:rgba(255,255,255,0.75);font-size:14px;">Blast analytics — opens, clicks, bounces, deliverability</span></li>
-          <li style="display:flex;gap:10px;align-items:flex-start;"><span style="color:#00C851;font-weight:700;flex-shrink:0;">✓</span><span style="color:rgba(255,255,255,0.75);font-size:14px;">Admin dashboard with full platform oversight</span></li>
-        </ul>
-        <a href="/dealer-register" style="display:block;width:100%;text-align:center;padding:16px;background:transparent;color:#00C851;font-size:16px;font-weight:700;border-radius:10px;text-decoration:none;border:2px solid #00C851;box-sizing:border-box;">Book a Demo →</a>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- HOW IT WORKS -->
-  <section class="cis-how">
-    <div class="cis-section-label">How It Works</div>
-    <h2 class="cis-section-title">From Dashboard<br>to Lead in 60 Seconds</h2>
-    <div class="cis-steps">
-      <div class="cis-step">
-        <div class="cis-step-num">1</div>
-        <div class="cis-step-title">Log In &amp; Add Your Car</div>
-        <div class="cis-step-desc">Submit your vehicle with photos and price in under 2 minutes</div>
-      </div>
-      <div class="cis-arrow">→</div>
-      <div class="cis-step">
-        <div class="cis-step-num">2</div>
-        <div class="cis-step-title">Generate Your Pro Ad</div>
-        <div class="cis-step-desc">One tap — professional image with your face, your car, and real urgency</div>
-      </div>
-      <div class="cis-arrow">→</div>
-      <div class="cis-step">
-        <div class="cis-step-num">3</div>
-        <div class="cis-step-title">Share to Social Media</div>
-        <div class="cis-step-desc">Post to Facebook, Instagram, or WhatsApp — caption auto-copied with your link</div>
-      </div>
-      <div class="cis-arrow">→</div>
-      <div class="cis-step">
-        <div class="cis-step-num">4</div>
-        <div class="cis-step-title">Lead Comes to You</div>
-        <div class="cis-step-desc">Buyer clicks your link, lands on your storefront, hits I'm Interested — lead is yours</div>
+    <div class="tool">
+      <div class="tool-top"><div class="tool-ic">📸</div><h3>Instant Ads</h3></div>
+      <div class="what">Pick a car, pick a template — a post-ready ad with your photo, the price, and a 7-day badge. Built for the floor, not the back office.</div>
+      <div class="ad-demo2">
+        <div class="adcard">
+          <div class="adcard-top"><span class="adcard-brand">Cars<b>InStock</b></span><span class="adcard-badge">7 DAYS LEFT</span></div>
+          <div class="adcard-photo"><div class="adcard-car"></div></div>
+          <div class="adcard-info">
+            <div class="adcard-title">2023 Toyota RAV4</div>
+            <div class="adcard-meta">28,410 mi · AWD</div>
+            <div class="adcard-price">$27,995</div>
+          </div>
+        </div>
       </div>
     </div>
-  </section>
 
-  <!-- PRICING -->
+    <div class="tool">
+      <div class="tool-top"><div class="tool-ic">✉️</div><h3>Direct Mail</h3></div>
+      <div class="what">Scan a handwritten reference sheet or drop in an address — the system finds the 15 closest neighbors and prints letters and labels in seconds.</div>
+      <div class="mail-demo2">
+        <div class="letter l3"></div>
+        <div class="letter l2"></div>
+        <div class="letter l1">
+          <div class="letter-line w70"></div>
+          <div class="letter-line w50"></div>
+          <div class="letter-gap"></div>
+          <div class="letter-line w90"></div>
+          <div class="letter-line w80"></div>
+          <div class="letter-line w60"></div>
+          <div class="letter-sig"></div>
+        </div>
+        <div class="mail-count">15 letters<br><span>ready to print</span></div>
+      </div>
+    </div>
+
+    <div class="tool">
+      <div class="tool-top"><div class="tool-ic">🤝</div><h3>Referrals</h3></div>
+      <div class="what">Past buyers send you their friends. They get a thank-you gift, you get a warm lead — all tracked, no spreadsheet.</div>
+      <div class="ref-demo">
+        <div class="ref-node2"><div class="ref-av">JD</div><div class="ref-cap">Past buyer</div></div>
+        <div class="ref-line"></div>
+        <div class="ref-node2"><div class="ref-av ref-you">You</div><div class="ref-cap">New lead</div></div>
+        <div class="ref-line"></div>
+        <div class="ref-node2"><div class="ref-av ref-giftav">Gift</div><div class="ref-cap">Thank-you</div></div>
+      </div>
+    </div>
+
+    <div class="tool">
+      <div class="tool-top"><div class="tool-ic">📊</div><h3>Dashboard</h3></div>
+      <div class="what">Leads from your storefront, the cars you feature, expiring inventory, walk-around videos — one screen, no sticky notes.</div>
+      <div class="dash-demo">
+        <div class="dash-stat">
+          <div class="dash-pill"><div class="n">4</div><div class="l">Live cars</div></div>
+          <div class="dash-pill"><div class="n">1</div><div class="l">New lead</div></div>
+          <div class="dash-pill"><div class="n">7d</div><div class="l">Auto-expire</div></div>
+        </div>
+        <div class="dash-row"><div class="dash-bar" style="width:80%"></div></div>
+        <div class="dash-row"><div class="dash-bar" style="width:55%"></div></div>
+        <div class="dash-row"><div class="dash-bar" style="width:67%"></div></div>
+      </div>
+    </div>
+
+    <div class="tool">
+      <div class="tool-top"><div class="tool-ic">💬</div><h3>24/7 Assistant</h3></div>
+      <div class="what">An AI chatbot on your storefront that answers buyer questions in your voice — working while you sleep.</div>
+      <div class="bot-demo">
+        <div class="bubble q">Is the RAV4 still available?</div>
+        <div class="bubble a">Yes! It's here and ready. Want me to set up a test drive this week?</div>
+        <div class="bubble q" style="background:none;padding:4px 13px"><span class="typing"><span></span><span></span><span></span></span></div>
+      </div>
+    </div>
+
+  </div>
+</section>
 
 
-  <!-- CTA -->
-  <section class="cis-cta">
-    <h2>Ready to Stop<br>Waiting for <em>Ups?</em></h2>
-    <p>Join salespeople who are building their own pipeline — starting today.</p>
-    <a href="/register" class="cis-cta-btn">Start Free — 14 Days on Us</a>
-    <p class="cis-cta-note">No credit card required · Cancel anytime · Setup in 5 minutes</p>
-  </section>
+<!-- FRESHNESS BAND -->
+<section style="border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:linear-gradient(180deg,var(--panel),var(--bg))">
+  <div class="wrap" style="padding:54px 24px;text-align:center">
+    <div style="font-size:13px;letter-spacing:.1em;color:var(--green);text-transform:uppercase;font-weight:600;margin-bottom:16px">Always fresh</div>
+    <p style="font-family:var(--disp);font-weight:700;font-size:clamp(24px,3.4vw,38px);letter-spacing:-.02em;line-height:1.18;max-width:820px;margin:0 auto">Every listing auto-expires in 7 days. Buyers only ever see <span style="color:var(--green)">what’s actually on the lot.</span></p>
+  </div>
+</section>
 
-  <!-- FOOTER -->
-  <footer class="cis-footer">
-    <p><strong>CarsInStock LLC</strong> &nbsp;·&nbsp; carsinstock.com &nbsp;·&nbsp; AI-Powered. Salespeople-Driven. &nbsp;·&nbsp; © 2026 &nbsp;·&nbsp; <a href="/careers" style="color:#00C851;text-decoration:none;" onmouseover="this.style.color='white'" onmouseout="this.style.color='#00C851'">Work With Us</a></p>
-  </footer>
+<!-- DEALERSHIP TURN -->
+<section class="dealer">
+  <div class="sec dealer-in wrap">
+    <div class="dealer-copy">
+      <div class="kick">For dealerships</div>
+      <h2>Your brand.<br>Their hustle.</h2>
+      <p>When your reps are ready, arm the whole floor. Every salesperson gets their own toolkit — branded to your dealership, controlled by you.</p>
+      <ul class="dealer-list">
+        <li><span class="ck">✓</span> One unified dealership page, plus a personal storefront for every rep</li>
+        <li><span class="ck">✓</span> Vehicle approval controls — nothing goes live without you</li>
+        <li><span class="ck">✓</span> Weekly email campaigns to your whole customer list, on autopilot</li>
+        <li><span class="ck">✓</span> Full blast analytics — opens, clicks, deliverability</li>
+      </ul>
+    </div>
+    <div class="dealer-vis">
+      <div class="dv-head">YOUR TEAM · 4 reps live</div>
+      <div class="dv-grid">
+        <div class="dv-rep"><div class="av">🧑</div><div><div class="nm">Alex R.</div><div class="st">● selling</div></div></div>
+        <div class="dv-rep"><div class="av">🧑</div><div><div class="nm">Sam T.</div><div class="st">● selling</div></div></div>
+        <div class="dv-rep"><div class="av">🧑</div><div><div class="nm">Jordan K.</div><div class="st">● selling</div></div></div>
+        <div class="dv-rep"><div class="av">🧑</div><div><div class="nm">Casey M.</div><div class="st">● selling</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="sec wrap" id="pricing">
+  <div class="sec-head">
+    <div class="kick">Pricing</div>
+    <h2>Simple, honest pricing</h2>
+    <p>Start free. Upgrade when your whole team wants in.</p>
+  </div>
+  <div class="price-grid">
+    <div class="pcard feat">
+      <div class="pfor">For salespeople</div>
+      <div class="amt">$39<span>/month</span></div>
+      <div class="pnote">Per salesperson. Cancel anytime.</div>
+      <ul>
+        <li><span class="ck">✓</span> Your own storefront + short branded link</li>
+        <li><span class="ck">✓</span> Instant Ads — every template, dealership-branded</li>
+        <li><span class="ck">✓</span> Direct Mail — reference + neighbor letters</li>
+        <li><span class="ck">✓</span> Referrals, vCard, QR, weekly post generator</li>
+        <li><span class="ck">✓</span> 24/7 AI assistant on your storefront</li>
+        <li><span class="ck">✓</span> Lead capture + built-in CRM</li>
+      </ul>
+      <a href="/register" class="btn btn-green" style="text-decoration:none">Start free trial →</a>
+    </div>
+    <div class="pcard">
+      <div class="pfor">For dealerships</div>
+      <div class="amt">$75<span>/seat/mo</span></div>
+      <div class="pnote">+ $200/mo dealership dashboard · min 3 seats<br><span style="color:var(--mid)">Example: 5 reps = $375 + $200 = <b style="color:var(--hi)">$575/mo</b></span></div>
+      <ul>
+        <li><span class="ck">✓</span> Everything in the salesperson plan, every rep</li>
+        <li><span class="ck">✓</span> Unified dealership storefront</li>
+        <li><span class="ck">✓</span> Vehicle approval controls</li>
+        <li><span class="ck">✓</span> Team management — add, edit, manage reps</li>
+        <li><span class="ck">✓</span> Auto email blast + full analytics</li>
+        <li><span class="ck">✓</span> Admin dashboard, full oversight</li>
+      </ul>
+      <a href="/demo" class="btn btn-ghost" style="width:100%;justify-content:center;text-decoration:none">Book a demo →</a>
+    </div>
+  </div>
+</section>
+
+
+<!-- FAQ -->
+<section class="sec wrap">
+  <div class="sec-head">
+    <div class="kick">Questions</div>
+    <h2>Straight answers</h2>
+  </div>
+  <div class="faq">
+    <div class="faq-item">
+      <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">Do I need to be technical?<span class="pm">+</span></button>
+      <div class="faq-a"><div>No. If you can use your phone, you can use this. Your storefront is live in five minutes — upload a photo, pick your cars, share your link. No setup, no code, no learning curve.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">What happens if a salesperson leaves?<span class="pm">+</span></button>
+      <div class="faq-a"><div>On a dealership plan, the dealership keeps the page, the inventory, and every lead. A rep’s personal storefront is theirs, but the customer relationships you paid for stay with you.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">Who owns the customer data?<span class="pm">+</span></button>
+      <div class="faq-a"><div>You do. Every lead and contact is yours to export anytime. We’re the tool that captures them — we never sell, share, or hold your data hostage.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">Is there a contract?<span class="pm">+</span></button>
+      <div class="faq-a"><div>No contract. Month to month, cancel anytime. Start with the free 14-day trial — no credit card required — and only keep going if it’s selling cars.</div></div>
+    </div>
+    <div class="faq-item">
+      <button class="faq-q" onclick="this.parentElement.classList.toggle('open')">How fast can I really start?<span class="pm">+</span></button>
+      <div class="faq-a"><div>Today. Sign up, add your photo and a few cars, and your storefront link works immediately — ready to text, post, and share before your next customer walks in.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL -->
+<section class="final wrap">
+  <h2>Get seen. Sell more.</h2>
+  <p>Your storefront's ready in five minutes. The free trial starts now.</p>
+  <a href="/register" class="btn btn-green btn-lg">Get your storefront →</a>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="foot-in wrap">
+    <div class="foot-brand">
+      <a href="/" class="logo">Cars<b>InStock</b></a>
+      <p>Fresh cars. Real people. The tools that put your inventory everywhere buyers are looking.</p>
+    </div>
+    <div class="foot-cols">
+      <div class="foot-col"><h4>Product</h4><a href="#">Storefront</a><a href="#">Instant Ads</a><a href="#">Direct Mail</a><a href="#">Referrals</a><a href="#">Dashboard</a></div>
+      <div class="foot-col"><h4>Solutions</h4><a href="#">For Salespeople</a><a href="#">For Dealerships</a><a href="#">Pricing</a></div>
+      <div class="foot-col"><h4>Company</h4><a href="#">See a demo</a><a href="#">Login</a><a href="#">Contact</a></div>
+      <div class="foot-col"><h4>Legal</h4><a href="/privacy">Privacy Policy</a><a href="/terms">Terms of Service</a><a href="/contact">Contact us</a></div>
+    </div>
+  </div>
+  <div class="foot-bot">
+    <span>© 2026 CarsInStock LLC · All rights reserved</span>
+    <span style="display:flex;gap:18px;flex-wrap:wrap">
+      <a href="/privacy" style="color:var(--dim)">Privacy</a>
+      <a href="/terms" style="color:var(--dim)">Terms</a>
+      <a href="/contact" style="color:var(--dim)">Contact</a>
+    </span>
+  </div>
+  <div style="max-width:1200px;margin:14px auto 0;padding:0 24px">
+    <p style="color:var(--dim);font-size:12px;line-height:1.6;max-width:760px">Emails sent through CarsInStock include an unsubscribe link in every message. Vehicle photos and pricing shown are for illustration. CarsInStock is a software platform for salespeople and dealerships.</p>
+  </div>
+</footer>
+
+
+<script>
+(function(){
+  var sl=document.getElementById('baSlider'); if(!sl) return;
+  var wrap=document.getElementById('baBeforeWrap');
+  var handle=document.getElementById('baHandle');
+  var before=sl.querySelector('.ba-before');
+  function setW(){ before.style.width=sl.clientWidth+'px'; before.style.minWidth=sl.clientWidth+'px'; }
+  setW(); window.addEventListener('resize',setW);
+  function move(x){
+    var r=sl.getBoundingClientRect();
+    var p=Math.max(0,Math.min(1,(x-r.left)/r.width));
+    wrap.style.width=(p*100)+'%';
+    handle.style.left=(p*100)+'%';
+  }
+  var drag=false;
+  sl.addEventListener('mousedown',function(e){drag=true;move(e.clientX);});
+  window.addEventListener('mousemove',function(e){if(drag)move(e.clientX);});
+  window.addEventListener('mouseup',function(){drag=false;});
+  sl.addEventListener('touchstart',function(e){drag=true;move(e.touches[0].clientX);},{passive:true});
+  window.addEventListener('touchmove',function(e){if(drag)move(e.touches[0].clientX);},{passive:true});
+  window.addEventListener('touchend',function(){drag=false;});
+})();
+</script>
 
 </div>
 {% endblock %}
