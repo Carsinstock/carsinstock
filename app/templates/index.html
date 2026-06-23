@@ -278,6 +278,23 @@ h1 .g{color:var(--green)}
 
 
 /* ============= TOOL CARD ANIMATIONS (pure CSS, zero Cloudinary) ============= */
+ /* ===== homebatch additions ===== */
+@media(max-width:880px){
+  .nav-cta{gap:8px}
+  .nav-cta .btn{padding:8px 12px;font-size:13px}
+}
+.dealer-copy p,.dealer-list li{overflow-wrap:anywhere}
+.dv-rep .st{transition:color .3s}
+.letter-qr{position:absolute;right:12px;bottom:12px;width:34px;height:34px;border-radius:4px;background:#fff;padding:2px;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+@media (prefers-reduced-motion: no-preference){
+  .dv-rep .st{animation:stPulse 2.4s ease-in-out infinite}
+  .dv-rep:nth-child(1) .st{animation-delay:0s}
+  .dv-rep:nth-child(2) .st{animation-delay:.6s}
+  .dv-rep:nth-child(3) .st{animation-delay:1.2s}
+  .dv-rep:nth-child(4) .st{animation-delay:1.8s}
+  @keyframes stPulse{0%,100%{opacity:1}50%{opacity:.45}}
+}
+
 @media (prefers-reduced-motion: no-preference){
 
 /* INSTANT ADS — card builds itself: photo, then title, price, badge stamp */
@@ -333,18 +350,18 @@ h1 .g{color:var(--green)}
       <div class="nav-item">
         <button>Product <svg viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></button>
         <div class="drop">
-          <a href="#"><div class="di">🏪</div><div><div class="dt">Storefront</div><div class="dd">Your own page — your cars, your face, your link</div></div></a>
-          <a href="#"><div class="di">📸</div><div><div class="dt">Instant Ads</div><div class="dd">A post-ready ad for any car, in seconds</div></div></a>
-          <a href="#"><div class="di">✉️</div><div><div class="dt">Direct Mail</div><div class="dd">Print-ready letters from a photo or address</div></div></a>
-          <a href="#"><div class="di">🤝</div><div><div class="dt">Referrals</div><div class="dd">Past buyers send you friends — they get a gift</div></div></a>
-          <a href="#"><div class="di">📊</div><div><div class="dt">Dashboard</div><div class="dd">Leads, inventory, and videos on one screen</div></div></a>
+          <a href="#salespeople"><div class="di">🏪</div><div><div class="dt">Storefront</div><div class="dd">Your own page — your cars, your face, your link</div></div></a>
+          <a href="#salespeople"><div class="di">📸</div><div><div class="dt">Instant Ads</div><div class="dd">A post-ready ad for any car, in seconds</div></div></a>
+          <a href="#salespeople"><div class="di">✉️</div><div><div class="dt">Direct Mail</div><div class="dd">Print-ready letters from a photo or address</div></div></a>
+          <a href="#salespeople"><div class="di">🤝</div><div><div class="dt">Referrals</div><div class="dd">Past buyers send you friends — they get a gift</div></div></a>
+          <a href="#salespeople"><div class="di">📊</div><div><div class="dt">Dashboard</div><div class="dd">Leads, inventory, and videos on one screen</div></div></a>
         </div>
       </div>
       <div class="nav-item">
         <button>Solutions <svg viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></button>
         <div class="drop">
-          <a href="#"><div class="di">🧑‍💼</div><div><div class="dt">For Salespeople</div><div class="dd">Build your own pipeline, on your phone</div></div></a>
-          <a href="#"><div class="di">🏢</div><div><div class="dt">For Dealerships</div><div class="dd">Arm your whole team — your brand on top</div></div></a>
+          <a href="#salespeople"><div class="di">🧑‍💼</div><div><div class="dt">For Salespeople</div><div class="dd">Build your own pipeline, on your phone</div></div></a>
+          <a href="#dealer-sec"><div class="di">🏢</div><div><div class="dt">For Dealerships</div><div class="dd">Arm your whole team — your brand on top</div></div></a>
         </div>
       </div>
       <div class="nav-item"><a href="#pricing"><button>Pricing</button></a></div>
@@ -368,7 +385,7 @@ h1 .g{color:var(--green)}
       <a href="#pricing" class="btn btn-ghost btn-lg">I run a sales team</a>
     </div>
     <p class="trust"><b>Free 14-day trial</b> · No credit card · Setup in 5 minutes</p>
-    <p style="margin-top:18px"><a href="#" style="color:var(--green);font-size:15px;font-weight:600;border-bottom:1px solid var(--green-line);padding-bottom:2px">See a sample storefront →</a></p>
+    <p style="margin-top:18px"><a href="/demo" style="color:var(--green);font-size:15px;font-weight:600;border-bottom:1px solid var(--green-line);padding-bottom:2px">See a sample storefront →</a></p>
   </div>
   </header>
 
@@ -430,7 +447,7 @@ h1 .g{color:var(--green)}
 
     <div class="tool">
       <div class="tool-top"><div class="tool-ic">✉️</div><h3>Direct Mail</h3></div>
-      <div class="what">Scan a handwritten reference sheet or drop in an address — the system finds the 15 closest neighbors and prints letters and labels in seconds.</div>
+      <div class="what">Scan a handwritten reference sheet or drop in an address — the system finds the 15 closest neighbors and prints letters and labels in seconds. Each letter is personalized and carries a QR code that opens your storefront.</div>
       <div class="mail-demo2">
         <div class="letter l3"></div>
         <div class="letter l2"></div>
@@ -442,6 +459,7 @@ h1 .g{color:var(--green)}
           <div class="letter-line w80"></div>
           <div class="letter-line w60"></div>
           <div class="letter-sig"></div>
+          <img class="letter-qr" src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=0&data=https%3A%2F%2Fcarsinstock.com%2Fdemo" alt="Scan to view storefront">
         </div>
         <div class="mail-count">15 letters<br><span>ready to print</span></div>
       </div>
@@ -497,7 +515,7 @@ h1 .g{color:var(--green)}
 </section>
 
 <!-- DEALERSHIP TURN -->
-<section class="dealer">
+<section class="dealer" id="dealer-sec">
   <div class="sec dealer-in wrap">
     <div class="dealer-copy">
       <div class="kick">For dealerships</div>
@@ -506,8 +524,8 @@ h1 .g{color:var(--green)}
       <ul class="dealer-list">
         <li><span class="ck">✓</span> One unified dealership page, plus a personal storefront for every rep</li>
         <li><span class="ck">✓</span> Vehicle approval controls — nothing goes live without you</li>
-        <li><span class="ck">✓</span> Weekly email campaigns to your whole customer list, on autopilot</li>
-        <li><span class="ck">✓</span> Full blast analytics — opens, clicks, deliverability</li>
+        <li><span class="ck">✓</span> AI showroom backdrops on every rep’s Top Pick — no photographer, no studio</li>
+        <li><span class="ck">✓</span> Branded social ads and neighbor-letter mailers for the whole floor</li>
       </ul>
     </div>
     <div class="dealer-vis">
@@ -553,7 +571,6 @@ h1 .g{color:var(--green)}
         <li><span class="ck">✓</span> Unified dealership storefront</li>
         <li><span class="ck">✓</span> Vehicle approval controls</li>
         <li><span class="ck">✓</span> Team management — add, edit, manage reps</li>
-        <li><span class="ck">✓</span> Auto email blast + full analytics</li>
         <li><span class="ck">✓</span> Admin dashboard, full oversight</li>
       </ul>
       <a href="/demo" class="btn btn-ghost" style="width:100%;justify-content:center;text-decoration:none">Book a demo →</a>
@@ -607,9 +624,9 @@ h1 .g{color:var(--green)}
       <p>Fresh cars. Real people. The tools that put your inventory everywhere buyers are looking.</p>
     </div>
     <div class="foot-cols">
-      <div class="foot-col"><h4>Product</h4><a href="#">Storefront</a><a href="#">Instant Ads</a><a href="#">Direct Mail</a><a href="#">Referrals</a><a href="#">Dashboard</a></div>
-      <div class="foot-col"><h4>Solutions</h4><a href="#">For Salespeople</a><a href="#">For Dealerships</a><a href="#">Pricing</a></div>
-      <div class="foot-col"><h4>Company</h4><a href="#">See a demo</a><a href="#">Login</a><a href="#">Contact</a></div>
+      <div class="foot-col"><h4>Product</h4><a href="#salespeople">Storefront</a><a href="#salespeople">Instant Ads</a><a href="#salespeople">Direct Mail</a><a href="#salespeople">Referrals</a><a href="#salespeople">Dashboard</a></div>
+      <div class="foot-col"><h4>Solutions</h4><a href="#salespeople">For Salespeople</a><a href="#dealer-sec">For Dealerships</a><a href="#pricing">Pricing</a></div>
+      <div class="foot-col"><h4>Company</h4><a href="/demo">See a demo</a><a href="/login">Login</a><a href="/contact">Contact</a><a href="/work-with-us">Work with us</a></div>
       <div class="foot-col"><h4>Legal</h4><a href="/privacy">Privacy Policy</a><a href="/terms">Terms of Service</a><a href="/contact">Contact us</a></div>
     </div>
   </div>

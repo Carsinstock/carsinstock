@@ -1,56 +1,72 @@
 {% extends "base.html" %}
 {% block content %}
 <style>
-    .contact-page { max-width: 720px; margin: 0 auto; padding: 40px 0; }
-    .contact-page h1 { font-size: 32px; font-weight: 700; color: #1E293B; margin-bottom: 12px; }
-    .contact-page .subtitle { font-size: 16px; color: #64748B; margin-bottom: 32px; line-height: 1.6; }
-    .contact-form .form-group { margin-bottom: 20px; }
-    .contact-form label { display: block; font-size: 14px; font-weight: 600; color: #1E293B; margin-bottom: 6px; }
-    .contact-form input, .contact-form textarea {
-        width: 100%; padding: 12px 14px; border: 1px solid #CBD5E1; border-radius: 8px;
-        font-size: 15px; font-family: 'Inter', sans-serif; color: #1E293B; background: #F8FAFC;
-    }
-    .contact-form input:focus, .contact-form textarea:focus { outline: none; border-color: #00C851; background: white; }
-    .contact-form textarea { min-height: 140px; resize: vertical; }
-    .contact-form .btn-send {
-        background: #00C851; color: white; border: none; padding: 14px 32px; border-radius: 8px;
-        font-size: 16px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif;
-    }
-    .contact-form .btn-send:hover { background: #00b348; }
-    .contact-note { font-size: 14px; color: #94A3B8; margin-top: 24px; }
-    .flash-msg { padding: 14px 18px; border-radius: 8px; margin-bottom: 20px; font-size: 15px; }
-    .flash-success { background: #F0FDF4; color: #166534; border: 1px solid #BBF7D0; }
-    .flash-error { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+  .cis-contact{--bg:#0a0f1a;--panel:#111a2b;--raised:#16213a;--border:#1f2d44;--hi:#e8eef7;--mid:#93a3bd;--dim:#5f6f8a;--green:#00c851;--green-soft:rgba(0,200,81,.12);--green-line:rgba(0,200,81,.4);background:var(--bg);margin:-24px calc(50% - 50vw) 0;padding:0;min-height:calc(100vh - 64px);width:100vw}
+  .cis-contact *{box-sizing:border-box}
+  .cc-wrap{max-width:640px;margin:0 auto;padding:64px 24px 80px}
+  .cc-kick{font-size:13px;letter-spacing:.1em;color:var(--green);text-transform:uppercase;font-weight:700;margin-bottom:14px}
+  .cc-wrap h1{font-family:'Inter',sans-serif;font-weight:800;font-size:clamp(30px,5vw,42px);letter-spacing:-.02em;color:var(--hi);line-height:1.08;margin:0 0 14px}
+  .cc-sub{font-size:16px;color:var(--mid);line-height:1.6;margin:0 0 36px;max-width:520px}
+  .cc-card{background:var(--panel);border:1px solid var(--border);border-radius:18px;padding:32px}
+  .cc-group{margin-bottom:20px}
+  .cc-group label{display:block;font-size:13px;font-weight:600;color:var(--hi);margin-bottom:8px;letter-spacing:.01em}
+  .cc-group input,.cc-group textarea,.cc-group select{width:100%;padding:13px 15px;border:1px solid var(--border);border-radius:11px;font-size:15px;font-family:'Inter',sans-serif;color:var(--hi);background:var(--raised);transition:border-color .15s,background .15s}
+  .cc-group input::placeholder,.cc-group textarea::placeholder{color:var(--dim)}
+  .cc-group input:focus,.cc-group textarea:focus,.cc-group select:focus{outline:none;border-color:var(--green);background:#0d1626}
+  .cc-group textarea{min-height:150px;resize:vertical;line-height:1.5}
+  .cc-group select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%2393a3bd' stroke-width='1.6' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:40px;cursor:pointer}
+  .cc-send{background:var(--green);color:#04210f;border:none;padding:15px 34px;border-radius:11px;font-size:16px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;transition:background .15s,transform .15s;width:100%}
+  .cc-send:hover{background:#00e25c;transform:translateY(-1px)}
+  .cc-note{font-size:13px;color:var(--dim);margin-top:20px;text-align:center}
+  .cc-flash{padding:14px 18px;border-radius:11px;margin-bottom:22px;font-size:15px;font-weight:500}
+  .cc-flash.flash-success{background:var(--green-soft);color:#5ef0a0;border:1px solid var(--green-line)}
+  .cc-flash.flash-error{background:rgba(220,60,60,.12);color:#f7a8a8;border:1px solid rgba(220,60,60,.4)}
+  .cc-turn{margin:4px 0 22px}
 </style>
-<div class="contact-page">
-    <h1>Contact Us</h1>
-    <p class="subtitle">Have a question, need help with your storefront, or want to learn more about CarsInStock? We'd love to hear from you.</p>
+<div class="cis-contact">
+  <div class="cc-wrap">
+    <div class="cc-kick">Get in touch</div>
+    <h1>Let's talk.</h1>
+    <p class="cc-sub">Whether you're a salesperson getting started, a dealership sizing up the floor, or exploring a partnership — tell us what you need and we'll get back within 24 hours.</p>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-        {% for category, message in messages %}
-        <div class="flash-msg flash-{{ category }}">{{ message }}</div>
-        {% endfor %}
+      {% for category, message in messages %}
+      <div class="cc-flash flash-{{ category }}">{{ message }}</div>
+      {% endfor %}
     {% endif %}
     {% endwith %}
 
-    <form method="POST" action="/contact" class="contact-form">
-        <div class="form-group">
-            <label for="name">Your Name</label>
-            <input type="text" id="name" name="name" placeholder="Full name" required>
+    <div class="cc-card">
+      <form method="POST" action="/contact">
+        <div class="cc-group">
+          <label for="inquiry">What's this about?</label>
+          <select id="inquiry" name="inquiry">
+            <option value="I'm a salesperson — getting started">I'm a salesperson — getting started</option>
+            <option value="I run a dealership — book a demo">I run a dealership — book a demo</option>
+            <option value="Partnership / work with us">Partnership / work with us</option>
+            <option value="Support — help with my storefront">Support — help with my storefront</option>
+            <option value="Something else">Something else</option>
+          </select>
         </div>
-        <div class="form-group">
-            <label for="email">Your Email</label>
-            <input type="email" id="email" name="email" placeholder="you@example.com" required>
+        <div class="cc-group">
+          <label for="name">Your name</label>
+          <input type="text" id="name" name="name" placeholder="Full name" required>
         </div>
-        <div class="form-group">
-            <label for="message">Message</label>
-            <textarea id="message" name="message" placeholder="How can we help?" required></textarea>
+        <div class="cc-group">
+          <label for="email">Your email</label>
+          <input type="email" id="email" name="email" placeholder="you@example.com" required>
         </div>
-        <div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}" style="margin-bottom:15px;"></div>
-        <button type="submit" class="btn-send">Send Message</button>
-    </form>
-    <p class="contact-note">We typically respond within 24 hours.</p>
+        <div class="cc-group">
+          <label for="message">Message</label>
+          <textarea id="message" name="message" placeholder="How can we help?" required></textarea>
+        </div>
+        <div class="cf-turnstile cc-turn" data-sitekey="{{ turnstile_site_key }}"></div>
+        <button type="submit" class="cc-send">Send message →</button>
+      </form>
+      <p class="cc-note">We typically respond within 24 hours.</p>
+    </div>
+  </div>
 </div>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 {% endblock %}

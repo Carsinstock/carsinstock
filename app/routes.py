@@ -1417,6 +1417,7 @@ def contact():
         name = request.form.get('name', '').strip()
         email = request.form.get('email', '').strip()
         message = request.form.get('message', '').strip()
+        inquiry = request.form.get('inquiry', '').strip() or 'General inquiry'
 
         # Verify Turnstile
         turnstile_response = request.form.get("cf-turnstile-response", "")
@@ -1451,10 +1452,11 @@ def contact():
             msg = Mail(
                 from_email=('noreply@carsinstock.com', 'CarsInStock Contact'),
                 to_emails='support@carsinstock.com',
-                subject=f'Contact Form: {name}',
+                subject=f'Contact — {inquiry}: {name}',
                 html_content=f"""
                 <div style="font-family:Inter,sans-serif;max-width:600px;">
                     <h2 style="color:#1E293B;">New Contact Form Submission</h2>
+                    <p><strong>Inquiry type:</strong> {inquiry}</p>
                     <p><strong>Name:</strong> {name}</p>
                     <p><strong>Email:</strong> {email}</p>
                     <p><strong>Message:</strong></p>
@@ -1471,6 +1473,72 @@ def contact():
         return redirect('/contact')
 
     return render_template('contact.html', turnstile_site_key=turnstile_site_key)
+
+
+@main.route('/work-with-us', methods=['GET', 'POST'])
+def work_with_us():
+    import os
+    turnstile_site_key = os.environ.get("TURNSTILE_SITE_KEY", "")
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        email = request.form.get('email', '').strip()
+        phone = request.form.get('phone', '').strip()
+        department = request.form.get('department', '').strip() or 'General / Other'
+        message = request.form.get('message', '').strip()
+
+        turnstile_response = request.form.get("cf-turnstile-response", "")
+        if not turnstile_response:
+            flash("Please complete the CAPTCHA verification.", "error")
+            return render_template('work_with_us.html', turnstile_site_key=turnstile_site_key)
+
+        import requests as http_requests
+        verify_url = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+        verify_data = {
+            "secret": os.environ.get("TURNSTILE_SECRET_KEY", ""),
+            "response": turnstile_response,
+            "remoteip": request.remote_addr
+        }
+        try:
+            verify_result = http_requests.post(verify_url, data=verify_data, timeout=5).json()
+            if not verify_result.get("success"):
+                flash("CAPTCHA verification failed. Please try again.", "error")
+                return render_template('work_with_us.html', turnstile_site_key=turnstile_site_key)
+        except:
+            pass
+
+        if not name or not email or not phone or not message:
+            flash("All fields are required.", "error")
+            return render_template('work_with_us.html', turnstile_site_key=turnstile_site_key)
+
+        try:
+            from sendgrid import SendGridAPIClient
+            from sendgrid.helpers.mail import Mail
+            sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+            msg = Mail(
+                from_email=('noreply@carsinstock.com', 'CarsInStock Careers'),
+                to_emails='support@carsinstock.com',
+                subject=f'Careers \u2014 {department}: {name}',
+                html_content=f"""
+                <div style="font-family:Inter,sans-serif;max-width:600px;">
+                    <h2 style="color:#1E293B;">New Careers Application</h2>
+                    <p><strong>Department:</strong> {department}</p>
+                    <p><strong>Name:</strong> {name}</p>
+                    <p><strong>Email:</strong> {email}</p>
+                    <p><strong>Phone:</strong> {phone}</p>
+                    <p><strong>About:</strong></p>
+                    <p style="background:#F8FAFC;padding:16px;border-radius:8px;color:#475569;">{message}</p>
+                </div>
+                """
+            )
+            msg.reply_to = email
+            sg.send(msg)
+        except Exception as e:
+            print(f"Careers form email error: {e}")
+
+        flash("Application sent! We'll be in touch soon.", "success")
+        return redirect('/work-with-us')
+
+    return render_template('work_with_us.html', turnstile_site_key=turnstile_site_key)
 
 
 @main.route('/subscribe', methods=['POST'])
