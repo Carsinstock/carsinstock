@@ -627,11 +627,94 @@ def howto():
 
 @main.route('/demo')
 def demo_page():
-    from app.models.salesperson import Salesperson
+    """Demo storefront — renders the live rep_storefront design (the twin) with a
+    fictional rep (Marcus Reyes / Coastline Auto Group). Static illustration only;
+    all actions are non-operable. Never references Pine Belt (stealth)."""
     from app.models.vehicle import Vehicle
-    sp = Salesperson.query.filter_by(profile_url_slug="jsmith").first_or_404()
-    vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id, status="available").all()
-    return render_template("salesperson/public_profile.html", sp=sp, vehicles=vehicles, is_owner=False, is_demo=True, hide_nav_auth=True)
+    from datetime import datetime
+
+    # jsmith's demo vehicles (real objects so days_remaining etc. work)
+    vehicles = Vehicle.query.filter_by(salesperson_id=2, status="available").all()
+    # Drop the Telluride so the grid (after RAV4 is featured) is an even 2-up sequence
+    vehicles = [v for v in vehicles if not (v.make and v.make.upper() == 'KIA' and v.model and v.model.upper() == 'TELLURIDE')]
+    # Static demo: show ALL cars regardless of (stale) expiry, with synthetic freshness.
+    # days_remaining is a read-only property derived from expires_at, so set expires_at.
+    from datetime import timedelta as _td
+    _demo_days = [7, 5, 6, 4, 7, 3, 6, 5, 7, 4]
+    for _i, _v in enumerate(vehicles):
+        try:
+            _v.expires_at = datetime.utcnow() + _td(days=_demo_days[_i % len(_demo_days)])
+        except Exception:
+            pass
+    # sort: team pick first, then price asc (mirrors live route)
+    vehicles.sort(key=lambda v: (0 if getattr(v, 'is_team_pick', False) else 1, v.price or 0))
+
+    # Feature the RAV4 as Marcus's Top Pick + use the cached AI-backdrop render
+    RAV4_SHOWROOM = ('https://res.cloudinary.com/dbpa9qqtb/image/upload/'
+        'e_extract:prompt_the%20Toyota%20RAV4/e_gen_background_replace:prompt_'
+        'Modern%20sleek%20car%20showroom%20with%20polished%20marble%20floors%20'
+        'and%20bright%20lighting/c_pad,w_1200,h_750,b_gen_fill/q_auto:good,f_auto/'
+        'v1772161090/demo/2023_toyota_rav4.jpg')
+    featured = None
+    for v in vehicles:
+        if v.make and v.make.upper() == 'TOYOTA' and v.model and v.model.upper() == 'RAV4':
+            v.is_team_pick = True
+            v.image_url = RAV4_SHOWROOM
+            v.pick_blurb = ("One owner, clean Carfax, and it drives like new. If you want an SUV "
+                            "that'll go 200k without complaint, this is the one I'd put my own family in.")
+            v.expires_at = datetime.utcnow() + _td(days=7)
+            featured = v
+            break
+    if featured:
+        vehicles = [featured] + [v for v in vehicles if v.id != featured.id]
+
+    # Stats for the hero strip
+    live_count = len(vehicles)
+    avg_days = round(sum((v.days_remaining or 0) for v in vehicles) / live_count) if live_count else 0
+    min_price = min((v.price for v in vehicles if v.price), default=None)
+
+    # Fictional rep (stealth-safe)
+    member = {
+        'id': 0,
+        'name': 'Marcus Reyes',
+        'slug': 'demo',
+        'phone': None,
+        'bio': ("14 years on the floor and I still do it the same way -- no pressure, no games. "
+                "I hand-pick every car on this page because I only put my name on ones I'd put my "
+                "own family in. See something you like? Reach out. I'll shoot you straight."),
+        'profile_photo': 'https://res.cloudinary.com/dbpa9qqtb/image/upload/v1772163364/demo/demo_profile_photo.jpg',
+        'dealership_id': 0,
+    }
+
+    # Synthetic dealership object exposing only the fields the template reads
+    class _DemoDealer:
+        dealership_name = 'Coastline Auto Group'
+        dealership_address = 'Doylestown, PA'
+        profile_url_slug = 'demo'
+        financing_url = None
+        salesperson_id = 0
+    dealership_sp = _DemoDealer()
+
+    # Demo Google rating + featured image var the template expects
+    google_rating = 4.8
+    google_review_count = 187
+    google_place_id = ''
+    featured_img = featured.image_url if featured else None
+
+    # OG/meta vars used in {% block meta %}
+    og_title = "Marcus Reyes — This Week's Top Picks"
+    og_description = (f"{live_count} cars available - From ${min_price:,.0f} - Updated daily"
+                      if (live_count and min_price) else "Browse this week's picks at CarsInStock")
+    og_image = featured_img or member['profile_photo']
+
+    return render_template("salesperson/rep_storefront_demo.html",
+        member=member, dealership_sp=dealership_sp, vehicles=vehicles,
+        live_count=live_count, avg_days=avg_days, min_price=min_price,
+        featured=featured, featured_img=featured_img,
+        google_rating=google_rating, google_review_count=google_review_count,
+        google_place_id=google_place_id,
+        og_title=og_title, og_description=og_description, og_image=og_image,
+        is_owner=False, is_demo=True, hide_nav_auth=True)
 
 
 @main.route('/manifest/<slug>.json')
