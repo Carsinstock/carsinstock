@@ -32,8 +32,9 @@
 /* NAV */
 .cis-home2 nav{position:sticky;top:0;z-index:100;background:rgba(11,18,32,.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
 .nav-in{display:flex;align-items:center;justify-content:space-between;height:68px;max-width:1200px;margin:0 auto;padding:0 24px}
-.logo{font-family:var(--disp);font-weight:700;font-size:20px;letter-spacing:-.02em}
+.logo{font-family:var(--disp);font-weight:700;font-size:20px;letter-spacing:-.02em;display:inline-flex;align-items:center}
 .logo b{color:var(--green)}
+.logo .logo-car{margin-right:5px}
 .nav-links{display:flex;align-items:center;gap:4px}
 .nav-item{position:relative}
 .nav-item>button{font-family:var(--body);font-size:15px;color:var(--mid);background:none;border:none;cursor:pointer;padding:10px 14px;border-radius:8px;display:flex;align-items:center;gap:5px;transition:color .15s}
@@ -48,6 +49,8 @@
 .drop .dt{font-size:14px;font-weight:600;color:var(--hi);font-family:var(--disp)}
 .drop .dd{font-size:12.5px;color:var(--dim);line-height:1.45}
 .nav-cta{display:flex;align-items:center;gap:10px}
+.gs-short{display:none}
+.gs-full{display:inline}
 .btn{font-family:var(--body);font-weight:600;font-size:15px;border-radius:10px;cursor:pointer;transition:all .16s;display:inline-flex;align-items:center;gap:8px;border:none}
 .btn-ghost{background:none;color:var(--hi);padding:10px 16px;border:1px solid var(--border)}
 .btn-ghost:hover{border-color:var(--mid)}
@@ -199,7 +202,7 @@ h1 .g{color:var(--green)}
 .cis-home2 footer{border-top:1px solid var(--border);padding:50px 0 40px}
 .foot-in{display:flex;justify-content:space-between;flex-wrap:wrap;gap:30px}
 .foot-brand{max-width:280px}
-.foot-brand .logo{margin-bottom:12px;display:inline-block}
+.foot-brand .logo{margin-bottom:12px;display:inline-flex;align-items:center}
 .foot-brand p{color:var(--dim);font-size:13.5px}
 .foot-cols{display:flex;gap:56px;flex-wrap:wrap}
 .foot-col h4{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin-bottom:14px;font-weight:600}
@@ -215,6 +218,16 @@ h1 .g{color:var(--green)}
   .price-grid{grid-template-columns:1fr}
   .radiate{flex-direction:column;gap:18px}
   .rad-arm{width:1px;height:24px;background:linear-gradient(180deg,var(--green-line),transparent)}
+}
+/* phones: keep "More eyes on your cars." on one line */
+@media(max-width:480px){
+  .cis-home2 h1{font-size:34px;letter-spacing:-.02em;line-height:1.05}
+  .cis-home2 h1 .hl1{display:block;font-size:42px;line-height:1.0;margin-bottom:0}
+  .cis-home2 h1 br{display:none}
+  .cis-home2 h1 .g{display:block;font-size:42px;line-height:1.05}
+  .cis-home2 .logo{font-size:18px}
+  .cis-home2 .nav-in{padding:0 16px}
+  .cis-home2 nav .btn{font-size:13px;padding:9px 13px}
 }
 
 /* FAQ */
@@ -282,6 +295,8 @@ h1 .g{color:var(--green)}
 @media(max-width:880px){
   .nav-cta{gap:8px}
   .nav-cta .btn{padding:8px 12px;font-size:13px}
+  .gs-full{display:none}
+  .gs-short{display:inline}
 }
 .dealer-copy p,.dealer-list li{overflow-wrap:anywhere}
 .dv-rep .st{transition:color .3s}
@@ -345,7 +360,7 @@ h1 .g{color:var(--green)}
 <!-- NAV -->
 <nav>
   <div class="nav-in">
-    <a href="/" class="logo">Cars<b>InStock</b></a>
+    <a href="/" class="logo"><svg class="logo-car" width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M3.5 20l1.5-4.5A3 3 0 0 1 7.9 13.3l1.9-3a2 2 0 0 1 1.7-.9h7.5a2 2 0 0 1 1.7.95l1.8 2.95 3 .8a2.2 2.2 0 0 1 1.6 2.1V21a1 1 0 0 1-1 1h-1.7a3 3 0 0 1-6 0h-5.8a3 3 0 0 1-6 0H4.5a1 1 0 0 1-1-1z" fill="#00C851"/><circle cx="9.7" cy="21" r="1.9" fill="#0d1626"/><circle cx="22.3" cy="21" r="1.9" fill="#0d1626"/></svg>Cars<b>InStock</b></a>
     <div class="nav-links">
       <div class="nav-item">
         <button>Product <svg viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none"/></svg></button>
@@ -369,7 +384,7 @@ h1 .g{color:var(--green)}
     </div>
     <div class="nav-cta">
       <a href="/login" class="btn btn-ghost">Login</a>
-      <a href="/register" class="btn btn-green">Get started free</a>
+      <a href="/register" class="btn btn-green"><span class="gs-full">Get started free</span><span class="gs-short">Get started</span></a>
     </div>
   </div>
 </nav>
@@ -378,7 +393,7 @@ h1 .g{color:var(--green)}
 <header class="hero">
   <div class="wrap">
     <div class="eyebrow"><span class="dot"></span>EXPOSURE SELLS CARS</div>
-    <h1>More eyes on your cars.<br><span class="g">More cars sold.</span></h1>
+    <h1><span class="hl1">More Exposure =</span><br><span class="g">More Cars Sold</span></h1>
     <p class="sub">The tools top salespeople use to put their inventory everywhere buyers are looking — storefront, social, and mail — in minutes a day.</p>
     <div class="hero-cta">
       <button class="btn btn-green btn-lg">I'm a salesperson →</button>
@@ -417,7 +432,7 @@ h1 .g{color:var(--green)}
 
     <div class="tool">
       <div class="tool-top"><div class="tool-ic">🏪</div><h3>Storefront</h3></div>
-      <div class="what">Your own page at carsinstock.com/yourname — your photo, your cars, your contact button. Pro AI backdrops on your top pick, and your dealership’s live Google rating right under your name.</div>
+      <div class="what">Your own page at carsinstock.com/yourname — your photo, your cars, your contact button. Pro AI backdrops on your top pick, and your dealership’s live Google rating right under your name. Plus a short, shareable <a href="https://cardeals.autos" style="color:var(--green);font-weight:600;text-decoration:none;">cardeals.autos</a> link for every car.</div>
       <div class="ba-slider" id="baSlider">
         <img class="ba-after" src="https://res.cloudinary.com/dbpa9qqtb/image/upload/e_extract:prompt_the%20Toyota%20RAV4/e_gen_background_replace:prompt_Modern%20sleek%20car%20showroom%20with%20polished%20marble%20floors%20and%20bright%20lighting/c_pad,w_1200,h_750,b_gen_fill/q_auto:good,f_auto/v1772161090/demo/2023_toyota_rav4.jpg" alt="Showroom backdrop applied" draggable="false">
         <div class="ba-before-wrap" id="baBeforeWrap">
@@ -467,7 +482,7 @@ h1 .g{color:var(--green)}
 
     <div class="tool">
       <div class="tool-top"><div class="tool-ic">🤝</div><h3>Referrals</h3></div>
-      <div class="what">Past buyers send you their friends. They get a thank-you gift, you get a warm lead — all tracked, no spreadsheet.</div>
+      <div class="what">Past buyers send you their friends. They get a thank-you gift, you get a warm lead — all tracked, no spreadsheet. Powered by <a href="https://mycarreferral.com" target="_blank" rel="noopener" style="color:var(--green);font-weight:600;text-decoration:none;">MyCarReferral.com</a>.</div>
       <div class="ref-demo">
         <div class="ref-node2"><div class="ref-av">JD</div><div class="ref-cap">Past buyer</div></div>
         <div class="ref-line"></div>
@@ -516,7 +531,7 @@ h1 .g{color:var(--green)}
 
 <!-- DEALERSHIP TURN -->
 <section class="dealer" id="dealer-sec">
-  <div class="sec dealer-in wrap">
+  <div class="sec dealer-in wrap" style="padding-bottom:0">
     <div class="dealer-copy">
       <div class="kick">For dealerships</div>
       <h2>Your brand.<br>Their hustle.</h2>
@@ -538,6 +553,15 @@ h1 .g{color:var(--green)}
       </div>
     </div>
   </div>
+</section>
+
+<!-- EXPOSURE MATH (plain, between team and pricing) -->
+<section class="wrap" style="text-align:center;padding:4px 24px 30px;">
+  <p style="font-size:clamp(15px,2.2vw,18px);line-height:1.7;color:var(--mid);max-width:640px;margin:0 auto;">
+    4 salespeople send 30 letters a day, 5 days a week. <b style="color:var(--hi)">That's 2,400 letters a month.</b><br>
+    They post 10 cars a week to 300 friends each. <b style="color:var(--hi)">That's 48,000 social views a month.</b><br>
+    <span style="display:inline-block;margin-top:10px;color:var(--green);font-weight:700;">That's 50,400 times a month your cars get in front of someone.</span>
+  </p>
 </section>
 
 <!-- PRICING -->
@@ -620,7 +644,7 @@ h1 .g{color:var(--green)}
 <footer>
   <div class="foot-in wrap">
     <div class="foot-brand">
-      <a href="/" class="logo">Cars<b>InStock</b></a>
+      <a href="/" class="logo"><svg class="logo-car" width="26" height="26" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M3.5 20l1.5-4.5A3 3 0 0 1 7.9 13.3l1.9-3a2 2 0 0 1 1.7-.9h7.5a2 2 0 0 1 1.7.95l1.8 2.95 3 .8a2.2 2.2 0 0 1 1.6 2.1V21a1 1 0 0 1-1 1h-1.7a3 3 0 0 1-6 0h-5.8a3 3 0 0 1-6 0H4.5a1 1 0 0 1-1-1z" fill="#00C851"/><circle cx="9.7" cy="21" r="1.9" fill="#0d1626"/><circle cx="22.3" cy="21" r="1.9" fill="#0d1626"/></svg>Cars<b>InStock</b></a>
       <p>Fresh cars. Real people. The tools that put your inventory everywhere buyers are looking.</p>
     </div>
     <div class="foot-cols">
