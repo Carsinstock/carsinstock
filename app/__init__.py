@@ -1,7 +1,7 @@
 from flask import Flask
 import os
 
-def create_app():
+def create_app(test_config=None):
     app = Flask(__name__)
 
     basedir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
@@ -10,6 +10,12 @@ def create_app():
     app.config['SECRET_KEY'] = 'cis-mvp-2026-x7k9m2p4q8r1w5'
     from datetime import timedelta
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
+
+    # Test-only override: when a test_config is supplied, apply it last so
+    # the disposable test DB replaces the production URI. Production calls
+    # create_app() with no argument and are completely unaffected.
+    if test_config:
+        app.config.update(test_config)
 
     from app.models import db
     db.init_app(app)
