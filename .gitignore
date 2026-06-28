@@ -219,3 +219,7 @@ carsinstock.db
 __pycache__/
 *.pyc
 *.pyo
+
+# Data exports & DB backups - contain customer PII, never commit
+exports/
+*.csv
