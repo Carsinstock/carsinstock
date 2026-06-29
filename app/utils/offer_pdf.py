@@ -44,30 +44,26 @@ def _build_letter(story, heading, subheading, salutation, body_paragraphs, rep_n
     story.append(Spacer(1, 0.3*inch))
     story.append(Paragraph('Sincerely,', body_style))
     story.append(Spacer(1, 0.4*inch))
-    sig_col = [
-        Paragraph(f'<b>{rep_name}</b>', ParagraphStyle('Sig', fontSize=11, fontName='Helvetica-Bold', textColor=NAVY, spaceAfter=2)),
-        Paragraph(rep_title, ParagraphStyle('SigTitle', fontSize=10, fontName='Helvetica', textColor=GRAY, spaceAfter=2)),
-        Paragraph(dealership_name, ParagraphStyle('SigDeal', fontSize=10, fontName='Helvetica', textColor=NAVY, spaceAfter=2)),
-        Paragraph(rep_phone, ParagraphStyle('SigPhone', fontSize=10, fontName='Helvetica', textColor=NAVY, spaceAfter=0)),
-    ]
-    qr_col = ''
+    # Signature block - full width, stands alone
+    story.append(Paragraph(f'<b>{rep_name}</b>', ParagraphStyle('Sig', fontSize=11, fontName='Helvetica-Bold', textColor=NAVY, spaceAfter=2)))
+    story.append(Paragraph(rep_title, ParagraphStyle('SigTitle', fontSize=10, fontName='Helvetica', textColor=GRAY, spaceAfter=2)))
+    story.append(Paragraph(dealership_name, ParagraphStyle('SigDeal', fontSize=10, fontName='Helvetica', textColor=NAVY, spaceAfter=2)))
+    story.append(Paragraph(rep_phone, ParagraphStyle('SigPhone', fontSize=10, fontName='Helvetica', textColor=NAVY, spaceAfter=0)))
+
+    # QR - its own centered band, prominent call-to-action
     if rep_slug:
         import qrcode as _qrlib
         from reportlab.platypus import Image as _RLImage
-        _qr = _qrlib.QRCode(version=1, box_size=8, border=2, error_correction=_qrlib.constants.ERROR_CORRECT_M)
+        _qr = _qrlib.QRCode(version=1, box_size=10, border=2, error_correction=_qrlib.constants.ERROR_CORRECT_M)
         _qr.add_data(f'https://cardeals.autos/{rep_slug}'); _qr.make(fit=True)
         _qr_img = _qr.make_image(fill_color='#1E293B', back_color='white')
         _qr_buf = BytesIO(); _qr_img.save(_qr_buf, format='PNG'); _qr_buf.seek(0)
-        _qr_flow = _RLImage(_qr_buf, width=0.95*inch, height=0.95*inch); _qr_flow.hAlign='RIGHT'
-        qr_col = [
-            Paragraph('<b>View My Inventory</b>', ParagraphStyle('QRCap', fontSize=8, fontName='Helvetica-Bold', textColor=NAVY, alignment=2, spaceAfter=3)),
-            _qr_flow,
-            Paragraph(f'cardeals.autos/{rep_slug}', ParagraphStyle('QRUrl', fontSize=7, fontName='Helvetica', textColor=GRAY, alignment=2, spaceAfter=0)),
-        ]
-    from reportlab.platypus import Table, TableStyle
-    _t = Table([[sig_col, qr_col]], colWidths=[3.6*inch, 2.5*inch])
-    _t.setStyle(TableStyle([('VALIGN',(0,0),(-1,-1),'TOP'),('LEFTPADDING',(0,0),(-1,-1),0),('RIGHTPADDING',(0,0),(-1,-1),0),('TOPPADDING',(0,0),(-1,-1),0),('BOTTOMPADDING',(0,0),(-1,-1),0),('ALIGN',(1,0),(1,0),'RIGHT')]))
-    story.append(_t)
+        _qr_flow = _RLImage(_qr_buf, width=2.4*inch, height=2.4*inch); _qr_flow.hAlign='CENTER'
+        story.append(Spacer(1, 0.35*inch))
+        story.append(Paragraph('Scan to See My Inventory', ParagraphStyle('QRCap', fontSize=15, fontName='Helvetica-Bold', textColor=NAVY, alignment=TA_CENTER, spaceAfter=10)))
+        story.append(_qr_flow)
+        story.append(Spacer(1, 0.08*inch))
+        story.append(Paragraph(f'cardeals.autos/{rep_slug}', ParagraphStyle('QRUrl', fontSize=9, fontName='Helvetica', textColor=GRAY, alignment=TA_CENTER, spaceAfter=0)))
 
 
     story.append(Spacer(1, 0.4*inch))
