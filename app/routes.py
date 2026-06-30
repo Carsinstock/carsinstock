@@ -1132,6 +1132,22 @@ def rep_storefront(member):
     )
 
 
+@main.route('/sp-dashboard/qr-analytics')
+def qr_analytics():
+    # Manager-only (pinebeltusedcars owner = user_id 2)
+    if session.get('user_id') != 2:
+        from flask import redirect
+        return redirect('/login')
+    import sqlite3 as _qsl
+    _qc = _qsl.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    _qc.row_factory = _qsl.Row
+    per_rep = [dict(r) for r in _qc.execute('SELECT dt.name AS rep_name, qs.slug AS slug, COUNT(*) AS scans, MAX(qs.scanned_at) AS last_scan FROM qr_scans qs LEFT JOIN dealership_team dt ON dt.id = qs.rep_id GROUP BY qs.slug, dt.name ORDER BY scans DESC').fetchall()]
+    recent = [dict(r) for r in _qc.execute('SELECT dt.name AS rep_name, qs.slug AS slug, qs.scanned_at AS scanned_at FROM qr_scans qs LEFT JOIN dealership_team dt ON dt.id = qs.rep_id ORDER BY qs.id DESC LIMIT 25').fetchall()]
+    total = _qc.execute('SELECT COUNT(*) FROM qr_scans').fetchone()[0]
+    _qc.close()
+    return render_template('qr_analytics.html', per_rep=per_rep, recent=recent, total=total)
+
+
 @main.route('/<slug>')
 def public_profile(slug):
     import re
