@@ -1148,6 +1148,21 @@ def public_profile(slug):
     _member = _ct.execute("SELECT * FROM dealership_team WHERE slug=? AND is_active=1", (slug,)).fetchone()
     _ct.close()
     if _member:
+        # Log QR scan (only when ?ref=qr marker present; fail-safe)
+        if request.args.get('ref') == 'qr':
+            try:
+                import sqlite3 as _qsl
+                _qc = _qsl.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+                _qc.execute(
+                    "INSERT INTO qr_scans (slug, rep_id, user_agent, ip) VALUES (?, ?, ?, ?)",
+                    (_member["slug"], _member["id"],
+                     request.headers.get('User-Agent', '')[:300],
+                     request.headers.get('X-Forwarded-For', request.remote_addr or ''))
+                )
+                _qc.commit()
+                _qc.close()
+            except Exception:
+                pass
         return rep_storefront(dict(_member))
 
     from app.models.salesperson import Salesperson

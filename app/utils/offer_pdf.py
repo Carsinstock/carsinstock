@@ -55,7 +55,7 @@ def _build_letter(story, heading, subheading, salutation, body_paragraphs, rep_n
         import qrcode as _qrlib
         from reportlab.platypus import Image as _RLImage
         _qr = _qrlib.QRCode(version=1, box_size=8, border=2, error_correction=_qrlib.constants.ERROR_CORRECT_M)
-        _qr.add_data(f'https://cardeals.autos/{rep_slug}'); _qr.make(fit=True)
+        _qr.add_data(f'https://cardeals.autos/{rep_slug}?ref=qr'); _qr.make(fit=True)
         _qr_img = _qr.make_image(fill_color='#1E293B', back_color='white')
         _qr_buf = BytesIO(); _qr_img.save(_qr_buf, format='PNG'); _qr_buf.seek(0)
         _qr_flow = _RLImage(_qr_buf, width=1.9*inch, height=1.9*inch); _qr_flow.hAlign='CENTER'
