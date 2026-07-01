@@ -255,6 +255,37 @@ def resend_verification():
     flash("If an unverified account exists with that email, a new verification link has been sent.", "success")
     return redirect(url_for("auth.login"))
 
+@auth.route("/change-password", methods=["GET", "POST"])
+def change_password():
+    from flask import session
+    if not session.get("user_id"):
+        return redirect(url_for("auth.login"))
+    user = User.query.get(session["user_id"])
+    if not user:
+        return redirect(url_for("auth.login"))
+    if request.method == "POST":
+        current = request.form.get("current_password", "")
+        password = request.form.get("password", "")
+        confirm_password = request.form.get("confirm_password", "")
+        if not check_password_hash(user.password_hash, current):
+            flash("Current password is incorrect.", "error")
+            return render_template("auth/change_password.html")
+        if not password or len(password) < 8:
+            flash("New password must be at least 8 characters.", "error")
+            return render_template("auth/change_password.html")
+        if password != confirm_password:
+            flash("New passwords do not match.", "error")
+            return render_template("auth/change_password.html")
+        if check_password_hash(user.password_hash, password):
+            flash("New password must be different from your current password.", "error")
+            return render_template("auth/change_password.html")
+        user.password_hash = generate_password_hash(password)
+        db.session.commit()
+        flash("Password changed successfully.", "success")
+        return redirect(url_for("salesperson.dashboard"))
+    return render_template("auth/change_password.html")
+
+
 @auth.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
     if request.method == "POST":
