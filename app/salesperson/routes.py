@@ -1323,8 +1323,16 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
             vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id).order_by(Vehicle.price.desc()).all()
         else:
             vehicles = Vehicle.query.filter_by(salesperson_id=sp.salesperson_id).order_by(Vehicle.created_at.desc()).all()
-        active_vehicles = [v for v in vehicles if not v.is_expired]
-        expired_vehicles = [v for v in vehicles if v.is_expired]
+        pending_vehicles = [v for v in vehicles if v.approval_status == 'pending']
+        import sqlite3 as _psql
+        _pc = _psql.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        _pc.row_factory = _psql.Row
+        _pick_names = {r['id']: r['name'] for r in _pc.execute("SELECT id, name FROM dealership_team").fetchall()}
+        _pc.close()
+        pending_submitter = {v.id: _pick_names.get(v.pick_user_id, 'Unknown') for v in pending_vehicles}
+        _non_pending = [v for v in vehicles if v.approval_status != 'pending']
+        active_vehicles = [v for v in _non_pending if not v.is_expired]
+        expired_vehicles = [v for v in _non_pending if v.is_expired]
         # My Leads
         from app.models.lead import Lead
         leads = Lead.query.filter_by(salesperson_id=sp.salesperson_id).order_by(Lead.created_at.desc()).all()
@@ -1359,7 +1367,7 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         except:
             blast_history = []
         return render_template("salesperson/dashboard.html", sp=sp,
-            active_vehicles=active_vehicles, expired_vehicles=expired_vehicles,
+            active_vehicles=active_vehicles, expired_vehicles=expired_vehicles, pending_vehicles=pending_vehicles, pending_submitter=pending_submitter,
             leads=leads, chats=chats, customers=customers, blast_count=blast_count, blast_history=blast_history,
             trial_days_left=trial_days_left, trial_active=trial_active, is_admin=User.query.get(session.get("user_id")).is_admin,
             role=_role)

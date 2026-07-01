@@ -45,6 +45,34 @@
     </div>
     <!-- MY VEHICLES TAB -->
     <div id="tab-vehicles" class="tab-content active">
+        {% if (is_master or role == 'manager') and pending_vehicles %}
+        <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 14px;margin-bottom:18px;">
+            <h3 style="margin:0 0 3px;color:#92400e;font-size:15px;font-weight:800;">&#9203; Pending Approval ({{ pending_vehicles|length }})</h3>
+            <p style="margin:0 0 10px;color:#b45309;font-size:12px;">These cars were submitted by your team and are waiting for your review. They are not live on the storefront yet.</p>
+            {% for v in pending_vehicles %}
+            <div style="background:#fff;border:1px solid #fde68a;border-radius:8px;padding:8px 12px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:12px;min-width:200px;">
+                    {% if v.image_url %}<img src="{{ v.image_url }}" style="width:44px;height:33px;object-fit:cover;border-radius:5px;">{% endif %}
+                    <div>
+                        <div style="font-weight:700;color:#1E293B;font-size:13px;">{{ v.year }} {{ v.make }} {{ v.model }}{% if v.trim %} {{ v.trim }}{% endif %}</div>
+                        <div style="color:#00C851;font-weight:700;font-size:13px;">${{ '{:,.0f}'.format(v.price) if v.price else '--' }}</div>
+                        <div style="color:#64748B;font-size:11px;margin-top:2px;">Submitted by {{ pending_submitter.get(v.id, 'Unknown') }}</div>
+                    </div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;">
+                    <form method="POST" action="/sp-dashboard/approve-car/{{ v.id }}" style="display:inline;">
+                        <button type="submit" style="background:#00C851;color:#fff;border:none;padding:6px 14px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">&#10003; Approve</button>
+                    </form>
+                    <button type="button" onclick="document.getElementById('reject-{{ v.id }}').style.display=(document.getElementById('reject-{{ v.id }}').style.display=='none'?'flex':'none')" style="background:#fff;color:#dc2626;border:1px solid #fca5a5;padding:6px 14px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">Reject</button>
+                </div>
+                <form id="reject-{{ v.id }}" method="POST" action="/sp-dashboard/reject-car/{{ v.id }}" style="display:none;width:100%;gap:8px;align-items:center;margin-top:8px;">
+                    <input type="text" name="reason" placeholder="Reason (the salesperson will see this)" maxlength="300" style="flex:1;padding:9px 12px;border:1px solid #CBD5E1;border-radius:8px;font-size:13px;box-sizing:border-box;">
+                    <button type="submit" style="background:#dc2626;color:#fff;border:none;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">Confirm Reject</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
             <h2 style="margin:0;">My Vehicles ({{ active_vehicles|length }} active, {{ expired_vehicles|length }} expired)</h2>
             <a href="/vehicles/add" class="dash-btn-add">+ Add Vehicle</a>

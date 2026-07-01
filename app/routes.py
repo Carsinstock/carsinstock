@@ -1162,6 +1162,55 @@ def rep_storefront(member):
     )
 
 
+@main.route('/sp-dashboard/approve-car/<int:vid>', methods=['POST'])
+def approve_car(vid):
+    role = current_role()
+    if role not in ('master', 'manager'):
+        return redirect('/login')
+    import sqlite3 as _asql
+    _ac = _asql.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    _ac.row_factory = _asql.Row
+    veh = _ac.execute("SELECT id, salesperson_id FROM vehicles WHERE id=?", (vid,)).fetchone()
+    if not veh:
+        _ac.close()
+        flash("Vehicle not found.", "error")
+        return redirect('/dashboard')
+    if role == 'manager' and veh['salesperson_id'] != current_dealership():
+        _ac.close()
+        flash("You can only approve cars for your own store.", "error")
+        return redirect('/dashboard')
+    _ac.execute("UPDATE vehicles SET approval_status='approved', rejection_reason=NULL WHERE id=?", (vid,))
+    _ac.commit()
+    _ac.close()
+    flash("Vehicle approved -- it is now live on the storefront.", "success")
+    return redirect('/dashboard')
+
+
+@main.route('/sp-dashboard/reject-car/<int:vid>', methods=['POST'])
+def reject_car(vid):
+    role = current_role()
+    if role not in ('master', 'manager'):
+        return redirect('/login')
+    reason = request.form.get('reason', '').strip()[:300]
+    import sqlite3 as _rsql
+    _rc = _rsql.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    _rc.row_factory = _rsql.Row
+    veh = _rc.execute("SELECT id, salesperson_id FROM vehicles WHERE id=?", (vid,)).fetchone()
+    if not veh:
+        _rc.close()
+        flash("Vehicle not found.", "error")
+        return redirect('/dashboard')
+    if role == 'manager' and veh['salesperson_id'] != current_dealership():
+        _rc.close()
+        flash("You can only manage cars for your own store.", "error")
+        return redirect('/dashboard')
+    _rc.execute("UPDATE vehicles SET approval_status='rejected', rejection_reason=? WHERE id=?", (reason or 'No reason given', vid))
+    _rc.commit()
+    _rc.close()
+    flash("Vehicle rejected. The salesperson will see your note.", "success")
+    return redirect('/dashboard')
+
+
 @main.route('/sp-dashboard/qr-analytics')
 def qr_analytics():
     # Manager-only (pinebeltusedcars owner = user_id 2)
