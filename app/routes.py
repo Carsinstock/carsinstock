@@ -5,6 +5,36 @@ from app.models import db
 main = Blueprint('main', __name__)
 
 
+def _current_user_row():
+    """Look up the logged-in user's row from the users table (or None)."""
+    uid = session.get('user_id')
+    if not uid:
+        return None
+    import sqlite3 as _rsql
+    _rc = _rsql.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    _rc.row_factory = _rsql.Row
+    row = _rc.execute("SELECT id, role, dealership_id, is_admin FROM users WHERE id=?", (uid,)).fetchone()
+    _rc.close()
+    return row
+
+
+def current_role():
+    """Return 'master' | 'manager' | 'salesperson' | None for the logged-in user."""
+    row = _current_user_row()
+    if not row:
+        return None
+    if row['is_admin'] == 1 or row['role'] == 'master':
+        return 'master'
+    return row['role'] or 'salesperson'
+
+
+def current_dealership():
+    """Return the logged-in user's dealership_id (or None)."""
+    row = _current_user_row()
+    return row['dealership_id'] if row else None
+
+
+
 @main.route('/sp-dashboard')
 def sp_dashboard():
     from flask import session, redirect
@@ -1135,7 +1165,7 @@ def rep_storefront(member):
 @main.route('/sp-dashboard/qr-analytics')
 def qr_analytics():
     # Manager-only (pinebeltusedcars owner = user_id 2)
-    if session.get('user_id') != 2:
+    if current_role() not in ('master', 'manager'):
         from flask import redirect
         return redirect('/login')
     import sqlite3 as _qsl

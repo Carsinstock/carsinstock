@@ -1220,6 +1220,10 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         import sqlite3
         from datetime import timedelta
         from app.models.salesperson import Salesperson
+        from app.routes import current_role
+        if current_role() != 'master':
+            flash("That tool isn't available on your dashboard.", "error")
+            return redirect(url_for("salesperson.dashboard"))
         sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
         if not sp:
             return redirect(url_for("salesperson.profile_setup"))
@@ -1300,7 +1304,14 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         from app.models import db
         from datetime import datetime
         import json
-        sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
+        # Role-aware: managers see their dealership storefront record
+        # (dealership_id -> salesperson_id), not a personal one they do not own.
+        from app.routes import current_role, current_dealership
+        _role = current_role()
+        if _role == "manager":
+            sp = Salesperson.query.filter_by(salesperson_id=current_dealership()).first()
+        else:
+            sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
         if not sp:
             flash("Set up your profile first.", "error")
             return redirect(url_for("salesperson.profile_setup"))
@@ -1350,7 +1361,8 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         return render_template("salesperson/dashboard.html", sp=sp,
             active_vehicles=active_vehicles, expired_vehicles=expired_vehicles,
             leads=leads, chats=chats, customers=customers, blast_count=blast_count, blast_history=blast_history,
-            trial_days_left=trial_days_left, trial_active=trial_active, is_admin=User.query.get(session.get("user_id")).is_admin)
+            trial_days_left=trial_days_left, trial_active=trial_active, is_admin=User.query.get(session.get("user_id")).is_admin,
+            role=_role)
 
     @bp.route("/customers/import", methods=["GET", "POST"])
     @login_required

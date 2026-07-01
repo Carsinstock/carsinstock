@@ -174,6 +174,11 @@ def login():
                 session["slug"] = sp.profile_url_slug
             user.last_login_at = datetime.utcnow()
             db.session.commit()
+            # Managers/master go straight to dashboard (they use the dealership record, not a personal one)
+            _u_role = (user.role or '').strip()
+            if user.is_admin or _u_role in ('master', 'manager'):
+                flash("Welcome back!", "success")
+                return redirect(url_for("salesperson.dashboard"))
             if not sp or not sp.display_name:
                 flash("Welcome! Let's set up your storefront.", "success")
                 return redirect(url_for("salesperson.profile_setup"))

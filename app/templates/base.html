@@ -92,14 +92,14 @@
                 {% elif session.get('user_id') %}
                     <a href="/dashboard" style="font-weight:700;">Dashboard</a>
                     <a href="/vehicles/add" class="nav-add-vehicle">+ Add Vehicle</a>
-                    <a href="/customers/list">My Customers</a>
+                    {% if is_master %}<a href="/customers/list">My Customers</a>{% endif %}
                     {% if session.get('slug') %}
                     <a href="/{{ session.get('slug') }}">My Storefront</a>
                     {% endif %}
                     <a href="/profile/setup">My Profile</a>
                     <a href="/search-cars">Search Cars</a>
                     <a href="/how-to">Tips</a>
-                    <a href="/autopilot">🚀 Autopilot</a>
+                    {% if is_master %}<a href="/autopilot">🚀 Autopilot</a>{% endif %}
                     <span class="nav-user">{{ session.get('email', '') }}</span>
                     <a href="/logout" class="nav-logout">Logout</a>
                 {% elif session.get('team_member_id') %}

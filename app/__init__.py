@@ -50,6 +50,26 @@ def create_app(test_config=None):
     app.register_blueprint(referral_bp)
 
     @app.context_processor
+    def inject_role():
+        try:
+            from flask import session as _sess
+            uid = _sess.get('user_id')
+            if not uid:
+                return {'role': None, 'is_master': False}
+            import sqlite3 as _s
+            _c = _s.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+            _c.row_factory = _s.Row
+            row = _c.execute("SELECT role, is_admin FROM users WHERE id=?", (uid,)).fetchone()
+            _c.close()
+            if not row:
+                return {'role': None, 'is_master': False}
+            _is_master = (row['is_admin'] == 1 or row['role'] == 'master')
+            _r = 'master' if _is_master else (row['role'] or 'salesperson')
+            return {'role': _r, 'is_master': _is_master}
+        except Exception:
+            return {'role': None, 'is_master': False}
+
+    @app.context_processor
     def inject_pending_count():
         try:
             from app.models.vehicle import Vehicle
