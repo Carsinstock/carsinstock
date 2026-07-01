@@ -1330,6 +1330,14 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         _pick_names = {r['id']: r['name'] for r in _pc.execute("SELECT id, name FROM dealership_team").fetchall()}
         _pc.close()
         pending_submitter = {v.id: _pick_names.get(v.pick_user_id, 'Unknown') for v in pending_vehicles}
+        # Team roster for this dealership (managers/master manage their floor)
+        import sqlite3 as _tsql
+        _tc = _tsql.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        _tc.row_factory = _tsql.Row
+        team_members = [dict(r) for r in _tc.execute(
+            "SELECT id, name, email, slug, is_active FROM dealership_team WHERE dealership_id=? AND is_active=1 ORDER BY name",
+            (sp.salesperson_id,)).fetchall()]
+        _tc.close()
         _non_pending = [v for v in vehicles if v.approval_status != 'pending']
         active_vehicles = [v for v in _non_pending if not v.is_expired]
         expired_vehicles = [v for v in _non_pending if v.is_expired]
@@ -1338,8 +1346,10 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         leads = Lead.query.filter_by(salesperson_id=sp.salesperson_id).order_by(Lead.created_at.desc()).all()
         # Chat Transcripts
         chats = ChatConversation.query.filter_by(salesperson_id=sp.salesperson_id).order_by(ChatConversation.started_at.desc()).all()
-        # My Customers
-        customers = Customer.query.filter_by(salesperson_id=sp.salesperson_id).order_by(Customer.first_name).all()
+        # My Customers -- cap dashboard render at 50 (full list lives in Email Blast tools).
+        # Rendering all (10k+) into the DOM bloated the page to 3MB and broke tab JS.
+        customers_total = Customer.query.filter_by(salesperson_id=sp.salesperson_id).count()
+        customers = Customer.query.filter_by(salesperson_id=sp.salesperson_id).order_by(Customer.first_name).limit(50).all()
         # Email blast count today
         today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
         try:
@@ -1367,8 +1377,8 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         except:
             blast_history = []
         return render_template("salesperson/dashboard.html", sp=sp,
-            active_vehicles=active_vehicles, expired_vehicles=expired_vehicles, pending_vehicles=pending_vehicles, pending_submitter=pending_submitter,
-            leads=leads, chats=chats, customers=customers, blast_count=blast_count, blast_history=blast_history,
+            active_vehicles=active_vehicles, expired_vehicles=expired_vehicles, pending_vehicles=pending_vehicles, pending_submitter=pending_submitter, team_members=team_members,
+            leads=leads, chats=chats, customers=customers, customers_total=customers_total, blast_count=blast_count, blast_history=blast_history,
             trial_days_left=trial_days_left, trial_active=trial_active, is_admin=User.query.get(session.get("user_id")).is_admin,
             role=_role)
 

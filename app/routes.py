@@ -1211,6 +1211,68 @@ def reject_car(vid):
     return redirect('/dashboard')
 
 
+@main.route('/sp-dashboard/add-salesperson', methods=['POST'])
+def add_salesperson():
+    role = current_role()
+    if role not in ('master', 'manager'):
+        return redirect('/login')
+    name = request.form.get('name', '').strip()
+    email = request.form.get('email', '').strip().lower()
+    temp_password = request.form.get('temp_password', '').strip()
+    if not name or not email or len(temp_password) < 6:
+        flash("Name, email, and a temp password (6+ chars) are required.", "error")
+        return redirect('/dashboard')
+    import re as _re
+    slug = _re.sub(r'[^a-z0-9]', '', name.lower())
+    dealer_id = current_dealership()
+    import sqlite3 as _asql, bcrypt as _bc
+    _ac = _asql.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    _ac.row_factory = _asql.Row
+    if _ac.execute("SELECT id FROM dealership_team WHERE LOWER(email)=?", (email,)).fetchone():
+        _ac.close()
+        flash("A team member with that email already exists.", "error")
+        return redirect('/dashboard')
+    base_slug = slug
+    n = 1
+    while _ac.execute("SELECT id FROM dealership_team WHERE slug=?", (slug,)).fetchone():
+        n += 1
+        slug = base_slug + str(n)
+    pw_hash = _bc.hashpw(temp_password.encode('utf-8'), _bc.gensalt()).decode('utf-8')
+    _ac.execute(
+        "INSERT INTO dealership_team (dealership_id, name, email, slug, is_active, password_hash) VALUES (?,?,?,?,1,?)",
+        (dealer_id, name, email, slug, pw_hash)
+    )
+    _ac.commit()
+    _ac.close()
+    flash("Salesperson " + name + " added. They can log in with the temp password and change it.", "success")
+    return redirect('/dashboard')
+
+
+@main.route('/sp-dashboard/deactivate-salesperson/<int:tid>', methods=['POST'])
+def deactivate_salesperson(tid):
+    role = current_role()
+    if role not in ('master', 'manager'):
+        return redirect('/login')
+    dealer_id = current_dealership()
+    import sqlite3 as _dsql
+    _dc = _dsql.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    _dc.row_factory = _dsql.Row
+    member = _dc.execute("SELECT id, name, dealership_id FROM dealership_team WHERE id=?", (tid,)).fetchone()
+    if not member:
+        _dc.close()
+        flash("Team member not found.", "error")
+        return redirect('/dashboard')
+    if role == 'manager' and member['dealership_id'] != dealer_id:
+        _dc.close()
+        flash("You can only manage your own team.", "error")
+        return redirect('/dashboard')
+    _dc.execute("UPDATE dealership_team SET is_active=0 WHERE id=?", (tid,))
+    _dc.commit()
+    _dc.close()
+    flash(member['name'] + " has been deactivated. Their listings and history are preserved.", "success")
+    return redirect('/dashboard')
+
+
 @main.route('/sp-dashboard/qr-analytics')
 def qr_analytics():
     # Manager-only (pinebeltusedcars owner = user_id 2)

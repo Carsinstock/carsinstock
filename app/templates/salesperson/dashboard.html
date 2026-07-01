@@ -41,6 +41,7 @@
         {% if is_master %}<button class="tab-btn" onclick="showTab('email', this)">Email Blast</button>{% endif %}
         <button class="tab-btn" onclick="showTab('chats', this)">Chat Transcripts</button>
         <button class="tab-btn" onclick="showTab('referrals', this);loadReferrals()">Referrals</button>
+        {% if is_master or role == 'manager' %}<button class="tab-btn" onclick="showTab('team', this)">Team</button>{% endif %}
         {% if is_admin %}<a href="/admin" class="tab-btn" style="background:#1E293B;color:#00C851;text-decoration:none;">⚡ Admin</a>{% endif %}
     </div>
     <!-- MY VEHICLES TAB -->
@@ -568,6 +569,7 @@ function sendBlast() {
     }
     </script>
 </div>
+    {% endif %}
 
 <style>
 .dashboard { max-width: 900px; margin: 30px auto; padding: 0 20px; }
@@ -738,11 +740,57 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-    {% endif %}
     <div id="tab-referrals" class="tab-content">
         <h2 style="margin-bottom:16px;">My Referrals</h2>
         <div id="referralsTable">Loading...</div>
     </div>
+{% if is_master or role == 'manager' %}
+    <!-- TEAM TAB -->
+    <div id="tab-team" class="tab-content">
+        <h2 style="margin:0 0 6px;">Team</h2>
+        <p style="color:#64748B;font-size:14px;margin:0 0 20px;">Your salespeople. Each has their own storefront page and login. Deactivating a rep hides their page and login but preserves their listings and history.</p>
+
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:6px 0;margin-bottom:24px;">
+            {% if team_members %}
+            {% for m in team_members %}
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid #f1f5f9;flex-wrap:wrap;">
+                <div>
+                    <div style="font-weight:700;color:#1E293B;font-size:14px;">{{ m.name }}</div>
+                    <div style="color:#64748B;font-size:12px;">{{ m.email }} &middot; /{{ m.slug }}</div>
+                </div>
+                <form method="POST" action="/sp-dashboard/deactivate-salesperson/{{ m.id }}" onsubmit="return confirm('Deactivate {{ m.name }}? Their storefront page and login will be turned off. Their listings and history are kept. You can re-add them later.');" style="margin:0;">
+                    <button type="submit" style="background:#fff;color:#dc2626;border:1px solid #fca5a5;padding:6px 14px;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;">Deactivate</button>
+                </form>
+            </div>
+            {% endfor %}
+            {% else %}
+            <p style="padding:16px;color:#94a3b8;font-size:14px;margin:0;">No active salespeople yet. Add your first below.</p>
+            {% endif %}
+        </div>
+
+        <div style="background:#f0fdf4;border:1px solid #00C851;border-radius:12px;padding:18px 20px;max-width:520px;">
+            <h3 style="margin:0 0 4px;color:#166534;font-size:16px;font-weight:800;">Add a Salesperson</h3>
+            <p style="margin:0 0 14px;color:#166534;font-size:13px;">They'll get a storefront page and can log in with the temp password, then change it.</p>
+            <form method="POST" action="/sp-dashboard/add-salesperson">
+                <div style="margin-bottom:12px;">
+                    <label style="display:block;font-size:13px;font-weight:600;color:#1E293B;margin-bottom:5px;">Full Name</label>
+                    <input type="text" name="name" required placeholder="Jane Smith" style="width:100%;padding:10px 13px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;box-sizing:border-box;">
+                </div>
+                <div style="margin-bottom:12px;">
+                    <label style="display:block;font-size:13px;font-weight:600;color:#1E293B;margin-bottom:5px;">Email</label>
+                    <input type="email" name="email" required placeholder="jane@dealership.com" style="width:100%;padding:10px 13px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;box-sizing:border-box;">
+                </div>
+                <div style="margin-bottom:16px;">
+                    <label style="display:block;font-size:13px;font-weight:600;color:#1E293B;margin-bottom:5px;">Temporary Password</label>
+                    <input type="text" name="temp_password" required minlength="6" placeholder="At least 6 characters" style="width:100%;padding:10px 13px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;box-sizing:border-box;">
+                    <p style="margin:5px 0 0;font-size:12px;color:#64748B;">Give this to the salesperson. They change it on first login.</p>
+                </div>
+                <button type="submit" style="background:#00C851;color:#fff;border:none;padding:11px 24px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">+ Add Salesperson</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
 
 <script>
 function loadReferrals() {
@@ -874,5 +922,7 @@ function copyPost(id) {
     });
 }
 </script>
+
+
 
 {% endblock %}
