@@ -42,6 +42,7 @@
         <button class="tab-btn" onclick="showTab('chats', this)">Chat Transcripts</button>
         <button class="tab-btn" onclick="showTab('referrals', this);loadReferrals()">Referrals</button>
         {% if is_master or role == 'manager' %}<button class="tab-btn" onclick="showTab('team', this)">Team</button>{% endif %}
+        {% if is_master or role == 'manager' %}<button class="tab-btn" onclick="showTab('reports', this)">Reports</button>{% endif %}
         {% if is_admin %}<a href="/admin" class="tab-btn" style="background:#1E293B;color:#00C851;text-decoration:none;">⚡ Admin</a>{% endif %}
     </div>
     <!-- MY VEHICLES TAB -->
@@ -788,6 +789,58 @@ document.addEventListener('DOMContentLoaded', function() {
                 <button type="submit" style="background:#00C851;color:#fff;border:none;padding:11px 24px;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">+ Add Salesperson</button>
             </form>
         </div>
+    </div>
+    {% endif %}
+
+    {% if is_master or role == 'manager' %}
+    <!-- REPORTS TAB -->
+    <div id="tab-reports" class="tab-content">
+        <h2 style="margin:0 0 6px;">Reports</h2>
+        <p style="color:#64748B;font-size:14px;margin:0 0 22px;">Where your customers are coming from -- letters, social posts, and direct visits to your storefronts.</p>
+
+        <!-- Traffic Sources -->
+        <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:28px;">
+            <div style="flex:1;min-width:150px;background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:18px 20px;">
+                <div style="font-size:13px;font-weight:700;color:#92400e;">&#128236; Letters (QR)</div>
+                <div style="font-size:34px;font-weight:800;color:#1E293B;margin-top:4px;">{{ reports.letters }}</div>
+                <div style="font-size:12px;color:#b45309;">mailer scans</div>
+            </div>
+            <div style="flex:1;min-width:150px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:18px 20px;">
+                <div style="font-size:13px;font-weight:700;color:#1e40af;">&#128241; Social</div>
+                <div style="font-size:34px;font-weight:800;color:#1E293B;margin-top:4px;">{{ reports.social }}</div>
+                <div style="font-size:12px;color:#3b82f6;">from posts</div>
+            </div>
+            <div style="flex:1;min-width:150px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:18px 20px;">
+                <div style="font-size:13px;font-weight:700;color:#166534;">&#127760; Direct</div>
+                <div style="font-size:34px;font-weight:800;color:#1E293B;margin-top:4px;">{{ reports.direct }}</div>
+                <div style="font-size:12px;color:#16a34a;">typed the link / store</div>
+            </div>
+        </div>
+
+        {% if reports.total_visits == 0 and reports.letters == 0 %}
+        <div style="background:#f8fafc;border:1px dashed #cbd5e1;border-radius:12px;padding:26px;text-align:center;color:#64748B;font-size:14px;">
+            Tracking is on. Numbers appear here as customers scan your mailer QR codes, click your social posts, and visit your storefronts.
+        </div>
+        {% endif %}
+
+        <!-- Letter Analytics detail -->
+        <h3 style="margin:0 0 10px;color:#1E293B;font-size:16px;font-weight:800;">Letter Analytics (QR scans by rep)</h3>
+        {% if reports.qr_per_rep %}
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+            <div style="display:flex;background:#f8fafc;padding:10px 16px;font-size:12px;font-weight:700;color:#64748B;">
+                <div style="flex:2;">Rep / Page</div><div style="flex:1;text-align:right;">Scans</div><div style="flex:1;text-align:right;">Last scan</div>
+            </div>
+            {% for r in reports.qr_per_rep %}
+            <div style="display:flex;padding:12px 16px;border-top:1px solid #f1f5f9;font-size:14px;">
+                <div style="flex:2;font-weight:600;color:#1E293B;">{{ r.rep_name or r.slug }}</div>
+                <div style="flex:1;text-align:right;font-weight:700;color:#00C851;">{{ r.scans }}</div>
+                <div style="flex:1;text-align:right;color:#64748B;font-size:12px;">{{ r.last_scan[:16] if r.last_scan else '--' }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color:#94a3b8;font-size:14px;padding:12px 0;">No mailer scans yet. Scans appear here once your Neighbor &amp; Reference letters are out and customers scan the QR codes.</p>
+        {% endif %}
     </div>
     {% endif %}
 

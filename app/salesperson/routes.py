@@ -1338,6 +1338,29 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
             "SELECT id, name, email, slug, is_active FROM dealership_team WHERE dealership_id=? AND is_active=1 ORDER BY name",
             (sp.salesperson_id,)).fetchall()]
         _tc.close()
+        # Reports data: traffic by source (letters/social/direct) + QR scans, dealership-scoped
+        import sqlite3 as _rsql
+        _rc = _rsql.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        _rc.row_factory = _rsql.Row
+        _rep_slugs = [m['slug'] for m in team_members if m['slug']]
+        if sp.profile_url_slug:
+            _rep_slugs.append(sp.profile_url_slug)
+        if not _rep_slugs:
+            _rep_slugs = ['__none__']
+        _ph = ','.join('?' * len(_rep_slugs))
+        _vis = _rc.execute("SELECT source, COUNT(*) n FROM storefront_visits WHERE slug IN (%s) GROUP BY source" % _ph, _rep_slugs).fetchall()
+        _vbs = {r['source']: r['n'] for r in _vis}
+        _qr_total = _rc.execute("SELECT COUNT(*) FROM qr_scans WHERE slug IN (%s)" % _ph, _rep_slugs).fetchone()[0]
+        _qr_per_rep = [dict(r) for r in _rc.execute("SELECT qs.slug AS slug, dt.name AS rep_name, COUNT(*) AS scans, MAX(qs.scanned_at) AS last_scan FROM qr_scans qs LEFT JOIN dealership_team dt ON dt.id=qs.rep_id WHERE qs.slug IN (%s) GROUP BY qs.slug ORDER BY scans DESC" % _ph, _rep_slugs).fetchall()]
+        _rc.close()
+        reports = {
+            'letters': _qr_total,
+            'social': _vbs.get('social', 0),
+            'direct': _vbs.get('direct', 0),
+            'qr_visits': _vbs.get('qr', 0),
+            'total_visits': sum(_vbs.values()),
+            'qr_per_rep': _qr_per_rep,
+        }
         _non_pending = [v for v in vehicles if v.approval_status != 'pending']
         active_vehicles = [v for v in _non_pending if not v.is_expired]
         expired_vehicles = [v for v in _non_pending if v.is_expired]
@@ -1377,7 +1400,7 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         except:
             blast_history = []
         return render_template("salesperson/dashboard.html", sp=sp,
-            active_vehicles=active_vehicles, expired_vehicles=expired_vehicles, pending_vehicles=pending_vehicles, pending_submitter=pending_submitter, team_members=team_members,
+            active_vehicles=active_vehicles, expired_vehicles=expired_vehicles, pending_vehicles=pending_vehicles, pending_submitter=pending_submitter, team_members=team_members, reports=reports,
             leads=leads, chats=chats, customers=customers, customers_total=customers_total, blast_count=blast_count, blast_history=blast_history,
             trial_days_left=trial_days_left, trial_active=trial_active, is_admin=User.query.get(session.get("user_id")).is_admin,
             role=_role)
