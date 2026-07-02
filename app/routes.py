@@ -2040,8 +2040,8 @@ def weekly_post():
     image_urls = [v.image_url for v in vehicles if v.image_url][:5]
     rep_slug = member_slug or sp.profile_url_slug
     rep_name = member_name or sp.display_name
-    storefront_url = f"https://cardeals.autos/{rep_slug}"
-    contact_url = f"https://cardeals.autos/{rep_slug}/contact"
+    storefront_url = f"https://cardeals.autos/{rep_slug}?ref=social"
+    contact_url = f"https://cardeals.autos/{rep_slug}/contact?ref=social"
     prompt = f"""Write social media posts for a car salesperson named {rep_name}. Sound personal, human, not corporate. Use their voice like a real person posting on their own Facebook.
 
 Their current inventory:
