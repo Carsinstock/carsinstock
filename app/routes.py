@@ -1320,12 +1320,42 @@ def public_profile(slug):
                 _qc.close()
             except Exception:
                 pass
+        # Log EVERY visit with its source (qr / social / direct) -- fail-safe, raw capture
+        try:
+            _ref = request.args.get('ref', '').lower()
+            _src = _ref if _ref in ('qr','social','facebook','instagram','email') else 'direct'
+            import sqlite3 as _vsl
+            _vc = _vsl.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+            _vc.execute(
+                "INSERT INTO storefront_visits (slug, rep_id, source, user_agent, ip) VALUES (?, ?, ?, ?, ?)",
+                (_member["slug"], _member["id"], _src,
+                 request.headers.get('User-Agent','')[:300],
+                 request.headers.get('X-Forwarded-For', request.remote_addr or ''))
+            )
+            _vc.commit(); _vc.close()
+        except Exception:
+            pass
         return rep_storefront(dict(_member))
 
     from app.models.salesperson import Salesperson
     sp = Salesperson.query.filter_by(profile_url_slug=slug).first()
     if not sp:
         return render_template('404.html'), 404
+    # Log dealership storefront visit with source (qr / social / direct) -- fail-safe
+    try:
+        _dref = request.args.get('ref', '').lower()
+        _dsrc = _dref if _dref in ('qr','social','facebook','instagram','email') else 'direct'
+        import sqlite3 as _dvsl
+        _dvc = _dvsl.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        _dvc.execute(
+            "INSERT INTO storefront_visits (slug, rep_id, source, user_agent, ip) VALUES (?, NULL, ?, ?, ?)",
+            (slug, _dsrc,
+             request.headers.get('User-Agent','')[:300],
+             request.headers.get('X-Forwarded-For', request.remote_addr or ''))
+        )
+        _dvc.commit(); _dvc.close()
+    except Exception:
+        pass
     from app.models.vehicle import Vehicle
     from datetime import datetime
     is_owner = (session.get('user_id') == sp.user_id)
