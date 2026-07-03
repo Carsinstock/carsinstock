@@ -1353,6 +1353,28 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         _qr_total = _rc.execute("SELECT COUNT(*) FROM qr_scans WHERE slug IN (%s)" % _ph, _rep_slugs).fetchone()[0]
         _qr_per_rep = [dict(r) for r in _rc.execute("SELECT qs.slug AS slug, dt.name AS rep_name, COUNT(*) AS scans, MAX(qs.scanned_at) AS last_scan FROM qr_scans qs LEFT JOIN dealership_team dt ON dt.id=qs.rep_id WHERE qs.slug IN (%s) GROUP BY qs.slug ORDER BY scans DESC" % _ph, _rep_slugs).fetchall()]
         _rc.close()
+        # Per-salesperson breakdown: each rep's letters(QR) / social / direct
+        _per_rep = []
+        _rc2 = _rsql.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        _rc2.row_factory = _rsql.Row
+        for _m in team_members:
+            _mslug = _m['slug']
+            if not _mslug:
+                continue
+            _msrc = {r['source']: r['n'] for r in _rc2.execute(
+                "SELECT source, COUNT(*) n FROM storefront_visits WHERE slug=? GROUP BY source", (_mslug,)).fetchall()}
+            _mqr = _rc2.execute("SELECT COUNT(*) FROM qr_scans WHERE slug=?", (_mslug,)).fetchone()[0]
+            _social = _msrc.get('social', 0)
+            _direct = _msrc.get('direct', 0)
+            _per_rep.append({
+                'name': _m['name'],
+                'letters': _mqr,
+                'social': _social,
+                'direct': _direct,
+                'total': _mqr + _social + _direct,
+            })
+        _rc2.close()
+        _per_rep.sort(key=lambda x: x['total'], reverse=True)
         reports = {
             'letters': _qr_total,
             'social': _vbs.get('social', 0),
@@ -1360,6 +1382,7 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
             'qr_visits': _vbs.get('qr', 0),
             'total_visits': sum(_vbs.values()),
             'qr_per_rep': _qr_per_rep,
+            'per_rep': _per_rep,
         }
         _non_pending = [v for v in vehicles if v.approval_status != 'pending']
         active_vehicles = [v for v in _non_pending if not v.is_expired]

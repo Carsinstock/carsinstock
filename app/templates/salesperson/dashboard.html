@@ -823,6 +823,31 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
         {% endif %}
 
+        <!-- Per-salesperson breakdown -->
+        <h3 style="margin:0 0 10px;color:#1E293B;font-size:16px;font-weight:800;">By Salesperson</h3>
+        {% if reports.per_rep %}
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:28px;">
+            <div style="display:flex;background:#f8fafc;padding:10px 16px;font-size:12px;font-weight:700;color:#64748B;">
+                <div style="flex:2;">Salesperson</div>
+                <div style="flex:1;text-align:right;">&#128236; Letters</div>
+                <div style="flex:1;text-align:right;">&#128241; Social</div>
+                <div style="flex:1;text-align:right;">&#127760; Direct</div>
+                <div style="flex:1;text-align:right;">Total</div>
+            </div>
+            {% for rp in reports.per_rep %}
+            <div style="display:flex;padding:12px 16px;border-top:1px solid #f1f5f9;font-size:14px;align-items:center;">
+                <div style="flex:2;font-weight:600;color:#1E293B;">{{ rp.name }}</div>
+                <div style="flex:1;text-align:right;color:#92400e;">{{ rp.letters }}</div>
+                <div style="flex:1;text-align:right;color:#1e40af;">{{ rp.social }}</div>
+                <div style="flex:1;text-align:right;color:#166534;">{{ rp.direct }}</div>
+                <div style="flex:1;text-align:right;font-weight:800;color:#1E293B;">{{ rp.total }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color:#94a3b8;font-size:14px;padding:12px 0;">No salespeople on the team yet.</p>
+        {% endif %}
+
         <!-- Letter Analytics detail -->
         <h3 style="margin:0 0 10px;color:#1E293B;font-size:16px;font-weight:800;">Letter Analytics (QR scans by rep)</h3>
         {% if reports.qr_per_rep %}
