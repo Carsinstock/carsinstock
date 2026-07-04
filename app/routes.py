@@ -1225,6 +1225,9 @@ def add_salesperson():
     import re as _re
     slug = _re.sub(r'[^a-z0-9]', '', name.lower())
     dealer_id = current_dealership()
+    if not dealer_id:
+        flash("Your account isn't linked to a dealership. Contact support.", "error")
+        return redirect('/dashboard')
     import sqlite3 as _asql, bcrypt as _bc
     _ac = _asql.connect('/home/eddie/carsinstock/instance/carsinstock.db')
     _ac.row_factory = _asql.Row
@@ -1254,6 +1257,9 @@ def deactivate_salesperson(tid):
     if role not in ('master', 'manager'):
         return redirect('/login')
     dealer_id = current_dealership()
+    if role == 'manager' and not dealer_id:
+        flash("Your account isn't linked to a dealership. Contact support.", "error")
+        return redirect('/dashboard')
     import sqlite3 as _dsql
     _dc = _dsql.connect('/home/eddie/carsinstock/instance/carsinstock.db')
     _dc.row_factory = _dsql.Row
