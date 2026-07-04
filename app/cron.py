@@ -30,6 +30,55 @@ def send_blast_email(sp_data, customer, subject, html):
         logger.error(f"Email send error: {e}")
         return False
 
+
+# ─────────────────────────────────────────────────────────────
+# Phase 2.6 — blast guardrails. One layer both blast paths call.
+#   MAX_BLAST_PER_RUN : hard per-run ceiling; over it -> halt, no send.
+#   BLAST_DRY_RUN     : env flag; runs full logic, sends nothing, writes nothing.
+#   QUARANTINE_SOURCE : the CyberLeads population, walled off from all blasts.
+# ─────────────────────────────────────────────────────────────
+MAX_BLAST_PER_RUN = 500
+BLAST_DRY_RUN = os.environ.get('BLAST_DRY_RUN') == '1'
+QUARANTINE_SOURCE = 'cyberleads_quarantine'
+
+# Dry-run counter (reset at the top of each blast function).
+_DRY_RUN_WOULD_SEND = 0
+
+def _reset_dry_counter():
+    global _DRY_RUN_WOULD_SEND
+    _DRY_RUN_WOULD_SEND = 0
+
+def _halt_and_alert(sp_id, reason, off_target=0, total=0):
+    """Log + best-effort email. NEVER raises — a broken alert must not crash the halt.
+    Returns False so callers can `if _halt_and_alert(...): continue` cleanly."""
+    line = f"ALERT: blast halted sp={sp_id} — {reason} — off_target={off_target} of total={total}"
+    logger.error(line)
+    print(line)
+    try:
+        import sendgrid
+        from sendgrid.helpers.mail import Mail
+        sg = sendgrid.SendGridAPIClient(api_key=os.environ.get('SENDGRID_API_KEY'))
+        sg.send(Mail(
+            from_email='noreply@carsinstock.com',
+            to_emails='edward@carsinstock.com',
+            subject=f'[BLAST HALT] sp={sp_id} — {reason}',
+            html_content=f'<p style="font-family:Arial">{line}</p>'
+            f'<p style="color:#64748B;font-size:12px">Off-target recipients: {off_target} of {total}. '
+            f'Run halted before any send. No emails went out for this salesperson.</p>'
+        ))
+    except Exception as _e:
+        logger.error(f"halt-alert email failed (non-fatal, halt still enforced): {_e}")
+    return False
+
+def _guarded_send(sp_data, customer, subject, html):
+    """Single send chokepoint. Dry-run: count and report success WITHOUT sending.
+    Live: delegate to the real send. Callers must still gate blast_log on BLAST_DRY_RUN."""
+    global _DRY_RUN_WOULD_SEND
+    if BLAST_DRY_RUN:
+        _DRY_RUN_WOULD_SEND += 1
+        return True
+    return send_blast_email(sp_data, customer, subject, html)
+
 def build_blast_html(sp_data, customer, message, template_id, storefront_url, vehicles, unsubscribe_html):
     first = customer['first_name'] or customer['email'].split('@')[0]
     personal_body = message.replace('{{first_name}}', first).replace('{{First_Name}}', first)
@@ -89,7 +138,10 @@ def run_onboarding_blast(app):
         conn = get_db()
         try:
             schedules = conn.execute('SELECT * FROM blast_schedule WHERE is_active=1').fetchall()
+            _abort_run = False
             for sched in schedules:
+                if _abort_run:
+                    break
                 sp_id = sched['salesperson_id']
                 per_day = sched['onboarding_per_day'] or 200
                 message = sched['weekly_message'] or 'Hey {{first_name}}, check out my latest picks this week!'
@@ -108,7 +160,7 @@ def run_onboarding_blast(app):
                 sent_ids = {r['customer_id'] for r in already_sent}
 
                 customers = conn.execute(
-                    'SELECT * FROM customers WHERE salesperson_id=? AND unsubscribed=0 AND email IS NOT NULL AND email != "" AND id > ? ORDER BY id LIMIT ?',
+                    'SELECT * FROM customers WHERE salesperson_id=? AND unsubscribed=0 AND source != "cyberleads_quarantine" AND email IS NOT NULL AND email != "" AND id > ? ORDER BY id LIMIT ?',
                     (sp_id, last_id, per_day)
                 ).fetchall()
 
@@ -126,6 +178,16 @@ def run_onboarding_blast(app):
                     , (sp_id,)
                 ).fetchall()
 
+                # ── Phase 2.6 guardrails: cap (skip sp) + source tripwire (abort run) ──
+                _reset_dry_counter()
+                if len(customers) > MAX_BLAST_PER_RUN:
+                    _halt_and_alert(sp_id, 'cap exceeded (onboarding)', off_target=0, total=len(customers))
+                    continue  # skip THIS salesperson; local failure, others proceed
+                _off = sum(1 for c in customers if (c['source'] if 'source' in c.keys() else None) == QUARANTINE_SOURCE)
+                if _off:
+                    _halt_and_alert(sp_id, 'QUARANTINE BREACH (onboarding) — wall failed', off_target=_off, total=len(customers))
+                    _abort_run = True
+                    break  # abort ENTIRE run; systemic failure. finally: still closes conn.
                 sent = 0
                 last_sent_id = last_id
                 for customer in customers:
@@ -136,16 +198,21 @@ def run_onboarding_blast(app):
                     unsubscribe_html = f'<p style="font-size:11px;color:#94A3B8;margin-top:8px;"><a href="https://carsinstock.com/storefront/unsubscribe/{slug}?cid={cid}" style="color:#94A3B8;">Unsubscribe</a></p>'
                     html = build_blast_html(dict(sp), dict(customer), message, template_id, storefront_url, [dict(v) for v in vehicles], unsubscribe_html)
                     subject = f"{sp['display_name']} — This Week's Top Picks"
-                    if send_blast_email(dict(sp), dict(customer), subject, html):
-                        conn.execute('INSERT INTO blast_log (salesperson_id, customer_id, blast_type) VALUES (?,?,?)', (sp_id, customer['id'], 'onboarding'))
+                    if _guarded_send(dict(sp), dict(customer), subject, html):
+                        if not BLAST_DRY_RUN:
+                            conn.execute('INSERT INTO blast_log (salesperson_id, customer_id, blast_type) VALUES (?,?,?)', (sp_id, customer['id'], 'onboarding'))
                         sent += 1
                     last_sent_id = customer['id']
 
-                # Update position
-                conn.execute('INSERT OR REPLACE INTO blast_onboard_position (salesperson_id, last_customer_id, updated_at) VALUES (?,?,?)',
-                    (sp_id, last_sent_id, datetime.utcnow()))
-                conn.commit()
-                logger.info(f"Onboarding blast: sent {sent} emails for salesperson {sp_id}")
+                # Update position (skip in dry-run — must not poison the next real run)
+                if not BLAST_DRY_RUN:
+                    conn.execute('INSERT OR REPLACE INTO blast_onboard_position (salesperson_id, last_customer_id, updated_at) VALUES (?,?,?)',
+                        (sp_id, last_sent_id, datetime.utcnow()))
+                    conn.commit()
+                if BLAST_DRY_RUN:
+                    logger.info(f"[DRY-RUN] onboarding sp={sp_id}: WOULD send {_DRY_RUN_WOULD_SEND} (cap={MAX_BLAST_PER_RUN}); wrote nothing")
+                else:
+                    logger.info(f"Onboarding blast: sent {sent} emails for salesperson {sp_id}")
         finally:
             conn.close()
 
@@ -156,7 +223,10 @@ def run_weekly_blast(app):
         conn = get_db()
         try:
             schedules = conn.execute('SELECT * FROM blast_schedule WHERE is_active=1').fetchall()
+            _abort_run = False
             for sched in schedules:
+                if _abort_run:
+                    break
                 sp_id = sched['salesperson_id']
                 message = sched['weekly_message'] or 'Hey {{first_name}}, check out my latest picks this week!'
                 template_id = sched['template_id'] or '1'
@@ -175,7 +245,7 @@ def run_weekly_blast(app):
                     continue
 
                 customers = conn.execute(
-                    f'SELECT * FROM customers WHERE id IN ({",".join("?" for _ in onboarded_ids)}) AND unsubscribed=0 AND email IS NOT NULL AND email != ""',
+                    f'SELECT * FROM customers WHERE id IN ({",".join("?" for _ in onboarded_ids)}) AND unsubscribed=0 AND source != "cyberleads_quarantine" AND email IS NOT NULL AND email != ""',
                     onboarded_ids
                 ).fetchall()
 
@@ -193,26 +263,41 @@ def run_weekly_blast(app):
                 ).fetchall()
 
                 total = len(customers)
-                # Stagger over 4 hours = 14400 seconds
+                # ── Phase 2.6 guardrails: cap (skip sp) + source tripwire (abort run) ──
+                _reset_dry_counter()
+                if total > MAX_BLAST_PER_RUN:
+                    _halt_and_alert(sp_id, 'cap exceeded (weekly)', off_target=0, total=total)
+                    continue  # skip THIS salesperson; local failure, others proceed
+                _off = sum(1 for c in customers if (c['source'] if 'source' in c.keys() else None) == QUARANTINE_SOURCE)
+                if _off:
+                    _halt_and_alert(sp_id, 'QUARANTINE BREACH (weekly) — wall failed', off_target=_off, total=total)
+                    _abort_run = True
+                    break  # abort ENTIRE run; systemic failure. finally: still closes conn.
+                # Stagger over 4 hours = 14400 seconds (skipped entirely in dry-run)
                 delay_per_email = 14400 / total if total > 0 else 0
 
                 sent = 0
                 for i, customer in enumerate(customers):
-                    if i > 0 and delay_per_email > 0:
+                    if i > 0 and delay_per_email > 0 and not BLAST_DRY_RUN:
                         time.sleep(min(delay_per_email, 2))  # cap at 2s per email max
                     slug = sp['profile_url_slug']
                     cid = customer['id']
                     unsubscribe_html = f'<p style="font-size:11px;color:#94A3B8;margin-top:8px;"><a href="https://carsinstock.com/storefront/unsubscribe/{slug}?cid={cid}" style="color:#94A3B8;">Unsubscribe</a></p>'
                     html = build_blast_html(dict(sp), dict(customer), message, template_id, storefront_url, [dict(v) for v in vehicles], unsubscribe_html)
                     subject = f"{sp['display_name']} — This Week's Top Picks"
-                    if send_blast_email(dict(sp), dict(customer), subject, html):
-                        conn.execute('INSERT INTO blast_log (salesperson_id, customer_id, blast_type) VALUES (?,?,?)', (sp_id, customer['id'], 'weekly'))
+                    if _guarded_send(dict(sp), dict(customer), subject, html):
+                        if not BLAST_DRY_RUN:
+                            conn.execute('INSERT INTO blast_log (salesperson_id, customer_id, blast_type) VALUES (?,?,?)', (sp_id, customer['id'], 'weekly'))
+                            if sent % 50 == 0:
+                                conn.commit()
                         sent += 1
-                        if sent % 50 == 0:
-                            conn.commit()
 
-                conn.commit()
-                logger.info(f"Weekly blast: sent {sent}/{total} emails for salesperson {sp_id}")
+                if not BLAST_DRY_RUN:
+                    conn.commit()
+                if BLAST_DRY_RUN:
+                    logger.info(f"[DRY-RUN] weekly sp={sp_id}: WOULD send {_DRY_RUN_WOULD_SEND} of {total} (cap={MAX_BLAST_PER_RUN}); wrote nothing")
+                else:
+                    logger.info(f"Weekly blast: sent {sent}/{total} emails for salesperson {sp_id}")
         finally:
             conn.close()
 
