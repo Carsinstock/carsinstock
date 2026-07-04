@@ -1335,7 +1335,7 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         _tc = _tsql.connect('/home/eddie/carsinstock/instance/carsinstock.db')
         _tc.row_factory = _tsql.Row
         team_members = [dict(r) for r in _tc.execute(
-            "SELECT id, name, email, slug, is_active FROM dealership_team WHERE dealership_id=? AND is_active=1 ORDER BY name",
+            "SELECT id, name, email, slug, is_active, profile_photo AS photo FROM dealership_team WHERE dealership_id=? AND is_active=1 ORDER BY name",
             (sp.salesperson_id,)).fetchall()]
         _tc.close()
         # Reports data: traffic by source (letters/social/direct) + QR scans, dealership-scoped
@@ -1375,6 +1375,44 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
             })
         _rc2.close()
         _per_rep.sort(key=lambda x: x['total'], reverse=True)
+
+        # === Sales Team Scorecard (read-only, self-contained; own DB conn) ===
+        # Effort metrics a rep controls (Letters + Cars) drive Score; QR views and
+        # Expiring<=3d are readouts, not scored. Dealership-walled, roster-driven.
+        # Keyed on rep_id/team_member_id/pick_user_id (ids, not slug) for reconcilable numbers.
+        import sqlite3 as _scsql
+        _scc = _scsql.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        _scc.row_factory = _scsql.Row
+        _scorecard = []
+        for _sm in team_members:
+            _rid = _sm['id']
+            _letters = _scc.execute(
+                "SELECT COUNT(*) FROM offer_codes WHERE team_member_id=? AND dealership_id=?",
+                (_rid, sp.salesperson_id)).fetchone()[0]
+            _cars = _scc.execute(
+                "SELECT COUNT(*) FROM vehicles WHERE pick_user_id=?", (_rid,)).fetchone()[0]
+            _expiring = _scc.execute(
+                "SELECT COUNT(*) FROM vehicles WHERE pick_user_id=? "
+                "AND expires_at IS NOT NULL "
+                "AND julianday(expires_at) - julianday('now') BETWEEN 0 AND 3",
+                (_rid,)).fetchone()[0]
+            _qr = _scc.execute(
+                "SELECT COUNT(*) FROM qr_scans WHERE rep_id=?", (_rid,)).fetchone()[0]
+            _resp = round((_qr / _letters * 100), 1) if _letters else 0.0
+            _scorecard.append({
+                'rep_id': _rid,
+                'name': _sm['name'],
+                'slug': _sm['slug'],
+                'photo': _sm.get('photo'),
+                'letters': _letters,
+                'cars': _cars,
+                'qr': _qr,
+                'response': _resp,
+                'expiring': _expiring,
+                'score': _letters + _cars,
+            })
+        _scc.close()
+        _scorecard.sort(key=lambda x: x['score'], reverse=True)
         reports = {
             'letters': _qr_total,
             'social': _vbs.get('social', 0),
@@ -1426,7 +1464,7 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
             active_vehicles=active_vehicles, expired_vehicles=expired_vehicles, pending_vehicles=pending_vehicles, pending_submitter=pending_submitter, team_members=team_members, reports=reports,
             leads=leads, chats=chats, customers=customers, customers_total=customers_total, blast_count=blast_count, blast_history=blast_history,
             trial_days_left=trial_days_left, trial_active=trial_active, is_admin=User.query.get(session.get("user_id")).is_admin,
-            role=_role)
+            role=_role, scorecard=_scorecard)
 
     @bp.route("/customers/import", methods=["GET", "POST"])
     @login_required
