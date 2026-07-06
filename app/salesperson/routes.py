@@ -1387,8 +1387,8 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         for _sm in team_members:
             _rid = _sm['id']
             _letters = _scc.execute(
-                "SELECT COUNT(*) FROM offer_codes WHERE team_member_id=? AND dealership_id=?",
-                (_rid, sp.salesperson_id)).fetchone()[0]
+                "SELECT COUNT(*) FROM offer_codes WHERE team_member_id=? AND dealership_id=? AND created_at >= ?",
+                (_rid, sp.salesperson_id, "2026-07-07")).fetchone()[0]
             _cars = _scc.execute(
                 "SELECT COUNT(*) FROM vehicles WHERE pick_user_id=?", (_rid,)).fetchone()[0]
             _expiring = _scc.execute(
