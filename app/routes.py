@@ -511,6 +511,7 @@ def dealer_register():
         dealership_name = request.form.get('dealership_name', '').strip()
         email = request.form.get('email', '').strip()
         phone = request.form.get('phone', '').strip()
+        website = request.form.get('website', '').strip()
         num_salespeople = request.form.get('num_salespeople', '').strip()
         message = request.form.get('message', '').strip()
         try:
@@ -522,6 +523,7 @@ def dealer_register():
 
 Name: {first_name} {last_name}
 Dealership: {dealership_name}
+Website: {website}
 Email: {email}
 Phone: {phone}
 Team Size: {num_salespeople}

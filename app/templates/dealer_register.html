@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="auth-container">
-    <h1>Get a Demo</h1>
-    <p class="auth-subtitle">Tell us about your dealership and we'll be in touch within 24 hours.</p>
+    <h1>Book a Demo</h1>
+    <p style="color:#00C851;font-weight:700;font-size:15px;margin:0 0 6px;">First month, no contract.</p>
+    <p class="auth-subtitle">Book your 20-minute demo and see if CarsInStock fits before you commit.</p>
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
@@ -31,6 +32,10 @@
         <div class="form-group">
             <label for="dealership_name">Dealership Name</label>
             <input type="text" id="dealership_name" name="dealership_name" placeholder="e.g. Main Street Auto Group" required>
+        </div>
+        <div class="form-group">
+            <label for="website">Website URL</label>
+            <input type="url" id="website" name="website" placeholder="https://yourdealership.com" required>
         </div>
         <div class="form-group">
             <label for="email">Email Address</label>
