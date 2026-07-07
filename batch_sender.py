@@ -11,6 +11,49 @@ from datetime import datetime, timedelta
 
 app = create_app()
 
+# ─────────────────────────────────────────────────────────────
+# Phase 2.6 guardrails (batch_sender) — one layer, all send paths.
+#   MAX_BLAST_PER_RUN : hard per-run ceiling; over it -> halt, no send.
+#   BLAST_DRY_RUN     : env flag; full logic, sends nothing, writes nothing.
+#   QUARANTINE_SOURCE : CyberLeads population, walled off from customer blasts.
+# ─────────────────────────────────────────────────────────────
+MAX_BLAST_PER_RUN = 500
+BLAST_DRY_RUN = os.environ.get('BLAST_DRY_RUN') == '1'
+QUARANTINE_SOURCE = 'cyberleads_quarantine'
+_DRY_RUN_WOULD_SEND = 0
+
+def _reset_dry_counter():
+    global _DRY_RUN_WOULD_SEND
+    _DRY_RUN_WOULD_SEND = 0
+
+def _halt_and_alert(reason, off_target=0, total=0):
+    """Log + best-effort email. NEVER raises — a broken alert must not crash the halt.
+    Returns False so callers can `if _halt_and_alert(...): return/continue` cleanly."""
+    line = f"ALERT: batch_sender halted — {reason} — off_target={off_target} of total={total}"
+    print(line)
+    try:
+        from sendgrid import SendGridAPIClient
+        from sendgrid.helpers.mail import Mail, Email, To
+        sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+        sg.send(Mail(
+            from_email=Email(email='sales@carsinstock.com', name='CarsInStock'),
+            to_emails=To('edward@carsinstock.com'),
+            subject=f'[BLAST HALT] batch_sender — {reason}',
+            html_content=f'<p>{line}</p><p style="color:#64748B;font-size:12px">Run halted before send. '
+                         f'Off-target: {off_target} of {total}. No emails went out for this run.</p>'))
+    except Exception as _e:
+        print(f"halt-alert email failed (non-fatal, halt still enforced): {_e}")
+    return False
+
+def _guarded_send(send_callable):
+    """Single send chokepoint. Dry-run: count, do NOT send. Live: invoke the real send.
+    `send_callable` is a zero-arg function that performs the actual sg.send and returns truthy."""
+    global _DRY_RUN_WOULD_SEND
+    if BLAST_DRY_RUN:
+        _DRY_RUN_WOULD_SEND += 1
+        return True
+    return send_callable()
+
 def send_recruitment_email(to_email, subject, html_content):
     from sendgrid import SendGridAPIClient
     from sendgrid.helpers.mail import Mail, Email, To
@@ -18,7 +61,9 @@ def send_recruitment_email(to_email, subject, html_content):
         sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
         from_email = Email(email='sales@carsinstock.com', name='CarsInStock')
         message = Mail(from_email=from_email, to_emails=To(to_email), subject=subject, html_content=html_content)
-        response = sg.send(message)
+        response = _guarded_send(lambda: sg.send(message))
+        if response is True:
+            return True  # dry-run: counted, not sent
         return response.status_code in [200, 201, 202]
     except Exception as e:
         print(f"Error sending to {to_email}: {e}")
@@ -82,6 +127,27 @@ def process_salesperson_blast(batch):
     remaining_ids = json.loads(batch.selected_ids)
     this_batch = remaining_ids[:batch.batch_size]
     still_remaining = remaining_ids[batch.batch_size:]
+
+    # ── Phase 2.6 guardrails: cap + source pre-pass (fail-safe, before any send) ──
+    _reset_dry_counter()
+    if len(this_batch) > MAX_BLAST_PER_RUN:
+        _halt_and_alert('cap exceeded (salesperson blast)', off_target=0, total=len(this_batch))
+        return 0, 0, still_remaining  # halt: nothing sent, recipients preserved unsent
+    # Source pre-pass via RAW SQL — the Customer ORM model lacks a 'source' column,
+    # so Customer.query cannot see it; query the table directly (the truth lives there).
+    _off = 0
+    if this_batch:
+        import sqlite3 as _sq_src
+        _qc = _sq_src.connect("/home/eddie/carsinstock/instance/carsinstock.db")
+        _qm = ",".join("?" * len(this_batch))
+        _off = _qc.execute(
+            f"SELECT COUNT(*) FROM customers WHERE id IN ({_qm}) AND source=?",
+            list(this_batch) + [QUARANTINE_SOURCE]
+        ).fetchone()[0]
+        _qc.close()
+    if _off:
+        _halt_and_alert('QUARANTINE BREACH (salesperson blast) — wall failed', off_target=_off, total=len(this_batch))
+        return 0, 0, still_remaining  # halt whole batch: quarantine record present
 
     heroes = {
         "1": ("#1E293B", "#00C851", "This Week's Top Picks"),
@@ -180,7 +246,7 @@ def process_salesperson_blast(batch):
                 subject=batch.subject,
                 html_content=html
             )
-            sg.send(msg)
+            _guarded_send(lambda m=msg: sg.send(m))
             sent += 1
         except Exception as e:
             print(f"  Failed {cid}: {e}")
@@ -189,268 +255,276 @@ def process_salesperson_blast(batch):
     return sent, failed, still_remaining
 
 
-with app.app_context():
-    import uuid
-    from app.models.recruitment_contact import RecruitmentContact
 
-    batches = db.engine.execute(
-        db.text("SELECT * FROM batch_queue WHERE status = 'active' AND next_send_at <= :now"),
-        {"now": datetime.utcnow()}
-    ).fetchall()
+if __name__ == "__main__":
+    with app.app_context():
+        import uuid
+        from app.models.recruitment_contact import RecruitmentContact
 
-    if not batches:
-        print(f"[{datetime.utcnow()}] No active batches to process.")
+        batches = db.engine.execute(
+            db.text("SELECT * FROM batch_queue WHERE status = 'active' AND next_send_at <= :now"),
+            {"now": datetime.utcnow()}
+        ).fetchall()
 
-    for batch in batches:
-        print(f"[{datetime.utcnow()}] Processing batch {batch.id}, type={batch.template_key}")
+        if not batches:
+            print(f"[{datetime.utcnow()}] No active batches to process.")
 
-        if batch.template_key and batch.template_key.startswith("salesperson_blast_"):
-            sent, failed, still_remaining = process_salesperson_blast(batch)
-        else:
-            remaining_ids = json.loads(batch.selected_ids)
-            batch_size = batch.batch_size
-            this_batch = remaining_ids[:batch_size]
-            still_remaining = remaining_ids[batch_size:]
-            sent = 0
-            failed = 0
-            for cid in this_batch:
-                c = RecruitmentContact.query.get(cid)
-                if not c:
-                    continue
-                tracking_id = str(uuid.uuid4())[:12]
-                c.tracking_id = tracking_id
-                c_subject = replace_merge_vars(batch.subject, c)
-                c_body = replace_merge_vars(batch.body, c)
-                html = build_recruitment_email(c_body, tracking_id)
-                success = send_recruitment_email(c.email, c_subject, html)
-                if success:
-                    c.status = "sent"
-                    c.sent_at = datetime.utcnow()
-                    c.template_used = batch.template_key
-                    sent += 1
-                else:
-                    failed += 1
+        for batch in batches:
+            print(f"[{datetime.utcnow()}] Processing batch {batch.id}, type={batch.template_key}")
 
-        new_batches_sent = batch.batches_sent + 1
+            if batch.template_key and batch.template_key.startswith("salesperson_blast_"):
+                sent, failed, still_remaining = process_salesperson_blast(batch)
+            else:
+                remaining_ids = json.loads(batch.selected_ids)
+                batch_size = batch.batch_size
+                this_batch = remaining_ids[:batch_size]
+                still_remaining = remaining_ids[batch_size:]
+                _reset_dry_counter()
+                if len(this_batch) > MAX_BLAST_PER_RUN:
+                    _halt_and_alert('cap exceeded (recruitment)', off_target=0, total=len(this_batch))
+                    continue  # skip this batch; recruitment is a separate audience
+                sent = 0
+                failed = 0
+                for cid in this_batch:
+                    c = RecruitmentContact.query.get(cid)
+                    if not c:
+                        continue
+                    tracking_id = str(uuid.uuid4())[:12]
+                    c.tracking_id = tracking_id
+                    c_subject = replace_merge_vars(batch.subject, c)
+                    c_body = replace_merge_vars(batch.body, c)
+                    html = build_recruitment_email(c_body, tracking_id)
+                    success = send_recruitment_email(c.email, c_subject, html)
+                    if success:
+                        c.status = "sent"
+                        c.sent_at = datetime.utcnow()
+                        c.template_used = batch.template_key
+                        sent += 1
+                    else:
+                        failed += 1
 
-        if still_remaining:
-            next_send = datetime.utcnow() + timedelta(days=1)
-            db.engine.execute(
-                db.text("UPDATE batch_queue SET selected_ids = :sids, batches_sent = :bs, next_send_at = :ns WHERE id = :bid"),
-                {"sids": json.dumps(still_remaining), "bs": new_batches_sent, "ns": next_send, "bid": batch.id}
-            )
-        else:
-            db.engine.execute(
-                db.text("UPDATE batch_queue SET status = 'complete', batches_sent = :bs WHERE id = :bid"),
-                {"bs": new_batches_sent, "bid": batch.id}
-            )
+            new_batches_sent = batch.batches_sent + 1
 
-        db.session.commit()
-        print(f"[{datetime.utcnow()}] Batch {batch.id}: sent {sent}, failed {failed}, remaining {len(still_remaining)}")
-
-        # Blast confirmation receipt to edward@carsinstock.com
-        if batch.template_key and batch.template_key.startswith("salesperson_blast_"):
-            try:
-                from sendgrid import SendGridAPIClient as _SG
-                from sendgrid.helpers.mail import Mail as _Mail
-                import sqlite3 as _sq2
-                _sg = _SG(os.environ.get("SENDGRID_API_KEY"))
-                from datetime import timezone, timedelta
-                _est = timezone(timedelta(hours=-4))  # EDT (EST is -5, EDT is -4)
-                _now_est = datetime.now(tz=_est)
-                _now_str = _now_est.strftime("%B %d, %Y at %I:%M %p EST")
-                _date_str = _now_est.strftime("%b %d, %Y")
-                _spot_rows = []
-                _vehicle_count = 0
-                try:
-                    _c2 = _sq2.connect("/home/eddie/carsinstock/instance/carsinstock.db")
-                    _meta2 = json.loads(batch.body)
-                    _sp_id2 = _meta2.get("salesperson_id")
-                    _cur2 = _c2.cursor()
-                    _cur2.execute("SELECT first_name, last_name, email FROM customers WHERE salesperson_id=? AND unsubscribed=0 AND email IS NOT NULL LIMIT 3", (_sp_id2,))
-                    _spot_rows = _cur2.fetchall()
-                    _vehicle_count = _cur2.execute("SELECT COUNT(*) FROM vehicles WHERE salesperson_id=? AND status='available'", (_sp_id2,)).fetchone()[0]
-                    _c2.close()
-                except:
-                    pass
-                _spot_html = "".join([
-                    f'<tr><td style="padding:6px 8px;color:#334155;">{r[0] or ""} {r[1] or ""}</td><td style="padding:6px 8px;color:#64748B;">{r[2]}</td></tr>'
-                    for r in _spot_rows
-                ])
-                _confirm_html = f"""<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;">
-                    <div style="background:#1E293B;padding:20px;border-radius:10px 10px 0 0;text-align:center;">
-                        <h2 style="color:white;margin:0;font-size:20px;">Blast Confirmation ✅</h2>
-                        <p style="color:#94A3B8;margin:4px 0 0;font-size:13px;">CarsInStock LLC</p>
-                    </div>
-                    <div style="background:white;border:1px solid #E2E8F0;border-top:none;border-radius:0 0 10px 10px;padding:24px;">
-                        <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
-                            <tr style="background:#F8FAFC;"><td style="padding:10px 8px;color:#64748B;font-size:13px;width:40%;">Date &amp; Time</td><td style="padding:10px 8px;font-weight:600;color:#1E293B;font-size:13px;">{_now_str}</td></tr>
-                            <tr><td style="padding:10px 8px;color:#64748B;font-size:13px;">Emails Sent</td><td style="padding:10px 8px;font-weight:700;color:#00C851;font-size:16px;">{sent}</td></tr>
-                            <tr style="background:#F8FAFC;"><td style="padding:10px 8px;color:#64748B;font-size:13px;">Failed</td><td style="padding:10px 8px;font-weight:600;color:#EF4444;font-size:13px;">{failed}</td></tr>
-                            <tr><td style="padding:10px 8px;color:#64748B;font-size:13px;">Template</td><td style="padding:10px 8px;font-weight:600;color:#1E293B;font-size:13px;">{batch.template_key}</td></tr>
-                            <tr style="background:#F8FAFC;"><td style="padding:10px 8px;color:#64748B;font-size:13px;">Vehicles in Email</td><td style="padding:10px 8px;font-weight:600;color:#1E293B;font-size:13px;">{_vehicle_count}</td></tr>
-                            <tr><td style="padding:10px 8px;color:#64748B;font-size:13px;">Subject</td><td style="padding:10px 8px;color:#1E293B;font-size:13px;">{batch.subject}</td></tr>
-                            <tr style="background:#F8FAFC;"><td style="padding:10px 8px;color:#64748B;font-size:13px;">SendGrid Status</td><td style="padding:10px 8px;font-weight:600;color:#00C851;font-size:13px;">Accepted ✅</td></tr>
-                        </table>
-                        <h3 style="color:#1E293B;font-size:14px;margin:0 0 8px;">Spot Check — First 3 Recipients</h3>
-                        <table style="width:100%;border-collapse:collapse;font-size:13px;border:1px solid #E2E8F0;border-radius:8px;overflow:hidden;">
-                            <tr style="background:#F8FAFC;"><th style="padding:8px;text-align:left;color:#64748B;">Name</th><th style="padding:8px;text-align:left;color:#64748B;">Email</th></tr>
-                            {_spot_html}
-                        </table>
-                    </div>
-                </div>"""
-                _msg = _Mail(
-                    from_email=("noreply@carsinstock.com", "CarsInStock"),
-                    to_emails="edward@carsinstock.com",
-                    subject=f"CarsInStock Blast Confirmation — {_date_str} — {sent} Emails Sent",
-                    html_content=_confirm_html
+            if still_remaining:
+                next_send = datetime.utcnow() + timedelta(days=1)
+                if not BLAST_DRY_RUN:
+                  db.engine.execute(
+                    db.text("UPDATE batch_queue SET selected_ids = :sids, batches_sent = :bs, next_send_at = :ns WHERE id = :bid"),
+                    {"sids": json.dumps(still_remaining), "bs": new_batches_sent, "ns": next_send, "bid": batch.id}
                 )
-                _sg.send(_msg)
-                print(f"[{datetime.utcnow()}] Confirmation receipt sent to edward@carsinstock.com")
-            except Exception as _e:
-                print(f"[{datetime.utcnow()}] Confirmation email failed: {_e}")
+            else:
+                if not BLAST_DRY_RUN:
+                  db.engine.execute(
+                    db.text("UPDATE batch_queue SET status = 'complete', batches_sent = :bs WHERE id = :bid"),
+                    {"bs": new_batches_sent, "bid": batch.id}
+                )
 
-def process_autopilot_schedules():
-    """Check blast_schedule and queue any due blasts."""
-    import sqlite3, json, pytz
-    from datetime import datetime, timezone, timedelta
+            db.session.commit()
+            print(f"[{datetime.utcnow()}] Batch {batch.id}: sent {sent}, failed {failed}, remaining {len(still_remaining)}")
 
-    est = pytz.timezone("US/Eastern")
-    now_utc = datetime.utcnow()
-    now_est = datetime.now(est)
+            # Blast confirmation receipt to edward@carsinstock.com
+            if batch.template_key and batch.template_key.startswith("salesperson_blast_"):
+                try:
+                    from sendgrid import SendGridAPIClient as _SG
+                    from sendgrid.helpers.mail import Mail as _Mail
+                    import sqlite3 as _sq2
+                    _sg = _SG(os.environ.get("SENDGRID_API_KEY"))
+                    from datetime import timezone, timedelta
+                    _est = timezone(timedelta(hours=-4))  # EDT (EST is -5, EDT is -4)
+                    _now_est = datetime.now(tz=_est)
+                    _now_str = _now_est.strftime("%B %d, %Y at %I:%M %p EST")
+                    _date_str = _now_est.strftime("%b %d, %Y")
+                    _spot_rows = []
+                    _vehicle_count = 0
+                    try:
+                        _c2 = _sq2.connect("/home/eddie/carsinstock/instance/carsinstock.db")
+                        _meta2 = json.loads(batch.body)
+                        _sp_id2 = _meta2.get("salesperson_id")
+                        _cur2 = _c2.cursor()
+                        _cur2.execute("SELECT first_name, last_name, email FROM customers WHERE salesperson_id=? AND unsubscribed=0 AND email IS NOT NULL LIMIT 3", (_sp_id2,))
+                        _spot_rows = _cur2.fetchall()
+                        _vehicle_count = _cur2.execute("SELECT COUNT(*) FROM vehicles WHERE salesperson_id=? AND status='available'", (_sp_id2,)).fetchone()[0]
+                        _c2.close()
+                    except:
+                        pass
+                    _spot_html = "".join([
+                        f'<tr><td style="padding:6px 8px;color:#334155;">{r[0] or ""} {r[1] or ""}</td><td style="padding:6px 8px;color:#64748B;">{r[2]}</td></tr>'
+                        for r in _spot_rows
+                    ])
+                    _confirm_html = f"""<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:24px;">
+                        <div style="background:#1E293B;padding:20px;border-radius:10px 10px 0 0;text-align:center;">
+                            <h2 style="color:white;margin:0;font-size:20px;">Blast Confirmation ✅</h2>
+                            <p style="color:#94A3B8;margin:4px 0 0;font-size:13px;">CarsInStock LLC</p>
+                        </div>
+                        <div style="background:white;border:1px solid #E2E8F0;border-top:none;border-radius:0 0 10px 10px;padding:24px;">
+                            <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+                                <tr style="background:#F8FAFC;"><td style="padding:10px 8px;color:#64748B;font-size:13px;width:40%;">Date &amp; Time</td><td style="padding:10px 8px;font-weight:600;color:#1E293B;font-size:13px;">{_now_str}</td></tr>
+                                <tr><td style="padding:10px 8px;color:#64748B;font-size:13px;">Emails Sent</td><td style="padding:10px 8px;font-weight:700;color:#00C851;font-size:16px;">{sent}</td></tr>
+                                <tr style="background:#F8FAFC;"><td style="padding:10px 8px;color:#64748B;font-size:13px;">Failed</td><td style="padding:10px 8px;font-weight:600;color:#EF4444;font-size:13px;">{failed}</td></tr>
+                                <tr><td style="padding:10px 8px;color:#64748B;font-size:13px;">Template</td><td style="padding:10px 8px;font-weight:600;color:#1E293B;font-size:13px;">{batch.template_key}</td></tr>
+                                <tr style="background:#F8FAFC;"><td style="padding:10px 8px;color:#64748B;font-size:13px;">Vehicles in Email</td><td style="padding:10px 8px;font-weight:600;color:#1E293B;font-size:13px;">{_vehicle_count}</td></tr>
+                                <tr><td style="padding:10px 8px;color:#64748B;font-size:13px;">Subject</td><td style="padding:10px 8px;color:#1E293B;font-size:13px;">{batch.subject}</td></tr>
+                                <tr style="background:#F8FAFC;"><td style="padding:10px 8px;color:#64748B;font-size:13px;">SendGrid Status</td><td style="padding:10px 8px;font-weight:600;color:#00C851;font-size:13px;">Accepted ✅</td></tr>
+                            </table>
+                            <h3 style="color:#1E293B;font-size:14px;margin:0 0 8px;">Spot Check — First 3 Recipients</h3>
+                            <table style="width:100%;border-collapse:collapse;font-size:13px;border:1px solid #E2E8F0;border-radius:8px;overflow:hidden;">
+                                <tr style="background:#F8FAFC;"><th style="padding:8px;text-align:left;color:#64748B;">Name</th><th style="padding:8px;text-align:left;color:#64748B;">Email</th></tr>
+                                {_spot_html}
+                            </table>
+                        </div>
+                    </div>"""
+                    _msg = _Mail(
+                        from_email=("noreply@carsinstock.com", "CarsInStock"),
+                        to_emails="edward@carsinstock.com",
+                        subject=f"CarsInStock Blast Confirmation — {_date_str} — {sent} Emails Sent",
+                        html_content=_confirm_html
+                    )
+                    _guarded_send(lambda: _sg.send(_msg))
+                    print(f"[{datetime.utcnow()}] Confirmation receipt sent to edward@carsinstock.com")
+                except Exception as _e:
+                    print(f"[{datetime.utcnow()}] Confirmation email failed: {_e}")
 
-    conn = sqlite3.connect("/home/eddie/carsinstock/instance/carsinstock.db")
-    conn.row_factory = sqlite3.Row
-    cur = conn.cursor()
+    def process_autopilot_schedules():
+        """Check blast_schedule and queue any due blasts."""
+        import sqlite3, json, pytz
+        from datetime import datetime, timezone, timedelta
 
-    schedules = cur.execute("""
-        SELECT * FROM blast_schedule
-        WHERE is_active=1 AND next_blast IS NOT NULL AND next_blast <= ?
-    """, (now_utc.strftime("%Y-%m-%d %H:%M:%S"),)).fetchall()
+        est = pytz.timezone("US/Eastern")
+        now_utc = datetime.utcnow()
+        now_est = datetime.now(est)
 
-    for sched in schedules:
-        sp_id = sched["salesperson_id"]
-        test_mode = sched["test_mode"] if "test_mode" in sched.keys() else 1
-        subject = sched["blast_subject"] if "blast_subject" in sched.keys() else "This Week's Top Picks"
-        message = sched["weekly_message"] or ""
-        template_id = sched["template_id"] or "1"
-        batch_size = sched["onboarding_per_day"] or 200
+        conn = sqlite3.connect("/home/eddie/carsinstock/instance/carsinstock.db")
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
 
-        # Get salesperson info
-        sp_row = cur.execute("SELECT * FROM salespeople WHERE salesperson_id=?", (sp_id,)).fetchone()
-        if not sp_row:
-            continue
+        schedules = cur.execute("""
+            SELECT * FROM blast_schedule
+            WHERE is_active=1 AND next_blast IS NOT NULL AND next_blast <= ?
+        """, (now_utc.strftime("%Y-%m-%d %H:%M:%S"),)).fetchall()
 
-        sp_display_name = sp_row["display_name"] or ""
-        sp_dealership = sp_row["dealership_name"] or ""
-        sp_phone = sp_row["phone"] or ""
-        sp_slug = sp_row["profile_url_slug"] or ""
-        storefront_url = f"https://carsinstock.com/{sp_slug}"
+        for sched in schedules:
+            sp_id = sched["salesperson_id"]
+            test_mode = sched["test_mode"] if "test_mode" in sched.keys() else 1
+            subject = sched["blast_subject"] if "blast_subject" in sched.keys() else "This Week's Top Picks"
+            message = sched["weekly_message"] or ""
+            template_id = sched["template_id"] or "1"
+            batch_size = sched["onboarding_per_day"] or 200
 
-        # Get active vehicle IDs
-        vehicle_ids = [r[0] for r in cur.execute(
-            "SELECT id FROM vehicles WHERE salesperson_id=? AND status='available'", (sp_id,)
-        ).fetchall()]
+            # Get salesperson info
+            sp_row = cur.execute("SELECT * FROM salespeople WHERE salesperson_id=?", (sp_id,)).fetchone()
+            if not sp_row:
+                continue
 
-        if test_mode:
-            # Test mode — send to edward@carsinstock.com only via direct send
-            print(f"[{now_utc}] Autopilot TEST for sp_id={sp_id} — sending to edward@carsinstock.com")
-            try:
-                from sendgrid import SendGridAPIClient
-                from sendgrid.helpers.mail import Mail
-                from app.models.vehicle import Vehicle
-                from app.utils.email import _build_unsubscribe_footer
+            sp_display_name = sp_row["display_name"] or ""
+            sp_dealership = sp_row["dealership_name"] or ""
+            sp_phone = sp_row["phone"] or ""
+            sp_slug = sp_row["profile_url_slug"] or ""
+            storefront_url = f"https://carsinstock.com/{sp_slug}"
 
-                with app.app_context():
-                    vehicles = Vehicle.query.filter_by(salesperson_id=sp_id, status='available').all()
-                    vehicles = [v for v in vehicles if not v.expires_at or v.expires_at > now_utc]
+            # Get active vehicle IDs
+            vehicle_ids = [r[0] for r in cur.execute(
+                "SELECT id FROM vehicles WHERE salesperson_id=? AND status='available'", (sp_id,)
+            ).fetchall()]
 
-                    hero_html = f'<div style="background:#1E293B;padding:28px 20px;text-align:center;border-radius:8px 8px 0 0;"><span style="color:#00C851;font-size:22px;font-weight:800;">This Week\'s Top Picks</span></div>'
-                    sp_header = f'<div style="padding:16px;border-bottom:1px solid #f1f5f9;"><div style="font-size:16px;font-weight:700;color:#1E293B;">{sp_display_name}</div><div style="font-size:13px;color:#64748B;">{sp_dealership}</div></div>'
+            if test_mode:
+                # Test mode — send to edward@carsinstock.com only via direct send
+                print(f"[{now_utc}] Autopilot TEST for sp_id={sp_id} — sending to edward@carsinstock.com")
+                try:
+                    from sendgrid import SendGridAPIClient
+                    from sendgrid.helpers.mail import Mail
+                    from app.models.vehicle import Vehicle
+                    from app.utils.email import _build_unsubscribe_footer
 
-                    vehicle_html = ""
-                    for v in vehicles:
-                        price_str = f"${v.price:,.0f}" if v.price else "Contact for price"
-                        mileage_str = f"{v.mileage:,} miles" if v.mileage else ""
-                        img_tag = f'<img src="{v.image_url}" style="width:100%;max-height:220px;object-fit:cover;display:block;">' if v.image_url else ""
-                        vehicle_html += (
-                            f'<div style="border:1px solid #E2E8F0;border-radius:10px;overflow:hidden;margin-bottom:16px;">'
-                            f'{img_tag}<div style="padding:14px;">'
-                            f'<div style="font-size:16px;font-weight:700;color:#1E293B;margin-bottom:4px;">{v.year} {v.make} {v.model}</div>'
-                            f'<div style="font-size:18px;font-weight:800;color:#00C851;margin-bottom:4px;">{price_str}</div>'
-                            f'<div style="font-size:13px;color:#64748B;margin-bottom:12px;">{mileage_str}</div>'
-                            f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I\'m Interested</a>'
+                    with app.app_context():
+                        vehicles = Vehicle.query.filter_by(salesperson_id=sp_id, status='available').all()
+                        vehicles = [v for v in vehicles if not v.expires_at or v.expires_at > now_utc]
+
+                        hero_html = f'<div style="background:#1E293B;padding:28px 20px;text-align:center;border-radius:8px 8px 0 0;"><span style="color:#00C851;font-size:22px;font-weight:800;">This Week\'s Top Picks</span></div>'
+                        sp_header = f'<div style="padding:16px;border-bottom:1px solid #f1f5f9;"><div style="font-size:16px;font-weight:700;color:#1E293B;">{sp_display_name}</div><div style="font-size:13px;color:#64748B;">{sp_dealership}</div></div>'
+
+                        vehicle_html = ""
+                        for v in vehicles:
+                            price_str = f"${v.price:,.0f}" if v.price else "Contact for price"
+                            mileage_str = f"{v.mileage:,} miles" if v.mileage else ""
+                            img_tag = f'<img src="{v.image_url}" style="width:100%;max-height:220px;object-fit:cover;display:block;">' if v.image_url else ""
+                            vehicle_html += (
+                                f'<div style="border:1px solid #E2E8F0;border-radius:10px;overflow:hidden;margin-bottom:16px;">'
+                                f'{img_tag}<div style="padding:14px;">'
+                                f'<div style="font-size:16px;font-weight:700;color:#1E293B;margin-bottom:4px;">{v.year} {v.make} {v.model}</div>'
+                                f'<div style="font-size:18px;font-weight:800;color:#00C851;margin-bottom:4px;">{price_str}</div>'
+                                f'<div style="font-size:13px;color:#64748B;margin-bottom:12px;">{mileage_str}</div>'
+                                f'<a href="{storefront_url}" style="display:block;text-align:center;background:#1E293B;color:white;padding:10px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">I\'m Interested</a>'
+                                f'</div></div>'
+                            )
+
+                        cta_html = f'<div style="text-align:center;margin:24px 0;"><a href="{storefront_url}" style="background:#00C851;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;display:inline-block;">View All My Inventory &rarr;</a></div>'
+                        phone_line = f'<div style="margin-bottom:8px;"><a href="tel:{sp_phone}" style="color:#00C851;text-decoration:none;font-weight:600;">{sp_phone}</a></div>' if sp_phone else ""
+                        footer_html = '<div style="border-top:1px solid #e2e8f0;padding:12px 0;text-align:center;"><a href="https://carsinstock.com/disclaimer" style="color:#94A3B8;font-size:11px;text-decoration:underline;">Legal Disclaimer</a></div>'
+                        body_text = message.replace("{{first_name}}", "Edward").replace("{{First_Name}}", "Edward")
+
+                        html = (
+                            f'<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f1f5f9;padding:16px;">'
+                            f'<div style="background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);">'
+                            f'{hero_html}{sp_header}'
+                            f'<div style="padding:16px;"><p style="font-size:15px;color:#334155;line-height:1.7;margin:0 0 20px;">{body_text}</p>'
+                            f'{vehicle_html}{cta_html}</div>'
+                            f'<div style="background:#f8fafc;padding:16px;text-align:center;border-top:1px solid #e2e8f0;">{phone_line}{footer_html}</div>'
                             f'</div></div>'
                         )
 
-                    cta_html = f'<div style="text-align:center;margin:24px 0;"><a href="{storefront_url}" style="background:#00C851;color:white;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;display:inline-block;">View All My Inventory &rarr;</a></div>'
-                    phone_line = f'<div style="margin-bottom:8px;"><a href="tel:{sp_phone}" style="color:#00C851;text-decoration:none;font-weight:600;">{sp_phone}</a></div>' if sp_phone else ""
-                    footer_html = '<div style="border-top:1px solid #e2e8f0;padding:12px 0;text-align:center;"><a href="https://carsinstock.com/disclaimer" style="color:#94A3B8;font-size:11px;text-decoration:underline;">Legal Disclaimer</a></div>'
-                    body_text = message.replace("{{first_name}}", "Edward").replace("{{First_Name}}", "Edward")
+                        sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
+                        msg = Mail(
+                            from_email=(os.environ.get("SENDGRID_FROM_EMAIL", "noreply@carsinstock.com"), sp_display_name + " via CarsInStock"),
+                            to_emails="edward@carsinstock.com",
+                            subject=f"[AUTOPILOT TEST] {subject}",
+                            html_content=html
+                        )
+                        _guarded_send(lambda m=msg: sg.send(m))
+                        print(f"[{now_utc}] Autopilot test email sent to edward@carsinstock.com")
+                except Exception as e:
+                    print(f"[{now_utc}] Autopilot test send failed: {e}")
+            else:
+                # Live mode — queue to batch_queue for full customer list
+                blast_meta = json.dumps({
+                    "salesperson_id": sp_id,
+                    "template_id": template_id,
+                    "storefront_url": storefront_url,
+                    "vehicle_ids": vehicle_ids,
+                    "sp_phone": sp_phone,
+                    "sp_display_name": sp_display_name,
+                    "sp_dealership": sp_dealership,
+                    "sp_slug": sp_slug,
+                    "sp_photo_url": "",
+                })
+                total_contacts = cur.execute(
+                    "SELECT COUNT(*) FROM customers WHERE salesperson_id=? AND unsubscribed=0 AND email IS NOT NULL AND email!=''",
+                    (sp_id,)
+                ).fetchone()[0]
+                cur.execute("""INSERT INTO batch_queue
+                    (template_key, subject, body, recipient_filter, selected_ids, batch_size, total_contacts, batches_sent, total_batches, status, next_send_at)
+                    VALUES (?,?,?,?,?,?,?,0,?,\'active\',datetime(\'now\'))""",
+                    (f"salesperson_blast_{template_id}", subject, blast_meta, "all",
+                     json.dumps([r[0] for r in cur.execute("SELECT id FROM customers WHERE salesperson_id=? AND unsubscribed=0 AND email IS NOT NULL AND email!=''", (sp_id,)).fetchall()]),
+                     batch_size, total_contacts, 1)
+                )
+                print(f"[{now_utc}] Autopilot queued {total_contacts} recipients for sp_id={sp_id}")
 
-                    html = (
-                        f'<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#f1f5f9;padding:16px;">'
-                        f'<div style="background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.07);">'
-                        f'{hero_html}{sp_header}'
-                        f'<div style="padding:16px;"><p style="font-size:15px;color:#334155;line-height:1.7;margin:0 0 20px;">{body_text}</p>'
-                        f'{vehicle_html}{cta_html}</div>'
-                        f'<div style="background:#f8fafc;padding:16px;text-align:center;border-top:1px solid #e2e8f0;">{phone_line}{footer_html}</div>'
-                        f'</div></div>'
-                    )
+            # Calculate next Sunday 9AM EST
+            import pytz as _pytz
+            _est = _pytz.timezone("US/Eastern")
+            _now_est = datetime.now(_est)
+            _days = (6 - _now_est.weekday()) % 7 or 7
+            _next = (_now_est + timedelta(days=_days)).replace(hour=9, minute=0, second=0, microsecond=0)
+            _next_utc = _next.astimezone(pytz.utc).replace(tzinfo=None)
+            cur.execute("UPDATE blast_schedule SET next_blast=?, last_updated=? WHERE salesperson_id=?",
+                (_next_utc.strftime("%Y-%m-%d %H:%M:%S"), now_utc.strftime("%Y-%m-%d %H:%M:%S"), sp_id))
 
-                    sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
-                    msg = Mail(
-                        from_email=(os.environ.get("SENDGRID_FROM_EMAIL", "noreply@carsinstock.com"), sp_display_name + " via CarsInStock"),
-                        to_emails="edward@carsinstock.com",
-                        subject=f"[AUTOPILOT TEST] {subject}",
-                        html_content=html
-                    )
-                    sg.send(msg)
-                    print(f"[{now_utc}] Autopilot test email sent to edward@carsinstock.com")
-            except Exception as e:
-                print(f"[{now_utc}] Autopilot test send failed: {e}")
-        else:
-            # Live mode — queue to batch_queue for full customer list
-            blast_meta = json.dumps({
-                "salesperson_id": sp_id,
-                "template_id": template_id,
-                "storefront_url": storefront_url,
-                "vehicle_ids": vehicle_ids,
-                "sp_phone": sp_phone,
-                "sp_display_name": sp_display_name,
-                "sp_dealership": sp_dealership,
-                "sp_slug": sp_slug,
-                "sp_photo_url": "",
-            })
-            total_contacts = cur.execute(
-                "SELECT COUNT(*) FROM customers WHERE salesperson_id=? AND unsubscribed=0 AND email IS NOT NULL AND email!=''",
-                (sp_id,)
-            ).fetchone()[0]
-            cur.execute("""INSERT INTO batch_queue
-                (template_key, subject, body, recipient_filter, selected_ids, batch_size, total_contacts, batches_sent, total_batches, status, next_send_at)
-                VALUES (?,?,?,?,?,?,?,0,?,\'active\',datetime(\'now\'))""",
-                (f"salesperson_blast_{template_id}", subject, blast_meta, "all",
-                 json.dumps([r[0] for r in cur.execute("SELECT id FROM customers WHERE salesperson_id=? AND unsubscribed=0 AND email IS NOT NULL AND email!=''", (sp_id,)).fetchall()]),
-                 batch_size, total_contacts, 1)
-            )
-            print(f"[{now_utc}] Autopilot queued {total_contacts} recipients for sp_id={sp_id}")
-
-        # Calculate next Sunday 9AM EST
-        import pytz as _pytz
-        _est = _pytz.timezone("US/Eastern")
-        _now_est = datetime.now(_est)
-        _days = (6 - _now_est.weekday()) % 7 or 7
-        _next = (_now_est + timedelta(days=_days)).replace(hour=9, minute=0, second=0, microsecond=0)
-        _next_utc = _next.astimezone(pytz.utc).replace(tzinfo=None)
-        cur.execute("UPDATE blast_schedule SET next_blast=?, last_updated=? WHERE salesperson_id=?",
-            (_next_utc.strftime("%Y-%m-%d %H:%M:%S"), now_utc.strftime("%Y-%m-%d %H:%M:%S"), sp_id))
-
-    conn.commit()
-    conn.close()
+        conn.commit()
+        conn.close()
 
 
-# Run autopilot check
-try:
-    process_autopilot_schedules()
-except Exception as e:
-    print(f"[{datetime.utcnow()}] Autopilot processor error: {e}")
+    # Run autopilot check
+    try:
+        process_autopilot_schedules()
+    except Exception as e:
+        print(f"[{datetime.utcnow()}] Autopilot processor error: {e}")
