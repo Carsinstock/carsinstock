@@ -43,6 +43,39 @@
 
 .cta-row { margin-top: 32px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
 
+/* ===== Animated referral transaction — PURE CSS, CarsInStock technique ===== */
+#heroCard { position: relative; overflow: hidden; }
+.txn-overlay { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); z-index: 5; pointer-events: none; width: max-content; max-width: 90%; height: 40px; }
+.txn-chip { position: absolute; top: 0; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 9px; background: #fff; border: 1px solid #E5E7EB; border-radius: 100px; padding: 7px 15px 7px 7px; box-shadow: 0 8px 24px rgba(0,200,81,0.16); white-space: nowrap; opacity: 0; }
+/* three chips cross-fade on a 7s loop (CarsInStock bdcycle technique) */
+.txn-chip.c1 { animation: chipA 8s infinite; }
+.txn-chip.c2 { animation: chipB 8s infinite; }
+.txn-chip.c3 { animation: chipC 8s infinite; }
+.txn-chip.c4 { animation: chipD 8s infinite; }
+@keyframes chipA { 0%{opacity:0;transform:translateX(-50%) translateY(-8px);} 3%,20%{opacity:1;transform:translateX(-50%) translateY(0);} 24%,100%{opacity:0;transform:translateX(-50%) translateY(-8px);} }
+@keyframes chipB { 0%,24%{opacity:0;transform:translateX(-50%) translateY(-8px);} 28%,44%{opacity:1;transform:translateX(-50%) translateY(0);} 48%,100%{opacity:0;transform:translateX(-50%) translateY(-8px);} }
+@keyframes chipC { 0%,48%{opacity:0;transform:translateX(-50%) translateY(-8px);} 52%,68%{opacity:1;transform:translateX(-50%) translateY(0);} 72%,100%{opacity:0;transform:translateX(-50%) translateY(-8px);} }
+@keyframes chipD { 0%,72%{opacity:0;transform:translateX(-50%) translateY(-8px) scale(.96);} 76%,95%{opacity:1;transform:translateX(-50%) translateY(0) scale(1);} 99%,100%{opacity:0;transform:translateX(-50%) translateY(-8px);} }
+.txn-ava { width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, #00C851, #00E676); color: #fff; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.txn-ava.gift { background: linear-gradient(135deg,#00C851,#00E676); font-size: 14px; }
+.txn-txt { font-size: 13px; color: #1E293B; }
+.txn-txt b { font-weight: 700; }
+.txn-txt .chk { color: #00C851; font-weight: 800; }
+/* traveling dot from the QR — CarsInStock 'travel' technique */
+.txn-dot { position: absolute; top: 92px; left: 34px; width: 8px; height: 8px; border-radius: 50%; background: #00C851; opacity: 0; box-shadow: 0 0 8px rgba(0,200,81,.7); animation: txnTravel 8s infinite; z-index: 4; }
+@keyframes txnTravel { 0%,3%{opacity:0;left:34px;} 6%{opacity:1;} 20%{opacity:1;left:60%;} 24%,100%{opacity:0;} } 8%{opacity:1;} 24%{opacity:1;left:60%;} 28%,100%{opacity:0;} }
+/* Earned/Sold numbers cross-fade to new value at payout — CarsInStock stPulse technique */
+.earn-wrap { position: relative; display: inline-block; }
+.earn-wrap .earn-a, .earn-wrap .earn-b { display: block; }
+.earn-wrap .earn-b { position: absolute; top: 0; left: 0; right: 0; opacity: 0; }
+.earn-wrap .earn-a { animation: earnA 8s infinite; }
+.earn-wrap .earn-b { animation: earnB 8s infinite; }
+@keyframes earnA { 0%,74%{opacity:1;} 78%,96%{opacity:0;} 99%,100%{opacity:1;} } 72%,94%{opacity:0;} 98%,100%{opacity:1;} }
+@keyframes earnB { 0%,74%{opacity:0;transform:translateY(4px);} 78%,96%{opacity:1;transform:translateY(0);} 99%,100%{opacity:0;} } 72%,94%{opacity:1;transform:translateY(0);} 98%,100%{opacity:0;} }
+/* +$300 rises into Earned — CarsInStock adPrice cadence */
+.txn-fly { position: absolute; top: -4px; left: 50%; transform: translateX(-50%); font-weight: 800; font-size: 14px; color: #00C851; opacity: 0; pointer-events: none; white-space: nowrap; animation: earnFly 8s infinite; }
+@keyframes earnFly { 0%,72%{opacity:0;transform:translateX(-50%) translateY(10px);} 76%{opacity:1;} 86%{opacity:1;transform:translateX(-50%) translateY(-16px);} 92%,100%{opacity:0;transform:translateX(-50%) translateY(-16px);} } 70%{opacity:1;} 80%{opacity:1;transform:translateX(-50%) translateY(-16px);} 86%,100%{opacity:0;transform:translateX(-50%) translateY(-16px);} } 40%{transform:scale(1.22);} }
+
 .hero-visual {
   background: var(--bg-card);
   border: 1px solid var(--border-light);
@@ -354,7 +387,14 @@
         <div class="cta-microcopy">No card. No password. Ready in 60 seconds.</div>
       </div>
 
-      <div class="hero-visual">
+      <div class="hero-visual" id="heroCard">
+        <div class="txn-overlay">
+          <div class="txn-chip c1"><span class="txn-ava">M</span><span class="txn-txt">You referred <b>Mike</b></span></div>
+          <div class="txn-chip c2"><span class="txn-ava">C</span><span class="txn-txt">Through <b>CarsInStock</b></span></div>
+          <div class="txn-chip c3"><span class="txn-ava buy">M</span><span class="txn-txt">Mike buys <span class="chk">✓</span></span></div>
+          <div class="txn-chip c4"><span class="txn-ava gift">🎁</span><span class="txn-txt">You receive a gift</span></div>
+        </div>
+        <div class="txn-dot"></div>
         <div class="hero-visual-header">
           <span>Your asset, ready to go</span>
           <span class="live-dot">Live</span>
@@ -370,16 +410,17 @@
         </div>
         <div class="hero-mini-stats">
           <div class="hero-mini-stat">
-            <div class="num">7</div>
+            <div class="num" id="statActive">7</div>
             <div class="lbl">Active</div>
           </div>
           <div class="hero-mini-stat">
-            <div class="num green">3</div>
+            <div class="num green earn-wrap"><span class="earn-a">3</span><span class="earn-b">4</span></div>
             <div class="lbl">Sold</div>
           </div>
-          <div class="hero-mini-stat">
-            <div class="num gold">$650</div>
+          <div class="hero-mini-stat" style="position:relative">
+            <div class="num green earn-wrap"><span class="earn-a">$650</span><span class="earn-b">$950</span></div>
             <div class="lbl">Earned</div>
+            <div class="txn-fly">+$300</div>
           </div>
         </div>
       </div>
@@ -641,5 +682,6 @@ document.querySelectorAll('.faq-item').forEach(item => {
   });
 });
 </script>
+
 
 {% endblock %}
