@@ -170,20 +170,11 @@ def get_neighbor_addresses(query_address):
         lat, lon, formatted, default_zip, default_state, default_city = _geocode_address(query_address)
     except ValueError as e:
         raise ValueError(str(e))
-    # Synthetic first: same-street neighbors are most relevant for residential mailings
-    neighbors = _generate_street_addresses(query_address, default_zip=default_zip, default_state=default_state, default_city=default_city)
-    seen = set(a.lower() for a in neighbors)
-    # Augment with Overpass, filtered to skip highway/commercial noise
-    if len(neighbors) < 15:
-        overpass_addrs = _get_overpass_addresses(lat, lon, default_zip=default_zip, default_state=default_state, default_city=default_city)
-        for addr in overpass_addrs:
-            if addr.lower() not in seen and not _is_likely_commercial(addr):
-                neighbors.append(addr)
-                seen.add(addr.lower())
-            if len(neighbors) >= 15:
-                break
-    # Final safety net: if both methods returned nothing, fall back to raw Overpass
-    if not neighbors:
-        neighbors = _get_overpass_addresses(lat, lon, default_zip=default_zip, default_state=default_state)
+    # REAL addresses only — OSM-confirmed. Never fabricate house numbers.
+    # (_generate_street_addresses invented sequential numbers with no validation,
+    #  producing "NO SUCH NUMBER" returns. Removed from the send path entirely.)
+    overpass_addrs = _get_overpass_addresses(lat, lon, default_zip=default_zip, default_state=default_state, default_city=default_city)
+    neighbors = [addr for addr in overpass_addrs if not _is_likely_commercial(addr)]
+    # If OSM returns few or none for this street, send fewer (or zero) — never invent to fill quota.
     _save_cache(query_address, lat, lon, formatted, neighbors)
     return neighbors
