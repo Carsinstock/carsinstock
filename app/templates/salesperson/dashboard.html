@@ -53,8 +53,26 @@
           <h2 style="margin:0;">My Sales Team</h2>
           <span style="font-size:13px;color:#64748B;">{{ scorecard|length }} active reps &middot; ranked by score</span>
         </div>
+        <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;padding:18px 20px;margin-bottom:16px;">
+          <div style="font-size:15px;font-weight:700;color:#1E293B;margin-bottom:10px;">How your scorecard works</div>
+          <div style="font-size:13.5px;color:#475569;line-height:1.6;margin-bottom:12px;">Your score measures the two activities every salesperson controls:</div>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+            <div style="flex:1;min-width:200px;background:#fff;border:1px solid #E2E8F0;border-radius:8px;padding:10px 12px;">
+              <div style="font-size:13px;font-weight:700;color:#3B6D11;margin-bottom:2px;">Letters sent</div>
+              <div style="font-size:12.5px;color:#64748B;line-height:1.5;">building local brand awareness</div>
+            </div>
+            <div style="flex:1;min-width:200px;background:#fff;border:1px solid #E2E8F0;border-radius:8px;padding:10px 12px;">
+              <div style="font-size:13px;font-weight:700;color:#3B6D11;margin-bottom:2px;">Cars posted</div>
+              <div style="font-size:12.5px;color:#64748B;line-height:1.5;">keeping your inventory fresh and visible</div>
+            </div>
+          </div>
+          <div style="font-size:13.5px;color:#475569;line-height:1.6;margin-bottom:12px;"><b style="color:#1E293B;">Letter views (QR)</b> show how many customers scanned a rep's mailer and visited their online showroom &mdash; the exposure your marketing is generating.</div>
+          <div style="background:#EEF6E9;border-left:3px solid #3B6D11;border-radius:0 8px 8px 0;padding:12px 14px;font-size:13.5px;color:#33450F;line-height:1.6;">
+            <b>The most successful method:</b> consistently market the same neighborhoods every 3&ndash;6 months, building recognition over time. Repetition creates familiarity, familiarity builds trust, and trust leads to sales.
+          </div>
+        </div>
         {% if scorecard %}
-        <div style="display:flex;flex-direction:column;gap:12px;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;">
           {% for r in scorecard %}
           <div style="background:#fff;border:1px solid #E2E8F0;border-radius:12px;padding:14px 16px;">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;">
@@ -73,7 +91,7 @@
             <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
               <div style="flex:1;min-width:104px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;color:#64748B;margin-bottom:4px;">Letters sent</div><div style="font-size:22px;font-weight:700;color:#1E293B;line-height:1;">{{ r.letters }}</div><div style="font-size:11px;color:#3B6D11;margin-top:4px;">counts toward score</div></div>
               <div style="flex:1;min-width:104px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;color:#64748B;margin-bottom:4px;">Cars posted</div><div style="font-size:22px;font-weight:700;color:#1E293B;line-height:1;">{{ r.cars }}</div><div style="font-size:11px;color:#3B6D11;margin-top:4px;">counts toward score</div></div>
-              <div style="flex:1;min-width:104px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;color:#64748B;margin-bottom:4px;">Letter views (QR)</div><div style="font-size:22px;font-weight:700;color:#1E293B;line-height:1;">{{ r.qr }}</div><div style="font-size:11px;color:#64748B;margin-top:4px;">{{ r.response }}% response</div></div>
+              <div style="flex:1;min-width:104px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;color:#64748B;margin-bottom:4px;">Letter views (QR)</div><div style="font-size:22px;font-weight:700;color:#1E293B;line-height:1;">{{ r.qr }}</div><div style="font-size:11px;color:#3B6D11;margin-top:4px;">{{ r.response }}% viewed the store</div></div>
               <div style="flex:1;min-width:104px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:10px 12px;"><div style="font-size:12px;color:#64748B;margin-bottom:4px;">Expiring &le;3d</div><div style="font-size:22px;font-weight:700;color:#1E293B;line-height:1;">{{ r.expiring }}</div><div style="font-size:11px;color:#854F0B;margin-top:4px;">renew soon &middot; not scored</div></div>
             </div>
             <a href="https://carsinstock.com/{{ r.slug }}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#185FA5;text-decoration:none;border:1px solid #CBD5E1;border-radius:8px;padding:7px 12px;">View {{ r.name.split()[0] }}'s store &#8599;</a>
