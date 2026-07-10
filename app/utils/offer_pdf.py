@@ -58,9 +58,9 @@ def _build_letter(story, heading, subheading, salutation, body_paragraphs, rep_n
         _qr.add_data(f'https://cardeals.autos/{rep_slug}?ref=qr'); _qr.make(fit=True)
         _qr_img = _qr.make_image(fill_color='#1E293B', back_color='white')
         _qr_buf = BytesIO(); _qr_img.save(_qr_buf, format='PNG'); _qr_buf.seek(0)
-        _qr_flow = _RLImage(_qr_buf, width=1.9*inch, height=1.9*inch); _qr_flow.hAlign='CENTER'
+        _qr_flow = _RLImage(_qr_buf, width=2.4*inch, height=2.4*inch); _qr_flow.hAlign='CENTER'
         qr_col = [
-            Paragraph('<b>Scan to View My Inventory</b>', ParagraphStyle('QRCap', fontSize=10, fontName='Helvetica-Bold', textColor=NAVY, alignment=1, spaceAfter=6)),
+            Paragraph('<b>Scan to See My Inventory</b>', ParagraphStyle('QRCap', fontSize=10, fontName='Helvetica-Bold', textColor=NAVY, alignment=1, spaceAfter=6)),
             _qr_flow,
             Paragraph(f'cardeals.autos/{rep_slug}', ParagraphStyle('QRUrl', fontSize=8, fontName='Helvetica', textColor=GRAY, alignment=1, spaceBefore=4, spaceAfter=0)),
         ]
