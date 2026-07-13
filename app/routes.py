@@ -51,10 +51,10 @@ def sp_dashboard():
     from app.models.salesperson import Salesperson
     from app.models.vehicle import Vehicle
     from app.models.lead import Lead
-    dealership_sp = Salesperson.query.filter_by(salesperson_id=member['dealership_id']).first()
+    dealership_sp = Salesperson.query.filter_by(dealership_id=member['dealership_id']).first()
     # Get ALL vehicles for this team member: approved, pending, rejected
     all_my_vehicles = Vehicle.query.filter_by(
-        salesperson_id=member['dealership_id'],
+        salesperson_id=dealership_sp.salesperson_id if dealership_sp else None,
         pick_user_id=member['id']
     ).order_by(Vehicle.created_at.desc()).all()
     # Only approved+available ones shown as active picks
@@ -243,8 +243,10 @@ def sp_edit_vehicle(vehicle_id):
         try:
             from app.utils.cloudinary_upload import upload_vehicle_image
             from app.models.salesperson import Salesperson
-            dealership_sp = Salesperson.query.filter_by(salesperson_id=member['dealership_id']).first()
-            new_url = upload_vehicle_image(photo, dealership_sp.salesperson_id if dealership_sp else 1)
+            dealership_sp = Salesperson.query.filter_by(dealership_id=member['dealership_id']).first()
+            if not dealership_sp:
+                raise RuntimeError("No storefront for this dealership - refusing to upload (never default to tenant 1)")
+            new_url = upload_vehicle_image(photo, dealership_sp.salesperson_id)
             if new_url:
                 vehicle.image_url = new_url
         except Exception as e:
@@ -255,8 +257,10 @@ def sp_edit_vehicle(vehicle_id):
         try:
             from app.utils.cloudinary_upload import upload_vehicle_video
             from app.models.salesperson import Salesperson
-            dealership_sp = Salesperson.query.filter_by(salesperson_id=member['dealership_id']).first()
-            vid_url, w, h = upload_vehicle_video(video, dealership_sp.salesperson_id if dealership_sp else 1, vehicle_id)
+            dealership_sp = Salesperson.query.filter_by(dealership_id=member['dealership_id']).first()
+            if not dealership_sp:
+                raise RuntimeError("No storefront for this dealership - refusing to upload (never default to tenant 1)")
+            vid_url, w, h = upload_vehicle_video(video, dealership_sp.salesperson_id, vehicle_id)
             if vid_url:
                 vehicle.pending_video_url = vid_url
         except Exception as e:
@@ -328,7 +332,7 @@ def sp_add_vehicle():
     from app.utils.cloudinary_upload import upload_vehicle_image
     from datetime import datetime
 
-    dealership_sp = Salesperson.query.filter_by(salesperson_id=member['dealership_id']).first()
+    dealership_sp = Salesperson.query.filter_by(dealership_id=member['dealership_id']).first()
     if not dealership_sp:
         flash("Store not found.", "error")
         return redirect('/sp-dashboard')
@@ -861,7 +865,7 @@ def rep_submit_lead(team_slug):
     _conn.close()
     if not member:
         return redirect(f'/{team_slug}')
-    dealership_sp = Salesperson.query.filter_by(salesperson_id=member['dealership_id']).first()
+    dealership_sp = Salesperson.query.filter_by(dealership_id=member['dealership_id']).first()
     vehicle_id = request.form.get('vehicle_id')
     customer_name = request.form.get('customer_name', '').strip()
     customer_email = request.form.get('customer_email', '').strip()
@@ -1074,13 +1078,13 @@ def rep_storefront(member):
     from sqlalchemy import or_
     from datetime import datetime, timedelta
 
-    dealership_sp = Salesperson.query.filter_by(salesperson_id=member['dealership_id']).first()
+    dealership_sp = Salesperson.query.filter_by(dealership_id=member['dealership_id']).first()
     if not dealership_sp:
         return render_template('404.html'), 404
 
     # Get approved vehicles assigned to this rep
     all_vehicles = Vehicle.query.filter(
-        Vehicle.salesperson_id == member['dealership_id'],
+        Vehicle.salesperson_id == dealership_sp.salesperson_id,
         Vehicle.pick_user_id == member['id'],
         Vehicle.status == 'available',
         or_(Vehicle.approval_status == 'approved', Vehicle.approval_status == None)
@@ -1445,7 +1449,7 @@ def public_profile(slug):
         import sqlite3 as _sqd
         _cd = _sqd.connect('/home/eddie/carsinstock/instance/carsinstock.db')
         _cd.row_factory = _sqd.Row
-        _team_members = _cd.execute("SELECT * FROM dealership_team WHERE dealership_id=? AND is_active=1 ORDER BY name", (sp.salesperson_id,)).fetchall()
+        _team_members = _cd.execute("SELECT * FROM dealership_team WHERE dealership_id=? AND is_active=1 ORDER BY name", (sp.dealership_id,)).fetchall()
         _team_members = [dict(r) for r in _team_members]
         _cd.close()
         _ref_val = session.get(f'ref_{slug}', '')

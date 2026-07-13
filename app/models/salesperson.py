@@ -6,7 +6,8 @@ class Salesperson(db.Model):
     
     salesperson_id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True, nullable=False)
-    dealer_id = db.Column(db.Integer, db.ForeignKey('dealers.dealer_id'), nullable=True)
+    dealer_id = db.Column(db.Integer, db.ForeignKey('dealers.dealer_id'), nullable=True)  # DEAD: dealers table is empty
+    dealership_id = db.Column(db.Integer, db.ForeignKey('dealerships.id'), nullable=True)  # the REAL tenant link
     display_name = db.Column(db.String(255), nullable=False)
     phone = db.Column(db.String(50))
     email = db.Column(db.String(255), nullable=False)
