@@ -36,6 +36,43 @@ with app.app_context():
 
     print(f"[{now}] Found {len(vehicles)} vehicles expiring within 48 hours")
 
+    # ZERO-WORK ALARM (calibrated): 0 in the 48h window is USUALLY correct.
+    # But 0 in 48h AND 0 in the next 14 days means the query is probably broken --
+    # Pine Belt always has cars on a 7-day clock. Silence is not success.
+    if len(vehicles) == 0:
+        _horizon = conn.execute("""
+            SELECT COUNT(*) FROM vehicles v
+            JOIN dealership_team t ON v.pick_user_id = t.id
+            WHERE v.status = "available" AND v.expires_at > ?
+              AND t.is_active = 1 AND t.email IS NOT NULL
+        """, (now,)).fetchone()[0]
+        if _horizon == 0:
+            bar = "!" * 70
+            print(bar, flush=True)
+            print("!!! CRITICAL: 0 vehicles in the 48h window AND 0 upcoming at all.", flush=True)
+            print("!!! Either every rep's inventory is expired/empty, or the query is broken.", flush=True)
+            print("!!! This cron did NO WORK. That is almost certainly wrong.", flush=True)
+            print(bar, flush=True)
+            try:
+                _k2 = os.environ.get('SENDGRID_API_KEY')
+                if _k2:
+                    _sg2 = SendGridAPIClient(_k2)
+                    _m2 = Mail(from_email=Email("sales@carsinstock.com", "CarsInStock ALERT"),
+                               to_emails=To("ecastillo@pinebeltauto.com"),
+                               subject="[CRITICAL] Expiry cron did zero work - query may be broken",
+                               html_content="<h2 style='color:#DC2626'>Expiry warning cron: ZERO WORK</h2>"
+                                            "<p>0 vehicles in the 48h window, and 0 upcoming at all. "
+                                            "Either all rep inventory is gone, or the recipient query is broken. "
+                                            "Nobody was warned about anything.</p>")
+                    _sg2.send(_m2)
+                    print("!!! operator alert sent", flush=True)
+            except Exception as _e2:
+                print(f"!!! ALERT ALSO FAILED: {_e2}", flush=True)
+            conn.close()
+            sys.exit(1)
+        else:
+            print(f"    (0 in window is normal - {_horizon} vehicles upcoming beyond 48h)", flush=True)
+
     _key = os.environ.get('SENDGRID_API_KEY')
     if not _key:
         print("!!! CRITICAL: SENDGRID_API_KEY not set — aborting. NO WARNINGS SENT.", flush=True)
