@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """Saturday 8AM EST — sends each active salesperson their weekly social post + QR code."""
 import sys, os, fcntl, io, base64
+DRY_RUN = '--dry-run' in sys.argv
+class _DryRun(Exception):
+    pass
 sys.path.insert(0, '/home/eddie/carsinstock')
 os.chdir('/home/eddie/carsinstock')
 from dotenv import load_dotenv
@@ -32,6 +35,10 @@ with app.app_context():
         "SELECT dt.id, dt.name, dt.email, dt.dealership_id FROM dealership_team dt WHERE dt.is_active=1 AND dt.email IS NOT NULL AND dt.email != ''"
     ).fetchall()
 
+    _expected = len(team_members)
+    _sent = 0
+    _failures = []
+    print(f'[saturday] {_expected} active reps found - expecting {_expected} sends')
     for member in team_members:
         sp_name = member['name']
         sp_email = member['email']
@@ -105,13 +112,49 @@ with app.app_context():
 </div>
 """
         try:
-            send_email(sp_email, f"Post this today — your weekly CarsInStock update 🚗", html)
-            print(f'[saturday] Sent to {sp_name} ({sp_email})')
+            if DRY_RUN:
+                raise _DryRun()
+            _ok = send_email(sp_email, f"Post this today — your weekly CarsInStock update 🚗", html)
+            if _ok:
+                _sent += 1
+                print(f'[saturday] Sent to {sp_name} ({sp_email})')
+            else:
+                _failures.append(f"{sp_name} <{sp_email}>: send_email returned False (SendGrid rejected it)")
+                print(f'[saturday] FAILED to send to {sp_name} ({sp_email})')
+        except _DryRun:
+            _sent += 1
+            print(f'[saturday] DRY-RUN would send to {sp_name} ({sp_email})')
         except Exception as e:
-            print(f'[saturday] Error sending to {sp.email}: {e}')
+            _failures.append(f"{sp_name} <{sp_email}>: {e}")
+            print(f'[saturday] Error sending to {sp_email}: {e}')
 
     conn.close()
 
 fcntl.flock(lock, fcntl.LOCK_UN)
 lock.close()
-print('[saturday] Done')
+_problem = None
+if _expected == 0:
+    _problem = ("ZERO WORK", "0 active reps found. There should be 3. The recipient query is broken or the team table is empty. NO WEEKLY POSTS WERE SENT.")
+elif _sent < _expected:
+    _problem = (f"{_expected - _sent} of {_expected} FAILED", f"Only {_sent} of {_expected} reps got their weekly post. These did NOT: " + "; ".join(_failures))
+
+if _problem:
+    tag, detail = _problem
+    bar = "!" * 70
+    print(bar, flush=True)
+    print(f"!!! CRITICAL [saturday]: {tag}", flush=True)
+    print(f"!!! {detail}", flush=True)
+    print(bar, flush=True)
+    try:
+        from app.utils.email import send_email as _alert
+        _alert_ok = _alert("ecastillo@pinebeltauto.com", f"[CRITICAL] Weekly rep post: {tag}",
+               f"<h2 style='color:#DC2626'>Weekly post cron failed</h2><p>{detail}</p>")
+        if _alert_ok:
+            print("!!! operator alert sent", flush=True)
+        else:
+            print("!!! ALERT EMAIL ALSO FAILED - NOBODY WAS NOTIFIED. SendGrid down or key bad.", flush=True)
+    except Exception as e:
+        print(f"!!! COULD NOT EVEN SEND THE ALERT: {e}", flush=True)
+    sys.exit(1)
+
+print(f'[saturday] Done. {_sent} of {_expected} sent, 0 failures.')
