@@ -1452,12 +1452,17 @@ def public_profile(slug):
         _cd.row_factory = _sqd.Row
         _team_members = _cd.execute("SELECT * FROM dealership_team WHERE dealership_id=? AND is_active=1 ORDER BY name", (sp.dealership_id,)).fetchall()
         _team_members = [dict(r) for r in _team_members]
+        _grow = _cd.execute("SELECT google_rating, google_review_count, google_place_id FROM dealerships WHERE id=?", (sp.dealership_id,)).fetchone()
         _cd.close()
+        _g_rating = _grow['google_rating'] if _grow else None
+        _g_count = _grow['google_review_count'] if _grow else None
+        _g_place = _grow['google_place_id'] if _grow else None
         _ref_val = session.get(f'ref_{slug}', '')
         return render_template('salesperson/public_profile.html', sp=sp, vehicles=vehicles,
             is_owner=is_owner, is_demo=False, hide_nav_auth=not is_owner,
             team_lookup=team_lookup, team_members=_team_members,
             og_image=_og_image, og_title=_og_title, og_description=_og_description,
+            google_rating=_g_rating, google_review_count=_g_count, google_place_id=_g_place,
             ref_slug=_ref_val)
 
     _ref_val = session.get(f'ref_{slug}', '')
