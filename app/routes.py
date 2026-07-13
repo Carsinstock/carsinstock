@@ -356,6 +356,7 @@ def sp_add_vehicle():
     if not model: errors.append("Model required.")
     if not vin or len(vin) != 17: errors.append("Valid 17-character VIN required.")
     if not price: errors.append("Price required.")
+    if not mileage or not mileage.isdigit(): errors.append("Mileage is required (numbers only).")
     if not photo or photo.filename == '': errors.append("Photo required.")
 
     if errors:

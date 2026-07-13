@@ -186,13 +186,6 @@ document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeVide
         }
         </script>
     </div>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">{{ message }}</div>
-        {% endfor %}
-    {% endif %}
-    {% endwith %}
     <div class="profile-inventory" style="margin-top:0;padding-top:0;">
         <div style="background:#f0fdf4;border:1px solid #00C851;border-radius:8px;padding:7px 14px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
     <p style="font-size:12px;font-weight:600;color:#1E293B;margin:0;flex:1;">🤝 Know someone? If they buy, you'll receive a Thank You gift.</p>
