@@ -6,6 +6,8 @@ from app import create_app
 from datetime import datetime, timedelta
 import sqlite3
 import os
+from dotenv import load_dotenv
+load_dotenv('/home/eddie/carsinstock/.env')
 
 app = create_app()
 
@@ -34,8 +36,13 @@ with app.app_context():
 
     print(f"[{now}] Found {len(vehicles)} vehicles expiring within 48 hours")
 
-    sg = SendGridAPIClient(os.environ.get('SENDGRID_API_KEY'))
+    _key = os.environ.get('SENDGRID_API_KEY')
+    if not _key:
+        print("!!! CRITICAL: SENDGRID_API_KEY not set — aborting. NO WARNINGS SENT.", flush=True)
+        sys.exit(1)
+    sg = SendGridAPIClient(_key)
 
+    _failures = []
     for v in vehicles:
         expires_dt = datetime.strptime(str(v["expires_at"]).split(".")[0], "%Y-%m-%d %H:%M:%S")
         days_left = max(0, int((expires_dt - now).total_seconds() / 86400))
@@ -73,7 +80,33 @@ with app.app_context():
             conn.commit()
             print(f"  Alert sent: {v['year']} {v['make']} {v['model']} to {v['rep_email']}")
         except Exception as e:
+            _failures.append(f"vehicle {v['id']} ({v['year']} {v['make']} {v['model']}) -> {v['rep_email']}: {e}")
             print(f"  Error for vehicle {v['id']}: {e}")
 
     conn.close()
-    print(f"Done. {len(vehicles)} alerts processed.")
+
+    if _failures:
+        banner = "!" * 70
+        print(banner, flush=True)
+        print(f"!!! CRITICAL: {len(_failures)} of {len(vehicles)} EXPIRY WARNINGS FAILED TO SEND", flush=True)
+        print("!!! Reps were NOT warned. Their storefronts will go dark.", flush=True)
+        for f in _failures:
+            print(f"!!!   {f}", flush=True)
+        print(banner, flush=True)
+        try:
+            alert = Mail(
+                from_email=Email("sales@carsinstock.com", "CarsInStock ALERT"),
+                to_emails=To("ecastillo@pinebeltauto.com"),
+                subject=f"[CRITICAL] {len(_failures)} expiry warnings FAILED to send",
+                html_content="<h2 style='color:#DC2626'>Expiry warnings failed</h2>"
+                             f"<p><b>{len(_failures)} of {len(vehicles)}</b> warnings did not send. "
+                             "These reps were NOT told their listings are expiring.</p><ul>"
+                             + "".join(f"<li>{f}</li>" for f in _failures) + "</ul>"
+            )
+            sg.send(alert)
+            print("!!! operator alert email sent", flush=True)
+        except Exception as e:
+            print(f"!!! COULD NOT EVEN SEND THE ALERT: {e}", flush=True)
+        sys.exit(1)
+
+    print(f"Done. {len(vehicles)} alerts processed, 0 failures.")

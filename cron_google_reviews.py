@@ -6,6 +6,8 @@ dealerships with a google_place_id and caches in the DB.
 """
 import sqlite3, requests, logging, os
 from datetime import datetime
+from dotenv import load_dotenv
+load_dotenv('/home/eddie/carsinstock/.env')
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 log = logging.getLogger(__name__)
