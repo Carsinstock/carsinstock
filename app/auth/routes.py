@@ -152,6 +152,15 @@ def login():
             except Exception:
                 _pw_ok = False
             if _pw_ok:
+                # RECORD THE LOGIN — reps were never tracked; we could not tell
+                # "disengaged" from "engaged but locked out by a silent bug".
+                try:
+                    _cW = _sqL.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+                    _cW.execute("UPDATE dealership_team SET last_login_at=?, login_count=COALESCE(login_count,0)+1 WHERE id=?",
+                                (datetime.utcnow(), _member['id']))
+                    _cW.commit(); _cW.close()
+                except Exception as _e:
+                    print(f"[login-track] FAILED to record rep login for id={_member['id']}: {_e}", flush=True)
                 session.permanent = True
                 session['team_member_id'] = _member['id']
                 session['team_member_name'] = _member['name']
