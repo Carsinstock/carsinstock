@@ -1399,7 +1399,53 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
             _qr = _scc.execute(
                 "SELECT COUNT(*) FROM qr_scans WHERE rep_id=?", (_rid,)).fetchone()[0]
             _resp = round((_qr / _letters * 100), 1) if _letters else 0.0
+
+            # LIVE cars — the exact three conditions the public storefront renders on.
+            # If this drifts from the storefront, the banner lies. Keep them identical.
+            _live = _scc.execute(
+                "SELECT COUNT(*) FROM vehicles WHERE pick_user_id=? "
+                "AND approval_status='approved' AND status='available' "
+                "AND (expires_at IS NULL OR julianday(expires_at) > julianday('now'))",
+                (_rid,)).fetchone()[0]
+
+            # LAST LOGIN — NULL means "we never recorded it", NOT "never logged in".
+            # The display must never claim more than the data supports.
+            _ll = _scc.execute("SELECT last_login_at FROM dealership_team WHERE id=?", (_rid,)).fetchone()[0]
+            if _ll:
+                _d = _scc.execute("SELECT julianday('now') - julianday(?)", (_ll,)).fetchone()[0] or 0
+                _hrs = _d * 24
+                if _hrs < 1:      _login_txt = "just now"
+                elif _hrs < 24:   _login_txt = f"{int(_hrs)}h ago"
+                else:             _login_txt = f"{int(_d)}d ago"
+                _login_stale = _d >= 7
+            else:
+                _login_txt = "not tracked before 7/14"
+                _login_stale = False
+
+            # LAST ACTION — most recent car posted OR letter generated
+            _lastcar = _scc.execute(
+                "SELECT MAX(created_at) FROM vehicles WHERE pick_user_id=?", (_rid,)).fetchone()[0]
+            _lastltr = _scc.execute(
+                "SELECT MAX(created_at) FROM offer_codes WHERE team_member_id=?", (_rid,)).fetchone()[0]
+            _act, _act_kind = None, None
+            if _lastcar and (not _lastltr or _lastcar > _lastltr):
+                _act, _act_kind = _lastcar, "car posted"
+            elif _lastltr:
+                _act, _act_kind = _lastltr, "letter"
+            if _act:
+                _ad = _scc.execute("SELECT julianday('now') - julianday(?)", (_act,)).fetchone()[0] or 0
+                _action_txt = f"{_act_kind}, {int(_ad)}d ago" if _ad >= 1 else f"{_act_kind}, today"
+                _action_stale = _ad >= 7
+            else:
+                _action_txt = "no activity recorded"
+                _action_stale = True
+
             _scorecard.append({
+                'live_cars': _live,
+                'last_login': _login_txt,
+                'login_stale': _login_stale,
+                'last_action': _action_txt,
+                'action_stale': _action_stale,
                 'rep_id': _rid,
                 'name': _sm['name'],
                 'slug': _sm['slug'],
