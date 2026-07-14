@@ -88,7 +88,25 @@ def sp_dashboard():
         "Thanks again for your business! Here's how to earn with our referral program.\n"
         f"https://mycarreferral.com/join/{_rep_slug_for_mcr}"
     )
+    # ===== EXPIRY BANNER (the SECOND channel) =====
+    # The email warning is a single point of failure -- it 401'd silently for months and Ryan
+    # lost his entire storefront without ever being told. This banner is rendered from the DB
+    # at page load: no SendGrid, no cron, no API key. It cannot fail quietly.
+    from datetime import datetime as _dtb
+    _nowb = _dtb.utcnow()
+    _live_v = [v for v in my_vehicles if (not v.expires_at) or v.expires_at > _nowb]
+    _soon_v = [v for v in _live_v if v.expires_at and (v.expires_at - _nowb).total_seconds() <= 3*86400]
+    live_count = len(_live_v)
+    expiring_count = len(_soon_v)
+    expiring_days = None
+    if _soon_v:
+        _mn = min((v.expires_at - _nowb).total_seconds() for v in _soon_v)
+        expiring_days = max(0, int(_mn // 86400))
+
     return render_template('salesperson/sp_dashboard.html',
+        live_count=live_count,
+        expiring_count=expiring_count,
+        expiring_days=expiring_days,
         member=dict(member),
         backdrop_menu=BACKDROP_MENU,
         backdrop_sample_seg={k: backdrop_segment(k, 'the Acura RDX') for k,_ in BACKDROP_MENU},

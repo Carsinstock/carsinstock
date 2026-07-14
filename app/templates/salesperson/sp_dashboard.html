@@ -1,5 +1,21 @@
 {% extends "base.html" %}
 {% block content %}
+{% if live_count == 0 %}
+<div style="max-width:900px;margin:16px auto 0;padding:0 16px;">
+  <div style="background:#FEF2F2;border:2px solid #DC2626;border-radius:12px;padding:16px 18px;">
+    <div style="font-size:16px;font-weight:800;color:#991B1B;margin-bottom:4px;">&#9888;&#65039; Your storefront is EMPTY &mdash; 0 cars live</div>
+    <div style="font-size:13.5px;color:#7F1D1D;margin-bottom:12px;">Anyone scanning your QR code right now sees an empty page. Post a car to bring your storefront back.</div>
+    <a href="#addVehicleSection" onclick="var s=document.getElementById('addVehicleSection'); if(s){s.style.display='block';}" style="display:inline-block;background:#DC2626;color:white;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:700;font-size:14px;">+ Add a Vehicle</a>
+  </div>
+</div>
+{% elif expiring_count > 0 %}
+<div style="max-width:900px;margin:16px auto 0;padding:0 16px;">
+  <div style="background:#FFF7ED;border:2px solid #F97316;border-radius:12px;padding:16px 18px;">
+    <div style="font-size:16px;font-weight:800;color:#9A3412;margin-bottom:4px;">&#9203; {{ expiring_count }} of your car{{ 's' if expiring_count != 1 else '' }} expire{{ '' if expiring_count != 1 else 's' }} {% if expiring_days == 0 %}TODAY{% elif expiring_days == 1 %}tomorrow{% else %}in {{ expiring_days }} days{% endif %}</div>
+    <div style="font-size:13.5px;color:#9A3412;">When they expire, your storefront goes empty &mdash; anyone scanning your QR code will see nothing. Renew them below.</div>
+  </div>
+</div>
+{% endif %}
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     <div style="max-width:900px;margin:16px auto 0;padding:0 16px;">
