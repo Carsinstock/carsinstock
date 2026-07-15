@@ -1195,12 +1195,12 @@ def approve_car(vid):
     import sqlite3 as _asql
     _ac = _asql.connect('/home/eddie/carsinstock/instance/carsinstock.db')
     _ac.row_factory = _asql.Row
-    veh = _ac.execute("SELECT id, salesperson_id FROM vehicles WHERE id=?", (vid,)).fetchone()
+    veh = _ac.execute("SELECT v.id, v.salesperson_id, s.dealership_id AS dealership_id FROM vehicles v JOIN salespeople s ON v.salesperson_id = s.salesperson_id WHERE v.id=?", (vid,)).fetchone()
     if not veh:
         _ac.close()
         flash("Vehicle not found.", "error")
         return redirect('/dashboard')
-    if role == 'manager' and veh['salesperson_id'] != current_dealership():
+    if role == 'manager' and veh['dealership_id'] != current_dealership():
         _ac.close()
         flash("You can only approve cars for your own store.", "error")
         return redirect('/dashboard')
@@ -1220,12 +1220,12 @@ def reject_car(vid):
     import sqlite3 as _rsql
     _rc = _rsql.connect('/home/eddie/carsinstock/instance/carsinstock.db')
     _rc.row_factory = _rsql.Row
-    veh = _rc.execute("SELECT id, salesperson_id FROM vehicles WHERE id=?", (vid,)).fetchone()
+    veh = _rc.execute("SELECT v.id, v.salesperson_id, s.dealership_id AS dealership_id FROM vehicles v JOIN salespeople s ON v.salesperson_id = s.salesperson_id WHERE v.id=?", (vid,)).fetchone()
     if not veh:
         _rc.close()
         flash("Vehicle not found.", "error")
         return redirect('/dashboard')
-    if role == 'manager' and veh['salesperson_id'] != current_dealership():
+    if role == 'manager' and veh['dealership_id'] != current_dealership():
         _rc.close()
         flash("You can only manage cars for your own store.", "error")
         return redirect('/dashboard')

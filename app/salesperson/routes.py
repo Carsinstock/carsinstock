@@ -549,7 +549,7 @@ END:VCARD"""
             member = conn.execute("SELECT dealership_id FROM dealership_team WHERE id=? AND is_active=1", (session["team_member_id"],)).fetchone()
             conn.close()
             if member:
-                sp = Salesperson.query.filter_by(salesperson_id=member["dealership_id"]).first()
+                sp = Salesperson.query.filter_by(dealership_id=member["dealership_id"]).first()
         if not sp:
             return redirect(url_for("auth.login"))
 
@@ -1309,7 +1309,7 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         from app.routes import current_role, current_dealership
         _role = current_role()
         if _role == "manager":
-            sp = Salesperson.query.filter_by(salesperson_id=current_dealership()).first()
+            sp = Salesperson.query.filter_by(dealership_id=current_dealership()).first()
         else:
             sp = Salesperson.query.filter_by(user_id=session["user_id"]).first()
         if not sp:
@@ -1336,7 +1336,7 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
         _tc.row_factory = _tsql.Row
         team_members = [dict(r) for r in _tc.execute(
             "SELECT id, name, email, slug, is_active, profile_photo AS photo FROM dealership_team WHERE dealership_id=? AND is_active=1 ORDER BY name",
-            (sp.salesperson_id,)).fetchall()]
+            (sp.dealership_id,)).fetchall()]
         _tc.close()
         # Reports data: traffic by source (letters/social/direct) + QR scans, dealership-scoped
         import sqlite3 as _rsql
@@ -1388,7 +1388,7 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
             _rid = _sm['id']
             _letters = _scc.execute(
                 "SELECT COUNT(*) FROM offer_codes WHERE team_member_id=? AND dealership_id=? AND created_at >= ?",
-                (_rid, sp.salesperson_id, "2026-07-07")).fetchone()[0]
+                (_rid, sp.dealership_id, "2026-07-07")).fetchone()[0]
             _cars = _scc.execute(
                 "SELECT COUNT(*) FROM vehicles WHERE pick_user_id=?", (_rid,)).fetchone()[0]
             _expiring = _scc.execute(
@@ -1651,7 +1651,7 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
             # Get inventory for this team member
             from app.models.vehicle import Vehicle
             from app.models.salesperson import Salesperson
-            sp = Salesperson.query.filter_by(salesperson_id=member['dealership_id']).first()
+            sp = Salesperson.query.filter_by(dealership_id=member['dealership_id']).first()
             salesperson_id = sp.salesperson_id if sp else None
             vehicles = []
             if salesperson_id:
@@ -2041,7 +2041,7 @@ Always guide the conversation toward signing up. Never be pushy - be like a frie
             session.clear()
             return redirect('/login')
         from app.models.salesperson import Salesperson
-        dealership_sp = Salesperson.query.filter_by(salesperson_id=member['dealership_id']).first()
+        dealership_sp = Salesperson.query.filter_by(dealership_id=member['dealership_id']).first()
         conn.close()
         return render_template('salesperson/pro_social_ad.html',
             member=dict(member),
@@ -2061,7 +2061,7 @@ Always guide the conversation toward signing up. Never be pushy - be like a frie
             session.clear()
             return redirect('/login')
         from app.models.salesperson import Salesperson
-        dealership_sp = Salesperson.query.filter_by(salesperson_id=member['dealership_id']).first()
+        dealership_sp = Salesperson.query.filter_by(dealership_id=member['dealership_id']).first()
         conn.close()
         return render_template('salesperson/birddogs_manage.html',
             member=dict(member),
@@ -2081,7 +2081,7 @@ Always guide the conversation toward signing up. Never be pushy - be like a frie
             session.clear()
             return redirect('/login')
         from app.models.salesperson import Salesperson
-        dealership_sp = Salesperson.query.filter_by(salesperson_id=member['dealership_id']).first()
+        dealership_sp = Salesperson.query.filter_by(dealership_id=member['dealership_id']).first()
         conn.close()
         return render_template('salesperson/birddog_how_it_works.html',
             member=dict(member),
@@ -2103,7 +2103,7 @@ Always guide the conversation toward signing up. Never be pushy - be like a frie
         from app.models.salesperson import Salesperson
         from app.models.vehicle import Vehicle
         from app.models.lead import Lead
-        dealership_sp = Salesperson.query.filter_by(salesperson_id=member['dealership_id']).first()
+        dealership_sp = Salesperson.query.filter_by(dealership_id=member['dealership_id']).first()
         all_my_vehicles = Vehicle.query.filter_by(
             salesperson_id=member['dealership_id'],
             pick_user_id=member['id']
