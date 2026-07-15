@@ -301,6 +301,36 @@ def forgot_password():
         email = request.form.get("email", "").strip().lower()
         flash("If an account with that email exists, a password reset link has been sent.", "success")
         if email:
+            import sqlite3 as _sqF
+            _cF = _sqF.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+            _cF.row_factory = _sqF.Row
+            _q = "SELECT id, email FROM dealership_team WHERE LOWER(email)=LOWER(?) AND is_active=1 AND password_hash IS NOT NULL"
+            _rep = _cF.execute(_q, (email,)).fetchone()
+            if _rep:
+                _tok = str(uuid.uuid4())
+                _exp = datetime.utcnow() + timedelta(hours=1)
+                _u = "UPDATE dealership_team SET reset_token=?, reset_token_expires=? WHERE id=?"
+                _cF.execute(_u, (_tok, _exp, _rep['id']))
+                _cF.commit(); _cF.close()
+                _reset_url = f"https://carsinstock.com/reset-password/{_tok}"
+                _rh = "".join([
+                    '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">',
+                    '<h1 style="color:#00C851;">CarsInStock</h1>',
+                    '<h2 style="color:#333;">Password Reset Request</h2>',
+                    '<p style="color:#555;font-size:16px;">We received a request to reset your password. ',
+                    'Click the button below to set a new password.</p>',
+                    '<div style="text-align:center;padding:25px 0;">',
+                    '<a href="' + _reset_url + '" ',
+                    'style="background-color:#00C851;color:#fff;padding:14px 32px;',
+                    'text-decoration:none;border-radius:6px;font-weight:bold;">Reset My Password</a></div>',
+                    '<p style="color:#999;font-size:13px;">This link expires in 1 hour. ',
+                    'If you did not request this, you can safely ignore this email.</p></div>',
+                ])
+                _sent = send_email(_rep['email'], "Reset Your CarsInStock Password", _rh)
+                if not _sent:
+                    flash("We found your account but couldn't send the reset email. Please contact your manager.", "error")
+                return redirect(url_for("auth.forgot_password"))
+            _cF.close()
             user = User.query.filter_by(email=email).first()
             if user:
                 token = str(uuid.uuid4())
@@ -337,16 +367,49 @@ def forgot_password():
                     </div>
                 </div>
                 """
-                try:
-                    send_email(email, "Reset Your CarsInStock Password", html_content)
-                except Exception as e:
-                    print(f"Password reset email error: {e}")
+                _sent = send_email(email, "Reset Your CarsInStock Password", html_content)
+                if not _sent:
+                    flash("We found your account but couldn't send the reset email. Please email eddie@carsinstock.com directly.", "error")
         return redirect(url_for("auth.forgot_password"))
     return render_template("auth/forgot_password.html")
 
 
 @auth.route("/reset-password/<token>", methods=["GET", "POST"])
 def reset_password(token):
+    import sqlite3 as _sqR
+    from app.utils.passwords import hash_password
+    _cR = _sqR.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+    _cR.row_factory = _sqR.Row
+    _rep = _cR.execute("SELECT id, reset_token_expires FROM dealership_team WHERE reset_token=?", (token,)).fetchone()
+    if _rep:
+        _exp = _rep['reset_token_expires']
+        if isinstance(_exp, str):
+            try: _exp = datetime.fromisoformat(_exp)
+            except Exception: _exp = None
+        if not _exp or _exp < datetime.utcnow():
+            _cR.close()
+            flash("This reset link is invalid or has expired. Please request a new one.", "error")
+            return redirect(url_for("auth.forgot_password"))
+        if request.method == "POST":
+            password = request.form.get("password", "")
+            confirm_password = request.form.get("confirm_password", "")
+            if not password or len(password) < 8:
+                _cR.close()
+                flash("Password must be at least 8 characters.", "error")
+                return render_template("auth/reset_password.html", token=token)
+            if password != confirm_password:
+                _cR.close()
+                flash("Passwords do not match.", "error")
+                return render_template("auth/reset_password.html", token=token)
+            _h = hash_password('rep', password)
+            _uu = "UPDATE dealership_team SET password_hash=?, reset_token=NULL, reset_token_expires=NULL WHERE id=?"
+            _cR.execute(_uu, (_h, _rep['id']))
+            _cR.commit(); _cR.close()
+            flash("Password updated successfully. You can now log in.", "success")
+            return redirect(url_for("auth.login"))
+        _cR.close()
+        return render_template("auth/reset_password.html", token=token)
+    _cR.close()
     user = User.query.filter_by(reset_token=token).first()
     if not user or not user.reset_token_expires or user.reset_token_expires < datetime.utcnow():
         flash("This reset link is invalid or has expired. Please request a new one.", "error")
