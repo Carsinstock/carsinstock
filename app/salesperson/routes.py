@@ -1440,7 +1440,12 @@ Respond ONLY with valid JSON in this exact format, no markdown, no extra text:
                 _action_txt = "no activity recorded"
                 _action_stale = True
 
+            _pending = _scc.execute(
+                "SELECT COUNT(*) FROM vehicles WHERE pick_user_id=? AND approval_status='pending'",
+                (_rid,)).fetchone()[0]
+
             _scorecard.append({
+                'pending': _pending,
                 'live_cars': _live,
                 'last_login': _login_txt,
                 'login_stale': _login_stale,

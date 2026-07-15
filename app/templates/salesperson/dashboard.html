@@ -36,7 +36,7 @@
     {% endif %}
     <div class="dash-tabs">
         <button class="tab-btn{% if role == 'manager' %} active{% endif %}" id="btn-scorecard" onclick="showTab('scorecard', this)">Sales Team</button>
-        <button class="tab-btn{% if role != 'manager' %} active{% endif %}" id="btn-vehicles" onclick="showTab('vehicles', this)">{% if role == 'manager' %}Inventory{% else %}My Vehicles{% endif %}</button>
+        <button class="tab-btn{% if role != 'manager' %} active{% endif %}" id="btn-vehicles" onclick="showTab('vehicles', this)">{% if role == 'manager' %}Inventory{% else %}My Vehicles{% endif %}{% if pending_vehicles %} <span style="background:#F59E0B;color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;font-weight:800;margin-left:4px;">{{ pending_vehicles|length }}</span>{% endif %}</button>
 <button class="tab-btn" onclick="showTab('leads', this)">My Leads</button>
         {% if is_master %}<button class="tab-btn" onclick="showTab('customers', this)">My Customers</button>{% endif %}
         {% if is_master %}<button class="tab-btn" onclick="showTab('email', this)">Email Blast</button>{% endif %}
@@ -90,6 +90,12 @@
             </div>
             <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
 
+            {% if r.pending and r.pending > 0 %}
+            <div style="background:#FFFBEB;border:2px solid #F59E0B;border-radius:10px;padding:12px 14px;margin-bottom:12px;">
+              <div style="font-size:14px;font-weight:800;color:#92400E;margin-bottom:2px;">&#9203; {{ r.pending }} car{{ 's' if r.pending != 1 else '' }} awaiting YOUR approval</div>
+              <div style="font-size:12.5px;color:#B45309;">{{ r.name.split()[0] }} posted {{ 'them' if r.pending != 1 else 'it' }} &mdash; not live on the storefront until you approve. <a href="#" onclick="showTab('vehicles', document.getElementById('btn-vehicles')); return false;" style="color:#92400E;font-weight:700;">Review &rarr;</a></div>
+            </div>
+            {% endif %}
             {% if r.live_cars == 0 %}
             <div style="background:#FEF2F2;border:2px solid #DC2626;border-radius:10px;padding:12px 14px;margin-bottom:12px;">
               <div style="font-size:14px;font-weight:800;color:#991B1B;margin-bottom:2px;">&#9888;&#65039; STOREFRONT EMPTY &mdash; 0 cars live</div>
