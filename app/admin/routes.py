@@ -26,6 +26,7 @@ def register_admin_routes(bp):
     if len(bp.deferred_functions) > 0:
         return  # Already registered
     @bp.route("/team")
+    @admin_required
     def team():
         import sqlite3
         conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
@@ -35,6 +36,7 @@ def register_admin_routes(bp):
         return render_template("admin/team.html", team=members)
 
     @bp.route("/team/add", methods=["POST"])
+    @admin_required
     def add_team_member():
         import sqlite3, cloudinary.uploader
         name = request.form.get("name", "").strip()
@@ -59,6 +61,7 @@ def register_admin_routes(bp):
         return redirect(url_for("admin.team"))
 
     @bp.route("/team/<int:member_id>/edit", methods=["POST"])
+    @admin_required
     def edit_team_member(member_id):
         import sqlite3, cloudinary.uploader
         name = request.form.get("name", "").strip()
@@ -84,6 +87,7 @@ def register_admin_routes(bp):
         return redirect(url_for("admin.team"))
 
     @bp.route("/team/<int:member_id>/delete", methods=["POST"])
+    @admin_required
     def delete_team_member(member_id):
         import sqlite3
         conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
@@ -385,6 +389,7 @@ def register_admin_routes(bp):
         return redirect(url_for("admin.vehicles"))
 
     @bp.route("/vehicles/<int:vehicle_id>/dismiss-notification", methods=["POST"])
+    @admin_required
     def dismiss_vehicle_notification(vehicle_id):
         from app.models.vehicle import Vehicle
         from app.models import db
@@ -395,6 +400,7 @@ def register_admin_routes(bp):
         return ("", 204)
 
     @bp.route("/vehicles/<int:vehicle_id>/team-pick", methods=["POST"])
+    @admin_required
     def set_team_pick(vehicle_id):
         from app.models.vehicle import Vehicle
         from app.models import db
@@ -408,6 +414,7 @@ def register_admin_routes(bp):
         return redirect(url_for("admin.vehicles"))
 
     @bp.route("/vehicles/<int:vehicle_id>/team-pick/remove", methods=["POST"])
+    @admin_required
     def remove_team_pick(vehicle_id):
         from app.models.vehicle import Vehicle
         from app.models import db
