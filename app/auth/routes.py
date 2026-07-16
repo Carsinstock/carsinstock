@@ -430,3 +430,127 @@ def reset_password(token):
         flash("Password updated successfully. You can now log in.", "success")
         return redirect(url_for("auth.login"))
     return render_template("auth/reset_password.html", token=token)
+
+
+@auth.route("/master/invite-manager-form", methods=["GET"])
+def invite_manager_form():
+    from app.routes import current_role
+    if current_role() != "master":
+        return redirect(url_for("auth.login"))
+    import sqlite3 as _sqD
+    _cD = _sqD.connect("/home/eddie/carsinstock/instance/carsinstock.db")
+    _cD.row_factory = _sqD.Row
+    _deals = _cD.execute("SELECT id, name FROM dealerships ORDER BY name").fetchall()
+    _cD.close()
+    _deals = [dict(d) for d in _deals]
+    return render_template("auth/invite_manager.html", dealerships=_deals)
+
+
+@auth.route("/master/invite-manager", methods=["POST"])
+def invite_manager():
+    from app.routes import current_role
+    from app.utils.passwords import hash_password
+    if current_role() != "master":
+        return redirect(url_for("auth.login"))
+    email = request.form.get("email", "").strip().lower()
+    first_name = request.form.get("first_name", "").strip()
+    last_name = request.form.get("last_name", "").strip()
+    dealership_id = request.form.get("dealership_id", "").strip()
+    if not email or not first_name or not last_name or not dealership_id:
+        flash("Email, first name, last name, and dealership are all required.", "error")
+        return redirect(url_for("auth.invite_manager_form"))
+    import sqlite3 as _sqI
+    _cI = _sqI.connect("/home/eddie/carsinstock/instance/carsinstock.db")
+    _cI.row_factory = _sqI.Row
+    if _cI.execute("SELECT id FROM users WHERE LOWER(email)=LOWER(?)", (email,)).fetchone():
+        _cI.close()
+        flash("A user with that email already exists.", "error")
+        return redirect(url_for("auth.invite_manager_form"))
+    _deal = _cI.execute("SELECT id, name FROM dealerships WHERE id=?", (dealership_id,)).fetchone()
+    if not _deal:
+        _cI.close()
+        flash("That dealership does not exist.", "error")
+        return redirect(url_for("auth.invite_manager_form"))
+    import secrets as _secrets
+    _tok = str(uuid.uuid4())
+    _exp = datetime.utcnow() + timedelta(days=7)
+    _throwaway = hash_password("user", _secrets.token_urlsafe(32))
+    try:
+        _cur = _cI.execute(
+            "INSERT INTO users (dealership_id, first_name, last_name, email, password_hash, role, is_active, created_at, email_verified, subscription_status, invite_token, invite_token_expires) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
+            (dealership_id, first_name, last_name, email, _throwaway, "manager", 0, datetime.utcnow(), 0, "active", _tok, _exp)
+        )
+        _cI.commit()
+        _new_id = _cur.lastrowid
+    except Exception as _e:
+        _cI.close()
+        flash("Could not create the manager account: " + str(_e), "error")
+        return redirect(url_for("auth.invite_manager_form"))
+    _accept_url = f"https://carsinstock.com/accept-invite/{_tok}"
+    _html = "".join([
+        '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">',
+        '<h1 style="color:#00C851;">CarsInStock</h1>',
+        '<h2 style="color:#333;">You have been invited to manage ',
+        _deal["name"], '</h2>',
+        '<p style="color:#555;font-size:16px;">Click below to set your password ',
+        'and activate your manager account.</p>',
+        '<div style="text-align:center;padding:25px 0;">',
+        '<a href="', _accept_url, '" ',
+        'style="background-color:#00C851;color:#fff;padding:14px 32px;',
+        'text-decoration:none;border-radius:6px;font-weight:bold;">Set Up My Account</a></div>',
+        '<p style="color:#999;font-size:13px;">This invite expires in 7 days.</p></div>',
+    ])
+    _sent = send_email(email, "Your CarsInStock Manager Invite", _html)
+    if not _sent:
+        try:
+            _cI.execute("DELETE FROM users WHERE id=? AND invite_token=?", (_new_id, _tok))
+            _cI.commit()
+            _cI.close()
+            flash("We couldn't send the invite email, so nothing was created. Please try again.", "error")
+        except Exception:
+            _cI.close()
+            flash("The invite email failed and cleanup also failed -- a partial account may exist for this email. Contact support before retrying.", "error")
+        return redirect(url_for("auth.invite_manager_form"))
+    _cI.close()
+    flash("Invite sent to " + email + ".", "success")
+    return redirect(url_for("auth.invite_manager_form"))
+
+
+@auth.route("/accept-invite/<token>", methods=["GET", "POST"])
+def accept_invite(token):
+    from app.utils.passwords import hash_password
+    import sqlite3 as _sqA
+    _cA = _sqA.connect("/home/eddie/carsinstock/instance/carsinstock.db")
+    _cA.row_factory = _sqA.Row
+    _row = _cA.execute("SELECT id, invite_token_expires FROM users WHERE invite_token=?", (token,)).fetchone()
+    if not _row:
+        _cA.close()
+        flash("This invite link is invalid or has already been used.", "error")
+        return redirect(url_for("auth.login"))
+    _exp = _row["invite_token_expires"]
+    if isinstance(_exp, str):
+        try: _exp = datetime.fromisoformat(_exp)
+        except Exception: _exp = None
+    if not _exp or _exp < datetime.utcnow():
+        _cA.close()
+        flash("This invite link has expired. Ask your admin to resend it.", "error")
+        return redirect(url_for("auth.login"))
+    if request.method == "POST":
+        password = request.form.get("password", "")
+        confirm_password = request.form.get("confirm_password", "")
+        if not password or len(password) < 8:
+            _cA.close()
+            flash("Password must be at least 8 characters.", "error")
+            return render_template("auth/reset_password.html", token=token, heading="Set Up Your Account", subheading="Choose a password to activate your manager account", form_action="auth.accept_invite")
+        if password != confirm_password:
+            _cA.close()
+            flash("Passwords do not match.", "error")
+            return render_template("auth/reset_password.html", token=token, heading="Set Up Your Account", subheading="Choose a password to activate your manager account", form_action="auth.accept_invite")
+        _h = hash_password("user", password)
+        _cA.execute("UPDATE users SET password_hash=?, email_verified=1, is_active=1, invite_token=NULL, invite_token_expires=NULL WHERE id=?", (_h, _row["id"]))
+        _cA.commit()
+        _cA.close()
+        flash("Your account is set up. You can now log in.", "success")
+        return redirect(url_for("auth.login"))
+    _cA.close()
+    return render_template("auth/reset_password.html", token=token, heading="Set Up Your Account", subheading="Choose a password to activate your manager account", form_action="auth.accept_invite")
