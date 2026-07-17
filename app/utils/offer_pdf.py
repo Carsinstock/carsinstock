@@ -74,7 +74,7 @@ def _build_letter(story, heading, subheading, salutation, body_paragraphs, rep_n
 
 def generate_reference_pdf(letters):
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=1.2*inch, leftMargin=1.2*inch, topMargin=1*inch, bottomMargin=1*inch)
+    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=1.2*inch, leftMargin=1.2*inch, topMargin=0.75*inch, bottomMargin=0.75*inch)
     story = []
     offer_codes = []
 
@@ -114,7 +114,7 @@ def generate_reference_pdf(letters):
 
 def generate_neighbor_pdf(letters):
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=1.2*inch, leftMargin=1.2*inch, topMargin=1*inch, bottomMargin=1*inch)
+    doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=1.2*inch, leftMargin=1.2*inch, topMargin=0.75*inch, bottomMargin=0.75*inch)
     story = []
     offer_codes = []
 
