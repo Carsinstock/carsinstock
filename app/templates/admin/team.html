@@ -2,7 +2,6 @@
 {% block content %}
 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
     <h2 class="section-title" style="margin:0;">Team Management</h2>
-    <button onclick="document.getElementById('addMemberModal').style.display='flex'" style="background:#00C851;color:white;border:none;padding:10px 20px;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;">+ Add Salesperson</button>
 </div>
 
 {% if team %}
@@ -36,36 +35,6 @@
     <p style="color:#64748B;">Add your first salesperson to get started.</p>
 </div>
 {% endif %}
-
-<!-- Add Member Modal -->
-<div id="addMemberModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:#fff;border-radius:12px;padding:28px;max-width:480px;width:90%;max-height:90vh;overflow-y:auto;position:relative;">
-        <h3 style="margin:0 0 20px;color:#1E293B;">Add Salesperson</h3>
-        <form method="POST" action="/admin/team/add" enctype="multipart/form-data">
-            <div style="margin-bottom:14px;">
-                <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:6px;">Full Name *</label>
-                <input type="text" name="name" required style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;box-sizing:border-box;" placeholder="Eddie Castillo">
-            </div>
-            <div style="margin-bottom:14px;">
-                <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:6px;">Phone</label>
-                <input type="tel" name="phone" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;box-sizing:border-box;" placeholder="(848) 992-1858">
-            </div>
-            <div style="margin-bottom:14px;">
-                <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:6px;">Email</label>
-                <input type="email" name="email" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;box-sizing:border-box;" placeholder="eddie@pinebelt.com">
-            </div>
-
-            <div style="margin-bottom:20px;">
-                <label style="font-size:13px;font-weight:600;color:#1E293B;display:block;margin-bottom:6px;">Profile Photo</label>
-                <input type="file" name="photo" accept="image/*" style="width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;font-size:14px;box-sizing:border-box;background:#F8FAFC;">
-            </div>
-            <div style="display:flex;gap:10px;">
-                <button type="submit" style="flex:1;background:#00C851;color:white;border:none;padding:12px;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;">Add to Team</button>
-                <button type="button" onclick="document.getElementById('addMemberModal').style.display='none'" style="flex:1;background:#f1f5f9;color:#1E293B;border:1px solid #CBD5E1;padding:12px;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;">Cancel</button>
-            </div>
-        </form>
-    </div>
-</div>
 
 <!-- Edit Member Modal -->
 <div id="editMemberModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">

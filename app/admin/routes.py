@@ -35,30 +35,6 @@ def register_admin_routes(bp):
         conn.close()
         return render_template("admin/team.html", team=members)
 
-    @bp.route("/team/add", methods=["POST"])
-    @admin_required
-    def add_team_member():
-        import sqlite3, cloudinary.uploader
-        name = request.form.get("name", "").strip()
-        phone = request.form.get("phone", "").strip()
-        email = request.form.get("email", "").strip()
-        slug = request.form.get("slug", "").strip().lower().replace(" ", "")
-        if not slug and name:
-            import re
-            slug = re.sub(r'[^a-z0-9]', '', name.lower().replace(" ", ""))
-        photo_url = None
-        photo = request.files.get("photo")
-        if photo and photo.filename:
-            result = cloudinary.uploader.upload(photo, folder="carsinstock/team")
-            photo_url = result["secure_url"]
-        conn = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
-        conn.execute(
-            "INSERT INTO dealership_team (name, phone, email, profile_photo, slug) VALUES (?,?,?,?,?)",
-            (name, phone, email, photo_url, slug)
-        )
-        conn.commit()
-        conn.close()
-        return redirect(url_for("admin.team"))
 
     @bp.route("/team/<int:member_id>/edit", methods=["POST"])
     @admin_required
