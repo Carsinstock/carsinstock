@@ -101,51 +101,6 @@ out center 30;"""
     except Exception:
         return []
 
-def _generate_street_addresses(input_address, count=15, default_zip='', default_state='', default_city=''):
-    match = re.match(r'^(\d+)\s+(.+?)(?:,\s*(.+))?$', input_address.strip())
-    if not match:
-        return []
-    base_number = int(match.group(1))
-    street_name = match.group(2).strip()
-    street_only = street_name.split(',')[0].strip()
-    # Prefer geocoder city; strip trailing city/state/zip tokens that bled into the parsed street
-    if default_city:
-        city = default_city
-        for _tok in (default_zip, default_state, default_city):
-            if _tok:
-                street_only = re.sub(r'[\s,]+' + re.escape(_tok) + r'$', '', street_only, flags=re.IGNORECASE).strip()
-    else:
-        addr_parts = [p.strip() for p in input_address.split(',') if p.strip()]
-        city = addr_parts[1] if len(addr_parts) > 1 else ''
-    if city and (default_state or default_zip):
-        line2 = f"{city}, {default_state} {default_zip}".strip().rstrip(',').strip()
-    elif city:
-        line2 = city
-    elif default_state or default_zip:
-        line2 = f"{default_state} {default_zip}".strip()
-    else:
-        line2 = ''
-    addresses = []
-    seen = set()
-    step = 1  # cover both sides of street (was 2 = same-parity only)
-    offsets = []
-    for i in range(1, 20):
-        offsets.append(i * step)
-        offsets.append(-i * step)
-    offsets.sort(key=abs)
-    for offset in offsets:
-        num = base_number + offset
-        if num <= 0:
-            continue
-        line1 = f"{num} {street_only}"
-        addr = f"{line1}\n{line2}" if line2 else line1
-        key = addr.lower()
-        if key not in seen:
-            seen.add(key)
-            addresses.append(addr)
-        if len(addresses) >= count:
-            break
-    return addresses
 
 def _is_likely_commercial(addr_str):
     """Heuristic filter: skip highway/commercial addresses unsuitable for residential neighbor mailings."""
@@ -171,8 +126,12 @@ def get_neighbor_addresses(query_address):
     except ValueError as e:
         raise ValueError(str(e))
     # REAL addresses only — OSM-confirmed. Never fabricate house numbers.
-    # (_generate_street_addresses invented sequential numbers with no validation,
-    #  producing "NO SUCH NUMBER" returns. Removed from the send path entirely.)
+    # A previous implementation invented sequential house numbers
+    # off the seed address with no validation, producing roughly
+    # 1,000 "NO SUCH NUMBER" returns, paid for by the pilot dealer.
+    # That function has been deleted entirely - do not reintroduce
+    # number-generation to fill a quota when OSM returns few.
+    # Send fewer, or none.
     overpass_addrs = _get_overpass_addresses(lat, lon, default_zip=default_zip, default_state=default_state, default_city=default_city)
     neighbors = [addr for addr in overpass_addrs if not _is_likely_commercial(addr)]
     # If OSM returns few or none for this street, send fewer (or zero) — never invent to fill quota.
