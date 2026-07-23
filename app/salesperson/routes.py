@@ -503,7 +503,6 @@ END:VCARD"""
             assigned_team_member_id = request.form.get("assigned_team_member_id", "").strip()
             pick_blurb = request.form.get("pick_blurb", "").strip()[:150]
             if assigned_team_member_id:
-                vehicle.is_team_pick = True
                 vehicle.pick_user_id = int(assigned_team_member_id)
                 vehicle.pick_blurb = pick_blurb if pick_blurb else None
             else:

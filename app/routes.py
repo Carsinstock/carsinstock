@@ -409,7 +409,7 @@ def sp_add_vehicle():
         transmission=transmission,
         fuel_type=fuel_type,
         image_url=image_url,
-        is_team_pick=True,
+        is_team_pick=False,
         pick_user_id=member['id'],
         pick_blurb=pick_blurb if pick_blurb else None,
         approval_status='pending'
