@@ -79,7 +79,7 @@ def generate_reference_pdf(letters):
     offer_codes = []
 
     for i, l in enumerate(letters):
-        code = generate_offer_code('REF')
+        code = l.get('offer_code') or generate_offer_code('REF')
         offer_codes.append(code)
         expires = expiry_date(30)
         first_name = l.get('reference_first_name', 'Friend')
@@ -119,7 +119,7 @@ def generate_neighbor_pdf(letters):
     offer_codes = []
 
     for i, l in enumerate(letters):
-        code = generate_offer_code('NBR')
+        code = l.get('offer_code') or generate_offer_code('NBR')
         offer_codes.append(code)
         expires = expiry_date(30)
         rep_name = l.get('rep_name', '')
