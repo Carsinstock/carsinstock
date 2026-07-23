@@ -119,11 +119,144 @@ def generate_reference_pdf(letters):
     doc.build(story)
     return buffer.getvalue(), offer_codes
 
-def generate_neighbor_pdf(letters):
+RED = colors.HexColor('#B91C1C')
+
+
+def _summary_flowables(summary, n_generated):
+    """Internal cover sheet for a neighbor batch.
+
+    Deliberately looks NOTHING like a letter: Courier not Helvetica, red
+    banner, no dealership letterhead, no green rule, no signature block,
+    no QR, no offer code.  A rep working fast must never fold this into
+    an envelope.
+
+    Counts are DERIVED, not trusted from the caller.  n_generated is
+    len(letters) -- the number of letters actually in this file -- so the
+    printed count and the document cannot disagree.
+    """
+    s = []
+    s.append(Paragraph('NOT A LETTER - DO NOT MAIL',
+             ParagraphStyle('NotLetter', fontSize=20, fontName='Courier-Bold',
+                            textColor=RED, alignment=TA_CENTER, spaceAfter=4)))
+    s.append(Paragraph('internal check sheet - keep or discard',
+             ParagraphStyle('NotLetterSub', fontSize=10, fontName='Courier',
+                            textColor=RED, alignment=TA_CENTER, spaceAfter=18)))
+    s.append(HRFlowable(width='100%', thickness=3, color=RED, spaceAfter=22))
+
+    h = ParagraphStyle('SumH', fontSize=14, fontName='Courier-Bold',
+                       textColor=NAVY, spaceAfter=14)
+    row = ParagraphStyle('SumRow', fontSize=12, fontName='Courier',
+                         textColor=NAVY, leading=20, spaceAfter=4)
+
+    reasons = summary.get('reasons') or {}
+    n_checked = int(summary.get('candidates') or n_generated)
+    n_dropped = max(n_checked - n_generated, 0)
+    n_explained = sum(int(v) for v in reasons.values())
+    n_unexplained = n_dropped - n_explained
+
+    s.append(Paragraph('ADDRESS CHECK RESULTS', h))
+    s.append(Paragraph('Addresses checked . . . . %d' % n_checked, row))
+    s.append(Paragraph('Letters in this file  . . %d' % n_generated, row))
+    s.append(Paragraph('Dropped . . . . . . . . . %d' % n_dropped, row))
+
+    if n_dropped:
+        s.append(Spacer(1, 0.12*inch))
+        s.append(Paragraph('WHY THEY WERE DROPPED',
+                 ParagraphStyle('SumWhy', fontSize=11, fontName='Courier-Bold',
+                                textColor=NAVY, spaceAfter=8)))
+        det = ParagraphStyle('SumDetail', fontSize=11, fontName='Courier',
+                             textColor=GRAY, leading=17, spaceAfter=2)
+        for why, n in sorted(reasons.items(), key=lambda kv: -int(kv[1])):
+            s.append(Paragraph('%3d  %s' % (int(n), why), det))
+        unex = ParagraphStyle('SumUnex', fontSize=11, fontName='Courier-Bold',
+                              textColor=RED, leading=17, spaceAfter=2)
+        if n_unexplained > 0:
+            s.append(Spacer(1, 0.06*inch))
+            s.append(Paragraph('%3d  NOT ACCOUNTED FOR - tell your manager'
+                               % n_unexplained, unex))
+        elif n_unexplained < 0:
+            s.append(Spacer(1, 0.06*inch))
+            s.append(Paragraph('COUNTS DISAGREE by %d - tell your manager'
+                               % abs(n_unexplained), unex))
+
+    near = summary.get('near')
+    s.append(Spacer(1, 0.22*inch))
+    if near:
+        s.append(Paragraph('Neighbors on: <b>%s</b>' % near,
+                 ParagraphStyle('SumNear', fontSize=12, fontName='Courier',
+                                textColor=NAVY, spaceAfter=6)))
+        s.append(Paragraph('If that is not the street and town you meant, '
+                           'stop and check the address you started from '
+                           'before mailing these.',
+                 ParagraphStyle('SumNearWarn', fontSize=10, fontName='Courier',
+                                textColor=GRAY, leading=15)))
+    else:
+        s.append(Paragraph('No deliverable addresses in this batch - nothing '
+                           'to mail.',
+                 ParagraphStyle('SumNone', fontSize=12, fontName='Courier',
+                                textColor=RED, spaceAfter=6)))
+        s.append(Paragraph('Every address was checked and none could be '
+                           'confirmed as a mailable home. Try a different '
+                           'starting address.',
+                 ParagraphStyle('SumNoneSub', fontSize=10, fontName='Courier',
+                                textColor=GRAY, leading=15)))
+
+    s.append(Spacer(1, 0.30*inch))
+    s.append(HRFlowable(width='100%', thickness=0.5, color=GRAY, spaceAfter=8))
+    s.append(Paragraph('Addresses confirmed with USPS data. Generated %s'
+                       % datetime.now(ET).strftime('%B %d, %Y at %I:%M %p'),
+             ParagraphStyle('SumFoot', fontSize=8, fontName='Courier',
+                            textColor=GRAY, alignment=TA_CENTER)))
+    return s
+
+
+def generate_halt_pdf(message):
+    """Single-page notice for a halted batch.
+
+    No letters exist when the gate halts, and the route cannot return
+    nothing, so the rep gets a sheet stating plainly that nothing was
+    generated and nothing was sent.  `message` is the REP-facing text
+    from rep_halt_message() -- never the technical halt_reason, which is
+    logged instead.
+    """
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=letter,
+                            rightMargin=1.2*inch, leftMargin=1.2*inch,
+                            topMargin=0.75*inch, bottomMargin=0.75*inch)
+    story = []
+    story.append(Paragraph('NOT A LETTER - DO NOT MAIL',
+             ParagraphStyle('HaltTag', fontSize=20, fontName='Courier-Bold',
+                            textColor=RED, alignment=TA_CENTER, spaceAfter=4)))
+    story.append(Paragraph('internal check sheet - keep or discard',
+             ParagraphStyle('HaltTagSub', fontSize=10, fontName='Courier',
+                            textColor=RED, alignment=TA_CENTER, spaceAfter=18)))
+    story.append(HRFlowable(width='100%', thickness=3, color=RED, spaceAfter=26))
+    story.append(Paragraph('NO LETTERS WERE GENERATED',
+             ParagraphStyle('HaltH', fontSize=15, fontName='Courier-Bold',
+                            textColor=NAVY, spaceAfter=18)))
+    for line in (message or '').split('\n'):
+        if line.strip():
+            story.append(Paragraph(line.strip(),
+                 ParagraphStyle('HaltBody', fontSize=12, fontName='Courier',
+                                textColor=NAVY, leading=20, spaceAfter=8)))
+    story.append(Spacer(1, 0.30*inch))
+    story.append(HRFlowable(width='100%', thickness=0.5, color=GRAY, spaceAfter=8))
+    story.append(Paragraph('Nothing was mailed and no offer codes were used. %s'
+                           % datetime.now(ET).strftime('%B %d, %Y at %I:%M %p'),
+             ParagraphStyle('HaltFoot', fontSize=8, fontName='Courier',
+                            textColor=GRAY, alignment=TA_CENTER)))
+    doc.build(story)
+    return buffer.getvalue()
+
+
+def generate_neighbor_pdf(letters, summary=None):
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=1.2*inch, leftMargin=1.2*inch, topMargin=0.75*inch, bottomMargin=0.75*inch)
     story = []
     offer_codes = []
+
+    if summary:
+        story.extend(_summary_flowables(summary, len(letters)))
 
     for i, l in enumerate(letters):
         code = l.get('offer_code') or generate_offer_code('NBR')
@@ -152,9 +285,14 @@ def generate_neighbor_pdf(letters):
             rep_phone=l.get('rep_phone', ''),
             offer_code=code,
             expires=expires,
-            first=(i == 0),
+            first=(i == 0 and not summary),
             rep_slug=l.get('rep_slug', '')
         )
+
+    if not story:
+        story.append(Paragraph('Nothing to print.',
+                     ParagraphStyle('Empty', fontSize=12,
+                                    fontName='Courier', textColor=NAVY)))
 
     doc.build(story)
     return buffer.getvalue(), offer_codes
