@@ -10,6 +10,13 @@ from reportlab.lib.enums import TA_CENTER
 from io import BytesIO
 from reportlab.pdfgen import canvas
 
+from zoneinfo import ZoneInfo
+# Customer-facing dates only.  The SERVER stays UTC -- crons are
+# scheduled against it and must not move.  Without this, a letter
+# generated after 8 PM ET prints tomorrow's date and the 30-day
+# expiry counts from tomorrow.
+ET = ZoneInfo('America/New_York')
+
 NAVY = colors.HexColor('#1E293B')
 GREEN = colors.HexColor('#00C851')
 GRAY = colors.HexColor('#64748B')
@@ -19,7 +26,7 @@ def generate_offer_code(prefix='REF'):
     return f"{prefix}-{''.join(random.choices(chars, k=8))}"
 
 def expiry_date(days=30):
-    return (datetime.now() + timedelta(days=days)).strftime('%B %d, %Y')
+    return (datetime.now(ET) + timedelta(days=days)).strftime('%B %d, %Y')
 
 def _build_letter(story, heading, subheading, salutation, body_paragraphs, rep_name, rep_title, dealership_name, rep_phone, offer_code, expires, first=True, rep_slug=''):
     if not first:
@@ -31,7 +38,7 @@ def _build_letter(story, heading, subheading, salutation, body_paragraphs, rep_n
     story.append(HRFlowable(width='100%', thickness=1, color=GREEN, spaceAfter=20))
 
     # Date
-    story.append(Paragraph(datetime.now().strftime('%B %d, %Y'), ParagraphStyle('Date', fontSize=10, fontName='Helvetica', textColor=GRAY, spaceAfter=20)))
+    story.append(Paragraph(datetime.now(ET).strftime('%B %d, %Y'), ParagraphStyle('Date', fontSize=10, fontName='Helvetica', textColor=GRAY, spaceAfter=20)))
 
     # Salutation
     story.append(Paragraph(salutation, ParagraphStyle('Sal', fontSize=11, fontName='Helvetica', textColor=NAVY, spaceAfter=16, leading=18)))
