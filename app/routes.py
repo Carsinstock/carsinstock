@@ -321,11 +321,15 @@ def sp_delete_vehicle(vehicle_id):
         flash("You can only delete your own vehicles.", "error")
         return redirect('/sp-dashboard')
     try:
-        db.session.delete(vehicle)
-        db.session.commit()
+        # Raw DELETE: the ORM cascade cannot resolve Salesperson's FK to the
+        # unmapped 'dealerships' table and throws before removing the row.
+        # See board: map dealerships or drop the dead FK.
+        _dc = _sq.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        _dc.execute("DELETE FROM vehicles WHERE id=?", (vehicle_id,))
+        _dc.commit()
+        _dc.close()
         flash(f"Vehicle removed.", "success")
     except Exception as e:
-        db.session.rollback()
         flash("Something went wrong.", "error")
         print(f"sp_delete_vehicle error: {e}")
     return redirect('/sp-dashboard')

@@ -564,11 +564,15 @@ END:VCARD"""
 
         name = f"{vehicle.year} {vehicle.make} {vehicle.model}"
         try:
-            db.session.delete(vehicle)
-            db.session.commit()
+            # Raw DELETE: the ORM cascade cannot resolve Salesperson's FK to
+            # the unmapped 'dealerships' table and throws before removing the
+            # row. See board: map dealerships or drop the dead FK.
+            _dc = sqlite3.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+            _dc.execute("DELETE FROM vehicles WHERE id=?", (vehicle_id,))
+            _dc.commit()
+            _dc.close()
             flash(f"{name} deleted.", "success")
         except Exception as e:
-            db.session.rollback()
             flash("Error deleting vehicle.", "error")
             print(f"Vehicle delete error: {e}")
 
