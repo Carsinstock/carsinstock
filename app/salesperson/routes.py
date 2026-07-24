@@ -2144,6 +2144,59 @@ Always guide the conversation toward signing up. Never be pushy - be like a frie
             dealership_sp=dealership_sp,
             notifications=notifications)
 
+    @bp.route("/sp/leads/delete/<int:lead_id>", methods=["POST"])
+    def sp_delete_lead(lead_id):
+        if not session.get('team_member_id'):
+            return redirect('/login')
+        import sqlite3 as _sq
+        _c = _sq.connect('/home/eddie/carsinstock/instance/carsinstock.db')
+        _c.row_factory = _sq.Row
+        member = _c.execute(
+            "SELECT dealership_id FROM dealership_team WHERE id=? AND is_active=1",
+            (session['team_member_id'],)).fetchone()
+        if not member:
+            _c.close()
+            return redirect('/login')
+        # Scope: a rep may only delete a lead tied to a vehicle they own OR
+        # a lead referred by their own slug -- mirrors how /sp-dashboard picks
+        # which leads to show this rep. Raw SQL throughout: the Lead ORM model
+        # foreign-keys to salespeople, so db.session.delete() would walk the
+        # same unmapped-'dealerships' cascade that broke vehicle delete.
+        lead = _c.execute(
+            "SELECT lead_id, vehicle_id, referred_by FROM leads WHERE lead_id=?",
+            (lead_id,)).fetchone()
+        if not lead:
+            _c.close()
+            flash("Lead not found.", "error")
+            return redirect('/sp-dashboard')
+        me = _c.execute(
+            "SELECT id, slug FROM dealership_team WHERE id=?",
+            (session['team_member_id'],)).fetchone()
+        owns = False
+        if lead["vehicle_id"]:
+            v = _c.execute(
+                "SELECT pick_user_id FROM vehicles WHERE id=?",
+                (lead["vehicle_id"],)).fetchone()
+            if v and v["pick_user_id"] == me["id"]:
+                owns = True
+        if not owns and lead["referred_by"] and me["slug"] \
+                and lead["referred_by"] == me["slug"]:
+            owns = True
+        if not owns:
+            _c.close()
+            flash("You can only delete your own leads.", "error")
+            return redirect('/sp-dashboard')
+        try:
+            _c.execute("DELETE FROM leads WHERE lead_id=?", (lead_id,))
+            _c.commit()
+            flash("Lead removed.", "success")
+        except Exception as e:
+            flash("Something went wrong.", "error")
+            print(f"sp_delete_lead error: {e}")
+        finally:
+            _c.close()
+        return redirect('/sp-dashboard')
+
     @bp.route('/sp-dashboard/guide')
     def sp_guide():
         if 'team_member_id' not in session:
