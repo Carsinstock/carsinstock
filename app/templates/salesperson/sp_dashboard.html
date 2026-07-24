@@ -113,6 +113,15 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
     {% set referral_url = '/earn/' + member.slug if member.slug else '/earn/' + (dealership_sp.profile_url_slug if dealership_sp else '') %}
     <div class="tile-home">
 
+        <a href="/sp-dashboard/guide" class="tile" style="text-decoration:none;">
+            <div class="t-row">
+                <div class="t-bd">
+                    <span class="t-t">How it all works</span>
+                    <div class="t-d">Every tool on this page, explained in plain English. Five minutes, once.</div>
+                </div>
+                <span class="t-cv">&rarr;</span>
+            </div>
+        </a>
         <a href="/sp-dashboard/pro-social-ad" class="tile featured">
             <div class="t-row">
                 <div class="t-ic g">✨</div>
@@ -156,6 +165,7 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
             </div>
             <a href="/sp-dashboard/send-card" class="t-chip primary" style="display:block;text-align:center;margin-top:10px;">📨 Send My Card via Text</a>
             <div id="tileToast" style="display:none;color:#00C851;font-size:12px;font-weight:700;margin-top:10px;text-align:center;"></div>
+            <a href="/sp-dashboard/guide#quick-share" class="t-chip" style="margin-top:8px;">How it works</a>
         </div>
 
         <div class="tile featured">
@@ -165,7 +175,7 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
                     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
                         <span class="t-t">Pro Mailer Generator</span>
                         <span class="t-pill" style="background:rgba(0,200,81,0.15);color:#00C851;">$500 offer</span>
-                        <span class="t-pill" style="background:rgba(0,200,81,0.15);color:#00C851;">Up to 20 letters</span>
+                        <span class="t-pill" style="background:rgba(0,200,81,0.15);color:#00C851;">Up to 15 letters</span>
                     </div>
                     <div class="t-d">Direct mail to past customers and neighbors of your last sale.</div>
                 </div>
@@ -174,6 +184,7 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
                 <a href="/sp-dashboard/toolbox/references" class="t-chip">📋 Reference letters</a>
                 <a href="/sp-dashboard/toolbox/neighbors" class="t-chip">🏠 Neighbor letters</a>
             </div>
+            <a href="/sp-dashboard/guide#pro-mailer" class="t-chip" style="margin-top:8px;">How it works</a>
         </div>
 
         <div class="tile featured">
@@ -224,6 +235,7 @@ body { background: #F1F5F9; font-family: 'Inter', sans-serif; }
                     <span class="meta">{{ my_leads|length }} new</span>
                 </a>
             </div>
+            <a href="/sp-dashboard/guide#my-store" class="t-chip" style="margin-top:8px;">How it works</a>
         </div>
 
     </div>

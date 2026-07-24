@@ -10,6 +10,8 @@ RESERVED_SLUGS = {
     'dashboard', 'static', 's', 'vehicles', 'leads', 'reports'
 }
 
+MAX_LETTERS_PER_BATCH = 15
+
 
 def login_required(f):
     @wraps(f)
@@ -2137,6 +2139,12 @@ Always guide the conversation toward signing up. Never be pushy - be like a frie
             storefront_url=storefront_url,
             dealership_sp=dealership_sp,
             notifications=notifications)
+
+    @bp.route('/sp-dashboard/guide')
+    def sp_guide():
+        if 'team_member_id' not in session:
+            return redirect('/login')
+        return render_template('salesperson/guide.html')
 
     @bp.route('/sp-dashboard/send-card')
     def sp_send_card():
